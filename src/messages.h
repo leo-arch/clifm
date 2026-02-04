@@ -429,7 +429,7 @@ To learn how to enable image previews run 'help image-previews'."
 
 #define IMAGE_PREVIEWS "\x1b[1mENABLING IMAGE PREVIEWS\x1b[22m\n\
 \n\
-Edit shotgun's configuration file ('view edit' or F7) and uncomment the\n\
+Edit Shotgun's configuration file ('view edit' or F7) and uncomment the\n\
 'clifmimg' lines at the top of the file.\n\
 \n\
 This instructs Clifm to use the 'clifmimg' script (~/.config/clifm/clifmimg)\n\
@@ -880,7 +880,7 @@ Tip: Use the 'pc' command to edit file permissions."
 \x1b[1mUSAGE\x1b[22m\n\
   opener APPLICATION\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Set the file opener to xdg-open (instead of the default, Lira)\n\
+- Set the file opener to xdg-open (instead of the built-in Lira)\n\
     opener xdg-open\n\
 - Set the file opener back to the default\n\
     opener default"
@@ -1386,14 +1386,14 @@ c: Quit paging (printing remaining files)\n"
 \n -a[VAL]  List hidden files ('first', 'last', 'true', or 'false')\
 \n -A       Do not list hidden files (same as -afalse)\
 \n -b FILE  Set an alternative bookmarks file\
-\n -B NUM   Set TAB-completion mode (NUM=[0-3])\
+\n -B NUM   Set tab-completion mode (NUM=[0–3])\
 \n -c FILE  Set an alternative main configuration file\
 \n -C       Do not clear the screen when changing directories\
 \n -d       Print disk usage (free/total)\
 \n -D       List directories only\
 \n -e       Force the use of the 'o/open' command to open files\
 \n -E       Force the use of 'cd' to change directories\
-\n -f       Display recursive directories sizes (long view only)\
+\n -f       Display recursive directories sizes (long-view only)\
 \n -F       Disable the file counter (directories)\
 \n -g       Display file sizes in powers of 1000 (SI units) instead of 1024\
 \n -G       Display physical file sizes (disk usage) instead of logical sizes (apparent size)\
@@ -1410,29 +1410,29 @@ c: Quit paging (printing remaining files)\n"
 \n -M       Disable colors\
 \n -n       Disable the command history\
 \n -N       Disable bold colors\
-\n -o PATH  Set a custom file opener (instead of the builtin Lira)\
+\n -o PATH  Set a custom file opener (instead of the built-in Lira)\
 \n -O FILE  Open FILE (via Lira) and exit\
 \n -p NAME  Set/create the profile NAME\
 \n -P FILE  Generate a preview of FILE and exit\
 \n -q       List files and quit\
 \n -Q       Enable cd-on-quit (consult the manpage)\
-\n -r       Files removed via the 'r' command are sent to the trash can\
+\n -r       Files removed with the 'r' command are sent to the trash can\
 \n -R       Do not append file type indicators\
 \n -s       Run in stealth mode (incognito)\
 \n -S       Disable suggestions\
 \n -t NAME  Use the color scheme NAME\
 \n -T       Do not truncate filenames\
-\n -u       Run in disk usage analyzer mode\
+\n -u       Run in disk-usage-analyzer mode\
 \n -U       Disable Unicode decorations\
 \n -v       Print version information and exit\
 \n -V DIR   Set a custom virtual directory\
-\n -w NUM   Start in workspace NUM (1-8)\
+\n -w NUM   Start in workspace NUM (1–8)\
 \n -W       Keep the list of selected files in sight\
 \n -x       Run in secure-environment mode\
 \n -X       Run in secure-environment mode (paranoid)\
 \n -y       Run in light mode\
 \n -Y       Run in secure-commands mode\
-\n -z NUM   Set a file sort order (1-13)\
+\n -z NUM   Set a file sort order (1–13)\
 \n -Z NUM   List only up to NUM files"
 #else
 #define SHORT_OPTIONS "\
@@ -1442,15 +1442,15 @@ c: Quit paging (printing remaining files)\n"
 \n  -c, --config-file=FILE\t Set an alternative configuration file\
 \n  -D, --config-dir=DIR\t\t Set an alternative configuration directory\
 \n  -e, --no-eln\t\t\t Do not print ELNs (Entry List Numbers)\
-\n  -E, --eln-use-workspace-color\t ELNs use the current workspace color\
+\n  -E, --eln-use-workspace-color\t Use the current workspace color for ELNs\
 \n  -f, --dirs-first\t\t List directories first (default)\
 \n  -F, --no-dirs-first\t\t Do not list directories first\
 \n  -g, --pager\t\t\t Enable the pager\
 \n  -G, --no-pager\t\t Disable the pager (default)\
 \n  -h, --help\t\t\t Show this help and exit\
 \n  -H, --horizontal-list\t\t List files horizontally\
-\n  -i, --no-case-sensitive\t Ignore case distinctions when listing files (default)\
-\n  -I, --case-sensitive\t\t Do not ignore case distinctions when listing files\
+\n  -i, --no-case-sensitive\t Ignore case when listing files (default)\
+\n  -I, --case-sensitive\t\t Do not ignore case when listing files\
 \n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
 \n  -l, --long-view\t\t Display extended file metadata (long view)\
 \n  -L, --follow-symlinks-long\t Follow symbolic links when running in long view\
@@ -1462,7 +1462,7 @@ c: Quit paging (printing remaining files)\n"
 on an empty line\
 \n  -s, --splash\t\t\t Enable the splash screen\
 \n  -S, --stealth-mode\t\t Run in incognito/private mode\
-\n  -t, --disk-usage-analyzer\t Run in disk usage analyzer mode\
+\n  -t, --disk-usage-analyzer\t Run in disk-usage-analyzer mode\
 \n  -T, --trash-dir=DIR\t\t Set an alternative trash directory\
 \n  -v, --version\t\t\t Show version details and exit\
 \n  -w, --workspace=NUM\t\t Start in the workspace NUM\
@@ -1474,20 +1474,20 @@ on an empty line\
 \n      --bell=STYLE\t\t Set terminal bell style to: 0 (none), 1 (audible), 2 (visible), 3 (flash)\
 \n      --case-sens-dirjump\t Do not ignore case when consulting the jump \
 database (via the 'j' command)\
-\n      --case-sens-path-comp\t Enable case sensitive path completion\
+\n      --case-sens-path-comp\t Enable case-sensitive path completion\
 \n      --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
 \n      --color-scheme=NAME\t Use the color scheme NAME\
 \n      --color-links-as-target\t Colorize symbolic links according to the target file\
-\n      --data-dir=PATH\t\t Use PATH as data directory (e.g.: /usr/local/share)\
+\n      --data-dir=PATH\t\t Use PATH as the data directory (e.g., /usr/local/share)\
 \n      --desktop-noti=STYLE\t Set the desktop notification style: 'kitty', 'system', or 'false' (default)\
 \n      --disk-usage\t\t Show disk usage (FREE/TOTAL (FREE %) TYPE DEVICE)\
-\n      --full-dir-size\t\t Display recursive directory sizes (long view only)\
+\n      --full-dir-size\t\t Display recursive directory sizes (long-view only)\
 \n      --fuzzy-algo=NUM\t\t Set fuzzy algorithm for fuzzy matching (1 or 2)\
 \n      --fuzzy-matching\t\t Enable fuzzy tab completion/suggestions for filenames \
 and paths\
 \n      --fzfpreview-hidden\t Enable file previews for tab completion (fzf mode only) with the preview window hidden (toggle with Alt+p)\
 \n      --icons\t\t\t Enable icons\
-\n      --icons-use-file-color\t Icon colors follow file colors\
+\n      --icons-use-file-color\t Make icon colors follow file colors\
 \n      --int-vars\t\t Enable the use of internal variables\
 \n      --kitty-keys\t\t Ask the terminal to enable the kitty keyboard protocol\
 \n      --list-and-quit\t\t List files and quit\
@@ -1510,8 +1510,8 @@ and paths\
 \n      --no-fzfpreview\t\t Disable file previews for tab completion (fzf mode only)\
 \n      --no-highlight\t\t Disable syntax highlighting\
 \n      --no-history\t\t Do not write commands to the history file\
-\n      --no-open-auto\t\t Same as no-cd-auto, but for files\
-\n      --no-refresh-on-resize\t Do not attempt to refresh the file list upon window's resize\
+\n      --no-open-auto\t\t Same as --no-cd-auto, but for files\
+\n      --no-refresh-on-resize\t Do not attempt to refresh the file list upon window resize\
 \n      --no-restore-last-path\t Do not record the last visited directory\
 \n      --no-suggestions\t\t Disable auto-suggestions\
 \n      --no-tips\t\t\t Disable startup tips\
@@ -1520,29 +1520,28 @@ and paths\
 \n      --no-warning-prompt\t Disable the warning prompt\
 \n      --no-welcome-message\t Disable the welcome message\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\
-\n      --open=FILE\t\t Open FILE (using Lira) and exit\
-\n      --opener=APPLICATION\t Use APPLICATION as file opener (instead of Lira, \
-the builtin opener)\
-\n      --pager-view=MODE\t\t How to list files in the pager (auto, long, short)\
+\n      --open=FILE\t\t Open FILE (using Lira, the built-in opener) and exit\
+\n      --opener=APPLICATION\t Use APPLICATION as file opener (instead of Lira)\
+\n      --pager-view=MODE\t\t How to list files in the pager: 'auto' (default), 'long', or 'short'\
 \n      --physical-size\t\t Display physical file sizes (disk usage) rather than logical sizes (apparent size)\
-\n      --preview=FILE\t\t Display a preview of FILE (via Shotgun) and exit\
-\n      --print-sel\t\t Keep the list of selected files in sight\n"
+\n      --preview=FILE\t\t Display a preview of FILE (via Shotgun, the built-in previewer) and exit\
+\n      --print-sel\t\t Keep the list of selected files visible\n"
 
 #define LONG_OPTIONS_B "\
       --prop-fields=FORMAT\t Set a custom format string for the long view (see \
 PropFields in the config file)\
 \n      --ptime-style=STYLE\t Time/date style used by the 'p/pp' command (see PTimeStyle in the config file)\
-\n      --readonly\t\t Disable internal commands able to modify the filesystem\
+\n      --readonly\t\t Disable internal commands that can modify the filesystem\
 \n      --report-cwd\t\t Report the current directory to the terminal (OSC-7)\
 \n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
 \n      --secure-cmds\t\t Sanitize commands to prevent command injection\
-\n      --secure-env\t\t Run in a sanitized environment (regular mode)\
-\n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
+\n      --secure-env\t\t Run in a sanitized environment\
+\n      --secure-env-full\t\t Run in a sanitized environment (paranoid mode)\
 \n      --sel-file=FILE\t\t Set FILE as custom selections file\
 \n      --share-selbox\t\t Make the Selection Box common to different profiles\
-\n      --shotgun-file=FILE\t Set FILE as shotgun's configuration file\
+\n      --shotgun-file=FILE\t Set FILE as Shotgun's configuration file\
 \n      --si\t\t\t Display file sizes in powers of 1000 (SI units) instead of 1024\
-\n      --sort-reverse\t\t Sort in reverse order, e.g., z-a instead of a-z\
+\n      --sort-reverse\t\t Sort in reverse order, e.g., z–a instead of a–z\
 \n      --stat FILE...\t\t Run the 'p' command on FILE(s) and exit\
 \n      --stat-full FILE...\t Run the 'pp' command on FILE(s) and exit\
 \n      --tabmode=MODE\t\t Set tab completion mode to one of 'fzf', 'fnf', 'smenu', or 'standard'\
@@ -1555,20 +1554,19 @@ PropFields in the config file)\
 #endif /* _BE_POSIX */
 
 #define CLIFM_COMMANDS_HEADER "\
-For a complete description of the below \
-commands run 'cmd' (or press F2) or consult the manpage (F1).\n\
-You can also try the interactive help plugin (it depends on FZF): just \
-enter 'ih', that's it.\n\
+For a complete description of the commands \
+below, run 'cmd' (or press F2) or consult the manpage (F1).\n\
+You can also try the interactive help plugin (it depends on FZF): enter 'ih'.\n\
 Help topics are available as well. Type 'help <TAB>' to get a list of topics.\n\n\
-The following is just a list of available commands and a brief description.\n\
-For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
+The following is a list of available commands with brief descriptions.\n\
+For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
 
 #define CLIFM_COMMANDS "\
  ELN/FILE/DIR       Auto-open/autocd files/directories\n\
  /PATTERN           Search for files\n\
  ;[CMD], :[CMD]     Run CMD using the system shell\n\
  ac, ad             (De)archive files\n\
- acd, autocd        Turn auto-cd on/off\n\
+ acd, autocd        Turn autocd on/off\n\
  actions            Manage actions/plugins\n\
  alias              Manage aliases\n\
  ao, auto-open      Turn auto-open on/off\n\
@@ -1592,21 +1590,21 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  exp                Export filenames to a temporary file\n\
  ext                Turn external/shell commands on/off\n\
  f, forth           Change to the next visited directory\n\
- fc                 Toggle the file-counter\n\
+ fc                 Toggle file-counter\n\
  ff, dirs-first     Toggle list-directories-first\n\
  ft, filter         Set a file filter\n\
- fz                 Display recursive directory sizes (long view only)\n\
- hh, hidden         Toggle hidden files\n\
+ fz                 Display recursive directory sizes (long-view only)\n\
+ hh, hidden         Toggle show-hidden-files\n\
  history            Manage the commands history\n\
  icons              Toggle icons\n\
- k                  Toggle follow-links (long view only)\n\
+ k                  Toggle follow-links (long-view only)\n\
  kk                 Toggle max-filename-len\n\
  j                  Jump to a visited directory\n\
  kb, keybinds       Manage keybindings\n\
- le                 Edit symbolic link target\n\
- ll, lv             Toggle the long-view\n\
- lm                 Toggle the light-mode\n\
- log                Manage your logs\n\
+ le                 Edit symbolic link targets\n\
+ ll, lv             Toggle long-view\n\
+ lm                 Toggle light-mode\n\
+ log                Manage logs\n\
  media              (Un)mount storage devices\n\
  mf                 Limit the number of listed files\n\
  mm, mime           Manage default opening applications\n\
@@ -1643,7 +1641,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  view               Preview files in the current directory\n\
  ws                 Switch workspaces\n\
  x, X               Launch a new instance of Clifm (as root if 'X')\n\n\
- Shell-builtin implementations\n\
+ Shell built-in implementations\n\
  export             Export variables to the environment\n\
  pwd                Print the current working directory\n\
  umask              Get/set umask\n\
@@ -1656,8 +1654,8 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  Alt+q              Delete the last entered word\n\
  Alt+g              Toggle list-directories-first\n\
  Alt+l              Toggle long-view\n\
- Alt++              Toggle follow-links (long view only)\n\
- Alt+.              Toggle hidden-files\n\
+ Alt+Plus           Toggle follow-links (long-view only)\n\
+ Alt+.              Toggle show-hidden-files\n\
  Alt+,              Toggle list-only-directories\n\
  Alt+-              Preview files in the current directory (requires fzf)\n\
  Alt+m              List mountpoints\n\
@@ -1667,6 +1665,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  Ctrl+y             Copy the current line buffer to the clipboard\n\
  Alt+s              Open the Selection Box\n\
  Alt+a              Select all files in the current directory\n\
+ Shift+Tab          Invert selection\n\
  Alt+d              Deselect all files\n\
  Alt+r              Change to the root directory\n\
  Alt+e, Home        Change to the home directory\n\
@@ -1674,11 +1673,11 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  Alt+j, Shift+Left  Change to previously visited directory\n\
  Alt+k, Shift+Right Change to next visited directory\n\
  Alt+p              Change to the pinned directory\n\
- Alt+v              Toggle prepend sudo\n\
+ Alt+v              Toggle prepend-sudo\n\
  Alt+0              Run the file pager\n\
- Alt+[1-8]          Switch to workspace 1-8\n\
- Ctrl+Alt+o         Switch to previous profile\n\
- Ctrl+Alt+p         Switch to next profile\n\
+ Alt+[1–8]          Switch to workspace 1–8\n\
+ Ctrl+Alt+o         Switch to the previous profile\n\
+ Ctrl+Alt+p         Switch to the next profile\n\
  Ctrl+Alt+a         Archive selected files\n\
  Ctrl+Alt+e         Export selected files\n\
  Ctrl+Alt+r         Rename selected files\n\
@@ -1686,7 +1685,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  Ctrl+Alt+t         Trash selected files\n\
  Ctrl+Alt+n         Move selected files to the current directory\n\
  Ctrl+Alt+v         Copy selected files to the current directory\n\
- Ctrl+Alt+l         Toggle max-name-length\n\
+ Ctrl+Alt+l         Toggle max-filename-len\n\
  Alt+y              Toggle light-mode\n\
  Alt+z              Switch to the previous sort method\n\
  Alt+x              Switch to the next sort method\n\
@@ -1695,7 +1694,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  F2                 Commands help\n\
  F3                 Keybindings help\n\
  F6                 Open the mimelist file\n\
- F7                 Open the shotgun configuration file\n\
+ F7                 Open the Shotgun configuration file\n\
  F8                 Open the current color scheme file\n\
  F9                 Open the keybindings file\n\
  F10                Open the configuration file\n\
@@ -1725,9 +1724,9 @@ NAVIGATION\n\
 ----------\n\
 /etc                     Change the current directory to '/etc'\n\
 5                        Change to the directory whose ELN is 5\n\
-b | Shift+left | Alt+j   Change to the previously visited directory\n\
-f | Shift+right | Alt+k  Change to the next visited directory\n\
-.. | Shift+up | Alt+u    Change to the parent directory\n\
+b | Shift+Left | Alt+j   Change to the previously visited directory\n\
+f | Shift+Right | Alt+k  Change to the next visited directory\n\
+.. | Shift+Up | Alt+u    Change to the parent directory\n\
 bd media                 Change to the parent directory matching 'media'\n\
 j <TAB> | dh <TAB>       Browse the directory history list\n\
 j xproj                  Jump to the best ranked directory matching 'xproj'\n\
@@ -1756,7 +1755,7 @@ p 4                  Print file properties of the file whose ELN is 4\n\
 /*.png               Search for files ending with .png in the current directory\n\
 s *.c                Select all C files\n\
 s 1-4 8 19-26        Select multiple files by ELN\n\
-sb | s:<TAB>         List currently selected files\n\
+sb | s:<TAB>         List selected files\n\
 ds | ds <TAB>        Deselect a few files\n\
 ds * | Alt+d         Deselect all files\n\
 bm add mydir mybm    Bookmark the directory named 'mydir' as 'mybm'\n\
@@ -1776,7 +1775,7 @@ le mylink            Edit the symbolic link 'mylink'\n\
 oc myfile            Edit ownership of the file 'myfile'\n\
 pc myfile            Edit permissions of the file 'myfile'\n\
 te *.sh              Toggle the executable bit on all .sh files\n\
-t 12-18              Move files whose ELNs are 12-18 to the trash can\n\
+t 12-18              Move files whose ELNs are 12–18 to the trash can\n\
 t del | t del <TAB>  Permanently remove trashed files using a menu\n\
 t empty              Empty the trash can\n\
 u | u <TAB>          Untrash files using a menu\n\
@@ -1790,10 +1789,10 @@ CMD --help      Get help for the command CMD\n\
 help <TAB>      List available help topics\n\
 F1              Open the manpage\n\
 ih              Run the interactive help plugin (requires fzf)\n\
-ll | Alt+l      Toggle long view\n\
-hh | Alt+.      Toggle hidden files\n\
+ll | Alt+l      Toggle long-view\n\
+hh | Alt+.      Toggle show-hidden-files\n\
 rf | Ctrl+l     Clear the screen (also Enter on empty line)\n\
-pg | Alt+0      Run the pager (builtin)\n\
+pg | Alt+0      Run the pager (built-in)\n\
 gg              Run the pager (plugin)\n\
 auto            Add an autocommand to the current directory\n\
 config | F10    View/edit the configuration file\n\
@@ -1803,7 +1802,7 @@ kb bind <TAB>   List available functions for binding\n\
 kb bind FUNC    Bind FUNC to a new key sequence\n\
 kb edit | F9    Manually edit the keybindings file\n\
 mm info 12      Get MIME information for the file whose ELN is 12\n\
-Alt+Tab         Toggle the disk usage analyzer mode\n\
+Alt+Tab         Toggle the disk-usage-analyzer mode\n\
 cs              Manage color schemes\n\
 Right           Accept the entire suggestion\n\
 Alt+f           Accept the first/next word of the current suggestion\n\
@@ -1869,7 +1868,7 @@ q | F12         I'm tired, quit"
 #define EXP_DESC     " (export filenames to a temporary file)"
 #define EXT_DESC     " (turn external/shell commands on/off)"
 #define F_DESC       " (change to the next visited directory)"
-#define FC_DESC      " (toggle the file-counter)"
+#define FC_DESC      " (toggle the file counter)"
 #define FF_DESC      " (toggle list-directories-first)"
 #define FT_DESC      " (set a file filter)"
 #define FZ_DESC      " (display recursive directory sizes - long view only)"

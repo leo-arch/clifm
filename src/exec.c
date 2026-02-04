@@ -680,7 +680,7 @@ static int
 opener_function(const char *arg)
 {
 	if (!arg) {
-		printf("opener: %s\n", conf.opener ? conf.opener : "lira (builtin)");
+		printf("opener: %s\n", conf.opener ? conf.opener : "lira (built-in)");
 		return FUNC_SUCCESS;
 	}
 
@@ -696,7 +696,7 @@ opener_function(const char *arg)
 		conf.opener = savestring(arg, strlen(arg));
 
 	printf(_("Opener set to '%s'\n"), conf.opener
-		? conf.opener : "lira (builtin)");
+		? conf.opener : "lira (built-in)");
 
 	return FUNC_SUCCESS;
 }
@@ -1983,7 +1983,7 @@ exec_cmd(char **args)
 	 * in this if...else chain. It will be found faster this way. */
 
 	/* ####################################################
-	 * #                 BUILTIN COMMANDS                 #
+	 * #                 BUILT-IN COMMANDS                 #
 	 * ####################################################*/
 
 	/*          ############### CD ##################     */

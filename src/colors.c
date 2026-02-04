@@ -936,9 +936,9 @@ get_color_scheme_name(void)
 		return cur_cscheme;
 
 	if (term_caps.color >= 256)
-		return _("builtin (256 colors)");
+		return _("built-in (256 colors)");
 
-	return _("builtin (8 colors)");
+	return _("built-in (8 colors)");
 }
 
 static int
@@ -3074,7 +3074,7 @@ print_suggestion_colors(void)
 		"(e.g. boo%skmarks%s)\n", sx_c, df_c, sx_c, df_c);
 	printf("%sColor%s (sc) External command names (e.g. lib%sreoffice%s)\n",
 		sc_c, df_c, sc_c, df_c);
-	printf("%sColor%s (sb) Shell builtin names (e.g. ex%sport%s)\n",
+	printf("%sColor%s (sb) Shell built-in names (e.g. ex%sport%s)\n",
 		sb_c, df_c, sb_c, df_c);
 	printf("%sColor%s (sd) Internal commands description (e.g. "
 		"br %s(batch rename files)%s)\n", sd_c, df_c, sd_c, df_c);

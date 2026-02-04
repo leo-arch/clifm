@@ -2015,6 +2015,7 @@ bonus_function(void)
 		"\"Ein Verletzter, Alarm, Alarm!\"",
 		"\"There is not knowledge that is not power\"",
 		"idkfa",
+		"The truth is out there",
 		"This is the second best file manager I've ever seen!",
 		"Winners don't use TUIs",
 		"\"La inmortalidad es baladí\" (J. L. Borges)",
