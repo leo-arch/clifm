@@ -2125,10 +2125,11 @@ expand_tilde_glob(char *text)
 	if (!q)
 		return NULL;
 
-	const char *g = ls[1] ? ls + 1 : NULL;
-	size_t len = strlen(q) + 2 + (g ? strlen(g) : 0);
+	const char *g = ls[1] ? ls + 1 : "";
+	size_t len = strlen(q) + 2 + strlen(g);
 	char *tmp = xnmalloc(len, sizeof(char));
 	snprintf(tmp, len, "%s/%s", q, g);
+
 	free(q);
 
 	return tmp;
