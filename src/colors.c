@@ -666,7 +666,7 @@ check_ext_string(const char *ext, size_t *val_len)
 	char *ptr = tmp_ext;
 
 	size_t i;
-	for (i = 0; i < NAME_MAX && ext[i]; i++)
+	for (i = 0; i < sizeof(tmp_ext) - 1 && ext[i]; i++)
 		tmp_ext[i] = TOLOWER(ext[i]);
 	tmp_ext[i] = '\0';
 
