@@ -201,8 +201,6 @@ clean_file_name(char *restrict name)
 
 		if (n <= 127) {
 			const int ret = translate_unsafe_char(n);
-			if (ret == -1)
-				continue;
 
 			if (ret == BRACKETS_TRANSLATION) {
 				if (q == p || (*(q - 1) != BRACKETS_TRANSLATION

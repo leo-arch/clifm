@@ -218,9 +218,6 @@ construct_shell_cmd(char **args)
 static int
 check_shell_cmd_conditions(char **args)
 {
-	if (!args || !args[0])
-		return FUNC_FAILURE;
-
 	/* No command name ends with a slash */
 	const size_t len = (args && args[0]) ? strlen(args[0]) : 0;
 	if (len > 0 && args[0][len - 1] == '/') {

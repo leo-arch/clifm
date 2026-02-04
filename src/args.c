@@ -807,7 +807,7 @@ open_preview_file(char *file, const int mode)
 	char *fpath = file;
 	int url = 1;
 	const int preview = mode == PREVIEW_FILE ? 1 : 0;
-	const size_t flen = fpath ? strlen(file) : 0;
+	const size_t flen = strlen(file);
 
 	struct stat attr;
 	if (IS_FILE_URI(fpath, flen)) {

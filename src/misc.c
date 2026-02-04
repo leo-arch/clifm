@@ -1756,7 +1756,7 @@ handle_stdin(void)
 	size_t links_counter = 0;
 
 	while (*p) {
-		if (!*p || *p == '\n') {
+		if (*p == '\n') {
 			*p = '\0';
 
 			/* Create symlinks (in tmp dir) to each valid file in the buffer */

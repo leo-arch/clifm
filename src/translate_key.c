@@ -507,7 +507,7 @@ set_end_char_is_keycode(char *str, size_t end, int *keycode, int *mod_key)
 
 	if (s) {
 		str[end] = '\0';
-		*mod_key += (s && s[1]) ? xatoi(s + 1) - 1 : 0;
+		*mod_key += (*s && s[1]) ? xatoi(s + 1) - 1 : 0;
 	} else if (IS_LOWER_ARROW_CHAR(str[end])) { /* Rxvt */
 		if (*str == SS3_INTRODUCER)
 			*mod_key += MOD_CTRL;

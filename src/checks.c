@@ -420,8 +420,7 @@ is_eln_range(char *str)
 	else if (is_number(dash + 1))
 		b = xatof(dash + 1);
 
-	if (dash)
-		*dash = '-';
+	*dash = '-';
 
 	if (a < 1 || a > g_files_num
 	|| b < 1 || b > g_files_num

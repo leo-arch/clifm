@@ -137,7 +137,7 @@ translate_emacs_style_keyseq(const char *key)
 			return NULL;
 		}
 
-		if (!*key || buf_len >= sizeof(buf) - 2
+		if (buf_len >= sizeof(buf) - 2
 		/* No keybinding starts with a non-modifier key. Skip it. */
 		|| buf_len == 0)
 			return NULL;
