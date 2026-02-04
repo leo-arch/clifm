@@ -523,6 +523,7 @@ detect_space(char *s)
 		case 0xa9: /* fallthrough */ /* PARAGRAPH SEPARATOR. */
 		case 0xaf: /* NARROW NO-BREAK SPACE. */
 			return 1;
+		default: break;
 		}
 
 CONT:
@@ -2612,7 +2613,6 @@ do_path_normalization(char **s, const size_t i, const int is_int_cmd)
 	/* If at least one path component is self or parent, we need to do
 	 * normalization. */
 	const char *p = arg;
-	const char *start;
 
 	while (*p) {
 		while (*p == '/') /* Skip consecutive slashes. */
@@ -2621,7 +2621,7 @@ do_path_normalization(char **s, const size_t i, const int is_int_cmd)
 		if (!*p)
 			break;
 
-		start = p;
+		const char *start = p;
 		while (*p && *p != '/')
 			p++;
 
@@ -3237,7 +3237,7 @@ get_substr(char *str, const char ifs, const int fproc)
 
 	free(substr);
 
-	dstr[n] = NULL;
+	if (dstr) dstr[n] = NULL;
 	return dstr;
 }
 
