@@ -412,8 +412,9 @@ sel_regex_nocwd(regex_t regex, const char *sel_path, const mode_t filetype,
 		if (regexec(&regex, list[i]->d_name, 0, NULL, 0) == FUNC_SUCCESS) {
 			if (invert == 0)
 				new_sel += select_file(tmp_path);
-		} else if (invert == 1) {
-			new_sel += select_file(tmp_path);
+		} else {
+			if (invert == 1)
+				new_sel += select_file(tmp_path);
 		}
 
 		free(tmp_path);

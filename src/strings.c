@@ -1093,9 +1093,11 @@ check_fused_param(char *str)
 			c++;
 		} else if (*p == ' ') {
 			break;
-		} else if (*p < '0' || *p > '9') {
-			ok = 0;
-			break;
+		} else {
+			if (*p < '0' || *p > '9') {
+				ok = 0;
+				break;
+			}
 		}
 		p++;
 		i++;

@@ -212,14 +212,16 @@ xmagic(const char *file, const int query_mime)
 			g_magic_mime_type_cookie = NULL;
 			return NULL;
 		}
-	} else if (query_mime == 0 && !g_magic_text_desc_cookie) {
-		g_magic_text_desc_cookie = magic_open(MAGIC_ERROR);
-		if (!g_magic_text_desc_cookie)
-			return NULL;
-		if (magic_load(g_magic_text_desc_cookie, NULL) == -1) {
-			magic_close(g_magic_text_desc_cookie);
-			g_magic_text_desc_cookie = NULL;
-			return NULL;
+	} else {
+		if (query_mime == 0 && !g_magic_text_desc_cookie) {
+			g_magic_text_desc_cookie = magic_open(MAGIC_ERROR);
+			if (!g_magic_text_desc_cookie)
+				return NULL;
+			if (magic_load(g_magic_text_desc_cookie, NULL) == -1) {
+				magic_close(g_magic_text_desc_cookie);
+				g_magic_text_desc_cookie = NULL;
+				return NULL;
+			}
 		}
 	}
 

@@ -1507,11 +1507,13 @@ construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 		tcmd[n] = savestring(".", 1);
 		*cwd = 1;
 		n++;
-	} else if (new_name) { /* Interactive rename: "m FILE" */
-		tcmd[n] = new_name;
-		if (*cwd == 0)
-			*cwd = is_file_in_cwd(tcmd[n]);
-		n++;
+	} else {
+		if (new_name) { /* Interactive rename: "m FILE" */
+			tcmd[n] = new_name;
+			if (*cwd == 0)
+				*cwd = is_file_in_cwd(tcmd[n]);
+			n++;
+		}
 	}
 
 	tcmd[n] = NULL;

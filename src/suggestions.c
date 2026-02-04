@@ -2057,23 +2057,27 @@ rl_suggestions(const unsigned char c)
 			/* Skip the j cmd: we always want the BAEJ suggestion here. */
 			if (full_line && *full_line == 'j' && full_line[1] == ' ') {
 				;
-			} else if (full_line && *full_line == *suggestion_buf
-			&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
-				printed = PARTIAL_MATCH;
-				zero_offset = 1;
-				goto SUCCESS;
+			} else {
+				if (full_line && *full_line == *suggestion_buf
+				&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
+					printed = PARTIAL_MATCH;
+					zero_offset = 1;
+					goto SUCCESS;
+				}
 			}
 
 		/* An alias name could be the same as the beginning of the alias
 		 * defintion, so that this test must always be skipped in case
 		 * of aliases. */
-		} else if (suggestion.type != ALIAS_SUG && c != ' '
-		&& (conf.case_sens_path_comp ? (*word == *suggestion_buf
-		&& strncmp(word, suggestion_buf, wlen) == 0)
-		: (TOUPPER(*word) == TOUPPER(*suggestion_buf)
-		&& strncasecmp(word, suggestion_buf, wlen) == 0) ) ) {
-			printed = PARTIAL_MATCH;
-			goto SUCCESS;
+		} else {
+			if (suggestion.type != ALIAS_SUG && c != ' '
+			&& (conf.case_sens_path_comp ? (*word == *suggestion_buf
+			&& strncmp(word, suggestion_buf, wlen) == 0)
+			: (TOUPPER(*word) == TOUPPER(*suggestion_buf)
+			&& strncasecmp(word, suggestion_buf, wlen) == 0) ) ) {
+				printed = PARTIAL_MATCH;
+				goto SUCCESS;
+			}
 		}
 	}
 
@@ -2117,9 +2121,10 @@ rl_suggestions(const unsigned char c)
 					if (s[3] != '-') /* Might be --help, let it continue. */
 						goto FAIL;
 				}
-			} else if (words_num > 5) {
-				/* 5 == 'bm add dir/ name shortcut'*/
-				goto FAIL;
+			} else {
+				if (words_num > 5)
+					/* 5 == 'bm add dir/ name shortcut'*/
+					goto FAIL;
 			}
 		}
 
@@ -2210,11 +2215,13 @@ rl_suggestions(const unsigned char c)
 			if (*word == ':' && word[1]
 			&& (printed = check_tags(word + 1, wlen - 1, TAGC_SUG)) != NO_MATCH)
 				goto SUCCESS;
-		} else if ((s[1] == 'l' || s[1] == 'm' || s[1] == 'n'
-		|| s[1] == 'r' || s[1] == 'y') && s[2] == ' ') {
-			printed = check_tags(word, wlen, TAGS_SUG);
-			if (*word && printed != NO_MATCH)
-				goto SUCCESS;
+		} else {
+			if ((s[1] == 'l' || s[1] == 'm' || s[1] == 'n'
+			|| s[1] == 'r' || s[1] == 'y') && s[2] == ' ') {
+				printed = check_tags(word, wlen, TAGS_SUG);
+				if (*word && printed != NO_MATCH)
+					goto SUCCESS;
+			}
 		}
 		break;
 #endif /* _NO_TAGS */

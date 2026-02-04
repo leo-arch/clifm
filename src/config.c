@@ -3368,14 +3368,16 @@ set_safe_filenames(const char *val)
 	if (!val || !*val)
 		return;
 
-	if (*val == 'f' && strncmp(val, "false\n", 6) == 0)
+	if (*val == 'f' && strncmp(val, "false\n", 6) == 0) {
 		conf.safe_filenames = SAFENAMES_NOCHECK;
-	else if (*val == 'b' && strncmp(val, "basic\n", 6) == 0)
+	} else if (*val == 'b' && strncmp(val, "basic\n", 6) == 0) {
 		conf.safe_filenames = SAFENAMES_BASIC;
-	else if (*val == 'p' && strncmp(val, "posix\n", 6) == 0)
+	} else if (*val == 'p' && strncmp(val, "posix\n", 6) == 0) {
 		conf.safe_filenames = SAFENAMES_POSIX;
-	else if (*val == 's' && strncmp(val, "strict\n", 7) == 0)
-		conf.safe_filenames = SAFENAMES_STRICT;
+	} else {
+		if (*val == 's' && strncmp(val, "strict\n", 7) == 0)
+			conf.safe_filenames = SAFENAMES_STRICT;
+	}
 }
 
 static void

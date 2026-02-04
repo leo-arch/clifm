@@ -2682,10 +2682,12 @@ fill_opts(const char *cmd_name, const char *word_start, const size_t w)
 
 			break;
 		}
-	} else if (w == 3 && word_start && (strncmp(word_start, "log msg ", 8) == 0
-	|| strncmp(word_start, "log cmd ", 8) == 0)) {
-		c_opts[0] = "list"; c_opts[1] = "on"; c_opts[2] = "off";
-		c_opts[3] = "status"; c_opts[4] = "clear"; c_opts[5] = NULL;
+	} else {
+		if (w == 3 && word_start && (strncmp(word_start, "log msg ", 8) == 0
+		|| strncmp(word_start, "log cmd ", 8) == 0)) {
+			c_opts[0] = "list"; c_opts[1] = "on"; c_opts[2] = "off";
+			c_opts[3] = "status"; c_opts[4] = "clear"; c_opts[5] = NULL;
+		}
 	}
 
 #undef MAX_OPTS

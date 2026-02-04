@@ -452,11 +452,9 @@ init_icons_hashes(void)
 static inline void
 swap_ent(const size_t id1, const size_t id2)
 {
-	struct fileinfo _dent, *pdent1 = &file_info[id1], *pdent2 =  &file_info[id2];
-
-	*(&_dent) = *pdent1;
-	*pdent1 = *pdent2;
-	*pdent2 = *(&_dent);
+    struct fileinfo tmp = file_info[id1];
+    file_info[id1] = file_info[id2];
+    file_info[id2] = tmp;
 }
 #endif /* TOURBIN_QSORT */
 
@@ -1848,8 +1846,9 @@ calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
 		if (file_info[i].filesn > 0 && conf.file_counter == 1
 		&& file_info[i].user_access == 1)
 			item_len += DIGINUM((int)file_info[i].filesn);
-	} else if (conf.colorize == 0 && has_file_type_char(i) == 1) {
-		item_len++;
+	} else {
+		if (conf.colorize == 0 && has_file_type_char(i) == 1)
+			item_len++;
 	}
 
 	return (size_t)item_len;

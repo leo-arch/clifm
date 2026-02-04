@@ -848,10 +848,12 @@ hidden_files_function(const char *arg)
 		conf.show_hidden = HIDDEN_FALSE;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(NULL, NULL, _("Hidden files: off\n"));
-	} else if (strcmp(arg, "on") == 0) {
-		conf.show_hidden = HIDDEN_TRUE;
-		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Hidden files: on\n"));
+	} else {
+		if (strcmp(arg, "on") == 0) {
+			conf.show_hidden = HIDDEN_TRUE;
+			if (conf.autols == 1) reload_dirlist();
+			print_reload_msg(NULL, NULL, _("Hidden files: on\n"));
+		}
 	}
 
 	update_autocmd_opts(AC_SHOW_HIDDEN);

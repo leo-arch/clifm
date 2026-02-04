@@ -1662,12 +1662,14 @@ load_prompts(void)
 			prompts[n].warning = savestring(ret, ret_len);
 		}
 
-		else if (strncmp(line, "RightPrompt=", 12) == 0) {
-			free(prompts[n].right);
-			prompts[n].right = savestring(ret, ret_len);
-			if (prompts[n].regular)
-				prompts[n].multiline =
-					strstr(prompts[n].regular, "\\n") ? 1 : 0;
+		else {
+			if (strncmp(line, "RightPrompt=", 12) == 0) {
+				free(prompts[n].right);
+				prompts[n].right = savestring(ret, ret_len);
+				if (prompts[n].regular)
+					prompts[n].multiline =
+						strstr(prompts[n].regular, "\\n") ? 1 : 0;
+			}
 		}
 	}
 
