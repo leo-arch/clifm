@@ -603,7 +603,7 @@ check_single_key(const char *str, const int csi_seq, const int term_type)
 
 	/* Alt+UTF-8 */
 	if (IS_UTF8_LEAD_BYTE(*str) && csi_seq == 0) {
-		snprintf(buf, MAX_BUF, "%s%s", SYM(MOD_ALT), (unsigned char *)str);
+		snprintf(buf, MAX_BUF, "%s%s", SYM(MOD_ALT), (const unsigned char *)str);
 		return buf;
 	}
 

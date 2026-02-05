@@ -1061,6 +1061,7 @@ list_ok_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 
 		char *p = args[trashed[i]];
 		if (strchr(args[trashed[i]], '\\')
+		/* cppcheck-suppress redundantInitialization */
 		&& !(p = unescape_str(args[trashed[i]], 0)) ) {
 			xerror(_("trash: '%s': Error unescaping filename\n"),
 				args[trashed[i]]);

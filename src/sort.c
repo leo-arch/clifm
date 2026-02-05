@@ -88,6 +88,7 @@ static inline int
 check_hidden_file(const char c1, const char c2)
 {
 	const int ret = ((c1 == '.' && c2 != '.') ? -1
+		/* cppcheck-suppress knownConditionTrueFalse */
 		: ((c1 != '.' && c2 == '.') ? 1 : 0));
 
 	return (ret == 0 ? 0
@@ -101,6 +102,7 @@ check_priority_sort_char(const char c1, const char c2)
 
 	if (!psch[1]) {  /* Single char */
 		return ((c1 == *psch && c2 != *psch) ? -1
+			/* cppcheck-suppress knownConditionTrueFalse */
 			: ((c1 != *psch && c2 == *psch) ? 1 : 0));
 	}
 

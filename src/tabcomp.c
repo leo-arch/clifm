@@ -438,6 +438,7 @@ append_ending_char(const enum comp_type ct)
 	*deq_str = '\0';
 	/* Clang static analysis complains that tmp[4] (deq_str[4]) is a garbage
 	 * value. Initialize only this exact value to get rid of the warning. */
+	/* cppcheck-suppress arrayIndexOutOfBounds */
 	deq_str[4] = '\0';
 	size_t deq_str_len = 0;
 
@@ -2242,7 +2243,7 @@ AFTER_USUAL_COMPLETION:
 						continue;
 					}
 					t[0] = replacement[k];
-					t[1] = '\0';
+					t[1] = '\0'; /* cppcheck-suppress arrayIndexOutOfBounds */
 					rl_insert_text(t);
 
 					/* WORKAROUND: If we are not at the end of the line,
@@ -2509,6 +2510,7 @@ DISPLAY_MATCHES:
 					char c = last_slash[1];
 					*(last_slash + 1) = '\0';
 					xchdir(dir, NO_TITLE);
+					/* cppcheck-suppress redundantAssignment */
 					*(last_slash + 1) = c;
 				} else {
 					/* We have the root dir */
@@ -2685,7 +2687,7 @@ RESTART:
 				}
 
 				t[0] = ss[k];
-				t[1] = '\0';
+				t[1] = '\0'; /* cppcheck-suppress arrayIndexOutOfBounds */
 				rl_insert_text(t);
 				rl_redisplay();
 			}
