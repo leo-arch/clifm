@@ -936,6 +936,9 @@ xrl_update_prompt(void)
 int
 keybind_exec_cmd(char *str)
 {
+	if (!str || !*str)
+		return FUNC_FAILURE;
+
 	const size_t old_args = args_n;
 	args_n = 0;
 
@@ -970,7 +973,7 @@ keybind_exec_cmd(char *str)
 }
 
 static int
-run_kb_cmd(char *cmd, const int ignore_empty_line)
+run_kb_cmd(const char *cmd, const int ignore_empty_line)
 {
 	if (!cmd || !*cmd)
 		return FUNC_FAILURE;
@@ -985,7 +988,9 @@ run_kb_cmd(char *cmd, const int ignore_empty_line)
 
 	const int exit_code_bk = exit_code;
 
-	keybind_exec_cmd(cmd);
+	char *tmp = strdup(cmd);
+	keybind_exec_cmd(tmp);
+	free(tmp);
 	rl_reset_line_state();
 
 	if (exit_code != exit_code_bk)

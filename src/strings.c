@@ -1085,11 +1085,11 @@ static int
 check_fused_param(char *str)
 {
 	char *p = str;
-	size_t c = 0, i = 0;
+	size_t c = 0;
 	int ok = 1;
 
 	while (*p) {
-		if (i > 0 && *p == '-' && *(p - 1) >= '1' && *(p - 1) <= '9') {
+		if (p != str && *p == '-' && *(p - 1) >= '1' && *(p - 1) <= '9') {
 			c++;
 		} else if (*p == ' ') {
 			break;
@@ -1100,7 +1100,6 @@ check_fused_param(char *str)
 			}
 		}
 		p++;
-		i++;
 	}
 
 	return (ok == 1 && c <= 1);
