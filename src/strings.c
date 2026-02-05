@@ -2758,7 +2758,7 @@ parse_input_str(char *str)
 		args_n--;
 	} else {
 		const size_t len = strlen(substr[args_n]);
-		if (len > 0 && substr[args_n][len - 1] == '&' && !substr[args_n][len]) {
+		if (len > 0 && substr[args_n][len - 1] == '&') {
 			substr[args_n][len - 1] = '\0';
 			bg_proc = 1;
 		}

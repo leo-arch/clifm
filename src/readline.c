@@ -2844,8 +2844,9 @@ tag_complete(const char *text, char *start)
 		case 'u':
 			if (text && *text == ':') { /* We have a tag name */
 				comp = 1; cur_comp_type = TCMP_TAGS_C;
-			} else if (l[1] == 'u') { /* We have a tagged file */
-				comp = 2;
+			} else {
+				if (l[1] == 'u') /* We have a tagged file */
+					comp = 2;
 			}
 			break;
 		case 'd': /* fallthough */

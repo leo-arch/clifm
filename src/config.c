@@ -2760,14 +2760,13 @@ set_pager_view_value(char *line)
 static void
 set_config_bool_value(char *line, int *var)
 {
-	char *p = line;
-	if (!p || !*p || !var)
+	if (!line || !*line || !var)
 		return;
 
-	if (*p == 't' && strncmp(p, "true\n", 5) == 0) {
+	if (*line == 't' && strncmp(line, "true\n", 5) == 0) {
 		*var = 1;
 	} else {
-		if (*p == 'f' && strncmp(p, "false\n", 6) == 0)
+		if (*line == 'f' && strncmp(line, "false\n", 6) == 0)
 			*var = 0;
 	}
 }

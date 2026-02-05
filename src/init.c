@@ -81,9 +81,9 @@ get_ext_mountpoints(void)
 		return;
 
 	size_t n = 0;
-	struct mntent *ent;
+	const struct mntent *ent;
 	while ((ent = getmntent(fp)) != NULL) {
-		char *t = ent->mnt_type;
+		const char *t = ent->mnt_type;
 		if (*t != 'e' || t[1] != 'x' || t[2] != 't' || !t[3] || t[4])
 			continue;
 
@@ -354,7 +354,7 @@ get_sysgroups(void)
 	setgrent();
 	sys_groups = xnmalloc(n + 1, sizeof(struct groups_t));
 
-	struct group *g;
+	const struct group *g;
 	n = 0;
 	while ((g = getgrent())) {
 		const size_t namlen = strlen(g->gr_name);
@@ -449,7 +449,7 @@ get_sys_shell(void)
 	if (!ret || !*(ret + 1))
 		return SHELL_POSIX;
 
-	char *s = ret + 1;
+	const char *s = ret + 1;
 	user.shell_basename = savestring(s, strlen(s));
 
 	if (*s == 'b' && strcmp(s, "bash") == 0)
@@ -566,7 +566,7 @@ check_env_filter(void)
 	if (filter.str)
 		return;
 
-	char *p = getenv("CLIFM_FILTER");
+	const char *p = getenv("CLIFM_FILTER");
 	if (!p)
 		return;
 
@@ -607,7 +607,7 @@ is_secure_env(void)
 }
 
 /* Retrieve user groups.
- * Return an array with the ID's of groups to which the user belongs.
+ * Return an array with the IDs of groups the user belongs to.
  * NGROUPS is set to the number of groups.
  * NOTE: getgroups(2) does not include the user's main group.
  * We use getgroups(2) on TERMUX because getgrouplist(3) always returns
@@ -615,12 +615,11 @@ is_secure_env(void)
 static gid_t *
 get_user_groups(const char *name, const gid_t gid, int *ngroups)
 {
-	int n = *ngroups;
-
 #if defined(__TERMUX__) || defined(_BE_POSIX)
 	UNUSED(name); UNUSED(gid);
 	gid_t *g = xnmalloc(NGROUPS_MAX, sizeof(g));
-	if ((n = getgroups(NGROUPS_MAX, g)) == -1) {
+	int n = getgroups(NGROUPS_MAX, g);
+	if (n == -1) {
 		err('e', PRINT_PROMPT, "%s: getgroups: %s\n",
 			PROGRAM_NAME, strerror(errno));
 		free(g);
@@ -630,12 +629,13 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 		g = xnrealloc(g, (size_t)n, sizeof(g));
 
 #elif defined(__linux__)
-	n = 0;
+	int n = 0;
 	getgrouplist(name, gid, NULL, &n);
 	gid_t *g = xnmalloc((size_t)n, sizeof(g));
 	getgrouplist(name, gid, g, &n);
+
 #else
-	n = NGROUPS_MAX;
+	int n = NGROUPS_MAX;
 	gid_t *g = xnmalloc((size_t)n, sizeof(g));
 # if defined(__APPLE__)
 	getgrouplist(name, (int)gid, (int *)g, &n);
@@ -696,7 +696,7 @@ validate_shell(void)
 	if (!p)
 		return;
 
-	char *q = strrchr(p, '/');
+	const char *q = strrchr(p, '/');
 	if ((!q && strcmp(p, PROGRAM_NAME) == 0)
 	|| (q && q[1] && strcmp(q + 1, PROGRAM_NAME) == 0)) {
 #ifdef _PATH_BSHELL
@@ -760,7 +760,7 @@ get_user_data_env(void)
 
 	if (t) {
 		char *p = xrealpath(t, NULL);
-		char *h = p ? p : t;
+		const char *h = p ? p : t;
 		tmp_user.home = savestring(h, strlen(h));
 		free(p);
 	}
@@ -1535,7 +1535,7 @@ load_file_templates(void)
 		return;
 
 	DIR *dir;
-	struct dirent *ent;
+	const struct dirent *ent;
 
 	if ((dir = opendir(templates_dir)) == NULL)
 		return;
@@ -2452,7 +2452,7 @@ check_time_str(void)
 	struct tm tm;
 	time_t t = time(NULL);
 	char tim[MAX_TIME_STR];
-	char *tfmt = conf.time_str ? conf.time_str : DEF_TIME_STYLE_OLDER;
+	const char *tfmt = conf.time_str ? conf.time_str : DEF_TIME_STYLE_OLDER;
 	size_t l = localtime_r(&t, &tm) ? strftime(tim, sizeof(tim), tfmt, &tm) : 0;
 
 	/* Construct the invalid time format string (used when we get an
