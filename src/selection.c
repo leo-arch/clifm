@@ -868,9 +868,11 @@ sel_function(char **args)
 			free(dir);
 			return errno;
 		}
-	} else if (filetype == (mode_t)-1) { /* parse_sel_params() error */
-		free(dir);
-		return FUNC_FAILURE;
+	} else {
+		if (filetype == (mode_t)-1) { /* parse_sel_params() error */
+			free(dir);
+			return FUNC_FAILURE;
+		}
 	}
 
 	for (i = 1; args[i]; i++) {

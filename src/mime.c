@@ -871,10 +871,12 @@ set_exec_flags(const char *str, int *exec_flags)
 		*exec_flags |= E_NOSTDERR;
 		if (str[1] == 'O')
 			*exec_flags |= E_NOSTDOUT;
-	} else if (*str == 'O') {
-		*exec_flags |= E_NOSTDOUT;
-		if (str[1] == 'E')
-			*exec_flags |= E_NOSTDERR;
+	} else {
+		if (*str == 'O') {
+			*exec_flags |= E_NOSTDOUT;
+			if (str[1] == 'E')
+				*exec_flags |= E_NOSTDERR;
+		}
 	}
 }
 

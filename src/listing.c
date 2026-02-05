@@ -2674,9 +2674,11 @@ list_dir_light(const int autocmd_ret)
 					stats.excluded++;
 					continue;
 				}
-			} else if (filter.rev == 0) {
-				stats.excluded++;
-				continue;
+			} else {
+				if (filter.rev == 0) {
+					stats.excluded++;
+					continue;
+				}
 			}
 		}
 

@@ -2873,8 +2873,9 @@ tag_complete(const char *text, char *start)
 		|| strncmp(p, "merge ", 6) == 0) {
 			if (*p == 'd' || *p == 'r' || *p == 'l') flags |= MULTI_SEL;
 			comp = 1; cur_comp_type = TCMP_TAGS_S;
-		} else if (text && *text == ':') {
-			comp = 1; cur_comp_type = TCMP_TAGS_C;
+		} else {
+			if (text && *text == ':')
+				{ comp = 1; cur_comp_type = TCMP_TAGS_C; }
 		}
 	}
 

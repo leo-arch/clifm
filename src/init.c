@@ -2694,8 +2694,9 @@ check_options(void)
 #ifndef _NO_LIRA
 	if (xargs.stealth_mode == 1) {
 		xargs.fzf_preview = conf.fzf_preview = 0;
-	} else if (conf.fzf_preview == UNSET) {
-		conf.fzf_preview = SETOPT(xargs.fzf_preview, DEF_FZF_PREVIEW);
+	} else {
+		if (conf.fzf_preview == UNSET)
+			conf.fzf_preview = SETOPT(xargs.fzf_preview, DEF_FZF_PREVIEW);
 	}
 #else
 	if (conf.fzf_preview == UNSET)

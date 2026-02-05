@@ -339,15 +339,16 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return BM_DESC;
 	}
 
-	else if (l == 10 && *s == 'd' && strcmp(s + 1, "irs-first") == 0)
+	else if (l == 10 && *s == 'd' && strcmp(s + 1, "irs-first") == 0) {
 			return FF_DESC;
 
-	else if (l == 11 && *s == 'm' && strcmp(s + 1, "ountpoints") == 0)
+	} else if (l == 11 && *s == 'm' && strcmp(s + 1, "ountpoints") == 0) {
 		return MP_DESC;
 
-	else
+	} else {
 		if (l == 12 && *s == 'c' && strcmp(s + 1, "olorschemes") == 0)
 			return CS_DESC;
+	}
 
 	return NULL;
 }
@@ -2129,12 +2130,14 @@ rl_suggestions(const unsigned char c)
 		}
 
 		/* Backdir function (bd) */
-		else if (s[1] == 'd' && s[2] == ' ' && s[3]) {
-				if (s[3] == '/' && !s[4])
-					/* The query string is a single slash: do nothing. */
-					goto FAIL;
-				if ((printed = check_backdir(s)) != NO_MATCH)
-					goto SUCCESS;
+		else {
+			if (s[1] == 'd' && s[2] == ' ' && s[3]) {
+					if (s[3] == '/' && !s[4])
+						/* The query string is a single slash: do nothing. */
+						goto FAIL;
+					if ((printed = check_backdir(s)) != NO_MATCH)
+						goto SUCCESS;
+			}
 		}
 		break;
 
