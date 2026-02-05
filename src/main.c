@@ -1134,7 +1134,11 @@ set_locale(void)
 
 	/* Check whether we have a UTF-8 encoding. */
     char *cs = nl_langinfo(CODESET);
+#ifndef _BE_POSIX
     if (cs && strncasecmp(cs, "UTF", 3) == 0
+#else
+    if (cs && strncmp(cs, "UTF", 3) == 0
+#endif /* !_BE_POSIX*/
     && (cs[3] == '8' || (cs[3] == '-' && cs[4] == '8')))
 		return;
 

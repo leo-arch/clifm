@@ -995,6 +995,14 @@ set_alt_selfile(char *file)
 	fprintf(stderr, _("%s: '%s': Invalid file format\n"), PROGRAM_NAME, file);
 	exit(EXIT_FAILURE);
 }
+
+static void
+print_cwd_in_title_deprecation_warning(void)
+{
+	err('w', PRINT_PROMPT, _("%s: '--cwd-in-title' is deprecated. "
+		"Use TermTitle=[true|false|auto] in the configuration file "
+		"instead.\n"), PROGRAM_NAME);
+}
 #endif /* !_BE_POSIX */
 
 static void
@@ -1232,14 +1240,6 @@ print_tabmode_deprecation_warning(const char *mode, const char *name)
 {
 	err('w', PRINT_PROMPT, _("%s: '%s' is deprecated. "
 		"Use '--tabmode=%s' instead.\n"), PROGRAM_NAME, mode, name);
-}
-
-static void
-print_cwd_in_title_deprecation_warning(void)
-{
-	err('w', PRINT_PROMPT, _("%s: '--cwd-in-title' is deprecated. "
-		"Use TermTitle=[true|false|auto] in the configuration file "
-		"instead.\n"), PROGRAM_NAME);
 }
 
 static void
