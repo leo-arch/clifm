@@ -115,6 +115,23 @@ get_block_devices(void)
 }
 
 static int
+cd_out_of_mountpoint(char *mountpoint)
+{
+	if (!mountpoint || !*mountpoint)
+		return FUNC_FAILURE;
+
+	char *slash = strrchr(mountpoint, '/');
+	if (!slash)
+		return FUNC_FAILURE;
+
+	*slash = '\0';
+	const int ret = cd_function(mountpoint, CD_PRINT_ERROR);
+	*slash = '/';
+
+	return ret;
+}
+
+static int
 unmount_dev(const size_t i, const int n)
 {
 	if (xargs.mount_cmd == UNSET) {
@@ -133,12 +150,8 @@ unmount_dev(const size_t i, const int n)
 
 	/* Get out of mountpoint before unmounting */
 	const size_t mlen = strlen(mnt);
-	if (strncmp(mnt, workspaces[cur_ws].path, mlen) == 0) {
-		char *cmd[] = {"b", NULL};
-		if (back_function(cmd) == FUNC_FAILURE)
-			cd_function(NULL, CD_PRINT_ERROR);
-		exit_status = (-1);
-	}
+	if (strncmp(mnt, workspaces[cur_ws].path, mlen) == 0)
+		(void)cd_out_of_mountpoint(mnt);
 
 	char *cmd[] = {xargs.mount_cmd == MNT_UDISKS2 ? "udisksctl" : "udevil",
 			"unmount", "-b", media[n].dev, NULL};
