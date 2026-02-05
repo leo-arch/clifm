@@ -44,7 +44,6 @@ get_plugin_path(char *action, int *status)
 
 	char *cmd = NULL;
 	int dir_path = 0;
-	size_t cmd_len = 0;
 
 	if (strchr(action, '/')) {
 		cmd = savestring(action, action_len);
@@ -56,7 +55,7 @@ get_plugin_path(char *action, int *status)
 			return NULL;
 		}
 
-		cmd_len = action_len + strlen(plugins_dir) + 2;
+		const size_t cmd_len = action_len + strlen(plugins_dir) + 2;
 		cmd = xnmalloc(cmd_len, sizeof(char));
 		snprintf(cmd, cmd_len, "%s/%s", plugins_dir, action);
 	}
@@ -67,7 +66,7 @@ get_plugin_path(char *action, int *status)
 
 	/* Not in local dir. Let's check the system data dir as well */
 	if (data_dir && dir_path == 0) {
-		cmd_len = action_len + strlen(data_dir)
+		const size_t cmd_len = action_len + strlen(data_dir)
 			+ (sizeof(PROGRAM_NAME) - 1) + 11;
 		cmd = xnrealloc(cmd, cmd_len, sizeof(char));
 		snprintf(cmd, cmd_len, "%s/%s/plugins/%s", data_dir,

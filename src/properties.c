@@ -893,7 +893,7 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 		return FUNC_SUCCESS;
 	}
 
-	ssize_t buflen = 0, vallen = 0;
+	ssize_t buflen = 0;
 	char *buf = NULL, *key = NULL, *val = NULL;
 
 	/* Determine the length of the buffer needed */
@@ -934,7 +934,7 @@ print_extended_attributes(char *s, const mode_t mode, const int xattr)
 		count++;
 
 		/* Determine length of the value */
-		vallen = getxattr(s, key, NULL, 0);
+		ssize_t vallen = getxattr(s, key, NULL, 0);
 		if (vallen == -1) {
 			printf("%s\n", strerror(errno));
 		} else if (vallen > 0) {

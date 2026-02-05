@@ -2213,8 +2213,6 @@ expand_range(char *str, int listdir)
 static void
 expand_ranges(char ***substr)
 {
-	size_t i = 0, j = 0;
-
 	int *range_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	const size_t ranges_ok = check_ranges(substr, &range_array);
 
@@ -2231,7 +2229,7 @@ expand_ranges(char ***substr)
 			(int)old_ranges_n], 1);
 
 		if (ranges) {
-			j = 0;
+			size_t i = 0, j = 0;
 			for (ranges_n = 0; ranges[ranges_n]; ranges_n++);
 
 			update_quoted_words_index((size_t)range_array[r]

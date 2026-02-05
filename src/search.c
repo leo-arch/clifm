@@ -494,13 +494,8 @@ print_glob_matches(struct search_t *matches, const char *search_path)
 	const size_t tab_offset_bk = tab_offset;
 	tab_offset = 0;
 
-	int last_column = 0, i;
-
-	for (i = 0; matches[i].name; i++) {
-		if ((i + 1) % columns_n == 0)
-			last_column = 1;
-		else
-			last_column = 0;
+	for (int i = 0; matches[i].name; i++) {
+		const int last_column = (i + 1) % columns_n == 0;
 
 		if (!search_path) {
 			/* Print ELN, file indicator, and icon. */
@@ -517,8 +512,8 @@ print_glob_matches(struct search_t *matches, const char *search_path)
 
 		/* Print filename. */
 		int name_pad = (last_column == 1 || i == (found - 1)) ? NO_PAD :
-		    (int)(flongest - matches[i].len - ( search_path ? 0
-		    : (size_t)(eln_pad - DIGINUM(matches[i].eln)) ) + 1);
+		    (int)(flongest - matches[i].len - (search_path ? 0
+		    : (size_t)(eln_pad - DIGINUM(matches[i].eln))) + 1);
 
 		if (name_pad < 0)
 			name_pad = 0;
@@ -834,17 +829,16 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 	const size_t longest_len = get_regex_longest(list, (int)matches, &eln_pad);
 	const size_t columns = calc_columns(longest_len, matches);
 
-	size_t last_col = 0, cur_col = 0;
+	size_t cur_col = 0;
 
 	for (size_t i = matches; i-- > 0;) {
 		cur_col++;
 		count++;
 
+		size_t last_col = 0;
 		if (cur_col == columns) {
 			last_col = 1;
 			cur_col = 0;
-		} else {
-			last_col = 0;
 		}
 
 		/* Calculate how much right pad we need for the current entry */
