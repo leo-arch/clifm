@@ -118,7 +118,7 @@ dir_info(const char *dir, const int first_level, struct dir_info_t *info)
 	if (first_level == 1 && stat(dir, &a) != -1)
 		info->blocks += a.st_blocks;
 
-	struct dirent *ent;
+	const struct dirent *ent;
 	char buf[PATH_MAX + 1];
 
 	while ((ent = readdir(p)) != NULL) {

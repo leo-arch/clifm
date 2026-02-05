@@ -277,7 +277,7 @@ rename_bulk_files(char **old_names, char **new_names, int *is_cwd,
  * Otherwise, an array containing destiny filenames is returned.
  *
  * STATUS is set to FUNC_FAILURE in case of error. */
-char **
+static char **
 get_new_names(FILE *fp, const size_t total, int *status)
 {
 	if (!fp)

@@ -56,7 +56,7 @@ get_ext_fs_type(const char *file)
 	size_t mnt_longest = 0;
 	int i, index = -1;
 	for (i = 0; ext_mnt[i].mnt_point; i++) {
-		char *ptr = strstr(file, ext_mnt[i].mnt_point);
+		const char *ptr = strstr(file, ext_mnt[i].mnt_point);
 		if (!ptr || ptr != file)
 			continue;
 
@@ -247,10 +247,10 @@ get_dev_name_mntent(const char *file)
 
 	size_t mnt_longest = 0;
 	static char name[PATH_MAX + 1]; *name = '\0';
-	struct mntent *ent;
+	const struct mntent *ent;
 
 	while ((ent = getmntent(fp)) != NULL) {
-		char *ptr = strstr(file, ent->mnt_dir);
+		const char *ptr = strstr(file, ent->mnt_dir);
 		if (!ptr || ptr != file)
 			continue;
 
@@ -379,7 +379,7 @@ get_dev_mountpoint(const char *file)
 	struct mnttab ent;
 
 	while (getmntent(fp, &ent) == 0) {
-		char *ptr = strstr(file, ent.mnt_mountp);
+		const char *ptr = strstr(file, ent.mnt_mountp);
 		if (!ptr || ptr != file)
 			continue;
 

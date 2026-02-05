@@ -203,7 +203,7 @@ list_tags_having_file(const dev_t dev, const ino_t ino)
 		if (dir == NULL)
 			continue;
 
-		struct dirent *ent;
+		const struct dirent *ent;
 		while ((ent = readdir(dir))) {
 			char full_name[PATH_MAX + NAME_MAX + 2];
 			snprintf(full_name, sizeof(full_name), "%s/%s", tmp, ent->d_name);
@@ -349,7 +349,7 @@ create_tags(char **args)
 
 	for (size_t i = 2; args[i]; i++) {
 		char dir[PATH_MAX + 1];
-		char *p = strchr(args[i], '\\');
+		const char *p = strchr(args[i], '\\');
 		if (p) {
 			char *deq = unescape_str(args[i], 0);
 			if (deq) {
@@ -391,7 +391,7 @@ remove_tags(char **args)
 	int exit_status = FUNC_SUCCESS;
 
 	for (size_t i = 2; args[i]; i++) {
-		char *p = strchr(args[i], '\\');
+		const char *p = strchr(args[i], '\\');
 		if (p) {
 			char *deq = unescape_str(args[i], 0);
 			if (deq) {
@@ -571,7 +571,7 @@ untag(char **args, const size_t n, size_t *t)
 		char *exp = NULL;
 		if (*p == '~')
 			exp = tilde_expand(p);
-		char *q = exp ? exp : p;
+		const char *q = exp ? exp : p;
 		char *r = replace_slashes(q, ':');
 
 		snprintf(f, sizeof(f), "%s/%s", dir, r ? r : q);
@@ -623,7 +623,8 @@ rename_tag(char **args)
 	if (!args || !args[1] || !args[2] || !args[3])
 		return print_usage(FUNC_FAILURE);
 
-	char *old = args[2], *new = args[3];
+	char *old = args[2];
+	const char *new = args[3];
 	if (!is_tag(old))
 		return print_no_such_tag(old);
 
@@ -697,7 +698,7 @@ merge_tags(char **args)
 	if (!is_tag(args[3]))
 		return print_no_such_tag(args[3]);
 
-	char *src = args[2], *dst = args[3];
+	const char *src = args[2], *dst = args[3];
 
 	if (strcmp(src, dst) == 0) {
 		xerror("%s\n", _("tag: Source and destination are the same tag"));
@@ -799,7 +800,7 @@ tags_function(char **args)
 	if (is_tag_help(a))
 		{ puts(_(TAG_USAGE)); goto END; }
 
-	char b[] = "adlmnuy";
+	const char b[] = "adlmnuy";
 	if (strcmp(a[0], "tag") != 0 && strspn(a[0] + 1, b))
 		{ a = reconstruct_input(args); free_args = 1; }
 

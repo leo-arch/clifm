@@ -85,9 +85,9 @@ print_config_value(const char *option, void *cur_value, void *def_value,
 	const char *ptr = SET_MISC_PTR;
 
 	if (type == DUMP_CONFIG_STR || type == DUMP_CONFIG_STR_NO_QUOTE) {
-		char *quote = type == DUMP_CONFIG_STR ? "\"" : "";
-		char *cv = (char *)cur_value;
-		char *dv = (char *)def_value;
+		const char *quote = type == DUMP_CONFIG_STR ? "\"" : "";
+		const char *cv = (const char *)cur_value;
+		const char *dv = (const char *)def_value;
 		if (!cv || (dv && strcmp(cv, dv) == 0))
 			printf("  %s: %s%s%s\n", option, quote, dv, quote);
 		else
@@ -152,7 +152,7 @@ get_start_path_and_ws_names(char **sp, char **ws)
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (*line == 'W' && strncmp(line, "WorkspaceNames=", 15) == 0
 		&& *(line + 15)) {
-			char *tmp = remove_quotes(line + 15);
+			const char *tmp = remove_quotes(line + 15);
 			if (!tmp || !*tmp)
 				continue;
 
@@ -161,7 +161,7 @@ get_start_path_and_ws_names(char **sp, char **ws)
 
 		if (*line == 'S' && strncmp(line, "StartingPath=", 13) == 0
 		&& *(line + 13)) {
-			char *tmp = remove_quotes(line + 13);
+			const char *tmp = remove_quotes(line + 13);
 			if (!tmp || !*tmp)
 				continue;
 
@@ -810,7 +810,7 @@ set_plugins_helper_file(void)
 static void
 set_shell_level(void)
 {
-	char *shlvl = getenv("SHLVL");
+	const char *shlvl = getenv("SHLVL");
 
 	int shlvl_n = shlvl ? xatoi(shlvl) : -1;
 	if (shlvl_n > 0 && shlvl_n < MAX_SHELL_LEVEL)
@@ -822,7 +822,7 @@ set_shell_level(void)
 	snprintf(tmp, sizeof(tmp), "%d", shlvl_n);
 	setenv("SHLVL", tmp, 1);
 
-	char *lvl = getenv("CLIFMLVL");
+	const char *lvl = getenv("CLIFMLVL");
 	if (!lvl) {
 		setenv("CLIFMLVL", "1", 1);
 		return;
@@ -1108,12 +1108,12 @@ create_preview_file(void)
 	}
 
 #if defined(_BE_POSIX)
-	char lscmd[] = "ls -Ap;";
+	const char lscmd[] = "ls -Ap;";
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__) || defined(__sun) || defined(__APPLE__)
-	char lscmd[] = "gls -Ap --color=always --indicator-style=none;ls -Ap;";
+	const char lscmd[] = "gls -Ap --color=always --indicator-style=none;ls -Ap;";
 #else
-	char lscmd[] = "ls -Ap --color=always --indicator-style=none;";
+	const char lscmd[] = "ls -Ap --color=always --indicator-style=none;";
 #endif /* !BSD */
 
 	fprintf(fp, "                  ######################################\n\
@@ -2742,7 +2742,7 @@ set_pager_view_value(char *line)
 	if (!line || !*line)
 		return;
 
-	char *p = remove_quotes(line);
+	const char *p = remove_quotes(line);
 	if (!p)
 		return;
 
@@ -2758,7 +2758,7 @@ set_pager_view_value(char *line)
 
 /* Get boolean value from LINE and set VAR accordingly. */
 static void
-set_config_bool_value(char *line, int *var)
+set_config_bool_value(const char *line, int *var)
 {
 	if (!line || !*line || !var)
 		return;
@@ -2775,7 +2775,7 @@ set_config_bool_value(char *line, int *var)
  * it in VAR. In case of error or out of range integer, VAR is left
  * unchanged. */
 static void
-set_config_int_value(char *line, int *var, const int min, const int max)
+set_config_int_value(const char *line, int *var, const int min, const int max)
 {
 	if (!line || !*line || !var)
 		return;
@@ -2804,7 +2804,7 @@ set_colorscheme(char *line)
 	if (!line || *line < ' ')
 		return;
 
-	char *p = remove_quotes(line);
+	const char *p = remove_quotes(line);
 	if (!p)
 		return;
 
@@ -2954,7 +2954,7 @@ set_tabcomp_mode(char *line)
 	if (!line || !*line)
 		return;
 
-	char *tmp = remove_quotes(line);
+	const char *tmp = remove_quotes(line);
 	if (!tmp)
 		return;
 
@@ -3001,7 +3001,7 @@ set_quoting_style(char *str)
 	if (!str || !*str)
 		return;
 
-	char *val = get_line_value(str);
+	const char *val = get_line_value(str);
 	if (!val)
 		return;
 
@@ -3088,7 +3088,7 @@ set_sort_name(char *line)
 }
 
 static void
-set_clear_screen(char *line)
+set_clear_screen(const char *line)
 {
 	if (*line == 'i' && strncmp(line, "internal\n", 9) == 0)
 		conf.clear_screen = CLEAR_INTERNAL_CMD_ONLY;
@@ -3144,7 +3144,7 @@ get_term_env(const char *cmd)
 	if (s)
 		*s = '\0';
 
-	char *env = getenv(cmd);
+	const char *env = getenv(cmd);
 
 	if (s)
 		*s = ' ';
@@ -3224,7 +3224,7 @@ set_default_answers(char *val)
 	if (!v || !*v)
 		return;
 
-	char *str = strtok(v, ",");
+	const char *str = strtok(v, ",");
 	if (!str || !*str)
 		return;
 
@@ -3406,7 +3406,7 @@ set_umask(const char *line)
 static void
 set_welcome_msg_str(char *line)
 {
-	char *val = get_line_value(line);
+	const char *val = get_line_value(line);
 	if (!val)
 		return;
 
@@ -3462,7 +3462,7 @@ set_max_name_len(char *line)
 static void
 set_file_opener(char *line)
 {
-	char *tmp = get_line_value(line);
+	const char *tmp = get_line_value(line);
 	if (!tmp)
 		return;
 
@@ -3471,7 +3471,7 @@ set_file_opener(char *line)
 }
 
 static void
-set_term_title_value(char *line)
+set_term_title_value(const char *line)
 {
 	if (!line || !*line || *line == '\n'
 	|| (*line == 'a' && strcmp(line, "auto\n") == 0)) {
@@ -3803,7 +3803,7 @@ read_config(void)
 
 		else if (!*prop_fields_str && *line == 'P'
 		&& strncmp(line, "PropFields=", 11) == 0) {
-			char *tmp = get_line_value(line + 11);
+			const char *tmp = get_line_value(line + 11);
 			if (tmp)
 				xstrsncpy(prop_fields_str, tmp, sizeof(prop_fields_str));
 		}
@@ -4039,11 +4039,11 @@ set_force_color(const char *val)
 static void
 check_colors(void)
 {
-	char *nc = getenv("NO_COLOR");
-	char *cnc = getenv("CLIFM_NO_COLOR");
+	const char *nc = getenv("NO_COLOR");
+	const char *cnc = getenv("CLIFM_NO_COLOR");
 
-	char *ccf = getenv("CLICOLOR_FORCE"); /* See https://bixense.com/clicolors */
-	char *cfc = getenv("CLIFM_FORCE_COLOR");
+	const char *ccf = getenv("CLICOLOR_FORCE"); /* See https://bixense.com/clicolors */
+	const char *cfc = getenv("CLIFM_FORCE_COLOR");
 
 	if (xargs.colorize == UNSET && !nc && !cnc && (ccf || cfc)) {
 		if (term_caps.color == 0)
@@ -4395,7 +4395,7 @@ init_config(void)
 	if (just_listing == 1)
 		return;
 
-	char *t = getenv("TERM");
+	const char *t = getenv("TERM");
 	if (t && *t == 'x' && strncmp(t, "xterm", 5) == 0)
 		/* If running Xterm, instruct it to send an escape code (27) for
 		 * Meta (Alt) key sequences. Otherwise, Alt keybindings won't work. */

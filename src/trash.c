@@ -128,7 +128,7 @@ trash_clear(void)
 	int exit_status = FUNC_SUCCESS;
 	size_t n = 0;
 	size_t removed = 0;
-	struct dirent *ent;
+	const struct dirent *ent;
 
 	while ((ent = readdir(dir))) {
 		if (SELFORPARENT(ent->d_name))
@@ -288,7 +288,7 @@ trash_file(char *file)
 		return errno;
 	}
 
-	char *tmpfile = file;
+	const char *tmpfile = file;
 	char full_path[PATH_MAX + 1];
 
 	if (*file != '/') { /* If relative path, make it absolute. */
@@ -623,7 +623,7 @@ read_original_path(const char *file, const char *src, int *status)
 
 	while (fgets(line, (int)sizeof(line), fp)) {
 		if (*line == 'P' && strncmp(line, "Path=", 5) == 0) {
-			char *p = strchr(line, '=');
+			const char *p = strchr(line, '=');
 			if (!p || !*(++p))
 				break;
 			orig_path = savestring(p, strnlen(p, sizeof(line) - 1));
@@ -711,19 +711,19 @@ check_untrash_dest(char *file)
 }
 
 static int
-untrash_file(char *file)
+untrash_file(const char *file)
 {
 	if (!file)
 		return FUNC_FAILURE;
 
-	char trash_file[PATH_MAX + 1];
-	char trash_info[PATH_MAX + 1];
-	snprintf(trash_file, sizeof(trash_file), "%s/%s", trash_files_dir, file);
-	snprintf(trash_info, sizeof(trash_info), "%s/%s.trashinfo",
+	char utrash_file[PATH_MAX + 1];
+	char utrash_info[PATH_MAX + 1];
+	snprintf(utrash_file, sizeof(utrash_file), "%s/%s", trash_files_dir, file);
+	snprintf(utrash_info, sizeof(utrash_info), "%s/%s.trashinfo",
 		trash_info_dir, file);
 
 	int ret = FUNC_SUCCESS;
-	char *orig_path = read_original_path(trash_info, file, &ret);
+	char *orig_path = read_original_path(utrash_info, file, &ret);
 	if (!orig_path)
 		return ret;
 
@@ -733,19 +733,19 @@ untrash_file(char *file)
 		return ret;
 	}
 
-	ret = renameat(XAT_FDCWD, trash_file, XAT_FDCWD, orig_path);
+	ret = renameat(XAT_FDCWD, utrash_file, XAT_FDCWD, orig_path);
 	if (ret == -1) {
 		if (errno == EXDEV) {
 			/* Destination file is on a different filesystem, which is why
 			 * rename(3) doesn't work: let's try with mv(1). */
-			char *cmd[] = {"mv", "--", trash_file, orig_path, NULL};
+			char *cmd[] = {"mv", "--", utrash_file, orig_path, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 			if (ret != FUNC_SUCCESS) {
 				free(orig_path);
 				return ret;
 			}
 		} else {
-			xerror("untrash: '%s': %s\n", trash_file, strerror(errno));
+			xerror("untrash: '%s': %s\n", utrash_file, strerror(errno));
 			free(orig_path);
 			return errno;
 		}
@@ -753,8 +753,8 @@ untrash_file(char *file)
 
 	free(orig_path);
 
-	if (unlinkat(XAT_FDCWD, trash_info, 0) == -1) {
-		xerror(_("untrash: '%s': %s\n"), trash_info, strerror(errno));
+	if (unlinkat(XAT_FDCWD, utrash_info, 0) == -1) {
+		xerror(_("untrash: '%s': %s\n"), utrash_info, strerror(errno));
 		return errno;
 	}
 
@@ -939,11 +939,11 @@ print_trashdir_size(void)
 		{fputs("Calculating...", stdout); fflush(stdout);}
 
 	const off_t full_size = dir_size(trash_files_dir, 0, &status);
-	char *human_size = construct_human_size(full_size);
+	const char *human_size = construct_human_size(full_size);
 
-	char err[sizeof(xf_cb) + 6]; *err = '\0';
+	char err_str[sizeof(xf_cb) + 6]; *err_str = '\0';
 	if (status != 0)
-		snprintf(err, sizeof(err), "%s%c%s", xf_cb, DU_ERR_CHAR, NC);
+		snprintf(err_str, sizeof(err_str), "%s%c%s", xf_cb, DU_ERR_CHAR, NC);
 
 	char s[MAX_SHADE_LEN]; *s = '\0';
 	if (conf.colorize == 1)
@@ -952,7 +952,7 @@ print_trashdir_size(void)
 	if (term_caps.suggestions == 1)
 		{MOVE_CURSOR_LEFT(14); ERASE_TO_RIGHT; fflush(stdout);}
 
-	printf(_("%s%s%s%s\n"), err, s, human_size, df_c);
+	printf(_("%s%s%s%s\n"), err_str, s, human_size, df_c);
 }
 
 /* List files currently in the trash can */

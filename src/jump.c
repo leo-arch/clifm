@@ -72,6 +72,7 @@ calculate_base_credit(const int days_since_first, const int hours_since_last,
 	const size_t visits, int *keep)
 {
 	const int ivisits = visits > INT_MAX ? INT_MAX : (int)visits;
+
 	int rank = days_since_first > 1
 		? (ivisits * VISIT_BONUS) / days_since_first
 		: (ivisits * VISIT_BONUS);

@@ -333,7 +333,7 @@ num_to_sort_name(const int n, const int abbrev)
 void
 print_sort_method(void)
 {
-	char *name = num_to_sort_name(conf.sort, 0);
+	const char *name = num_to_sort_name(conf.sort, 0);
 
 	printf("%s%s%s%s", BOLD, name, NC,
 		(conf.sort_reverse == 1) ? " [rev]" : "");

@@ -253,7 +253,7 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 	/* Delete or backspace keys. */
 	int del_key = 0;
 	int space = 0;
-	char *ptr = NULL;
+	const char *ptr = NULL;
 
 	/* Disable suggestions while in vi mode. */
 	if (rl_editing_mode == RL_VI_MODE) {
@@ -384,7 +384,7 @@ END:
 		}
 
 		if (wrong_cmd == 1) { /* Wrong cmd and we are on the first word. */
-			char *fs = strchr(rl_line_buffer, ' ');
+			const char *fs = strchr(rl_line_buffer, ' ');
 			if (fs && rl_line_buffer + rl_point <= fs)
 				space = -1;
 		}
@@ -432,7 +432,7 @@ END:
  * (malformed prompt: either RL_PROMPT_START_IGNORE or RL_PROMPT_END_IGNORE
  * is missing). */
 static int
-xrl_expand_prompt(char *str)
+xrl_expand_prompt(const char *str)
 {
 	if (!str || !*str)
 		return 0;
@@ -441,7 +441,7 @@ xrl_expand_prompt(char *str)
 	while (*str) {
 		char *start = strchr(str, RL_PROMPT_START_IGNORE);
 		if (!start) {
-			char *end = strchr(str, RL_PROMPT_END_IGNORE);
+			const char *end = strchr(str, RL_PROMPT_END_IGNORE);
 			if (end) {
 				err('w', PRINT_PROMPT, "%s: Malformed prompt: "
 					"RL_PROMPT_END_IGNORE (\\%d) without "
@@ -461,7 +461,7 @@ xrl_expand_prompt(char *str)
 			*start = c;
 		}
 
-		char *end = strchr(start, RL_PROMPT_END_IGNORE);
+		const char *end = strchr(start, RL_PROMPT_END_IGNORE);
 		if (!end) {
 			err('w', PRINT_PROMPT, "%s: Malformed prompt: "
 				"RL_PROMPT_START_IGNORE (\\%d) without "
@@ -481,12 +481,12 @@ xrl_expand_prompt(char *str)
 
 /* Get the number of visible chars in the last line of the prompt (STR). */
 static int
-get_prompt_offset(char *str)
+get_prompt_offset(const char *str)
 {
 	if (!str || !*str)
 		return 0;
 
-	char *newline = strrchr(str, '\n');
+	const char *newline = strrchr(str, '\n');
 	return xrl_expand_prompt((newline && *(++newline)) ? newline : str) + 1;
 }
 
@@ -758,7 +758,7 @@ is_quote_char(const char c)
 	if (c == '\0' || !quote_chars)
 		return (-1);
 
-	char *p = quote_chars;
+	const char *p = quote_chars;
 
 	while (*p) {
 		if (c == *p)
@@ -1245,7 +1245,7 @@ int_cmds_generator(const char *text, int state)
 	if (state == 0)
 		i = 0;
 
-	static char *const cmd_desc[] = {
+	static const char *const cmd_desc[] = {
 		"/       (search for files)",
 		"ac      (archive/compress files)",
 		"acd     (toggle autocd)",
@@ -1332,7 +1332,7 @@ int_cmds_generator(const char *text, int state)
 		NULL
 	};
 
-	char *name;
+	const char *name;
 	while ((name = cmd_desc[i++]))
 		return strdup(name);
 
@@ -1494,8 +1494,9 @@ hist_generator(const char *text, int state)
 			 * metacharacter */
 			if (!*name || !name[1])
 				continue;
-			char *ret = strpbrk(name + 1, conf.search_strategy == GLOB_ONLY
-					? " /*?[{" : " /*?[{|^+$.");
+			const char *ret = strpbrk(name + 1,
+				conf.search_strategy == GLOB_ONLY
+				? " /*?[{" : " /*?[{|^+$.");
 			if (!ret || *ret == ' ' || *ret == '/')
 				continue;
 
@@ -2158,7 +2159,7 @@ rl_mime_list(void)
 		if (file_info[i].user_access == 0 && file_info[i].type == DT_REG)
 			continue;
 
-		char *name = file_info[i].name;
+		const char *name = file_info[i].name;
 		if (virtual_dir == 1) {
 			*buf = '\0';
 			if (xreadlink(XAT_FDCWD, file_info[i].name, buf, sizeof(buf)) == -1
@@ -2224,7 +2225,7 @@ rl_mime_files(const char *text)
 
 	size_t n = 1;
 	for (filesn_t i = 0; i < g_files_num; i++) {
-		char *name = file_info[i].name;
+		const char *name = file_info[i].name;
 		if (virtual_dir == 1) {
 			*buf = '\0';
 			if (xreadlink(XAT_FDCWD, file_info[i].name, buf, sizeof(buf)) == -1
@@ -2236,7 +2237,7 @@ rl_mime_files(const char *text)
 		char *m = (name && *name) ? xmagic(name, MIME_TYPE) : NULL;
 		if (!m) continue;
 
-		char *p = strstr(m, text);
+		const char *p = strstr(m, text);
 		free(m);
 
 		if (!p) continue;
@@ -2303,7 +2304,7 @@ rl_glob(char *text)
 
 	char *str = (last_word && *last_word)
 		? unescape_str(last_word, 0) : NULL;
-	char *word = str ? str : NULL;
+	const char *word = str ? str : NULL;
 
 	int char_copy = -1;
 	char *basename = NULL;
@@ -2365,7 +2366,7 @@ rl_trashed_files(const char *text)
 	}
 
 	char *p = unescape_str((char *)text, 0);
-	char *f = p ? p : (char *)text;
+	const char *f = p ? p : text;
 
 	char **tfiles = xnmalloc((size_t)n + 2, sizeof(char *));
 	if (f) {
@@ -2378,7 +2379,7 @@ rl_trashed_files(const char *text)
 	int nn = 1;
 	size_t tlen = f ? strlen(f) : 0;
 	for (int i = 0; i < n; i++) {
-		char *name = t[i]->d_name;
+		const char *name = t[i]->d_name;
 		if (SELFORPARENT(name) || !f || strncmp(f, name, tlen) != 0) {
 			free(t[i]);
 			continue;
@@ -2862,7 +2863,7 @@ tag_complete(const char *text, char *start)
 		if (strncmp(l, "tag ", 4) != 0) {
 			return comp;
 		}
-		char *p = l + 4;
+		const char *p = l + 4;
 		if (!*p || strncmp(p, "untag ", 6) == 0) {
 			if (text && *text == ':') { /* We have a tag name */
 				comp = 1; cur_comp_type = TCMP_TAGS_C;
@@ -2922,7 +2923,7 @@ file_types_opts_generator(const char *text, int state)
 	if (state == 0)
 		i = 0;
 
-	static char *const ft_opts[] = {
+	static const char *const ft_opts[] = {
 		"b (Block device)", "c (Character device)",
 		"d (Directory)", "D (Empty directory)",
 #ifdef SOLARIS_DOORS
@@ -3195,7 +3196,7 @@ complete_ranges(const char *text)
 
 #ifndef _NO_LIRA
 static char **
-complete_open_with(char *text, char *start)
+complete_open_with(const char *text, char *start)
 {
 	char *arg = start + 3; /* "ow " */
 	char *space = strrchr(arg, ' ');

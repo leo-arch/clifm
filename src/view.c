@@ -72,7 +72,7 @@ static size_t
 remove_empty_thumbnails(void)
 {
 	DIR *dir;
-	struct dirent *ent;
+	const struct dirent *ent;
 
 	if ((dir = opendir(thumbnails_dir)) == NULL)
 		return 0;

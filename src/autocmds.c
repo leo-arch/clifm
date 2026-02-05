@@ -258,7 +258,8 @@ gen_opt_entry(char *buf, const char *name, const char *val, size_t *pos,
 
 /* Write into BUF the list of autocmd options set in the struct A. */
 static int
-gen_autocmd_options_list(char *buf, struct autocmds_t *a, const int print_filter)
+gen_autocmd_options_list(char *buf, const struct autocmds_t *a,
+	const int print_filter)
 {
 	int len = 0; /* Number of bytes currently consumed by buf. */
 	size_t c = 0; /* Number of procesed options for the current autocommand. */

@@ -120,7 +120,7 @@ construct_and_print_filename(const struct fileinfo *props,
 
 	int diff = 0;
 	char *name = wname ? wname : props->name;
-	char *ext_name = NULL;
+	const char *ext_name = NULL;
 
 	if (cur_len > (size_t)max_namelen) {
 		const int rest = (int)cur_len - max_namelen;
@@ -208,7 +208,7 @@ gen_size(const struct fileinfo *props, char *size_str,
 		? props->size : 0;
 
 	/* Let's construct the color for the current file size */
-	char *csize = dz_c;
+	const char *csize = dz_c;
 	static char sf[MAX_SHADE_LEN];
 	if (!*dz_c && conf.colorize == 1) {
 		get_color_size(size, sf, sizeof(sf));
@@ -293,7 +293,7 @@ gen_time(char *time_str, const struct fileinfo *props)
 	const time_t t = props->ltime;
 
 	/* Let's construct the color for the current timestamp. */
-	char *cdate = dd_c;
+	const char *cdate = dd_c;
 	static char df[MAX_SHADE_LEN];
 	if (conf.colorize == 1 && !*dd_c) {
 		get_color_age(t, df, sizeof(df));
@@ -405,8 +405,8 @@ gen_filecounter(const struct fileinfo *props, char *fc_str,
 	int bytes = 0;
 
 	if (props->filesn > 0) {
-		bytes = snprintf(fc_str, buf_rem_space, "%s%*zu%s", fc_c, max,
-			props->filesn, df_c);
+		bytes = snprintf(fc_str, buf_rem_space, "%s%*jd%s", fc_c, max,
+			(intmax_t)props->filesn, df_c);
 	} else {
 		bytes = snprintf(fc_str, buf_rem_space, "%s%*c%s", dn_c, max,
 			props->filesn < 0 ? UNKNOWN_CHR /* Dir with no read permission */
@@ -488,7 +488,7 @@ set_file_type_and_color(const struct fileinfo *props, char **color)
 	/* Precompute file type colors without the bold attribute for the
 	 * file type field in the permissions string. Let's do this only once,
 	 * and each time the color scheme is switched. */
-	static char *cscheme_bk = NULL;
+	static const char *cscheme_bk = NULL;
 	if (!cscheme_bk || cscheme_bk != cur_cscheme) {
 		set_no_bold_colors();
 		cscheme_bk = cur_cscheme;

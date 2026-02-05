@@ -2331,7 +2331,7 @@ run_dir_cmd(const int mode, const char *dir)
 
 	char buf[PATH_MAX + 1];
 	*buf = '\0';
-	char *ret = fgets(buf, sizeof(buf), fp);
+	const char *ret = fgets(buf, sizeof(buf), fp);
 	size_t buf_len = *buf ? strnlen(buf, sizeof(buf)) : 0;
 	if (buf_len > 0 && buf[buf_len - 1] == '\n') {
 		buf[buf_len - 1] = '\0';

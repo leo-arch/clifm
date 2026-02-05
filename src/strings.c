@@ -181,7 +181,7 @@ get_last_chr(char *str, const char c, const int len)
 
 /* Replace all slashes in STR by the character C. */
 char *
-replace_slashes(char *str, const char c)
+replace_slashes(const char *str, const char c)
 {
 	if (!str || !*str)
 		return NULL;
@@ -287,7 +287,7 @@ x_strcasestr(char *a, char *b)
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 {
-	char *end = memccpy(dst, src, '\0', n);
+	const char *end = memccpy(dst, src, '\0', n);
 	if (!end) {
 		dst[n - 1] = '\0';
 		end = dst + n;
@@ -463,7 +463,7 @@ u8truncstr(char *restrict str, const size_t max)
  * The list of available whitespaces is taken from:
  * https://en.wikipedia.org/wiki/Whitespace_character */
 int
-detect_space(char *s)
+detect_space(const char *s)
 {
 	if (!s || !*s)
 		return 0;
@@ -564,8 +564,8 @@ replace_invalid_chars(const char *name)
 	char *p = n;
 
 	mbstate_t mbstate = {0};
-	char *q = (char *)name;
-	char *qlimit = q + len;
+	const char *q = name;
+	const char *qlimit = q + len;
 
 	while (*q) {
 		if (*q >= ' ' && *q < 127) { /* Printable ASCII char */
@@ -660,7 +660,10 @@ strbtw(char *str, const char a, const char b)
 	if (!str || !*str || !a || !b)
 		return NULL;
 
-	char *p = str, *pa = NULL, *pb = NULL;
+	char *p = str;
+	const char *pa = NULL;
+	char *pb = NULL;
+
 	while (*p) {
 		if (!pa) {
 			if (*p == a)
@@ -689,7 +692,7 @@ strbtw(char *str, const char a, const char b)
 
 /* Replace the first occurrence of NEEDLE in HAYSTACK by REP. */
 char *
-replace_substr(const char *haystack, const char *needle, char *rep)
+replace_substr(const char *haystack, const char *needle, const char *rep)
 {
 	if (!haystack || !*haystack || !needle || !*needle || !rep)
 		return NULL;
@@ -698,7 +701,7 @@ replace_substr(const char *haystack, const char *needle, char *rep)
 	if (!ret)
 		return NULL;
 
-	char *needle_end = ret + strlen(needle);
+	const char *needle_end = ret + strlen(needle);
 	*ret = '\0';
 
 	size_t new_str_len = 0;
@@ -778,7 +781,7 @@ remove_quotes(char *str)
 	if (!*p)
 		return NULL;
 
-	char *q = p;
+	const char *q = p;
 	int blank = 1;
 
 	while (*q) {
@@ -1082,9 +1085,9 @@ split_str(char *str, const int update_args)
 
 /* Return 1 if STR contains only numbers or a range of numbers, or 0 if not. */
 static int
-check_fused_param(char *str)
+check_fused_param(const char *str)
 {
-	char *p = str;
+	const char *p = str;
 	size_t c = 0;
 	int ok = 1;
 
@@ -1313,7 +1316,7 @@ expand_tag(char ***args, const int tag_index)
 
 		char rpath[PATH_MAX + 1];
 		*rpath = '\0';
-		char *ret = xrealpath(filename, rpath);
+		const char *ret = xrealpath(filename, rpath);
 		if (!ret || !*rpath) {
 			/* This tagged file points to a non-existent file. Just copy
 			 * the tag path. */
@@ -1321,7 +1324,7 @@ expand_tag(char ***args, const int tag_index)
 		}
 
 		char *esc_str = escape_str(rpath);
-		char *q = esc_str ? esc_str : rpath;
+		const char *q = esc_str ? esc_str : rpath;
 		p[j++] = savestring(q, strlen(q));
 		free(esc_str);
 	}
@@ -1403,7 +1406,7 @@ expand_mime_type_filter(const char *pattern)
 
 	filesn_t n = 0;
 	for (filesn_t i = 0; i < g_files_num; i++) {
-		char *name = file_info[i].name;
+		const char *name = file_info[i].name;
 		if (virtual_dir == 1) {
 			*buf = '\0';
 			if (xreadlink(XAT_FDCWD, file_info[i].name, buf, sizeof(buf)) == -1
@@ -1415,7 +1418,7 @@ expand_mime_type_filter(const char *pattern)
 		char *m = (name && *name) ? xmagic(name, MIME_TYPE) : NULL;
 		if (!m) continue;
 
-		char *p = strstr(m, pattern);
+		const char *p = strstr(m, pattern);
 		free(m);
 
 		if (!p) continue;
@@ -1447,7 +1450,7 @@ expand_file_type_filter(const char t)
 	char buf[PATH_MAX + 1];
 
 	while (i < g_files_num) {
-		char *n = file_info[i].name;
+		const char *n = file_info[i].name;
 		if (virtual_dir == 1) {
 			*buf = '\0';
 			if (xreadlink(XAT_FDCWD, file_info[i].name, buf, sizeof(buf)) == -1
@@ -1719,7 +1722,7 @@ expand_workspace(char **name)
 			return FUNC_FAILURE;
 
 		char *q = escape_str(workspaces[n - 1].path);
-		char *tmp = q ? q : workspaces[n - 1].path;
+		const char *tmp = q ? q : workspaces[n - 1].path;
 		const size_t tmp_len = strlen(tmp);
 		*name = xnrealloc(*name, tmp_len + 1, sizeof(char));
 		xstrsncpy(*name, tmp, tmp_len + 1);
@@ -1729,7 +1732,7 @@ expand_workspace(char **name)
 	}
 
 	char *deq_str = unescape_str(ws_name, 0);
-	char *tmp_name = deq_str ? deq_str : ws_name;
+	const char *tmp_name = deq_str ? deq_str : ws_name;
 
 	for (size_t i = 0; i < MAX_WS; i++) {
 		if (!workspaces[i].path || !workspaces[i].name
@@ -1738,7 +1741,7 @@ expand_workspace(char **name)
 			continue;
 
 		char *q = escape_str(workspaces[i].path);
-		char *tmp = q ? q : workspaces[i].path;
+		const char *tmp = q ? q : workspaces[i].path;
 		const size_t tmp_len = strlen(tmp);
 		*name = xnrealloc(*name, tmp_len + 1, sizeof(char));
 		xstrsncpy(*name, tmp, tmp_len + 1);
@@ -1759,7 +1762,7 @@ expand_bm_name(char **name)
 {
 	int bm_exp = FUNC_FAILURE;
 	char *p = unescape_str(*name + 2, 0);
-	char *n = p ? p : *name + 2;
+	const char *n = p ? p : *name + 2;
 
 	for (size_t j = 0; j < bm_n; j++) {
 		if (!bookmarks[j].name || *n != *bookmarks[j].name
@@ -1767,7 +1770,7 @@ expand_bm_name(char **name)
 			continue;
 
 		char *q = escape_str(bookmarks[j].path);
-		char *tmp = q ? q : bookmarks[j].path;
+		const char *tmp = q ? q : bookmarks[j].path;
 		const size_t tmp_len = strlen(tmp);
 		*name = xnrealloc(*name, tmp_len + 1, sizeof(char));
 		xstrsncpy(*name, tmp, tmp_len + 1);
@@ -1785,7 +1788,7 @@ expand_bm_name(char **name)
 static void
 expand_int_var(char **name)
 {
-	char *var_name = (*name) + 1;
+	const char *var_name = (*name) + 1;
 
 	for (size_t j = usrvar_n; j-- > 0;) {
 		if (*var_name != *usr_var[j].name
@@ -2014,7 +2017,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 			if (esc_str) {
 				glob_cmd[j++] = esc_str;
 			} else {
-				xerror(_("%s: '%s': Error quoting filename\n"),
+				xerror(_("%s: '%s': Error escaping filename\n"),
 					PROGRAM_NAME, globbuf.gl_pathv[i]);
 				continue;
 			}
@@ -2057,7 +2060,8 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 			 * and environment variables expansion. Otherwise, wordexp(3)
 			 * modifies the input string and breaks other expansions made
 			 * by the sel function, mostly regex expansion. */
-			char *p = strchr((*substr)[word_array[w] + (int)old_pathc], '$');
+			const char *p =
+				strchr((*substr)[word_array[w] + (int)old_pathc], '$');
 			if (p && *(p + 1) != '(' && (*(p + 1) < 'A' || *(p + 1) > 'Z'))
 				continue;
 		}
@@ -2306,12 +2310,12 @@ expand_regex(char ***substr)
 
 		/* At this point, all filenames are escaped. But check_regex()
 		 * needs unescaped filenames. So, let's deescape it. */
-		char *p = strchr((*substr)[i], '\\');
+		const char *p = strchr((*substr)[i], '\\');
 		char *dstr = NULL;
 		if (p)
 			dstr = unescape_str((*substr)[i], 0);
 
-		char *t = dstr ? dstr : (*substr)[i];
+		const char *t = dstr ? dstr : (*substr)[i];
 
 		/* Prepend an initial '^' and append and ending '$' to prevent
 		 * accidental file expansions. For example, a file named file.txt
@@ -2490,7 +2494,7 @@ static char **
 gen_full_line(char **str, const int fusedcmd_ok)
 {
 	/* Remove leading spaces */
-	char *p = *str;
+	const char *p = *str;
 	while (*p == ' ' || *p == '\t')
 		p++;
 
@@ -2511,11 +2515,11 @@ gen_full_line(char **str, const int fusedcmd_ok)
 }
 
 static int
-check_int_var(char *str)
+check_int_var(const char *str)
 {
 	/* Remove leading spaces. This: '   a="test"' should be
 	 * taken as a valid variable declaration */
-	char *p = str;
+	const char *p = str;
 	while (*p == ' ' || *p == '\t')
 		p++;
 
@@ -3167,7 +3171,7 @@ escape_str(const char *str)
  * are expanded and duplicates removed.
  * Returns an array containing all substrings in STR. */
 char **
-get_substr(char *str, const char ifs, const int fproc)
+get_substr(const char *str, const char ifs, const int fproc)
 {
 	if (!str || !*str)
 		return NULL;

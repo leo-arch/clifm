@@ -216,7 +216,7 @@ create_mountpoint(char *file)
 {
 	char *mountpoint = NULL;
 	char *p = strrchr(file, '/');
-	char *tfile = (p && *(++p)) ? p : file;
+	const char *tfile = (p && *(++p)) ? p : file;
 
 	if (xargs.stealth_mode == 1) {
 		const size_t len = strlen(tfile) + P_tmpdir_len + 15;
@@ -334,7 +334,7 @@ handle_iso(char *file)
 }
 
 static int
-create_iso_from_block_dev(char *in_file, char *out_file)
+create_iso_from_block_dev(const char *in_file, const char *out_file)
 {
 	size_t len = strlen(in_file) + 4;
 	char *if_option = xnmalloc(len, sizeof(char));
@@ -397,7 +397,7 @@ create_iso(char *in_file, char *out_file)
 /* Check the MIME type of the file named FILE and look for "ISO 9660" in its
  * output. Returns zero if found, one if not, and -1 in case of error. */
 static int
-check_iso(char *file)
+check_iso(const char *file)
 {
 	if (!file || !*file) {
 		xerror("%s\n", _("Error querying file type"));
@@ -438,7 +438,7 @@ check_compressed(const char *line, const int test_iso)
  * well (and there is no need to run two functions (is_compressed and
  * check_iso), when we can run just one). */
 int
-is_compressed(char *file, const int test_iso)
+is_compressed(const char *file, const int test_iso)
 {
 	if (!file || !*file) {
 		xerror("%s\n", _("Error querying file type"));
@@ -493,7 +493,7 @@ get_archive_filename(void)
 			return NULL;
 		}
 
-		char *dot = strrchr(name, '.');
+		const char *dot = strrchr(name, '.');
 		if (!dot || (dot == name && dot[1]))
 			/* No extension or hidden: add the default extension. */
 			return add_default_extension(name);
@@ -656,12 +656,12 @@ compress_zstandard(char *name, char **args)
 }
 
 static int
-compress_others(char **args, char *name)
+compress_others(char **args, const char *name)
 {
 	size_t n = 0, i;
 	for (i = 1; args[i]; i++);
 
-	char *ext_ok = strrchr(name, '.');
+	const char *ext_ok = strrchr(name, '.');
 	char **tcmd = xnmalloc(3 + i + 1, sizeof(char *));
 	tcmd[0] = savestring("atool", 5);
 	tcmd[1] = savestring("-a", 2);
@@ -697,7 +697,7 @@ compress_files(char **args)
 	if (!name)
 		return exit_status;
 
-	char *ret = strrchr(name, '.');
+	const char *ret = strrchr(name, '.');
 
 	/* # ZSTANDARD # */
 	if (ret && strcmp(ret, ".zst") == 0) {
@@ -1161,7 +1161,7 @@ handle_zip(char **args)
 	int success = 0;
 	int ret = FUNC_SUCCESS;
 	char dest_dir[PATH_MAX + 2];
-	char *suffix = "extracted"; /* Append this suffix to extracted files */
+	const char *suffix = "extracted"; /* Append this suffix to extracted files */
 
 	for (size_t i = 1; args[i]; i++) {
 		if (zip_app == ZIP_APP_NONE || is_probably_zip(args[i]) != 1) {

@@ -285,7 +285,7 @@ get_regfile_color(const char *filename, const struct stat *a, size_t *is_ext)
 		return color;
 
 	size_t color_len = 0;
-	char *extcolor = get_ext_color(ext, &color_len);
+	const char *extcolor = get_ext_color(ext, &color_len);
 	if (!extcolor || color_len == 0 || color_len + 4 > sizeof(tmp_color))
 		return color;
 
@@ -678,7 +678,7 @@ check_ext_string(const char *ext, size_t *val_len)
 		|| ext_colors[i].len != len || *ptr != TOLOWER(*ext_colors[i].name))
 			continue;
 
-		char *p = ptr + 1, *q = ext_colors[i].name + 1;
+		const char *p = ptr + 1, *q = ext_colors[i].name + 1;
 
 		size_t match = 1;
 		while (*p) {
@@ -898,7 +898,7 @@ set_colorscheme(char *arg)
 		return FUNC_FAILURE;
 
 	char *p = unescape_str(arg, 0);
-	char *q = p ? p : arg;
+	const char *q = p ? p : arg;
 
 	size_t cs_found = 0;
 	for (size_t i = 0; color_schemes[i]; i++) {
@@ -1163,7 +1163,7 @@ set_color(char *color, char var[], const int flag)
 	char *p = color;
 #endif /* !CLIFM_SUCKLESS */
 
-	char *s = NULL;
+	const char *s = NULL;
 	if (IS_COLOR_PREFIX(*p) && !(s = decode_color_prefix(p))) {
 		*var = '\0';
 		return;
@@ -1422,7 +1422,7 @@ store_extension_line(const char *line)
 		return FUNC_FAILURE;
 
 	char *tmp = (def && *def) ? def : q + 1;
-	char *code = IS_COLOR_PREFIX(*tmp) ? decode_color_prefix(tmp) : tmp;
+	const char *code = IS_COLOR_PREFIX(*tmp) ? decode_color_prefix(tmp) : tmp;
 
 	if (!code || !*code)
 		return FUNC_FAILURE;
@@ -1460,9 +1460,9 @@ free_extension_colors(void)
 }
 
 static void
-split_extension_colors(char *extcolors)
+split_extension_colors(const char *extcolors)
 {
-	char *p = extcolors;
+	const char *p = extcolors;
 	char buf[MAX_COLOR + 3 + NAME_MAX]; /* "*.NAME=COLOR" */
 	*buf = '\0';
 	size_t len = 0;
@@ -1550,8 +1550,8 @@ set_extra_colors(void)
 static int
 hash_sort(const void *a, const void *b)
 {
-	struct ext_t *pa = (struct ext_t *)a;
-	struct ext_t *pb = (struct ext_t *)b;
+	const struct ext_t *pa = (const struct ext_t *)a;
+	const struct ext_t *pb = (const struct ext_t *)b;
 
 	if (pa->hash > pb->hash)
 		return 1;
@@ -1791,7 +1791,7 @@ set_filetype(const int c)
 static char *
 set_lscolors_bsd(void)
 {
-	char *env = getenv("LSCOLORS");
+	const char *env = getenv("LSCOLORS");
 	if (!env)
 		return NULL;
 
@@ -1884,7 +1884,7 @@ get_colors_from_env(char **file, char **ext, char **iface)
 		env_extcolors = getenv("CLIFM_EXT_COLORS");
 	}
 
-	char *env_ifacecolors = getenv("CLIFM_IFACE_COLORS");
+	const char *env_ifacecolors = getenv("CLIFM_IFACE_COLORS");
 	char *env_date_shades = getenv("CLIFM_DATE_SHADES");
 	char *env_size_shades = getenv("CLIFM_SIZE_SHADES");
 
@@ -1946,7 +1946,7 @@ store_definition(const char *str)
 	/* If we find a definition for TEMP, let's use this color for backup files
 	 * (bk_c color code). */
 	if (!*bk_c && *name == 'T' && strcmp(name + 1, "EMP") == 0) {
-		char *v = IS_COLOR_PREFIX(*value) ? decode_color_prefix(value) : value;
+		const char *v = IS_COLOR_PREFIX(*value) ? decode_color_prefix(value) : value;
 		if (v && *v)
 			snprintf(bk_c, sizeof(bk_c), "\x1b[0;%sm", v);
 	}
@@ -2014,7 +2014,7 @@ set_cs_warning_prompt_str(char *line)
 	if (IS_CTRL_CHR(*line))
 		return;
 
-	char *p = remove_quotes(line);
+	const char *p = remove_quotes(line);
 	if (!p)
 		return;
 
@@ -2028,7 +2028,7 @@ set_cs_right_prompt_str(char *line)
 	if (IS_CTRL_CHR(*line))
 		return;
 
-	char *p = remove_quotes(line);
+	const char *p = remove_quotes(line);
 	if (!p)
 		return;
 
@@ -2046,7 +2046,7 @@ set_fzf_opts(const char *line)
 	conf.fzftab_options = NULL;
 
 	if (!line) {
-		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS
+		const char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS
 			: DEF_FZFTAB_OPTIONS_NO_COLOR;
 		conf.fzftab_options = savestring(p, strlen(p));
 	}
@@ -2095,7 +2095,7 @@ set_cs_fzftabopts(char *line)
 	if (IS_CTRL_CHR(*line))
 		return;
 
-	char *p = remove_quotes(line);
+	const char *p = remove_quotes(line);
 	if (!p || !*p)
 		return;
 
@@ -2158,14 +2158,14 @@ set_cs_extcolors(char *line, char **extcolors, const ssize_t line_len)
 static void
 set_cs_dir_icon_color(char *line, const ssize_t line_len)
 {
-	char *p = line + 13; /* 13 == "DirIconColor=" */
+	const char *p = line + 13; /* 13 == "DirIconColor=" */
 	if (IS_CTRL_CHR(*p) || ((*p == '\'' || *p == '"') && !*(++p)))
 		return;
 
 	if (line[line_len - 1] == '\'' || line[line_len - 1] == '"')
 		line[line_len - 1] = '\0';
 
-	char *c = NULL;
+	const char *c = NULL;
 	if (is_color_code(p) == 0 && (c = check_defs(p)) == NULL)
 		return;
 
@@ -2182,7 +2182,7 @@ set_div_line(char *line)
 		return;
 	}
 
-	char *tmp = remove_quotes(line);
+	const char *tmp = remove_quotes(line);
 	if (!tmp) {
 		*div_line = '\0';
 		return;
@@ -2335,9 +2335,9 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 /* Split the colors line LINE and set the corresponding colors
  * according to TYPE (either interface or file type color). */
 static void
-split_color_line(char *line, const int type)
+split_color_line(const char *line, const int type)
 {
-	char *p = line;
+	const char *p = line;
 	char **colors = NULL;
 	/* MAX_COLOR is not enough when parsing LS_COLORS lines, where we
 	 * usually find extension colors ("*.ext=color"). */
@@ -2533,7 +2533,7 @@ set_colors(const char *colorscheme, const int check_env)
 }
 
 char *
-get_entry_color(char *ent, const struct stat *attr)
+get_entry_color(const char *ent, const struct stat *attr)
 {
 	char *color = NULL;
 
@@ -2623,7 +2623,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	if (wlen == 0) /* Invalid chars found. */
 		wname = replace_invalid_chars(ent);
 
-	char *color = ret == -1 ? uf_c : get_entry_color(ent, &attr);
+	const char *color = ret == -1 ? uf_c : get_entry_color(ent, &attr);
 
 	char *name = wname ? wname : ent;
 	char *tmp = (flags & IN_SELBOX_SCREEN) ? abbreviate_file_name(name) : name;
@@ -3002,7 +3002,7 @@ print_workspace_colors(void)
 {
 	printf(_("\n%sWorkspaces%s\n\n"), BOLD, df_c);
 
-	char *p = remove_ctrl_chars(ws1_c);
+	const char *p = remove_ctrl_chars(ws1_c);
 	printf(_("%sColor%s (ws1) Workspace [%s1%s]\n"), p, df_c, p, df_c);
 	p = remove_ctrl_chars(ws2_c);
 	printf(_("%sColor%s (ws2) Workspace [%s2%s]\n"), p, df_c, p, df_c);
@@ -3028,7 +3028,7 @@ print_prompt_colors(void)
 	printf(_("%sColor%s (tx) Input text (e.g. \x1b[1m$\x1b[0m "
 		"%sls%s %s-l%s %sfilename.zst%s)\n"), tx_c, df_c, tx_c, df_c,
 		hp_c, df_c, tx_c, df_c);
-	char *p = remove_ctrl_chars(ac_c);
+	const char *p = remove_ctrl_chars(ac_c);
 	printf(_("%sColor%s (ac) Autocommand indicator (%sA%s)\n"),
 		p, df_c, p, df_c);
 	printf(_("%sColor%s (li) Selected files indicator (%s%c%s)\n"),

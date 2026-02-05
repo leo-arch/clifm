@@ -45,7 +45,7 @@ size_t get_colorschemes(void);
 #endif /* CLIFM_SUCKLESS */
 char *get_dir_color(const char *filename, const struct stat *a,
 	const filesn_t count);
-char *get_entry_color(char *ent, const struct stat *a);
+char *get_entry_color(const char *ent, const struct stat *a);
 char *get_ext_color(const char *ext, size_t *val_len);
 char *get_file_color(const char *filename, const struct stat *a);
 char *get_regfile_color(const char *filename, const struct stat *a,

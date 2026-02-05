@@ -141,7 +141,7 @@ sanitize_file_descriptors(void)
 }
 
 static int
-sanitize_shell_level(char *str)
+sanitize_shell_level(const char *str)
 {
 	if (!str || !*str || !is_number(str))
 		return FUNC_FAILURE;
@@ -163,14 +163,14 @@ drop_privs(void)
 	const gid_t egid = getegid();
 
 	if (rgid != egid) {
-		int err = 0;
+		int error = 0;
 #ifndef __linux__
 		setegid(rgid);
-		if (setgid(rgid) == -1) err = 1;
+		if (setgid(rgid) == -1) error = 1;
 #else
-		if (setregid(rgid, rgid) == -1) err = 1;
+		if (setregid(rgid, rgid) == -1) error = 1;
 #endif /* __linux__ */
-		if (err == 1 || setegid(egid) != -1 || getegid() != rgid) {
+		if (error == 1 || setegid(egid) != -1 || getegid() != rgid) {
 			fprintf(stderr, _("%s: Error dropping group privileges. "
 				"Aborting.\n"), PROGRAM_NAME);
 			exit(FUNC_FAILURE);
@@ -178,14 +178,14 @@ drop_privs(void)
 	}
 
 	if (ruid != euid) {
-		int err = 0;
+		int error = 0;
 #ifndef __linux__
 		seteuid(ruid);
-		if (setuid(ruid) == -1) err = 1;
+		if (setuid(ruid) == -1) error = 1;
 #else
-		if (setreuid(ruid, ruid) == -1) err = 1;
+		if (setreuid(ruid, ruid) == -1) error = 1;
 #endif /* __linux__ */
-		if (err == 1 || seteuid(euid) != -1 || geteuid() != ruid) {
+		if (error == 1 || seteuid(euid) != -1 || geteuid() != ruid) {
 			fprintf(stderr, _("%s: Error dropping user privileges. "
 				"Aborting.\n"), PROGRAM_NAME);
 			exit(FUNC_FAILURE);

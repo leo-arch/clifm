@@ -94,7 +94,7 @@ print_file_name(char *fname, const int isdir)
 	if (wc_xstrlen(fname) == 0)
 		tmp_name = replace_invalid_chars(fname);
 
-	char *name = tmp_name ? tmp_name : fname;
+	const char *name = tmp_name ? tmp_name : fname;
 
 	if (detect_space(name) == 1) {
 		if (strchr(name, '\''))
@@ -265,7 +265,7 @@ set_fzf_preview_border_type(void)
  * 2) That the pipe was created and exported as FIFO_UEBERZUG.
  * 3) That the identifier string was set to "clifm-preview". */
 static void
-ueberzug_clear(char *file)
+ueberzug_clear(const char *file)
 {
 	int fd = 0;
 	FILE *fp = open_fwrite(file, &fd);
@@ -281,7 +281,7 @@ void
 clear_term_img(void)
 {
 	static char fu[PATH_MAX + 1] = "";
-	char *p = NULL;
+	const char *p = NULL;
 
 	if (!*fu) {
 		p = getenv("CLIFM_FIFO_UEBERZUG");
@@ -525,7 +525,7 @@ normalize_path(char *src, const size_t src_len)
 	if (l == 0 || *s != '/') {
 		/* Relative path */
 		char p[PATH_MAX + 1]; *p = '\0';
-		char *cwd = get_cwd(p, sizeof(p), 1);
+		const char *cwd = get_cwd(p, sizeof(p), 1);
 		if (!cwd || !*cwd) {
 			xerror(_("%s: Error getting current directory\n"), PROGRAM_NAME);
 			free(tmp);
@@ -1160,22 +1160,23 @@ get_link_ref(const char *link)
 const char *
 xitoa(long long n)
 {
-	static char const *nums[102] = {
-		"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-		"10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
-		"20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
-		"30", "31", "32", "33", "34", "35", "36", "37", "38", "39",
-		"40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
-		"50", "51", "52", "53", "54", "55", "56", "57", "58", "59",
-		"60", "61", "62", "63", "64", "65", "66", "67", "68", "69",
-		"70", "71", "72", "73", "74", "75", "76", "77", "78", "79",
-		"80", "81", "82", "83", "84", "85", "86", "87", "88", "89",
-		"90", "91", "92", "93", "94", "95", "96", "97", "98", "99",
-		"100", NULL
-	};
+	if (n >= 0 && n <= 100) {
+		static char const *nums[102] = {
+			"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+			"10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+			"20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
+			"30", "31", "32", "33", "34", "35", "36", "37", "38", "39",
+			"40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
+			"50", "51", "52", "53", "54", "55", "56", "57", "58", "59",
+			"60", "61", "62", "63", "64", "65", "66", "67", "68", "69",
+			"70", "71", "72", "73", "74", "75", "76", "77", "78", "79",
+			"80", "81", "82", "83", "84", "85", "86", "87", "88", "89",
+			"90", "91", "92", "93", "94", "95", "96", "97", "98", "99",
+			"100", NULL
+		};
 
-	if (n >= 0 && n <= 100)
 		return nums[n];
+	}
 
 	static char buf[MAX_INT_STR] = {0};
 	/* We start writing at the end of the buffer, which has MAX_INT_STR bytes

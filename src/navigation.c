@@ -118,7 +118,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 		matches = xnrealloc(matches, (size_t)*n + 2, sizeof(char *));
 		if (mode == BD_TAB) {
 			/* Print only the path base name. */
-			char *ss = strrchr(workspaces[cur_ws].path, '/');
+			const char *ss = strrchr(workspaces[cur_ws].path, '/');
 			if (ss && *(++ss))
 				matches[*n] = savestring(ss, strlen(ss));
 			else /* Last slash is the first and only char: we have the root dir. */
@@ -617,7 +617,7 @@ print_dirhist(char *query)
 		: !strstr(old_pwd[i], query) ) )
 			continue;
 
-		char *color = lstat(old_pwd[i], &a) == 0 ?
+		const char *color = lstat(old_pwd[i], &a) == 0 ?
 			get_entry_color(old_pwd[i], &a) : uf_c;
 
 		printf("%s %s%-*d%s %s%s%s\n", i == dirhist_cur_index ? pointer : " ",

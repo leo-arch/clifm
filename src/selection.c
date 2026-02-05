@@ -136,7 +136,7 @@ select_file(char *file)
 }
 
 static char **
-load_matches_invert_cwd(glob_t *gbuf, const mode_t filetype, int *matches)
+load_matches_invert_cwd(const glob_t *gbuf, const mode_t filetype, int *matches)
 {
 	char **list = xnmalloc((size_t)g_files_num + 2, sizeof(char *));
 
@@ -162,7 +162,7 @@ load_matches_invert_cwd(glob_t *gbuf, const mode_t filetype, int *matches)
 }
 
 static char **
-load_matches_invert_nocwd(glob_t *gbuf, struct dirent **ent,
+load_matches_invert_nocwd(const glob_t *gbuf, struct dirent **ent,
 	const mode_t filetype, int *matches, const int ret)
 {
 	char **list = xnmalloc((size_t)ret + 2, sizeof(char *));
@@ -687,7 +687,7 @@ construct_sel_filename(const char *dir, const char *name)
 }
 
 static int
-select_filename(char *arg, char *dir, int *errors)
+select_filename(char *arg, const char *dir, int *errors)
 {
 	int new_sel = 0;
 
@@ -857,9 +857,10 @@ sel_function(char **args)
 		return invert_selection();
 
 	mode_t filetype = 0;
-	int i, ifiletype = 0, isel_path = 0, new_sel = 0, err = 0, f = 0;
+	int i, ifiletype = 0, isel_path = 0, new_sel = 0, error = 0, f = 0;
 
-	char *dir = NULL, *pattern = NULL;
+	char *dir = NULL;
+	const char *pattern = NULL;
 	char *sel_path = parse_sel_params(&args, &ifiletype, &filetype, &isel_path);
 
 	if (sel_path) {
@@ -888,16 +889,16 @@ sel_function(char **args)
 		}
 
 		if (!pattern)
-			new_sel += select_filename(args[i], dir, &err);
+			new_sel += select_filename(args[i], dir, &error);
 		else
-			new_sel += select_pattern(args[i], dir, filetype, &err);
+			new_sel += select_pattern(args[i], dir, filetype, &error);
 	}
 
 	if (f == 0)
 		fputs(_("Missing parameter. Try 's --help'\n"), stderr);
 	free(dir);
 
-	return print_sel_results(new_sel, sel_path, pattern, err);
+	return print_sel_results(new_sel, sel_path, pattern, error);
 }
 
 void
@@ -978,16 +979,16 @@ list_selected_files(void)
 	flags &= ~IN_SELBOX_SCREEN;
 	tab_offset = t;
 
-	char *human_size = construct_human_size(total);
-	char err[sizeof(xf_cb) + 6]; *err = '\0';
+	const char *human_size = construct_human_size(total);
+	char err_str[sizeof(xf_cb) + 6]; *err_str = '\0';
 	if (status != 0)
-		snprintf(err, sizeof(err), "%s%c%s", xf_cb, DU_ERR_CHAR, NC);
+		snprintf(err_str, sizeof(err_str), "%s%c%s", xf_cb, DU_ERR_CHAR, NC);
 
 	char s[MAX_SHADE_LEN]; *s = '\0';
 	if (conf.colorize == 1)
 		get_color_size(total, s, sizeof(s));
 
-	printf(_("\n%sTotal size: %s%s%s%s\n"), df_c, err, s, human_size, df_c);
+	printf(_("\n%sTotal size: %s%s%s%s\n"), df_c, err_str, s, human_size, df_c);
 
 	if (conf.pager == 0)
 		UNHIDE_CURSOR;
@@ -1115,8 +1116,8 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 		desel_path = desel_elements;
 	}
 
-	int err = 0;
-	const int dn = deselect_entries(desel_path, desel_n, &err, desel_screen);
+	int error = 0;
+	const int dn = deselect_entries(desel_path, desel_n, &error, desel_screen);
 
 	/* Update the number of selected files according to the number of
 	 * deselected files. */
@@ -1138,13 +1139,13 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 
 	if (desel_screen == 1) {
 		free(desel_path);
-	} else if (err == 1) {
+	} else if (error == 1) {
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%d file(s) deselected\n"), dn);
 		print_reload_msg(NULL, NULL, _("%zu total selected file(s)\n"), sel_n);
 	}
 	free(desel_elements);
 
-	if (err == 1) {
+	if (error == 1) {
 		save_sel();
 		return FUNC_FAILURE;
 	}
@@ -1340,8 +1341,8 @@ handle_desel_args(char **args)
 		return ret;
 
 	} else {
-		const int err = deselect_from_args(args);
-		return end_deselect(err, &args);
+		const int error = deselect_from_args(args);
+		return end_deselect(error, &args);
 	}
 }
 

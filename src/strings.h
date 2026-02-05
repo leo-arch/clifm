@@ -16,20 +16,20 @@
 
 __BEGIN_DECLS
 
-int  detect_space(char *s);
+int  detect_space(const char *s);
 size_t count_chars(const char *s, const char c);
 size_t count_words(size_t *start_word, size_t *full_word);
 char *escape_str(const char *str);
 char *gen_rand_str(const size_t len);
 char *get_last_chr(char *str, const char c, const int len);
-char **get_substr(char *str, const char ifs, const int fproc);
+char **get_substr(const char *str, const char ifs, const int fproc);
 char *home_tilde(char *new_path, int *free_buf);
 char **parse_input_str(char *str);
 char *quote_str(const char *str);
 char *remove_quotes(char *str);
 char *replace_invalid_chars(const char *name);
-char *replace_slashes(char *str, const char c);
-char *replace_substr(const char *haystack, const char *needle, char *rep);
+char *replace_slashes(const char *str, const char c);
+char *replace_substr(const char *haystack, const char *needle, const char *rep);
 char *savestring(const char *restrict str, const size_t size);
 char **split_str(char *str, const int update_args);
 char *strbfrlst(char *str, const char c);

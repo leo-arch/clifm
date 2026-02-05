@@ -1085,7 +1085,7 @@ rl_prepend_sudo(int count, int key)
 		snprintf(s, len + 1, "%s ", DEF_SUDO_CMD);
 	}
 
-	char *c = NULL;
+	const char *c = NULL;
 	if (conf.highlight == 1 && conf.colorize == 1
 	&& cur_color && cur_color != tx_c) {
 		c = cur_color;
@@ -1282,7 +1282,7 @@ rl_accept_suggestion(int count, int key)
 	char *s = NULL, truncated_char = 0;
 	int truncated = 0, accept_first_word_last = 0;
 	if (accept_first_word == 1) {
-		char *p = suggestion_buf + (rl_point - suggestion.offset);
+		const char *p = suggestion_buf + (rl_point - suggestion.offset);
 		/* Skip leading spaces */
 		while (*p == ' ')
 			p++;
@@ -2245,7 +2245,7 @@ rl_open_sel(int count, int key)
 }
 
 static int
-run_man_cmd(char *str)
+run_man_cmd(const char *str)
 {
 	char *mp = NULL;
 	const char *p = getenv("MANPAGER");

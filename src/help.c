@@ -514,7 +514,7 @@ quick_help(const char *topic)
 
 	int ret = 0;
 	char *s = strrchr(pager_app, '/');
-	char *p = (s && *(++s)) ? s : pager_app;
+	const char *p = (s && *(++s)) ? s : pager_app;
 
 	if (*p == 'l' && strcmp(p, "less") == 0) {
 		char *cmd[] = {pager_app, "-FIRXP?e\\(END\\):CLIFM", tmp_file, NULL};

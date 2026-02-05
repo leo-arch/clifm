@@ -516,7 +516,7 @@ get_path_dir(char **dir)
  * CONF.TERM (global) contains spaces. Otherwise, new_instance will try
  * "CONF.TERM clifm". */
 static char **
-get_cmd(char *dir, char *_sudo, char *self, const int sudo)
+get_cmd(const char *dir, const char *_sudo, const char *self, const int sudo)
 {
 	if (!conf.term || !strchr(conf.term, ' '))
 		return NULL;
@@ -968,7 +968,7 @@ expand_prompt_name(char *name)
 	if (!name || !*name || prompts_n == 0)
 		return FUNC_FAILURE;
 
-	char *p = remove_quotes(name);
+	const char *p = remove_quotes(name);
 	if (!p || !*p || strchr(p, '\\')) /* Exclude prompt codes. */
 		return FUNC_FAILURE;
 
@@ -1502,7 +1502,7 @@ get_term_size(void)
 		return;
 	}
 
-	char *env = getenv("CLIFM_COLUMNS");
+	const char *env = getenv("CLIFM_COLUMNS");
 	int value = env ? xatoi(env) : -1;
 	if (value > 0 && value <= USHRT_MAX)
 		term_cols = (unsigned short)value;
@@ -1727,7 +1727,7 @@ handle_stdin(void)
 		free(stdin_tmp_dir);
 
 		suffix = gen_rand_str(RAND_SUFFIX_LEN);
-		char *temp = tmp_dir ? tmp_dir : P_tmpdir;
+		const char *temp = tmp_dir ? tmp_dir : P_tmpdir;
 		const size_t tmp_len = strlen(temp) + RAND_SUFFIX_LEN + 7;
 		stdin_tmp_dir = xnmalloc(tmp_len, sizeof(char));
 		snprintf(stdin_tmp_dir, tmp_len, "%s/vdir.%s", temp,
@@ -1918,10 +1918,10 @@ unpin_dir(void)
 void
 version_function(const int full)
 {
-	char *posix = "";
-	char *legacy = "";
-	char *suckless = "";
-	char *paranoid = "";
+	const char *posix = "";
+	const char *legacy = "";
+	const char *suckless = "";
+	const char *paranoid = "";
 
 #ifdef _BE_POSIX
 	posix = "-POSIX";

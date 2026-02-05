@@ -58,7 +58,7 @@ get_workspace_path_color(const uint8_t num)
 	if (S_ISLNK(a.st_mode)) {
 		char p[PATH_MAX + 1];
 		*p = '\0';
-		char *ret = xrealpath(workspaces[num].path, p);
+		const char *ret = xrealpath(workspaces[num].path, p);
 		return (ret && *p) ? ln_c : or_c;
 	}
 
@@ -73,14 +73,14 @@ list_workspaces(void)
 	const char *ptr = SET_MISC_PTR;
 
 	for (i = 0; i < MAX_WS; i++) {
-		char *path_color = get_workspace_path_color(i);
+		const char *path_color = get_workspace_path_color(i);
 
 		if (i == cur_ws)
 			printf("%s%s%s ", mi_c, ptr, df_c);
 		else
 			fputs("  ", stdout);
 
-		char *ws_color = df_c;
+		const char *ws_color = df_c;
 
 		if (workspaces[i].name) {
 			printf("%s%d%s [%s%s%s]: %*s",
@@ -103,7 +103,7 @@ list_workspaces(void)
 }
 
 static int
-check_workspace_num(char *str, int *tmp_ws)
+check_workspace_num(const char *str, int *tmp_ws)
 {
 	const int istr = xatoi(str);
 	if (istr <= 0 || istr > MAX_WS) {
@@ -165,7 +165,7 @@ set_ws_filter(const int n)
 
 	free(filter.str);
 	regfree(&regex_exp);
-	char *p = workspace_opts[n].filter.str;
+	const char *p = workspace_opts[n].filter.str;
 	filter.str = savestring(p, strlen(p));
 
 	if (filter.type != FILTER_FILE_NAME)

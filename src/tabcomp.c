@@ -251,7 +251,7 @@ reinsert_slashes(char *str)
 
 #ifndef _NO_FZF
 static char *
-fzftab_color(char *filename, const struct stat *attr)
+fzftab_color(const char *filename, const struct stat *attr)
 {
 	if (conf.colorize == 0)
 		return df_c;
@@ -275,7 +275,7 @@ fzftab_color(char *filename, const struct stat *attr)
 			return (cl ? cl : fi_c);
 
 		char *ext_cl = NULL;
-		char *ext = strrchr(filename, '.');
+		const char *ext = strrchr(filename, '.');
 		if (ext && ext != filename)
 			ext_cl = get_ext_color(ext, NULL);
 
@@ -310,7 +310,7 @@ get_comp_entry_color(char *entry, const char *norm_prefix)
 		entry += FILE_URI_PREFIX_LEN;
 
 	if (norm_prefix && !*vt_file) {
-		char *s = strrchr(entry, '/');
+		const char *s = strrchr(entry, '/');
 		char tmp[PATH_MAX + 1];
 		snprintf(tmp, sizeof(tmp), "%s/%s", norm_prefix,
 			(s && *(++s)) ? s : entry);
@@ -407,10 +407,10 @@ get_last_input_word(void)
 /* Store the unescaped string STR in the buffer BUF (only up to MAX bytes).
  * Returns the number of copied bytes. */
 static size_t
-unescape_word(char *str, char *buf, const size_t max)
+unescape_word(const char *str, char *buf, const size_t max)
 {
 	size_t i = 0;
-	char *p = str;
+	const char *p = str;
 
 	while (*p && i < max) {
 		if (*p != '\\')
@@ -1008,7 +1008,7 @@ get_finder_output(const int multi, char *base)
 		}
 
 		/* We don't want to quote the initial tilde */
-		char *r = q;
+		const char *r = q;
 		if (*r == '\\' && *(r + 1) == '~')
 			r++;
 
@@ -1104,12 +1104,13 @@ store_completions(char **matches)
 		if (!matches[i] || !*matches[i] || SELFORPARENT(matches[i]))
 			continue;
 
-		char *color = df_c, *entry = matches[i];
+		const char *color = df_c;
+		char *entry = matches[i];
 
 		if (prev == 1) {
 			const int get_base_name = ((ct == TCMP_PATH || ct == TCMP_GLOB)
 				&& !(flags & PREVIEWER));
-			char *p = get_base_name == 1 ? strrchr(entry, '/') : NULL;
+			const char *p = get_base_name == 1 ? strrchr(entry, '/') : NULL;
 			const size_t len = strlen((p && p[1]) ? p + 1 : entry);
 			if (len > longest_prev_entry)
 				longest_prev_entry = len;
@@ -1290,7 +1291,7 @@ calculate_prefix_len(const char *str, const char *query, const char *lw)
 		return (rl_line_buffer ? wc_xstrlen(rl_line_buffer) : 0);
 	}
 
-	char *q = strrchr(str, '/');
+	const char *q = strrchr(str, '/');
 	if (q) {
 		const size_t qlen = strlen(q);
 		if (ct == TCMP_PATH) {
@@ -1330,8 +1331,8 @@ is_multi_sel(void)
 	if (!rl_line_buffer)
 		return 0;
 
-	char *l = rl_line_buffer;
-	char *lws = get_last_chr(rl_line_buffer, ' ', rl_point);
+	const char *l = rl_line_buffer;
+	const char *lws = get_last_chr(rl_line_buffer, ' ', rl_point);
 
 	/* Do not allow multi-sel if we have a path, only filenames */
 	if (t == TCMP_PATH && *l != '/' && (!lws || !strchr(lws, '/'))) {
@@ -2209,7 +2210,7 @@ AFTER_USUAL_COMPLETION:
 			else if (c == TCMP_WS_PREFIX)
 				start += 2;
 			else if (c == TCMP_FILE_TEMPLATES) {
-				char *p = strrchr(text, '@');
+				const char *p = strrchr(text, '@');
 				if (p)
 					start = rl_point - (int)strlen(p + 1);
 			}
@@ -2312,7 +2313,7 @@ AFTER_USUAL_COMPLETION:
 
 			/* Let's append an ending character to the inserted match. */
 			if (cur_comp_type == TCMP_OWNERSHIP) {
-				char *sc = rl_line_buffer
+				const char *sc = rl_line_buffer
 					? strchr(rl_line_buffer, ':') : NULL;
 				size_t l = wc_xstrlen(sc ? sc + 1
 					: (rl_line_buffer ? rl_line_buffer : ""));
@@ -2349,7 +2350,7 @@ AFTER_USUAL_COMPLETION:
 					if (rl_line_buffer[rl_point] != '/') {
 #ifndef _NO_HIGHLIGHT
 						if (conf.highlight && !wrong_cmd) {
-							char *cc = cur_color;
+							const char *cc = cur_color;
 
 							fputs(hd_c, stdout);
 							rl_insert_text("/");
@@ -2418,11 +2419,8 @@ DISPLAY_MATCHES:
 		{
 			max = 0;
 			for (i = 1; matches[i]; i++) {
-				char *temp;
-				size_t name_length;
-
-				temp = printable_part(matches[i]);
-				name_length = wc_xstrlen(temp);
+				const char *temp = printable_part(matches[i]);
+				const size_t name_length = wc_xstrlen(temp);
 
 				if ((int)name_length > max)
 					max = (int)name_length;
@@ -2549,8 +2547,9 @@ CALC_OFFSET:
 			ptr++;
 		}
 
-		char *qq = (cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_SEL
-		|| cur_comp_type == TCMP_HIST) ? ptr : strrchr(ptr, '/');
+		const char *qq =
+			(cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_SEL
+			|| cur_comp_type == TCMP_HIST) ? ptr : strrchr(ptr, '/');
 
 		if (qq && qq != ptr) {
 			if (*(++qq)) {

@@ -203,7 +203,7 @@ get_dup_file_dest_dir(void)
 			const int n = xatoi(dir);
 			if (n > 0 && (filesn_t)n <= g_files_num) {
 				free(dir);
-				char *name = file_info[n - 1].name;
+				const char *name = file_info[n - 1].name;
 				dir = savestring(name, strlen(name));
 			}
 		} else {
@@ -268,7 +268,7 @@ construct_dup_destination(char *source, const char *dest_dir)
 	}
 
 	char *tmp = strrchr(source, '/');
-	char *source_name = (tmp && tmp[1]) ? tmp + 1 : source;
+	const char *source_name = (tmp && tmp[1]) ? tmp + 1 : source;
 
 	char tmp_dest[PATH_MAX + 1];
 	if (*dest_dir == '/' && !dest_dir[1]) /* Root dir */
@@ -378,7 +378,7 @@ err_file_exists(char *name, const int multi, const int is_md)
 }
 
 static char *
-extract_template_name_from_filename(char *basename, int *t_auto)
+extract_template_name_from_filename(const char *basename, int *t_auto)
 {
 	/* Explicit template name: file@template */
 	char *tname = strrchr(basename, '@');
@@ -418,7 +418,7 @@ find_template(const char *name)
  * Returns 1 in case of success, 0 in there's no template for this file
  * (or cp(1) fails), or -1 in case of error. */
 static int
-create_from_template(char *abs_path, char *basename)
+create_from_template(char *abs_path, const char *basename)
 {
 	if (!file_templates || !templates_dir || !*templates_dir
 	|| !abs_path || !*abs_path || !basename || !*basename)
@@ -476,7 +476,7 @@ create_file(char *name, const int is_md)
 {
 	struct stat a;
 	char *ret = NULL;
-	char *n = name;
+	const char *n = name;
 	char *errname = is_md == 1 ? "md" : "new";
 	int status = FUNC_SUCCESS;
 
@@ -550,7 +550,7 @@ list_created_files(char **nfiles, const filesn_t nfiles_n)
 
 	for (size_t i = 0; nfiles[i]; i++) {
 		char *f = abbreviate_file_name(nfiles[i]);
-		char *p = f ? f : nfiles[i];
+		const char *p = f ? f : nfiles[i];
 		puts((*p == '.' && p[1] == '/' && p[2]) ? p + 2 : p);
 		if (f && f != nfiles[i])
 			free(f);
@@ -1201,7 +1201,7 @@ symlink_file(char **args)
 	struct stat a;
 
 	if (!link_name || !*link_name) {
-		char *p = strrchr(target, '/');
+		const char *p = strrchr(target, '/');
 		snprintf(tmp, sizeof(tmp), "%s.link", (p && p[1]) ? p + 1 : target);
 
 		size_t suffix = 0;
@@ -1280,7 +1280,7 @@ vv_rename_files(char **args, const size_t copied)
 	if (l > 0 && args[args_n][l - 1] == '/')
 		args[args_n][l - 1] = '\0';
 
-	char *dest = sel_is_last == 1 ? "." : args[args_n];
+	const char *dest = sel_is_last == 1 ? "." : args[args_n];
 	const size_t n = args_n + (sel_is_last == 1);
 
 	for (i = 1; i < n && args[i]; i++) {
@@ -1292,7 +1292,7 @@ vv_rename_files(char **args, const size_t copied)
 			args[i][l - 1] = '\0';
 
 		char p[PATH_MAX + 1];
-		char *s = strrchr(args[i], '/');
+		const char *s = strrchr(args[i], '/');
 		snprintf(p, sizeof(p), "%s/%s", dest, (s && *(++s)) ? s : args[i]);
 
 		tmp[c++] = savestring(p, strnlen(p, sizeof(p)));
@@ -1797,7 +1797,7 @@ check_rm_files(const struct rm_info *info, const size_t start,
 static struct rm_info
 fill_rm_info_struct(char **filename, struct stat *a)
 {
-	struct rm_info info;
+	struct rm_info info = {0};
 
 	info.name = *filename;
 	info.dir = (S_ISDIR(a->st_mode));
@@ -2025,7 +2025,7 @@ batch_link(char **args)
 		}
 
 		char *s = strrchr(filename, '/');
-		char *basename = s && *(++s) ? s : filename;
+		const char *basename = s && *(++s) ? s : filename;
 
 		/* + 64 = Make some room for suffix */
 		const size_t tmp_len = strlen(basename) + 64;

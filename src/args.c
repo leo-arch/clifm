@@ -281,9 +281,9 @@ static void
 err_arg_required(const char *arg)
 {
 #ifdef _BE_POSIX
-	char *optname = "-h";
+	const char *optname = "-h";
 #else
-	char *optname = "--help";
+	const char *optname = "--help";
 #endif /* _BE_POSIX */
 	fprintf(stderr, _("%s: '%s': Option requires an argument\n"
 		"Try '%s %s' for more information.\n"), PROGRAM_NAME,
@@ -315,7 +315,7 @@ set_cur_workspace(void)
 		return;
 
 	char p[PATH_MAX + 1] = "";
-	char *cwd = get_cwd(p, sizeof(p), 0);
+	const char *cwd = get_cwd(p, sizeof(p), 0);
 
 	if (cwd && *cwd) {
 		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
@@ -464,7 +464,7 @@ try_xdg_data_dirs(void)
 	if (!env || !*env)
 		return FUNC_FAILURE;
 
-	char *str = strtok(env, ":");
+	const char *str = strtok(env, ":");
 	if (!str || !*str) {
 		free(env);
 		return FUNC_FAILURE;
@@ -502,7 +502,7 @@ try_standard_data_dirs(void)
 	*home_local = '\0';
 	const int sec_env = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
-	char *env = sec_env != 1 ? getenv("XDG_DATA_HOME") : NULL;
+	const char *env = sec_env != 1 ? getenv("XDG_DATA_HOME") : NULL;
 	if (env && *env) {
 		xstrsncpy(home_local, env, sizeof(home_local));
 	} else {
@@ -547,7 +547,7 @@ resolve_absolute_path(const char *s)
 		return NULL;
 
 	char *p = strrchr(s, '/');
-	char *t = NULL;
+	const char *t = NULL;
 
 	if (p && p != s)
 		*p = '\0';
@@ -665,7 +665,7 @@ get_data_dir(void)
 static char *
 get_home_sec_env(void)
 {
-	struct passwd *pw = NULL;
+	const struct passwd *pw = NULL;
 
 	uid_t u = geteuid();
 	pw = getpwuid(u);
@@ -1068,7 +1068,7 @@ resolve_path(char *file, const size_t flen)
 
 	} else {
 		char tmp[PATH_MAX + 1] = "";
-		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
+		const char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 
 		if (!cwd || !*cwd) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
@@ -1447,7 +1447,7 @@ set_desktop_notifications(const char *val)
 }
 
 static void
-xset_pager_view(char *arg)
+xset_pager_view(const char *arg)
 {
 	if (!arg || !*arg || *arg == '-')
 		err_arg_required("--pager-view");

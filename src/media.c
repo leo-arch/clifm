@@ -483,7 +483,7 @@ get_mnt_input(const int mode, int *info)
 			return (-1);
 		}
 
-		char *p = input;
+		const char *p = input;
 		if (*p == 'i') {
 			*info = 1;
 			++p;

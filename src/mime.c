@@ -151,7 +151,7 @@ get_mimetype_fallback(const char *file)
 
 	/* NAME_MAX should be enough to store a MIME type. */
 	char line[NAME_MAX + 1]; *line = '\0';
-	char *retval = fgets(line, (int)sizeof(line), fp_out);
+	const char *retval = fgets(line, (int)sizeof(line), fp_out);
 	fclose(fp_out);
 
 	if (!retval)
@@ -814,7 +814,7 @@ mime_edit(char **args)
 }
 
 static char *
-get_basename(char *file_path)
+get_basename(const char *file_path)
 {
 	char *f = strrchr(file_path, '/');
 	if (f && *(++f))
@@ -891,7 +891,7 @@ copy_field(char **dst, const char *src)
 /* Expand %[f|m|u|x] placeholders, stderr/stdout flags, and environment
  * variables in the opening application line. */
 static size_t
-expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
+expand_app_fields(char ***cmd, size_t *n, const char *fpath, int *exec_flags)
 {
 	size_t f = 0, i;
 	char **a = *cmd;
@@ -967,7 +967,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 /* Open the file named FILE using the application APP, splitting APP and
  * expanding fields to the appropriate values. */
 static int
-run_mime_app(char *app, char *file)
+run_mime_app(char *app, const char *file)
 {
 	char **cmd = split_str(app, NO_UPDATE_ARGS);
 	if (!cmd)
@@ -1068,7 +1068,7 @@ is_dup_entry(const char *prefix, char **apps, const char *app)
  * If ONLY_NAMES is 1, we're tab completing for 'edit' subcommands (in which
  * case we want only command names, not parameters). */
 static char **
-get_apps_from_file(FILE *fp, char *file_name, const char *mime,
+get_apps_from_file(FILE *fp, const char *file_name, const char *mime,
 	const char *prefix, const int only_names)
 {
 	size_t line_size = 0;
@@ -1421,7 +1421,7 @@ build_command(char **app_fields, char **files, int *exec_flags)
 		}
 
 		if (*app_fields[i] == '$' && IS_ALPHA_UP(app_fields[i][1])) {
-			char *env = expand_env(app_fields[i]);
+			const char *env = expand_env(app_fields[i]);
 			if (env)
 				cmd[n++] = strdup(env);
 			continue;

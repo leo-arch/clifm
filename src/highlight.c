@@ -70,7 +70,7 @@ rl_highlight(const char *str, const size_t pos, const int flag)
 	if (cur_color == hc_c)
 		goto END;
 
-	char *sp = strchr(rl_line_buffer, ' ');
+	const char *sp = strchr(rl_line_buffer, ' ');
 	if (cur_color == wp_c && !sp)
 		goto END;
 

@@ -501,7 +501,7 @@ print_glob_matches(struct search_t *matches, const char *search_path)
 			/* Print ELN, file indicator, and icon. */
 			int index = matches[i].eln - 1;
 			char ind_chr = file_info[index].sel == 1 ? SELFILE_CHR : ' ';
-			char *ind_chr_color = file_info[index].sel == 1 ? li_cb : "";
+			const char *ind_chr_color = file_info[index].sel == 1 ? li_cb : "";
 
 			printf("%s%*d%s%s%c%s%s%s%s%c", el_c, eln_pad, matches[i].eln, df_c,
 				ind_chr_color, ind_chr, df_c,
@@ -720,7 +720,7 @@ load_entry_info(struct dirent **reg_dirlist, const int index)
 	char *name = reg_dirlist ? reg_dirlist[index]->d_name
 		: file_info[index].name;
 
-	struct search_t list;
+	struct search_t list = {0};
 	list.name = name;
 	list.eln = reg_dirlist ? -1 : index + 1;
 	list.len = wc_xstrlen(name);
@@ -782,7 +782,7 @@ print_regex_entry(struct search_t list, const int namepad, const int elnpad,
 		/* Print ELN, file indicator, and icon. */
 		int index = list.eln - 1;
 		char ind_chr = file_info[index].sel == 1 ? SELFILE_CHR : ' ';
-		char *ind_chr_color = file_info[index].sel == 1 ? li_cb : "";
+		const char *ind_chr_color = file_info[index].sel == 1 ? li_cb : "";
 
 		printf("%s%*d%s%s%c%s%s%s%s%c", el_c, elnpad,
 			list.eln, df_c, ind_chr_color, ind_chr, df_c,

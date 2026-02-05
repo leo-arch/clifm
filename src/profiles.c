@@ -53,7 +53,7 @@ get_profile_names(void)
 		return FUNC_FAILURE;
 	}
 
-	struct dirent *ent;
+	const struct dirent *ent;
 	size_t pf_n = 0;
 
 	while ((ent = readdir(dir))) {
@@ -226,7 +226,7 @@ profile_set(const char *prof)
 
 	if (!workspaces[cur_ws].path) {
 		char tmp[PATH_MAX + 1] = "";
-		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
+		const char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 
 		if (!cwd || !*cwd) {
 			xerror("pf: %s\n", strerror(errno));

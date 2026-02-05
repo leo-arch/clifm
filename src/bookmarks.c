@@ -180,7 +180,7 @@ print_bookmarks(void)
 		if (sc_pad < 0)
 			sc_pad = 0;
 
-		char *color = stat(bookmarks[i].path, &attr) == -1
+		const char *color = stat(bookmarks[i].path, &attr) == -1
 			? uf_c : get_entry_color(bookmarks[i].path, &attr);
 
 		printf("%s%s%*zu%s%s%s%s%s%s%s%-*s %s%-*s%s  %s%s%s\n",
@@ -466,9 +466,9 @@ bookmark_add(char *file, char *name, char *shortcut)
 
 	int exit_status = FUNC_FAILURE;
 	char *p = unescape_str(name, 0);
-	char *n = p ? p : name;
+	const char *n = p ? p : name;
 	char *q = NULL;
-	char *s = NULL;
+	const char *s = NULL;
 
 	if (check_bm_name(n, 1) != -1)
 		goto ERROR;

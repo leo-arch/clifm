@@ -44,7 +44,7 @@ utf8nextcodepoint(const char *s)
 
 /* A Unicode aware version of xstrcasechr (in strings.c)*/
 static char *
-utf8casechr(char *s, char *c)
+utf8casechr(char *s, const char *c)
 {
 	if (!s || !*s || !c || !*c)
 		return NULL;
@@ -175,7 +175,7 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 
 	const int cs = conf.case_sens_path_comp;
 	int included = 0;
-	char *p = NULL;
+	const char *p = NULL;
 
 	if (cs == 1 ? (p = utf8str(s2, s1)) : (p = utf8casestr(s2, s1))) {
 		if (p == s2) {

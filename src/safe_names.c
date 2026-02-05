@@ -204,7 +204,8 @@ validate_filename(char **name, const int is_md)
 	if (*tmp == '~' && tmp[1] == '/' && tmp[2])
 		tmp += 2;
 
-	char *p = tmp, *q = tmp;
+	const char *p = tmp;
+	char *q = tmp;
 	struct stat a;
 	int ret = 1;
 

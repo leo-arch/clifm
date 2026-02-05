@@ -481,7 +481,7 @@ check_img_support(const char *env_term)
 		setenv("CLIFM_IMG_SUPPORT", "sixel", 1);
 	} else {
 #ifdef __APPLE__
-		char *p = getenv("TERM_PROGRAM");
+		const char *p = getenv("TERM_PROGRAM");
 		if (p && *p == 'i' && strcmp(p, "iTerm.app") == 0) {
 			setenv("CLIFM_IMG_SUPPORT", "iterm", 1);
 			return;

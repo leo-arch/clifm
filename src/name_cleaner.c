@@ -165,7 +165,7 @@ get_uft8_dec_value(size_t *i, const char *str)
  * filename is empty, it will be replaced by "bleach.YYYYMMDDHHMMS"
  * */
 static char *
-clean_file_name(char *restrict name)
+clean_file_name(const char *restrict name)
 {
 	if (!name || !*name)
 		return NULL;
@@ -175,7 +175,7 @@ clean_file_name(char *restrict name)
 
 	size_t i = 0, cur_len = 0, too_long = 0;
 
-	char *s = strrchr(name, '/');
+	const char *s = strrchr(name, '/');
 	i = s ? (size_t)(s - name) + 1 : 0;
 
 	unsigned char n = 0;
@@ -252,7 +252,7 @@ clean_file_name(char *restrict name)
 		}
 
 		int j = (int)(sizeof(unitable) / sizeof(struct utable_t));
-		char *t = NULL;
+		const char *t = NULL;
 		while (--j >= 0) {
 			if (dec_value == unitable[j].key && unitable[j].data)
 				t = unitable[j].data;
@@ -414,7 +414,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 		if (*line != 'o' && *line != 'r')
 			continue;
 
-		char *p = strchr(line, ' ');
+		const char *p = strchr(line, ' ');
 		if (!p || !*(++p))
 			continue;
 
@@ -506,7 +506,7 @@ bleach_files(char **names)
 			continue;
 
 		/* Nothing to clean. Skip this one */
-		char *n = (sl && sl[1]) ? sl + 1 : names[i];
+		const char *n = (sl && sl[1]) ? sl + 1 : names[i];
 		if (*n == *p && strcmp(n, p) == 0) {
 			free(p);
 			continue;

@@ -1044,7 +1044,7 @@ new_instance_function(char **args)
 #ifndef NO_MEDIA_FUNC
 /* MODE could be either MEDIA_LIST (mp command) or MEDIA_MOUNT (media command) */
 static int
-media_function(char *arg, const int mode)
+media_function(const char *arg, const int mode)
 {
 	if (arg && IS_HELP(arg)) {
 		if (mode == MEDIA_LIST)
@@ -1315,7 +1315,7 @@ check_auto_second(char **args)
 }
 
 static int
-colors_function(char *arg)
+colors_function(const char *arg)
 {
 	if (arg && IS_HELP(arg))
 		puts(_(COLORS_USAGE));
@@ -1538,7 +1538,7 @@ set_cp_cmd(char **cmd, int *cp_force)
 		}
 	}
 
-	char *n = NULL;
+	const char *n = NULL;
 
 	switch (conf.cp_cmd) {
 	case CP_ADVCP: n = DEFAULT_ADVCP_CMD; break;
@@ -1570,7 +1570,7 @@ set_mv_cmd(char **cmd, int *mv_force)
 		}
 	}
 
-	char *n = NULL;
+	const char *n = NULL;
 
 	switch (conf.mv_cmd) {
 	case MV_ADVMV: n = DEFAULT_ADVMV_CMD; break;

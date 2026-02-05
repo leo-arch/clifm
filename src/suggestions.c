@@ -650,7 +650,7 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 		return fi_c;
 
 	size_t color_len = 0;
-	char *extcolor = get_ext_color(ext, &color_len);
+	const char *extcolor = get_ext_color(ext, &color_len);
 	if (!extcolor)
 		return fi_c;
 
@@ -745,7 +745,8 @@ skip_leading_backslashes(char **str, size_t *len)
 }
 
 static void
-match_print(char *match, const size_t len, char *color, const int append_slash)
+match_print(const char *match, const size_t len, char *color,
+	const int append_slash)
 {
 	*tmp_buf = '\0';
 
@@ -896,7 +897,7 @@ print_directory_suggestion(const filesn_t i, const size_t len, char *color)
 }
 
 static inline void
-print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
+print_reg_file_suggestion(const char *str, const filesn_t i, size_t len,
 	char *color, const int dot_slash)
 {
 	if (conf.suggest_filetype_color)
@@ -906,7 +907,7 @@ print_reg_file_suggestion(char *str, const filesn_t i, size_t len,
 
 	char *tmp = escape_str(file_info[i].name);
 	if (tmp) {
-		char *s = str;
+		const char *s = str;
 		while (*s) {
 			if (is_quote_char(*s))
 				len++;
@@ -1385,7 +1386,7 @@ check_users(const char *str, const size_t len)
 	UNUSED(str); UNUSED(len);
 	return NO_MATCH;
 #else
-	struct passwd *p;
+	const struct passwd *p;
 	while ((p = getpwent())) {
 		if (!p->pw_name) break;
 		if (len == 0 || (*str == *p->pw_name
@@ -1452,7 +1453,7 @@ is_last_word(void)
 	if (rl_point >= rl_end)
 		return lw;
 
-	char *p = strchr(rl_line_buffer + rl_point, ' ');
+	const char *p = strchr(rl_line_buffer + rl_point, ' ');
 	if (!p)
 		return lw;
 
@@ -1722,7 +1723,7 @@ check_profiles(char *word, const size_t len)
 #endif /* !_NO_PROFILES */
 
 static int
-check_kb_func_names(char *word, const size_t len)
+check_kb_func_names(const char *word, const size_t len)
 {
 	if (!word || !*word || len == 0 || kbinds_n == 0 || !kbinds)
 		return NO_MATCH;
@@ -1873,8 +1874,8 @@ check_backdir(char *start)
 	char *ds = strchr(lb, '\\') ? unescape_str(lb, 0) : lb;
 
 	/* Find the query string in the list of parent directories. */
-	char *p = conf.case_sens_path_comp == 1 ? strstr(bk_cwd, ds)
-		: xstrcasestr(bk_cwd, ds);
+	char *p = ds ? (conf.case_sens_path_comp == 1 ? strstr(bk_cwd, ds)
+		: xstrcasestr(bk_cwd, ds)) : NULL;
 	if (p) {
 		char *pp = strchr(p, '/');
 		if (pp)
@@ -1959,7 +1960,7 @@ rl_suggestions(const unsigned char c)
 	}
 
 	suggestion.full_line_len = (size_t)rl_end + 1;
-	char *last_space = get_last_chr(rl_line_buffer, ' ', rl_end);
+	const char *last_space = get_last_chr(rl_line_buffer, ' ', rl_end);
 
 	/* Reset the wrong cmd flag whenever we have a new word or a new line. */
 	if (rl_end == 0 || c == '\n') {
@@ -1982,7 +1983,7 @@ rl_suggestions(const unsigned char c)
 	char *first_word = NULL;
 	if (full_word) {
 		rl_line_buffer[full_word] = '\0';
-		char *q = rl_line_buffer + start_word;
+		const char *q = rl_line_buffer + start_word;
 		first_word = savestring(q, strlen(q));
 		rl_line_buffer[full_word] = ' ';
 	}
@@ -2396,7 +2397,7 @@ rl_suggestions(const unsigned char c)
 			}
 
 			/* If we have a slash, we're not looking for files in the CWD. */
-			char *p = strchr(word, '/');
+			const char *p = strchr(word, '/');
 			if (p && p[1])
 				break;
 

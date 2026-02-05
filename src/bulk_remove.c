@@ -272,7 +272,7 @@ get_files_from_tmp_file(const char *tmpfile, const char *target, const filesn_t 
 
 /* If FILE is not found in LIST, returns one; zero otherwise. */
 static int
-remove_this_file(char *file, char **list)
+remove_this_file(const char *file, char **list)
 {
 	if (SELFORPARENT(file))
 		return 0;

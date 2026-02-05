@@ -444,7 +444,7 @@ static struct perms_t
 get_common_perms(char **files, int *diff)
 {
 	*diff = 0;
-	struct stat a, b;
+	struct stat a = {0}, b = {0};
 	struct perms_t p = {0};
 
 	p.ur = p.gr = p.or = 'r';
@@ -650,8 +650,8 @@ get_common_ownership(char **args, int *exit_status, int *diff)
 			return savestring(":", 1);
 	}
 
-	struct passwd *owner = getpwuid(a.st_uid);
-	struct group *group = getgrgid(a.st_gid);
+	const struct passwd *owner = getpwuid(a.st_uid);
+	const struct group *group = getgrgid(a.st_gid);
 
 	const size_t owner_len = (common_uid > 0 && owner && owner->pw_name)
 		? wc_xstrlen(owner->pw_name) : 0;
@@ -1050,7 +1050,7 @@ print_file_perms(const struct stat *attr, const char file_type_char,
 
 static void
 print_filename(char *filename, const char *color, const int follow_link,
-	const mode_t mode, char *link_target)
+	const mode_t mode, const char *link_target)
 {
 	char *wname = wc_xstrlen(filename) == 0
 		? replace_invalid_chars(filename) : NULL;
@@ -1059,7 +1059,7 @@ print_filename(char *filename, const char *color, const int follow_link,
 	if (detect_space(wname ? wname : filename) == 1)
 		snprintf(name, sizeof(name), "'%s'", wname ? wname : filename);
 
-	char *n = *name ? name : (wname ? wname : filename);
+	const char *n = *name ? name : (wname ? wname : filename);
 
 	if (follow_link == 1) { /* 'pp' command */
 		if (link_target && *link_target) {
@@ -1095,7 +1095,7 @@ print_filename(char *filename, const char *color, const int follow_link,
 
 	struct stat a;
 	if (tlen != -1 && *target && lstat(target, &a) != -1) {
-		char *link_color = get_link_color(target);
+		const char *link_color = get_link_color(target);
 		printf(_("\tName: %s%s%s %s%s%s %s%s%s\n"), ln_c, n, df_c,
 			dn_c, SET_MSG_PTR, df_c, link_color, *t ? t : target, df_c);
 
@@ -1222,8 +1222,8 @@ END:
 #endif /* HAVE_ACL */
 
 static void
-print_file_details(char *filename, const struct stat *attr, const char file_type,
-	const int file_perm, const int xattr)
+print_file_details(char *filename, const struct stat *attr,
+	const char file_type, const int file_perm, const int xattr)
 {
 #if !defined(LINUX_FILE_ATTRS) && !defined(LINUX_FILE_XATTRS) \
 && !defined(HAVE_ACL) && !defined(LINUX_FILE_CAPS)
@@ -1234,8 +1234,8 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	UNUSED(xattr);
 #endif
 
-	struct passwd *owner = getpwuid(attr->st_uid);
-	struct group *group = getgrgid(attr->st_gid);
+	const struct passwd *owner = getpwuid(attr->st_uid);
+	const struct group *group = getgrgid(attr->st_gid);
 
 	const char *gid_color =
 		conf.colorize == 0 ? "" : (file_perm == 1 ? dg_c : BOLD);
@@ -1346,7 +1346,8 @@ has_nsec_modifier(char *fmt)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static void
-gen_user_time_str(char *buf, size_t buf_size, struct tm *t, const size_t nsec)
+gen_user_time_str(char *buf, size_t buf_size, const struct tm *t,
+	const size_t nsec)
 {
 	char *ptr = has_nsec_modifier(conf.ptime_str);
 	if (!ptr) {
@@ -1440,7 +1441,7 @@ END:
 }
 
 static void
-print_timestamps(char *filename, const struct stat *attr)
+print_timestamps(const char *filename, const struct stat *attr)
 {
 #if !defined(ST_BTIME) || (!defined(LINUX_STATX) && !defined(__sun))
 	UNUSED(filename);
@@ -1599,8 +1600,8 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		(FILE_TYPE_NON_ZERO_SIZE(attr->st_mode) || S_TYPEISSHM(attr)
 		|| S_TYPEISTMO(attr)) ? FILE_SIZE_PTR(attr) : 0;
 
-	char *size_unit = construct_human_size(size);
-	char *csize = dz_c;
+	const char *size_unit = construct_human_size(size);
+	const char *csize = dz_c;
 	const char *cend = conf.colorize == 1 ? df_c : "";
 
 	char sf[MAX_SHADE_LEN];
@@ -1658,11 +1659,11 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 	}
 
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
-		char err[sizeof(xf_cb) + 6]; *err = '\0';
+		char err_str[sizeof(xf_cb) + 6]; *err_str = '\0';
 		if (du_status != 0)
-			snprintf(err, sizeof(err), "%s%c%s", xf_cb, DU_ERR_CHAR, NC);
+			snprintf(err_str, sizeof(err_str), "%s%c%s", xf_cb, DU_ERR_CHAR, NC);
 
-		printf("%s%s%s%s ", err, csize, human_size, cend);
+		printf("%s%s%s%s ", err_str, csize, human_size, cend);
 
 		if (total_size > size_mult_factor)
 			printf("/ %s%jd B%s ", csize, (intmax_t)total_size, cend);
@@ -1726,9 +1727,9 @@ print_size(const struct stat *attr, const int apparent)
 			? (apparent == 1 ? attr->st_size : attr->st_blocks * S_BLKSIZE)
 			: 0;
 
-	char *size_unit = construct_human_size(size);
-	char *csize = dz_c;
-	char *cend = conf.colorize == 1 ? df_c : "";
+	const char *size_unit = construct_human_size(size);
+	const char *csize = dz_c;
+	const char *cend = conf.colorize == 1 ? df_c : "";
 
 	char sf[MAX_SHADE_LEN];
 	*sf = '\0';
@@ -1767,15 +1768,15 @@ print_file_size(const struct stat *attr)
 static void
 print_dir_size(const off_t dir_size, const int apparent, const char *read_err)
 {
-	char *cend = conf.colorize == 1 ? df_c : "";
-	char *size_color = dz_c;
+	const char *cend = conf.colorize == 1 ? df_c : "";
+	const char *size_color = dz_c;
 	char sf[MAX_SHADE_LEN]; *sf = '\0';
 	if (conf.colorize == 1 && !*dz_c) {
 		get_color_size(dir_size, sf, sizeof(sf));
 		size_color = sf;
 	}
 
-	char *size = construct_human_size(dir_size);
+	const char *size = construct_human_size(dir_size);
 	if (size) {
 		printf("%s%s%s%s ", read_err, size_color, size, cend);
 
@@ -1885,8 +1886,8 @@ do_stat(char *filename, const int follow_link)
 		1;
 #endif /* !__CYGWIN__ */
 
-	char *color = get_file_type_and_color(*link_target ? link_target : filename,
-		&attr, &file_type, &ctype);
+	const char *color = get_file_type_and_color(*link_target
+		? link_target : filename, &attr, &file_type, &ctype);
 
 #if defined(LINUX_FILE_XATTRS)
 	const int xattr =
@@ -2040,7 +2041,7 @@ print_analysis_stats(const off_t total, const off_t largest,
 		}
 	}
 
-	char *tsize = dz_c, *lsize = dz_c;
+	const char *tsize = dz_c, *lsize = dz_c;
 
 	char ts[MAX_SHADE_LEN], ls[MAX_SHADE_LEN];
 	if (!*dz_c) {

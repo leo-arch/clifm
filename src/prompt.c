@@ -135,7 +135,7 @@ reduce_path(const char *str)
 	const size_t slen = strlen(str);
 
 	if (slen > (size_t)conf.prompt_p_max_path) {
-		char *ret = strrchr(str, '/');
+		const char *ret = strrchr(str, '/');
 		if (!ret || !ret[1])
 			temp = savestring(str, slen);
 		else
@@ -148,7 +148,7 @@ reduce_path(const char *str)
 }
 
 static size_t
-copy_char(char *buf, char *s)
+copy_char(char *buf, const char *s)
 {
 	const int bytes = IS_UTF8_CHAR(*s) ? utf8_bytes((unsigned char)*s) : 1;
 
@@ -269,7 +269,7 @@ gen_workspace(void)
 {
 	/* An int (or workspace name) + workspaces color + NUL byte */
 	char s[NAME_MAX + sizeof(ws1_c) + 1];
-	char *cl = df_c;
+	const char *cl = df_c;
 
 	if (conf.colorize == 1) {
 		switch (cur_ws + 1) {
@@ -1351,7 +1351,7 @@ set_prompt_length(const size_t decoded_prompt_len, const size_t ac_matches)
 static char *
 construct_prompt(const char *decoded_prompt, const size_t ac_matches)
 {
-	char *rl_vi_mode = NULL;
+	const char *rl_vi_mode = NULL;
 	/* Construct indicators: MSGS (ERR, WARN, and NOTICE), SEL, and TRASH */
 	char err_ind[N_IND], warn_ind[N_IND], notice_ind[N_IND],
 		trash_ind[N_IND], sel_ind[N_IND], acmd_ind[N_IND];
@@ -1496,11 +1496,11 @@ get_rprompt_len_utf8(char *rprompt)
 
 	while (buf[i]) {
 		if (buf[i] == '\x1b' && buf[i + 1] == '[') {
-			wchar_t *tmp = wcschr(buf + i + 1, L'm');
+			const wchar_t *tmp = wcschr(buf + i + 1, L'm');
 			if (tmp)
 				i += (size_t)(tmp - (buf + i) + 1);
 		} else if (buf[i] == 001) {
-			wchar_t *tmp = wcschr(buf + i, L'\002');
+			const wchar_t *tmp = wcschr(buf + i, L'\002');
 			if (tmp)
 				i += (size_t)(tmp - (buf + i) + 1);
 		} else {
@@ -1586,7 +1586,7 @@ static int
 expand_history(char **input)
 {
 	/* history_expansion_char defaults to '!' */
-	char *hist_c = strchr(*input, history_expansion_char);
+	const char *hist_c = strchr(*input, history_expansion_char);
 	if (!hist_c || (hist_c != *input && *(hist_c - 1) != ' ')
 	|| exclude_from_history(*input) == 1)
 		return FUNC_SUCCESS;
@@ -1788,7 +1788,7 @@ set_default_prompt(void)
 void
 set_prompt_options(void)
 {
-	char *val = NULL;
+	const char *val = NULL;
 	int n = 0;
 
 	const char *np = conf.encoded_prompt; /* Normal/Regular prompt */
