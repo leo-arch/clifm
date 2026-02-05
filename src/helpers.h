@@ -245,7 +245,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 #if defined(__linux__)
 # include <linux/version.h>
 # include <linux/limits.h>
-# if !defined(__GLIBC__) || (__GLIBC__ > 2 \
+# if defined(__GLIBC__) && (__GLIBC__ > 2 \
 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 9)) \
 && LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
 #  define HAVE_INOTIFY
