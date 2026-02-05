@@ -33,7 +33,7 @@
 int
 is_force_param(const char *s)
 {
-	if (!s || !*s || *s != '-')
+	if (!s || *s != '-')
 		return 0;
 
 	struct stat a;

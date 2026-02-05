@@ -100,7 +100,7 @@ append_str(char *buf, const int buf_size, size_t *len, const char *str)
 static const char *
 translate_emacs_style_keyseq(const char *key)
 {
-	if (!key || !*key || *key != '\\')
+	if (!key || *key != '\\')
 		return NULL;
 
 	if (key[1] == 'e' && (key[2] == CSI_INTRODUCER || key[2] == SS3_INTRODUCER))

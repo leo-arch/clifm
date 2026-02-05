@@ -338,8 +338,7 @@ unset_filter(void)
 static int
 validate_file_type_filter(void)
 {
-	if (!filter.str || !*filter.str || *filter.str != '='
-	|| !filter.str[1] || filter.str[2])
+	if (!filter.str || *filter.str != '=' || !filter.str[1] || filter.str[2])
 		return FUNC_FAILURE;
 
 	const char c = filter.str[1];

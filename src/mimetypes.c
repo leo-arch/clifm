@@ -75,7 +75,7 @@ parse_shared_mime_info_db(FILE *fp)
 		while (*line_ptr == ' ' || *line_ptr == '\t')
 			line_ptr++;
 
-		if (!*line_ptr || *line_ptr != '<')
+		if (*line_ptr != '<')
 			continue;
 
 		if (header_start == 0
