@@ -1656,7 +1656,7 @@ jump_generator(const char *text, int state)
 		}
 
 		if ((conf.case_sens_dirjump == 1 ? strstr(name, text)
-		: xstrcasestr(name, (char *)text)) != NULL)
+		: xstrcasestr(name, text)) != NULL)
 			return strdup(name);
 	}
 
@@ -1796,7 +1796,7 @@ dirhist_generator(const char *text, int state)
 		} else {
 			if ((conf.case_sens_path_comp == 1 ? strstr(name, text)
 #if defined(_BE_POSIX)
-			: xstrcasestr(name, (char *)text)) != NULL)
+			: xstrcasestr(name, text)) != NULL)
 #else
 			: xstrcasestr(name, text)) != NULL)
 #endif /* _BE_POSIX */

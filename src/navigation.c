@@ -102,7 +102,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 		char *p = NULL;
 		if (str && *str) { /* Non-empty query string. */
 			p = conf.case_sens_path_comp
-				? strstr(cwd, str) : xstrcasestr(cwd, (char *)str);
+				? strstr(cwd, str) : xstrcasestr(cwd, str);
 			if (!p)
 				break;
 		}

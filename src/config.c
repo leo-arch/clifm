@@ -80,7 +80,7 @@ regen_config(void)
 
 static void
 print_config_value(const char *option, void *cur_value, void *def_value,
-		const int type)
+	const int type)
 {
 	const char *ptr = SET_MISC_PTR;
 
