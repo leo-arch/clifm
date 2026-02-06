@@ -414,28 +414,26 @@ rank_cmp(const void *a, const void *b)
 static void
 print_jump_table_header(void)
 {
-	char item[16]; /* BOLD and NC are 4 bytes each */
-	snprintf(item, sizeof(item), "%s%s%s", BOLD,
+	char bullet[16]; /* BOLD and NC are 4 bytes each */
+	snprintf(bullet, sizeof(bullet), "%s%s%s", BOLD,
 		term_caps.unicode == 1 ? "•" : "*", NC);
 
-	printf(_("%s First time access is displayed in days, while last "
-		"time access is displayed in hours.\n"), item);
-	printf(_("%s An asterisk next rank values means that the "
-		"corresponding directory will not be removed despite its rank, "
-		"either because it was visited in the last 24 hours, or because "
-		"it is bookmarked, pinned, or currently active in some "
-		"workspace.\n"), item);
-	printf(_("%s A plus sign next rank values means that the "
-		"corresponding directory is marked as permanent (it will not be "
-		"removed).\n"), item);
+	printf(_("%s First-time access is shown in days; last-time "
+		"access is shown in hours.\n"), bullet);
+	printf(_("%s An asterisk (*) next to a rank means the directory will "
+		"not be removed\n  despite its rank, either because it was visited "
+		"within the last 24 hours,\n  or because it is bookmarked, pinned, "
+		"or currently active in a workspace.\n"), bullet);
+	printf(_("%s A plus sign (+) next to a rank means the directory is "
+		"marked as permanent\n  (it will not be removed).\n"), bullet);
 
 	if (conf.min_jump_rank <= 0) {
-		printf(_("%s MinJumpRank is set to %d: entries will not be removed "
-			"from the database (no matter their rank).\n"),
-			item, conf.min_jump_rank);
+		printf(_("%s MinJumpRank is set to %d: entries will not be "
+			"removed from the database\n  (no matter their rank).\n"),
+			bullet, conf.min_jump_rank);
 	} else {
-		printf(_("%s Entries ranked below MinJumpRank (currently %d) will be "
-			"removed at program exit.\n"), item, conf.min_jump_rank);
+		printf(_("%s Entries ranked below MinJumpRank (%d) will be "
+			"removed at program exit.\n"), bullet, conf.min_jump_rank);
 	}
 
 	printf(_("\n%sVisits\tFirst\tLast\tRank\tDirectory%s\n"), BOLD, NC);

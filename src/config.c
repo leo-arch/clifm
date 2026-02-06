@@ -79,8 +79,8 @@ regen_config(void)
 }
 
 static void
-print_config_value(const char *option, void *cur_value, void *def_value,
-	const int type)
+print_config_value(const char *option, const void *cur_value,
+	const void *def_value, const int type)
 {
 	const char *ptr = SET_MISC_PTR;
 
@@ -96,7 +96,8 @@ print_config_value(const char *option, void *cur_value, void *def_value,
 	}
 
 	else if (type == DUMP_CONFIG_BOOL) {
-		int cv = *((int *)cur_value), dv = *((int *)def_value);
+		const int cv =
+			*((const int *)cur_value), dv = *((const int *)def_value);
 		if (cv == dv)
 			printf("  %s: %s\n", option, cv == 1 ? "true" : "false");
 		else
@@ -105,7 +106,8 @@ print_config_value(const char *option, void *cur_value, void *def_value,
 	}
 
 	else if (type == DUMP_CONFIG_CHR) {
-		char cv = *((char *)cur_value), dv = *((char *)def_value);
+		const char cv =
+			*((const char *)cur_value), dv = *((const char *)def_value);
 		if (cv == dv)
 			printf("  %s: '%c'\n", option, cv);
 		else
@@ -114,7 +116,8 @@ print_config_value(const char *option, void *cur_value, void *def_value,
 	}
 
 	else { /* CONFIG_BOOL_INT */
-		int cv = *((int *)cur_value), dv = *((int *)def_value);
+		const int cv =
+			*((const int *)cur_value), dv = *((const int *)def_value);
 		if (cv == dv)
 			printf("  %s: %d\n", option, cv);
 		else
@@ -299,15 +302,15 @@ gen_term_title_str(const int value)
 static int
 dump_config(void)
 {
-	puts(_("The following is the list of options (as defined in the configuration "
-		"file) and their current values. Whenever a value differs from the "
-		"default, the entry is highlighted and the default value is displayed "
-		"in square brackets.\n"));
+	puts(_("The following is the list of options (as defined in the "
+		"configuration file)\nalong with their current values. Whenever a "
+		"value differs from the default,\nthe entry is highlighted, and the "
+		"default value is shown in square brackets.\n"));
 
 	char *start_path = NULL, *ws_names = NULL;
 	get_start_path_and_ws_names(&start_path, &ws_names);
 
-	char *s = NULL;
+	const char *s = NULL;
 	int n = 0;
 
 	n = DEF_APPARENT_SIZE;
@@ -365,7 +368,7 @@ dump_config(void)
 	print_config_value("cpCmd", &conf.cp_cmd, &n, DUMP_CONFIG_INT);
 
 	s = gen_default_answer_value_str(0);
-	char *cur_da_value = gen_default_answer_value_str(1);
+	const char *cur_da_value = gen_default_answer_value_str(1);
 	print_config_value("DefaultAnswer", cur_da_value, s, DUMP_CONFIG_STR);
 
 	print_config_value("DesktopNotifications",
@@ -591,7 +594,7 @@ dump_config(void)
 		DUMP_CONFIG_BOOL);
 #endif /* !_NO_HIGHLIGHT */
 
-	char *ss = get_tab_comp_mode_str();
+	const char *ss = get_tab_comp_mode_str();
 	print_config_value("TabCompletionMode", ss,
 #ifndef _NO_FZF
 		(bin_flags & FZF_BIN_OK) ? "fzf" : "standard",
