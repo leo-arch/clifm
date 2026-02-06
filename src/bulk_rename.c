@@ -119,7 +119,7 @@ write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
 	for (size_t i = 1; (*args)[i]; i++) {
 		/* Dequote filename, if necessary */
 		if (strchr((*args)[i], '\\')) {
-			char *deq_file = unescape_str((*args)[i], 0);
+			char *deq_file = unescape_str((*args)[i]);
 			if (!deq_file) {
 				xerror(_("br: '%s': Error unescaping filename\n"), (*args)[i]);
 				press_any_key_to_continue(0);

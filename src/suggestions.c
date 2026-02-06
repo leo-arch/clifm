@@ -1568,7 +1568,7 @@ check_prompts(char *word, const size_t len)
 	size_t l = len;
 
 	if (strchr(word, '\\')) {
-		q = unescape_str(word, 0);
+		q = unescape_str(word);
 		w = q ? q : word;
 		l = w == q ? strlen(w) : len;
 	}
@@ -1634,7 +1634,7 @@ check_workspaces(char *word, size_t wlen, const int type)
 	size_t l = wlen;
 
 	if (strchr(word, '\\')) {
-		q = unescape_str(word, 0);
+		q = unescape_str(word);
 		w = q ? q : word;
 		l = w == q ? strlen(w) : wlen;
 	}
@@ -1696,7 +1696,7 @@ check_profiles(char *word, const size_t len)
 	size_t l = len;
 
 	if (strchr(word, '\\')) {
-		q = unescape_str(word, 0);
+		q = unescape_str(word);
 		w = q ? q : word;
 		l = w == q ? strlen(w) : len;
 	}
@@ -1751,7 +1751,7 @@ check_remotes(char *word, const size_t len)
 	size_t l = len;
 
 	if (strchr(word, '\\')) {
-		q = unescape_str(word, 0);
+		q = unescape_str(word);
 		w = q ? q : word;
 		l = w == q ? strlen(w) : len;
 	}
@@ -1786,7 +1786,7 @@ check_color_schemes(char *word, const size_t len)
 	size_t l = len;
 
 	if (strchr(word, '\\')) {
-		q = unescape_str(word, 0);
+		q = unescape_str(word);
 		w = q ? q : word;
 		l = w == q ? strlen(w) : len;
 	}
@@ -1822,7 +1822,7 @@ check_bookmark_names(char *word, const size_t len)
 	size_t l = len - prefix;
 
 	if (strchr(word + prefix, '\\')) {
-		q = unescape_str(word + prefix, 0);
+		q = unescape_str(word + prefix);
 		w = q ? q : word + prefix;
 		l = w == q ? strlen(w) : len;
 	}
@@ -1871,7 +1871,7 @@ check_backdir(char *start)
 		*q = '\0';
 
 	char *lb = start + 3;
-	char *ds = strchr(lb, '\\') ? unescape_str(lb, 0) : lb;
+	char *ds = strchr(lb, '\\') ? unescape_str(lb) : lb;
 
 	/* Find the query string in the list of parent directories. */
 	char *p = ds ? (conf.case_sens_path_comp == 1 ? strstr(bk_cwd, ds)

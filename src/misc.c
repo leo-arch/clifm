@@ -107,7 +107,7 @@ get_newname(const char *msg, char *old_name, int *quoted)
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
 
-	char *n = (old_name && *old_name) ? unescape_str(old_name, 0) : NULL;
+	char *n = (old_name && *old_name) ? unescape_str(old_name) : NULL;
 	char *input = secondary_prompt((msg && *msg) ? msg : "> ",
 		n ? n : NULL);
 	free(n);
@@ -127,7 +127,7 @@ get_newname(const char *msg, char *old_name, int *quoted)
 		goto END;
 	}
 
-	char *deq = unescape_str(p, 0);
+	char *deq = unescape_str(p);
 	char *tmp = deq ? deq : p;
 
 	size_t len = strlen(tmp);
@@ -642,7 +642,7 @@ new_instance(char *dir, int sudo)
 		return errno;
 #endif /* !__HAIKU__ */
 
-	char *deq_dir = unescape_str(dir, 0);
+	char *deq_dir = unescape_str(dir);
 	if (!deq_dir) {
 		free(sudo_prog);
 		xerror(_("%s: '%s': Error unescaping filename\n"), PROGRAM_NAME, dir);
@@ -1842,7 +1842,7 @@ pin_directory(char *dir)
 	if (!dir || !*dir)
 		return FUNC_FAILURE;
 
-	char *d = unescape_str(dir, 0);
+	char *d = unescape_str(dir);
 	if (!d)
 		return FUNC_FAILURE;
 

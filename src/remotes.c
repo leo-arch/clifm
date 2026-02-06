@@ -62,7 +62,7 @@ dequote_remote_name(char *name)
 {
 	char *deq = NULL;
 	if (strchr(name, '\\')) {
-		deq = unescape_str(name, 0);
+		deq = unescape_str(name);
 		if (deq) {
 			xstrsncpy(name, deq, strlen(deq) + 1);
 			free(deq);

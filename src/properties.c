@@ -534,7 +534,7 @@ set_file_perms(char **args)
 	for (size_t i = 1; args[i]; i++) {
 		if (!strchr(args[i], '\\'))
 			continue;
-		char *tmp = unescape_str(args[i], 0);
+		char *tmp = unescape_str(args[i]);
 		if (tmp) {
 			free(args[i]);
 			args[i] = tmp;
@@ -1933,7 +1933,7 @@ properties_function(char **args, const int follow_link)
 
 	for (i = 0; args[i]; i++) {
 		if (strchr(args[i], '\\')) {
-			char *deq_file = unescape_str(args[i], 0);
+			char *deq_file = unescape_str(args[i]);
 			if (!deq_file) {
 				xerror(_("p: '%s': Cannot unescape filename\n"), args[i]);
 				exit_status = FUNC_FAILURE;

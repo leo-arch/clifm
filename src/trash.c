@@ -367,7 +367,7 @@ remove_from_trash_params(char **args)
 	for (i = 0; args[i]; i++) {
 		char *d = NULL;
 		if (strchr(args[i], '\\'))
-			d = unescape_str(args[i], 0);
+			d = unescape_str(args[i]);
 
 		const int ret = remove_file_from_trash(d ? d : args[i]);
 		if (ret != FUNC_SUCCESS)
@@ -818,7 +818,7 @@ untrash_files(char **args)
 	for (size_t i = 0; args[i]; i++) {
 		char *d = NULL;
 		if (strchr(args[i], '\\'))
-			d = unescape_str(args[i], 0);
+			d = unescape_str(args[i]);
 
 		if (untrash_file(d ? d : args[i]) != FUNC_SUCCESS)
 			status = FUNC_FAILURE;
@@ -1062,7 +1062,7 @@ list_ok_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 		char *p = args[trashed[i]];
 		if (strchr(args[trashed[i]], '\\')
 		/* cppcheck-suppress redundantInitialization */
-		&& !(p = unescape_str(args[trashed[i]], 0)) ) {
+		&& !(p = unescape_str(args[trashed[i]])) ) {
 			xerror(_("trash: '%s': Error unescaping filename\n"),
 				args[trashed[i]]);
 			continue;
@@ -1099,7 +1099,7 @@ ask_for_confirmation(char **args)
 	fputs(_("File(s) to be trashed:\n"), stdout);
 
 	for (i = 1; args[i]; i++) {
-		char *name = unescape_str(args[i], 0);
+		char *name = unescape_str(args[i]);
 		if (!name)
 			name = savestring(args[i], strlen(args[i]));
 
@@ -1144,7 +1144,7 @@ trash_files_args(char **args)
 			break;
 		}
 
-		char *deq_file = unescape_str(args[i], 0);
+		char *deq_file = unescape_str(args[i]);
 		if (!deq_file) {
 			xerror(_("trash: '%s': Error unescaping filename\n"), args[i]);
 			continue;

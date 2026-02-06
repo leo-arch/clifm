@@ -990,7 +990,7 @@ my_rl_path_completion(const char *text, int state)
 	/* Dequote string to be completed (text), if necessary. */
 	if (strchr(text, '\\')) {
 		char *p = savestring(text, strlen(text));
-		tmp_text = unescape_str(p, 0);
+		tmp_text = unescape_str(p);
 		free(p);
 		if (!tmp_text)
 			return NULL;
@@ -2313,7 +2313,7 @@ rl_glob(const char *text)
 		last_word = rl_line_buffer;
 
 	char *str = (last_word && *last_word)
-		? unescape_str(last_word, 0) : NULL;
+		? unescape_str(last_word) : NULL;
 	const char *word = str ? str : NULL;
 
 	int char_copy = -1;
@@ -2375,7 +2375,7 @@ rl_trashed_files(const char *text)
 		return NULL;
 	}
 
-	char *p = unescape_str((char *)text, 0);
+	char *p = unescape_str(text);
 	const char *f = p ? p : text;
 
 	char **tfiles = xnmalloc((size_t)n + 2, sizeof(char *));
@@ -2480,7 +2480,7 @@ tag_entries_generator(const char *text, int state)
 
 		char *p = NULL, *q = name;
 		if (strchr(name, '\\')) {
-			p = unescape_str(name, 0);
+			p = unescape_str(name);
 			q = p;
 		}
 
@@ -3162,7 +3162,7 @@ complete_bookmark_names(const char *text, const size_t words_n, int *exit_status
 	if (suggestion.type != FILE_SUG)
 		rl_attempted_completion_over = 1;
 #endif /* !_NO_SUGGESTIONS */
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
 	free(p);
 
@@ -3411,7 +3411,7 @@ complete_tag_names_t(const char *text)
 {
 	cur_comp_type = TCMP_TAGS_T;
 
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches = rl_completion_matches(p ? p : text, &tags_generator);
 	free(p);
 
@@ -3451,7 +3451,7 @@ complete_tags(const char *text)
 static char **
 complete_bookmark_paths(const char *text)
 {
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches = rl_completion_matches(p ? p : text, &bm_paths_generator);
 	free(p);
 
@@ -3468,7 +3468,7 @@ complete_bookmark_paths(const char *text)
 static char **
 complete_bookmark_names_b(const char *text)
 {
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
 	free(p);
 
@@ -3525,7 +3525,7 @@ complete_dirhist(const char *text, const size_t words_n)
 	if (words_n > 2)
 		return NULL;
 
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches = rl_completion_matches(p ? p : text, &dirhist_generator);
 	free(p);
 
@@ -3547,7 +3547,7 @@ complete_backdir(const char *text, const size_t words_n)
 		return NULL;
 
 	int n = 0;
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches = get_bd_matches(p ? p : text, &n, BD_TAB);
 	free(p);
 
@@ -3567,7 +3567,7 @@ complete_workspaces(const char *text)
 
 	rl_sort_completion_matches = 0;
 	const char *t = (*text == 'w' && text[1] == ':') ? text + 2 : text;
-	char *p = unescape_str(t, 0);
+	char *p = unescape_str(t);
 
 	const enum comp_type ct = cur_comp_type;
 	cur_comp_type = t != text ? TCMP_WS_PREFIX : TCMP_WORKSPACES;
@@ -3610,7 +3610,7 @@ static char **
 complete_net(const char *text)
 {
 	rl_attempted_completion_over = 1;
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches = rl_completion_matches(p ? p : text, &nets_generator);
 	free(p);
 
@@ -3671,7 +3671,7 @@ complete_profiles(const char *text, const size_t words_n)
 	|| strncmp(lb, "profile add ", 12) == 0 || strncmp(lb, "profile list ", 13) == 0)
 		return NULL;
 
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches = rl_completion_matches(p ? p : text, &profiles_generator);
 	free(p);
 
@@ -3690,7 +3690,7 @@ complete_colorschemes(const char *text, const size_t words_n)
 	if (words_n != 2)
 		return NULL;
 
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches = rl_completion_matches(p ? p : text, &cschemes_generator);
 	free(p);
 
@@ -3705,7 +3705,7 @@ static char **
 complete_file_templates(char *text)
 {
 	rl_attempted_completion_over = 1;
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches =
 		rl_completion_matches(p ? p : text, &file_templates_generator);
 	free(p);
@@ -3756,7 +3756,7 @@ complete_prompt_names(const char *text, const size_t words_n)
 	if (words_n > 3)
 		return NULL;
 
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches = rl_completion_matches(p ? p : text, &prompts_generator);
 	free(p);
 
@@ -3879,7 +3879,7 @@ complete_eln(const char *text, const size_t words_n, char *cmd_name)
 static char **
 complete_history(const char *text)
 {
-	char *p = unescape_str(text, 0);
+	char *p = unescape_str(text);
 	char **matches = rl_completion_matches(p ? p : text, &hist_generator);
 	free(p);
 	if (matches)
@@ -4382,7 +4382,8 @@ set_rl_input_file(void)
 static char *
 unescape_str_wrapper(char *text, int mt)
 {
-	return unescape_str((const char *)text, mt);
+	UNUSED(mt);
+	return unescape_str((const char *)text);
 }
 
 int

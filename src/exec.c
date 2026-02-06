@@ -149,7 +149,7 @@ export_var_function(char **args)
 	for (size_t i = 0; args[i]; i++) {
 		/* ARG might have been escaped by parse_input_str(), in the command
 		 * and parameter substitution block. Let's deescape it. */
-		char *ds = unescape_str(args[i], 0);
+		char *ds = unescape_str(args[i]);
 		if (!ds) {
 			xerror("%s\n", _("export: Error unescaping argument"));
 			status = FUNC_FAILURE;
@@ -873,7 +873,7 @@ toggle_exec_func(char **args)
 	for (size_t i = 1; args[i]; i++) {
 		struct stat attr;
 		if (strchr(args[i], '\\')) {
-			char *tmp = unescape_str(args[i], 0);
+			char *tmp = unescape_str(args[i]);
 			if (tmp) {
 				xstrsncpy(args[i], tmp, strlen(tmp) + 1);
 				free(tmp);
@@ -1149,7 +1149,7 @@ expand_and_deescape(char **arg, char **deq_str)
 
 	/* Deescape the string (only if filename) */
 	if (strchr(*arg, '\\'))
-		*deq_str = unescape_str(*arg, 0);
+		*deq_str = unescape_str(*arg);
 }
 
 static int
@@ -1278,7 +1278,7 @@ check_auto_second(char **args)
 		return (-1);
 
 	if (strchr(tmp, '\\')) {
-		char *dstr = unescape_str(tmp, 0);
+		char *dstr = unescape_str(tmp);
 		if (dstr) {
 			free(tmp);
 			tmp = dstr;
@@ -1356,7 +1356,7 @@ check_comments(char *name)
 		return FUNC_FAILURE;
 
 	char *p = (*name == '\\' || strchr(name + 1, '\\'))
-		? unescape_str(name, 0) : NULL;
+		? unescape_str(name) : NULL;
 	char * n = p ? p : name;
 
 	/* Skip lines starting with '#' if there is no such filename
@@ -1605,7 +1605,7 @@ is_path(char *str)
 		return 0;
 
 	if (strchr(str, '\\')) {
-		char *p = unescape_str(str, 0);
+		char *p = unescape_str(str);
 		if (!p)
 			return 0;
 		const int ret = access(p, F_OK);

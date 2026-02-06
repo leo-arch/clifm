@@ -1752,7 +1752,7 @@ set_prompt(char *name)
 		return FUNC_FAILURE;
 	}
 
-	char *p = unescape_str(name, 0);
+	char *p = unescape_str(name);
 	if (!p) {
 		xerror(_("prompt: %s: Error unescaping string\n"), name);
 		return FUNC_FAILURE;

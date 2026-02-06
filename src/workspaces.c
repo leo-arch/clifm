@@ -266,15 +266,15 @@ switch_workspace(const int tmp_ws)
  * or -1 if no workspace is named NAME, if error, or if NAME is already
  * the current workspace */
 static int
-get_workspace_by_name(char *name, const int check_current)
+get_workspace_by_name(const char *name, const int check_current)
 {
 	if (!name || !*name)
 		return (-1);
 
 	/* CHECK_CURRENT is zero when coming from unset_workspace(), in which
 	 * case name is already unescapeed. */
-	char *p = check_current == 1 ? unescape_str(name, 0) : NULL;
-	char *q = p ? p : name;
+	char *p = check_current == 1 ? unescape_str(name) : NULL;
+	const char *q = p ? p : name;
 
 	int n = MAX_WS;
 	while (--n >= 0) {
@@ -296,11 +296,11 @@ get_workspace_by_name(char *name, const int check_current)
 }
 
 static int
-unset_workspace(char *str)
+unset_workspace(const char *str)
 {
 	int n = -1;
 
-	char *name = unescape_str(str, 0);
+	char *name = unescape_str(str);
 	if (!name) {
 		xerror("ws: '%s': Error unescaping name\n", str);
 		return FUNC_FAILURE;

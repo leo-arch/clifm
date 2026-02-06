@@ -80,7 +80,7 @@ bm_prompt(const int print_header)
 		flags &= ~IN_BOOKMARKS_SCREEN;
 		free(bm);
 	} else {
-		char *tmp = strchr(bm, '\\') ? unescape_str(bm, 0) : NULL;
+		char *tmp = strchr(bm, '\\') ? unescape_str(bm) : NULL;
 		cmd = xnmalloc(2, sizeof(char *));
 		cmd[0] = tmp ? tmp : bm;
 		cmd[1] = NULL;
@@ -325,7 +325,7 @@ static int
 bm_open(char **cmd)
 {
 	int exit_status = FUNC_FAILURE;
-	char *p = unescape_str(cmd[1], 0);
+	char *p = unescape_str(cmd[1]);
 	if (!p)
 		p = cmd[1];
 
@@ -465,7 +465,7 @@ bookmark_add(char *file, char *name, char *shortcut)
 		return FUNC_SUCCESS;
 
 	int exit_status = FUNC_FAILURE;
-	char *p = unescape_str(name, 0);
+	char *p = unescape_str(name);
 	const char *n = p ? p : name;
 	char *q = NULL;
 	const char *s = NULL;
@@ -474,7 +474,7 @@ bookmark_add(char *file, char *name, char *shortcut)
 		goto ERROR;
 
 	if (shortcut) {
-		q = unescape_str(shortcut, 0);
+		q = unescape_str(shortcut);
 		s = q ? q : shortcut;
 
 		if (check_bm_shortcut(s, 1) != -1)
@@ -543,7 +543,7 @@ add_bookmark(char **cmd)
 		return FUNC_FAILURE;
 	}
 
-	char *p = unescape_str(cmd[0], 0);
+	char *p = unescape_str(cmd[0]);
 	if (!p) {
 		xerror(_("bookmarks: '%s': Error unescaping filename\n"), cmd[0]);
 		return FUNC_FAILURE;
@@ -570,7 +570,7 @@ mark_bookmarks_for_deletion(char **args, int *exit_status)
 	size_t counter = 0;
 
 	for (size_t i = 0; args[i]; i++) {
-		char *p = unescape_str(args[i], 0);
+		char *p = unescape_str(args[i]);
 		char *name = p ? p : args[i];
 		int index = -1;
 

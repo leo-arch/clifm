@@ -396,7 +396,7 @@ bulk_remove(char *s1, char *s2)
 
 	char dpath[PATH_MAX + 1]; *dpath = '\0';
 	if (s1 && *s1 && *s1 != ':' && strchr(s1, '\\')) {
-		char *tmp = unescape_str(s1, 0);
+		char *tmp = unescape_str(s1);
 		if (tmp) {
 			xstrsncpy(dpath, tmp, sizeof(dpath));
 			free(tmp);

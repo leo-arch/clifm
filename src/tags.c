@@ -106,7 +106,7 @@ print_tagged_file(char *name, const char *tag)
 		q = home_tilde(tmp, &free_name);
 
 	if (strchr(name, '\\')) {
-		char *d = unescape_str(name, 0);
+		char *d = unescape_str(name);
 		if (d) {
 			xstrsncpy(name, d, strlen(d) + 1);
 			free(d);
@@ -128,7 +128,7 @@ static int
 list_files_in_tag(char *name)
 {
 	if (strchr(name, '\\')) {
-		char *p = unescape_str(name, 0);
+		char *p = unescape_str(name);
 		if (p) {
 			xstrsncpy(name, p, strlen(p) + 1);
 			free(p);
@@ -231,7 +231,7 @@ is_tag(char *name)
 		return 0;
 
 	if (strchr(name, '\\')) {
-		char *deq = unescape_str(name, 0);
+		char *deq = unescape_str(name);
 		if (deq) {
 			xstrsncpy(name, deq, strlen(deq) + 1);
 			free(deq);
@@ -300,7 +300,7 @@ list_tags(char **args)
 	for (i = 2; args[i]; i++) {
 		if (!is_tag(args[i])) {
 			/* 'tag list FILENAME' */
-			char *p = unescape_str(args[i], 0);
+			char *p = unescape_str(args[i]);
 
 			struct stat a;
 			if (lstat(p ? p : args[i], &a) == -1) {
@@ -351,7 +351,7 @@ create_tags(char **args)
 		char dir[PATH_MAX + 1];
 		const char *p = strchr(args[i], '\\');
 		if (p) {
-			char *deq = unescape_str(args[i], 0);
+			char *deq = unescape_str(args[i]);
 			if (deq) {
 				free(args[i]);
 				args[i] = deq;
@@ -393,7 +393,7 @@ remove_tags(char **args)
 	for (size_t i = 2; args[i]; i++) {
 		const char *p = strchr(args[i], '\\');
 		if (p) {
-			char *deq = unescape_str(args[i], 0);
+			char *deq = unescape_str(args[i]);
 			if (deq) {
 				free(args[i]);
 				args[i] = deq;
@@ -432,7 +432,7 @@ tag_file(char *name, char *tag)
 	int new_tag = 0;
 	char *p = NULL;
 	if (strchr(tag, '\\'))
-		p = unescape_str(tag, 0);
+		p = unescape_str(tag);
 	char dir[PATH_MAX + 1];
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, p ? p : tag);
 
@@ -528,7 +528,7 @@ tag_files(char **args)
 
 			char *p = NULL;
 			if (strchr(args[j], '\\'))
-				p = unescape_str(args[j], 0);
+				p = unescape_str(args[j]);
 
 			if (tag_file(p ? p : args[j], args[tag_names[i]] + 1) != FUNC_SUCCESS)
 				if (n > 0) --n;
@@ -556,7 +556,7 @@ untag(char **args, const size_t n, size_t *t)
 		if (i == n || (*args[i] == ':' && *(args[1] + 1)))
 			continue;
 
-		char *ds = unescape_str(args[n] + 1, 0);
+		char *ds = unescape_str(args[n] + 1);
 		char dir[PATH_MAX + 1];
 		snprintf(dir, sizeof(dir), "%s/%s", tags_dir, ds ? ds : args[n] + 1);
 		free(ds);
@@ -566,7 +566,7 @@ untag(char **args, const size_t n, size_t *t)
 			return print_no_such_tag(args[n] + 1);
 
 		char f[PATH_MAX + NAME_MAX];
-		char *deq = unescape_str(args[i], 0);
+		char *deq = unescape_str(args[i]);
 		char *p = deq ? deq : args[i];
 		char *exp = NULL;
 		if (*p == '~')

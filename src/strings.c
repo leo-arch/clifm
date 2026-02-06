@@ -1727,7 +1727,7 @@ expand_workspace(char **name)
 		return FUNC_SUCCESS;
 	}
 
-	char *deq_str = unescape_str(ws_name, 0);
+	char *deq_str = unescape_str(ws_name);
 	const char *tmp_name = deq_str ? deq_str : ws_name;
 
 	for (size_t i = 0; i < MAX_WS; i++) {
@@ -1757,7 +1757,7 @@ static int
 expand_bm_name(char **name)
 {
 	int bm_exp = FUNC_FAILURE;
-	char *p = unescape_str(*name + 2, 0);
+	char *p = unescape_str(*name + 2);
 	const char *n = p ? p : *name + 2;
 
 	for (size_t j = 0; j < bm_n; j++) {
@@ -2309,7 +2309,7 @@ expand_regex(char ***substr)
 		const char *p = strchr((*substr)[i], '\\');
 		char *dstr = NULL;
 		if (p)
-			dstr = unescape_str((*substr)[i], 0);
+			dstr = unescape_str((*substr)[i]);
 
 		const char *t = dstr ? dstr : (*substr)[i];
 
@@ -2398,7 +2398,7 @@ static int
 expand_symlink(char **substr)
 {
 	struct stat a;
-	char *name = strchr(*substr, '\\') ? unescape_str(*substr, 0) : *substr;
+	char *name = strchr(*substr, '\\') ? unescape_str(*substr) : *substr;
 	if (!name)
 		return 0;
 
@@ -3245,9 +3245,8 @@ get_substr(const char *str, const char ifs, const int fproc)
 /* This function simply unescapes whatever escaped chars it founds in
  * TEXT. Returns a string containing TEXT without escape sequences. */
 char *
-unescape_str(const char *text, int mt)
+unescape_str(const char *text)
 {
-	UNUSED(mt);
 	if (!text || !*text)
 		return NULL;
 

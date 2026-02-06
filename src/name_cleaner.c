@@ -486,7 +486,7 @@ bleach_files(char **names)
 
 	size_t f = 0;
 	for (size_t i = 1; names[i]; i++) {
-		char *dstr = unescape_str(names[i], 0);
+		char *dstr = unescape_str(names[i]);
 		if (!dstr) {
 			xerror(_("bleach: '%s': Error unescaping filename\n"), names[i]);
 			continue;

@@ -182,7 +182,7 @@ static int
 chdir_search_path(char **search_path, const char *arg)
 {
 	if (strchr(*search_path, '\\')) {
-		char *deq_dir = unescape_str(*search_path, 0);
+		char *deq_dir = unescape_str(*search_path);
 		if (!deq_dir) {
 			xerror(_("search: %s: Error unescaping filename\n"), arg);
 			return FUNC_FAILURE;
@@ -647,7 +647,7 @@ err_regex_no_match(const int regex_found, const char *arg)
 	if (input && input != rl_line_buffer) {
 		/* Input string contains at least two slashes. It looks like a path:
 		 * let's err like it was. */
-		char *p = unescape_str(rl_line_buffer, 0);
+		char *p = unescape_str(rl_line_buffer);
 		xerror("cd: '%s': %s\n", p ? p : rl_line_buffer, strerror(ENOENT));
 		free(p);
 	} else if (search_flags & NO_GLOB_CHAR) {
@@ -964,7 +964,7 @@ err_glob_no_match(const char *arg)
 	if (input && input != rl_line_buffer) {
 		/* Input string contains two slashes: it looks like a path, so let's
 		 * err like it was. */
-		char *p = unescape_str(rl_line_buffer, 0);
+		char *p = unescape_str(rl_line_buffer);
 		xerror("cd: '%s': %s\n", p ? p : rl_line_buffer, strerror(ENOENT));
 		free(p);
 		return FUNC_FAILURE;

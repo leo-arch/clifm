@@ -281,7 +281,7 @@ backdir(char *str)
 	if (help_or_root(str) == FUNC_SUCCESS)
 		return FUNC_SUCCESS;
 
-	char *deq_str = str ? unescape_str(str, 0) : NULL;
+	char *deq_str = str ? unescape_str(str) : NULL;
 	if (str) {
 		const int ret = backdir_directory(deq_str, str);
 		if (ret != BD_CONTINUE) {
@@ -451,7 +451,7 @@ change_to_path(char *new_path, const int cd_flag)
 	}
 
 	if (strchr(new_path, '\\')) {
-		char *deq_path = unescape_str(new_path, 0);
+		char *deq_path = unescape_str(new_path);
 		if (deq_path) {
 			/* deq_path is guaranteed to be shorter than new_path. */
 			xstrsncpy(new_path, deq_path, strlen(deq_path) + 1);

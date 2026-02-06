@@ -53,7 +53,7 @@ ask_user_for_path(void)
 	&& (p = remove_quotes(ext_path)))
 		memmove(ext_path, p, strlen(p) + 1);
 
-	char *unesc_path = unescape_str(ext_path, 0);
+	char *unesc_path = unescape_str(ext_path);
 	if (unesc_path) {
 		free(ext_path);
 		ext_path = unesc_path;
@@ -316,7 +316,7 @@ handle_iso(char *file)
 	char sel_op = get_operation(OP_ISO);
 
 	if (strchr(file, '\\')) {
-		char *deq_file = unescape_str(file, 0);
+		char *deq_file = unescape_str(file);
 		if (deq_file) {
 			xstrsncpy(file, deq_file, strlen(deq_file) + 1);
 			free(deq_file);
@@ -513,7 +513,7 @@ static int
 zstandard(char *in_file, char *out_file, const char mode, const char op)
 {
 	int exit_status = FUNC_SUCCESS;
-	char *deq_file = unescape_str(in_file, 0);
+	char *deq_file = unescape_str(in_file);
 	if (!deq_file) {
 		xerror(_("archiver: '%s': Error unescaping filename\n"), in_file);
 		return FUNC_FAILURE;
@@ -671,7 +671,7 @@ compress_others(char **args, const char *name)
 	n += 3;
 
 	for (i = 1; args[i]; i++) {
-		char *p = unescape_str(args[i], 0);
+		char *p = unescape_str(args[i]);
 		if (!p)
 			continue;
 		tcmd[n++] = savestring(p, strlen(p));
@@ -727,7 +727,7 @@ check_not_compressed(char **args)
 	for (size_t i = 1; args[i]; i++) {
 		char *deq = NULL;
 		if (strchr(args[i], '\\')) {
-			deq = unescape_str(args[i], 0);
+			deq = unescape_str(args[i]);
 			xstrsncpy(args[i], deq, strlen(deq) + 1);
 			free(deq);
 		}

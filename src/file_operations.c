@@ -246,7 +246,7 @@ static char *
 construct_dup_destination(char *source, const char *dest_dir)
 {
 	if (strchr(source, '\\')) {
-		char *deq_str = unescape_str(source, 0);
+		char *deq_str = unescape_str(source);
 		if (!deq_str) {
 			xerror(_("dup: '%s': Error unescaping filename\n"), source);
 			return NULL;
@@ -836,7 +836,7 @@ open_function(char **cmd)
 
 	if ((*cmd[0] == 'o' && (!cmd[0][1] || strcmp(cmd[0], "open") == 0))
 	&& strchr(cmd[1], '\\')) {
-		char *deq_path = unescape_str(cmd[1], 0);
+		char *deq_path = unescape_str(cmd[1]);
 		if (!deq_path) {
 			xerror(_("%s: '%s': Error unescaping filename\n"), errname, cmd[1]);
 			return FUNC_FAILURE;
@@ -960,7 +960,7 @@ edit_link(char *link)
 
 	/* Dequote the filename, if necessary. */
 	if (strchr(link, '\\')) {
-		char *tmp = unescape_str(link, 0);
+		char *tmp = unescape_str(link);
 		if (!tmp) {
 			xerror(_("le: '%s': Error unescaping filename\n"), link);
 			return FUNC_FAILURE;
@@ -1180,7 +1180,7 @@ symlink_file(char **args)
 		args[0][len - 1] = '\0';
 
 	if (strchr(args[0], '\\')) {
-		char *deq = unescape_str(args[0], 0);
+		char *deq = unescape_str(args[0]);
 		if (deq) {
 			free(args[0]);
 			args[0] = deq;
@@ -1188,7 +1188,7 @@ symlink_file(char **args)
 	}
 
 	if (args[1] && strchr(args[1], '\\')) {
-		char *deq = unescape_str(args[1], 0);
+		char *deq = unescape_str(args[1]);
 		if (deq) {
 			free(args[1]);
 			args[1] = deq;
@@ -1435,7 +1435,7 @@ get_rename_dest_filename(char *name, int *status)
 
 	/* Check source file existence. */
 	struct stat a;
-	char *p = unescape_str(name, 0);
+	char *p = unescape_str(name);
 	const int ret = lstat(p ? p : name, &a);
 	free(p);
 
@@ -1493,7 +1493,7 @@ construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 
 	for (; cmd[i]; i++) {
 		if (!*cmd[i] /* File skipped by the user in the confirmation prompt. */
-		|| !(p = unescape_str(cmd[i], 0)))
+		|| !(p = unescape_str(cmd[i])))
 			continue;
 		tcmd[n] = savestring(p, strlen(p));
 		free(p);
@@ -1523,7 +1523,7 @@ construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 static int
 handle_nodir_overwrite(char *arg, const char *cmd_name)
 {
-	char *file = unescape_str(arg, 0);
+	char *file = unescape_str(arg);
 	if (!file)
 		return 0;
 
@@ -1574,7 +1574,7 @@ check_overwrite(char **args, const int force, size_t *skipped)
 		(dest_len > 1 && dest[dest_len - 1] == '/');
 
 	for (size_t i = 1; i < files_num; i++) {
-		char *p = unescape_str(args[i], 0);
+		char *p = unescape_str(args[i]);
 		if (!p)
 			continue;
 
@@ -1851,7 +1851,7 @@ remove_files(char **args)
 		if (cwd == 0)
 			cwd = is_file_in_cwd(args[i]);
 
-		char *tmp = unescape_str(args[i], 0);
+		char *tmp = unescape_str(args[i]);
 		if (!tmp) {
 			xerror(_("%s: '%s': Error unescaping filename\n"), err_name, args[i]);
 			continue;
@@ -2004,7 +2004,7 @@ batch_link(char **args)
 	int exit_status = FUNC_SUCCESS;
 
 	for (size_t i = 0; args[i]; i++) {
-		char *filename = unescape_str(args[i], 0);
+		char *filename = unescape_str(args[i]);
 		if (!filename) {
 			exit_status = FUNC_FAILURE;
 			xerror(_("bl: '%s': Error unescaping name\n"), args[i]);

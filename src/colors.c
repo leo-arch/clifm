@@ -897,7 +897,7 @@ set_colorscheme(char *arg)
 	if (!arg || !*arg)
 		return FUNC_FAILURE;
 
-	char *p = unescape_str(arg, 0);
+	char *p = unescape_str(arg);
 	const char *q = p ? p : arg;
 
 	size_t cs_found = 0;

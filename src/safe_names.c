@@ -189,7 +189,7 @@ validate_filename(char **name, const int is_md)
 	if (!*name || !*(*name))
 		return 0;
 
-	char *deq = unescape_str(*name, 0);
+	char *deq = unescape_str(*name);
 	if (!deq) {
 		xerror(_("%s: '%s': Error unescaping filename\n"),
 			is_md ? "md" : "new", *name);

@@ -744,7 +744,7 @@ static int
 check_dir(char *param, const int mode, int *ret)
 {
 	char *dir = (mode == NO_SUG_JUMP && strchr(param, '\\'))
-		? unescape_str(param, 0) : param;
+		? unescape_str(param) : param;
 
 	struct stat a;
 	if (lstat(dir, &a) == -1) {

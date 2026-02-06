@@ -567,7 +567,7 @@ check_sel_path(char **sel_path)
 		(*sel_path)[len - 1] = '\0';
 
 	if (strchr(*sel_path, '\\')) {
-		char *deq = unescape_str(*sel_path, 0);
+		char *deq = unescape_str(*sel_path);
 		if (deq) {
 			xstrsncpy(*sel_path, deq, strlen(deq) + 1);
 			free(deq);
@@ -692,7 +692,7 @@ select_filename(char *arg, const char *dir, int *errors)
 	int new_sel = 0;
 
 	if (strchr(arg, '\\')) {
-		char *deq_str = unescape_str(arg, 0);
+		char *deq_str = unescape_str(arg);
 		if (deq_str) {
 			xstrsncpy(arg, deq_str, strlen(deq_str) + 1);
 			free(deq_str);

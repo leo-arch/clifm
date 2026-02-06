@@ -485,7 +485,7 @@ normalize_path(char *src, const size_t src_len)
 	const int is_escaped = *src == '\\';
 
 	if (strchr(src, '\\')) {
-		tmp = unescape_str(src, 0);
+		tmp = unescape_str(src);
 		if (!tmp) {
 			xerror(_("%s: '%s': Error unescaping string\n"), PROGRAM_NAME, src);
 			return NULL;
