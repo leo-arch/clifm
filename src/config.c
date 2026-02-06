@@ -3505,7 +3505,8 @@ read_config(void)
 		? DEF_MAX_NAMELEN_AUTO_RATIO : UNSET;
 
 	/* The longest possible line in the config file is StartingPath="PATH" */
-	char line[PATH_MAX + 16]; *line = '\0';
+	char line[PATH_MAX + 16];
+	memset(line, 0, sizeof(line));
 
 	if (xargs.prop_fields_str != 1)
 		*prop_fields_str = '\0';
