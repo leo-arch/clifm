@@ -618,7 +618,7 @@ launch_new_instance_cmd(char ***cmd, char **self, char **sudo_prog,
 }
 
 /* After the last line of new_instance */
-// cppcheck-suppress syntaxError
+/* cppcheck-suppress syntaxError */
 
 /* Open DIR in a new instance of the program (using TERM, set in the config
  * file, as terminal emulator). */

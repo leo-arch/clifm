@@ -1795,11 +1795,7 @@ dirhist_generator(const char *text, int state)
 				return strdup(name);
 		} else {
 			if ((conf.case_sens_path_comp == 1 ? strstr(name, text)
-#if defined(_BE_POSIX)
 			: xstrcasestr(name, text)) != NULL)
-#else
-			: xstrcasestr(name, text)) != NULL)
-#endif /* _BE_POSIX */
 				return strdup(name);
 		}
 	}

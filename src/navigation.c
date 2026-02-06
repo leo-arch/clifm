@@ -332,7 +332,7 @@ backdir(char *str)
  * current directory is explicitly changed by the user. The terminal window
  * title is changed accordingly as well, provided cwd_in_title is enabled. */
 int
-xchdir(char *dir, const int cd_flag)
+xchdir(const char *dir, const int cd_flag)
 {
 	if (!dir || !*dir) {
 		errno = ENOENT;

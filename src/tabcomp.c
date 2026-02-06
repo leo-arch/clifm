@@ -847,7 +847,7 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 	const int ret = launch_execl(cmd);
 	umask(old_mask); /* flawfinder: ignore */
 
-	if (restore_cwd == 1)
+	if (restore_cwd == 1) /* cppcheck-suppress knownConditionTrueFalse */
 		xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 	/* Restore the user's shell to its original value. */

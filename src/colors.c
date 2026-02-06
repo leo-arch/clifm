@@ -628,11 +628,11 @@ END:
 static int
 bcomp(const void *a, const void *b)
 {
-	size_t pa = *(size_t *)a;
-	const struct ext_t *pb = (const struct ext_t *)b;
+	const size_t pa = *(const size_t *)a;
+	const size_t pb_hash = ((const struct ext_t *)b)->hash;
 
-	if (pa < pb->hash) return (-1);
-	if (pa > pb->hash) return 1;
+	if (pa < pb_hash) return (-1);
+	if (pa > pb_hash) return 1;
     return 0;
 }
 
@@ -1421,7 +1421,7 @@ store_extension_line(const char *line)
 #endif /* !CLIFM_SUCKLESS */
 		return FUNC_FAILURE;
 
-	char *tmp = (def && *def) ? def : q + 1;
+	char *tmp = (def && *def) ? def : q + 1; /* cppcheck-suppress knownConditionTrueFalse */
 	const char *code = IS_COLOR_PREFIX(*tmp) ? decode_color_prefix(tmp) : tmp;
 
 	if (!code || !*code)
@@ -2752,8 +2752,8 @@ get_longest_ext_name(void)
 static int
 color_sort(const void *a, const void *b)
 {
-	struct ext_t *pa = (struct ext_t *)a;
-	struct ext_t *pb = (struct ext_t *)b;
+	const struct ext_t *pa = (const struct ext_t *)a;
+	const struct ext_t *pb = (const struct ext_t *)b;
 
 	const int ret = strcmp(pa->value, pb->value);
 	if (ret != 0)

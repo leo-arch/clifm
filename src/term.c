@@ -30,7 +30,7 @@ static struct termios bk_term_attrs;
 
 /* Set the terminal title using the OSC-2 escape sequence. */
 void
-set_term_title(char *dir)
+set_term_title(const char *dir)
 {
 	if (term_caps.term_title == 0 || conf.term_title == 0)
 		return;

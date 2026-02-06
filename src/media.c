@@ -132,16 +132,11 @@ cd_out_of_mountpoint(char *mountpoint)
 }
 
 static int
-unmount_dev(const size_t i, const int n)
+unmount_dev(const size_t n)
 {
 	if (xargs.mount_cmd == UNSET) {
 		xerror(_("%s: No mount application found. Install either "
 			"udevil or udisks2.\n"), PROGRAM_NAME);
-		return FUNC_FAILURE;
-	}
-
-	if ((unsigned int)n + (unsigned int)1 < (unsigned int)1 || n + 1 > (int)i) {
-		xerror(_("%s: %d: Invalid ELN\n"), PROGRAM_NAME, n + 1);
 		return FUNC_FAILURE;
 	}
 
@@ -302,7 +297,7 @@ list_mounted_devs(const int mode)
 
 /* Mount device and store mountpoint (at media[N]). */
 static int
-mount_dev(const int n)
+mount_dev(const size_t n)
 {
 	if (xargs.mount_cmd == UNSET) {
 		xerror(_("%s: No mount application found. Install either "
@@ -391,7 +386,7 @@ free_media(void)
 
 /* Get device information via external application */
 static int
-print_dev_info(const int n)
+print_dev_info(const size_t n)
 {
 	if (!media[n].dev || xargs.mount_cmd == UNSET)
 		return FUNC_FAILURE;
@@ -451,10 +446,11 @@ list_mountpoints_bsd(struct statfs *fslist)
 }
 #endif /* BSD || APPLE */
 
-static int
+static size_t
 get_mnt_input(const int mode, int *info)
 {
-	int n = -1;
+	size_t n = (size_t)-1;
+
 	puts(_("Enter 'q' to quit"));
 	if (xargs.mount_cmd != UNSET)
 		puts(_("Enter 'iELN' for device information. E.g.: i4"));
@@ -480,7 +476,7 @@ get_mnt_input(const int mode, int *info)
 			if (conf.autols == 1)
 				reload_dirlist();
 			free(input);
-			return (-1);
+			return (size_t)-1;
 		}
 
 		const char *p = input;
@@ -490,14 +486,14 @@ get_mnt_input(const int mode, int *info)
 		}
 
 		const int atoi_num = xatoi(p);
-		if (atoi_num <= 0 || atoi_num > (int)mp_n) {
+		if (atoi_num <= 0 || (size_t)atoi_num > mp_n) {
 			xerror(_("%s: %s: Invalid ELN\n"), PROGRAM_NAME, input);
 			free(input);
 			input = NULL;
 			continue;
 		}
 
-		n = atoi_num - 1;
+		n = (size_t)atoi_num - 1;
 	}
 
 	free(input);
@@ -505,7 +501,7 @@ get_mnt_input(const int mode, int *info)
 }
 
 static int
-print_mnt_info(const int n)
+print_mnt_info(const size_t n)
 {
 	const int exit_status = print_dev_info(n);
 
@@ -604,8 +600,6 @@ media_menu(const int mode)
 		return FUNC_FAILURE;
 	}
 
-	const size_t mp_n_bk = mp_n;
-
 	if (mode == MEDIA_MOUNT)
 		list_unmounted_devs();
 
@@ -622,7 +616,7 @@ media_menu(const int mode)
 
 	/* This should never happen: There should always be a mountpoint,
 	 * at least "/" */
-	// cppcheck-suppress knownConditionTrueFalse
+	/* cppcheck-suppress knownConditionTrueFalse */
 	if (mp_n == 0) {
 #ifdef HAVE_PROC_MOUNTS
 		printf(_("%s: There are no available %s\n"), mode == MEDIA_LIST ? "mp"
@@ -640,10 +634,10 @@ media_menu(const int mode)
 
 	putchar('\n');
 	int info = 0;
-	const int n = get_mnt_input(mode, &info);
+	const size_t n = get_mnt_input(mode, &info);
 
 	int exit_status = FUNC_SUCCESS;
-	if (n == -1)
+	if (n == (size_t)-1)
 		goto EXIT;
 
 	if (info == 1) {
@@ -662,7 +656,7 @@ media_menu(const int mode)
 			}
 		} else {
 			/* The device is mounted: unmount it */
-			int ret = unmount_dev(mp_n_bk, n);
+			int ret = unmount_dev(n);
 			if (ret == FUNC_FAILURE)
 				exit_status = FUNC_FAILURE;
 			goto EXIT;

@@ -3085,7 +3085,7 @@ parse_input_str(char *str)
  * memory, in which case FREE_BUF is set to zero.
  * Otherwise, the reduced path is copied into malloc'ed memory. */
 char *
-home_tilde(char *new_path, int *free_buf)
+home_tilde(const char *new_path, int *free_buf)
 {
 	*free_buf = 0;
 	if (home_ok == 0 || !new_path || !*new_path || !user.home)
@@ -3115,7 +3115,7 @@ home_tilde(char *new_path, int *free_buf)
 		return path_tilde;
 	}
 
-	return new_path;
+	return (char *)new_path;
 }
 
 /* Returns a pointer to a copy of the string STR, malloc'ed with size SIZE, or

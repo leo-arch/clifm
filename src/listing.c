@@ -3501,9 +3501,11 @@ list_dir(void)
 					stats.excluded++;
 					continue;
 				}
-			} else if (filter.rev == 0) {
-				stats.excluded++;
-				continue;
+			} else {
+				if (filter.rev == 0) {
+					stats.excluded++;
+					continue;
+				}
 			}
 		}
 

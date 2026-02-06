@@ -22,7 +22,7 @@ int  forth_function(char **args);
 char **get_bd_matches(const char *str, int *n, const int mode);
 void print_dirhist(char *query);
 int  pwd_function(const char *arg);
-int  xchdir(char *dir, const int cd_flag);
+int  xchdir(const char *dir, const int cd_flag);
 
 __END_DECLS
 

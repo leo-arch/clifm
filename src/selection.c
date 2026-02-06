@@ -1139,9 +1139,13 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 
 	if (desel_screen == 1) {
 		free(desel_path);
-	} else if (error == 1) {
-		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%d file(s) deselected\n"), dn);
-		print_reload_msg(NULL, NULL, _("%zu total selected file(s)\n"), sel_n);
+	} else {
+		if (error == 1) {
+			print_reload_msg(SET_SUCCESS_PTR, xs_cb,
+				_("%d file(s) deselected\n"), dn);
+			print_reload_msg(NULL, NULL,
+				_("%zu total selected file(s)\n"), sel_n);
+		}
 	}
 	free(desel_elements);
 

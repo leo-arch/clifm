@@ -71,7 +71,7 @@ int  enable_raw_mode(const int fd);
 int  get_cursor_position(int *c, int *l);
 void init_shell(void);
 void report_cwd(const char *dir);
-void set_term_title(char *str);
+void set_term_title(const char *str);
 
 __END_DECLS
 

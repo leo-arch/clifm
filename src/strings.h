@@ -23,7 +23,7 @@ char *escape_str(const char *str);
 char *gen_rand_str(const size_t len);
 char *get_last_chr(char *str, const char c, const int len);
 char **get_substr(const char *str, const char ifs, const int fproc);
-char *home_tilde(char *new_path, int *free_buf);
+char *home_tilde(const char *new_path, int *free_buf);
 char **parse_input_str(char *str);
 char *quote_str(const char *str);
 char *remove_quotes(char *str);
