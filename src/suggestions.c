@@ -1895,7 +1895,7 @@ check_backdir(char *start)
 }
 
 static int
-check_dirhist(char *word, const size_t len)
+check_dirhist(const char *word, const size_t len)
 {
 	const int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(word) == 1)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;

@@ -56,9 +56,9 @@ skip_files(const struct dirent *ent)
  * This function is not UTF8 aware, meaning that UTF8 non-alphanemeric
  * characters are not supported. */
 static inline void
-skip_name_prefixes(char **name)
+skip_name_prefixes(const char **name)
 {
-	char *s = *name;
+	const char *s = *name;
 
 	while (*s) {
 		if (IS_ALNUM(*s) || IS_UTF8_LEAD_BYTE(*s))
@@ -118,7 +118,7 @@ check_priority_sort_char(const char c1, const char c2)
 }
 
 static int
-namecmp(char *s1, char *s2)
+namecmp(const char *s1, const char *s2)
 {
 	if (conf.skip_non_alnum_prefix == 1) {
 		skip_name_prefixes(&s1);
@@ -149,7 +149,7 @@ namecmp(char *s1, char *s2)
 }
 
 static inline int
-sort_by_extension(struct fileinfo *pa, struct fileinfo *pb)
+sort_by_extension(const struct fileinfo *pa, const struct fileinfo *pb)
 {
 	const char *e1 = (pa->dir == 0 && pa->ext_name)
 		? pa->ext_name + (pa->ext_name[1] != '\0') : NULL;
@@ -171,7 +171,7 @@ sort_by_extension(struct fileinfo *pa, struct fileinfo *pb)
 }
 
 static inline int
-sort_by_owner(struct fileinfo *pa, struct fileinfo *pb)
+sort_by_owner(const struct fileinfo *pa, const struct fileinfo *pb)
 {
 	if (pa->uid_i.name && pb->uid_i.name)
 		return namecmp(pa->uid_i.name, pb->uid_i.name);
@@ -180,7 +180,7 @@ sort_by_owner(struct fileinfo *pa, struct fileinfo *pb)
 }
 
 static inline int
-sort_by_group(struct fileinfo *pa, struct fileinfo *pb)
+sort_by_group(const struct fileinfo *pa, const struct fileinfo *pb)
 {
 	if (pa->gid_i.name && pb->gid_i.name)
 		return namecmp(pa->gid_i.name, pb->gid_i.name);
@@ -189,7 +189,7 @@ sort_by_group(struct fileinfo *pa, struct fileinfo *pb)
 }
 
 static inline int
-sort_by_type(struct fileinfo *pa, struct fileinfo *pb)
+sort_by_type(const struct fileinfo *pa, const struct fileinfo *pb)
 {
 	const mode_t m1 = pa->type;
 	const mode_t m2 = pb->type;
@@ -211,7 +211,7 @@ sort_by_type(struct fileinfo *pa, struct fileinfo *pb)
 }
 
 static int
-sort_by_version(char *s1, char *s2, const int have_utf8)
+sort_by_version(const char *s1, const char *s2, const int have_utf8)
 {
 	if (have_utf8 == 1)
 		return namecmp(s1, s2);
@@ -228,8 +228,8 @@ sort_by_version(char *s1, char *s2, const int have_utf8)
 int
 entrycmp(const void *a, const void *b)
 {
-	struct fileinfo *pa = (struct fileinfo *)a;
-	struct fileinfo *pb = (struct fileinfo *)b;
+	const struct fileinfo *pa = (const struct fileinfo *)a;
+	const struct fileinfo *pb = (const struct fileinfo *)b;
 	int st = conf.sort;
 
 	int ret = conf.list_dirs_first == 1 ? F_SORT_DIRS(pa->dir, pb->dir) : 0;

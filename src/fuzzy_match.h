@@ -33,7 +33,7 @@
 
 __BEGIN_DECLS
 
-int fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type);
+int fuzzy_match(const char *s1, const char *s2, const size_t s1_len, const int type);
 int contains_utf8(const char *s);
 
 __END_DECLS

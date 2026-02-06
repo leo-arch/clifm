@@ -36,15 +36,15 @@ char *strbfrlst(char *str, const char c);
 char *strbtw(char *str, const char a, const char b);
 int  strcntchr(const char *str, const char c);
 int  u8truncstr(char *restrict str, size_t max);
-char *unescape_str(char *text, int mt);
+char *unescape_str(const char *text, int mt);
 size_t wc_xstrlen(const char *restrict str);
-char *xstrrpbrk(char *s, const char *accept);
+char *xstrrpbrk(const char *s, const char *accept);
 
 #if defined(_BE_POSIX)
-char *x_strcasestr(char *a, char *b);
+char *x_strcasestr(const char *haystack, const char *needle);
 #endif /* _BE_POSIX */
 
-char * xstrcasechr(char *s, char c);
+char *xstrcasechr(const char *s, const char c);
 size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);
 char * xstrncat(char *restrict dst, const size_t dst_len,
 	const char *restrict src, const size_t dst_size);

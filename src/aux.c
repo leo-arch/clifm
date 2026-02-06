@@ -459,9 +459,9 @@ xmemrchr(const void *s, const int c, size_t n)
 	const unsigned char *cp;
 
 	if (n != 0) {
-		cp = (unsigned char *)s + n;
+		cp = (const unsigned char *)s + n;
 		do {
-			if (*(--cp) == (unsigned char)c)
+			if (*(--cp) == (const unsigned char)c)
 				return((void *)cp);
 		} while (--n != 0);
 	}
@@ -480,7 +480,7 @@ normalize_path(char *src, const size_t src_len)
 	if (!src || !*src)
 		return NULL;
 
-	/* Deescape SRC */
+	/* Unescape SRC */
 	char *tmp = NULL;
 	const int is_escaped = *src == '\\';
 

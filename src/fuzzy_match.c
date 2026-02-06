@@ -44,7 +44,7 @@ utf8nextcodepoint(const char *s)
 
 /* A Unicode aware version of xstrcasechr (in strings.c)*/
 static char *
-utf8casechr(char *s, const char *c)
+utf8casechr(const char *s, const char *c)
 {
 	if (!s || !*s || !c || !*c)
 		return NULL;
@@ -62,7 +62,7 @@ utf8casechr(char *s, const char *c)
 			continue;
 		}
 
-		return s;
+		return (char *)s;
 	}
 
 	return NULL;
@@ -89,11 +89,11 @@ contains_utf8(const char *s)
  * 1: Not Unicode aware
  * 2: Much faster */
 static int
-fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
+fuzzy_match_v1(const char *s1, const char *s2, const size_t s1_len)
 {
 	const int cs = conf.case_sens_path_comp;
 	int included = 0;
-	char *p = NULL;
+	const char *p = NULL;
 
 	if (cs == 1 ? (p = strstr(s2, s1)) : (p = xstrcasestr(s2, s1))) {
 		if (p == s2) {
@@ -111,10 +111,10 @@ fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
 		: (TOUPPER(*s1) == TOUPPER(*s2));
 
 	size_t l = 0;
-	char *hs = s2;
+	const char *hs = s2;
 
 	while (*s1) {
-		char *m = cs == 1 ? strchr(hs, *s1) : xstrcasechr(hs, *s1);
+		const char *m = cs == 1 ? strchr(hs, *s1) : xstrcasechr(hs, *s1);
 		if (!m)
 			break;
 
@@ -160,7 +160,7 @@ fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
  * What this fuzzy matcher lacks:
  * 1. Taking gap (distance) between matched chars into account */
 int
-fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
+fuzzy_match(const char *s1, const char *s2, const size_t s1_len, const int type)
 {
 	if (!s1 || !*s1 || !s2 || !*s2)
 		return 0;
@@ -197,10 +197,10 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 		: (utf8uprcodepoint(cp1) == utf8uprcodepoint(cp2));
 
 	size_t l = 0;
-	char *hs = s2;
+	const char *hs = s2;
 
 	while (*s1) {
-		char *m = NULL;
+		const char *m = NULL;
 		if (cs == 1) {
 			utf8codepoint(s1, &cp1);
 			m = utf8chr(hs, cp1);

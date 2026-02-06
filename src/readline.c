@@ -911,7 +911,7 @@ check_match(const char *s1, const char *s2, const size_t s1_len)
 }
 
 static inline int
-get_best_fuzzy_match(char *filename, const char *dirname, char *d_name,
+get_best_fuzzy_match(const char *filename, const char *dirname, char *d_name,
 	const size_t flen, const int fuzzy_str_type, int *best_fz_score)
 {
 	const int score = fuzzy_match(filename, d_name, flen, fuzzy_str_type);
@@ -1485,7 +1485,7 @@ hist_generator(const char *text, int state)
 			if (len == 0
 			|| (*name == text[1] && strncmp(name, text + 1, len) == 0)
 			|| (conf.fuzzy_match == 1 && tabmode != STD_TAB
-			&& fuzzy_match((char *)(text + 1), name, len, FUZZY_HISTORY) > 0))
+			&& fuzzy_match(text + 1, name, len, FUZZY_HISTORY) > 0))
 				return strdup(name);
 		} else {
 			/* Restrict the search to what seems to be a pattern:
@@ -1758,7 +1758,7 @@ filenames_gen_text(const char *text, int state)
 		if (conf.fuzzy_match == 0 || tabmode == STD_TAB || rl_point < rl_end)
 			continue;
 
-		if (len == 0 || fuzzy_match((char *)text, name, len, fuzzy_str_type) > 0)
+		if (len == 0 || fuzzy_match(text, name, len, fuzzy_str_type) > 0)
 			return strdup(name);
 	}
 
@@ -1791,7 +1791,7 @@ dirhist_generator(const char *text, int state)
 			return strdup(name);
 
 		if (conf.fuzzy_match == 1) {
-			if (fuzzy_match((char *)text, name, len, fuzzy_str_type) > 0)
+			if (fuzzy_match(text, name, len, fuzzy_str_type) > 0)
 				return strdup(name);
 		} else {
 			if ((conf.case_sens_path_comp == 1 ? strstr(name, text)
@@ -2115,27 +2115,37 @@ prompts_generator(const char *text, int state)
 
 /* Expand tilde and resolve dot expressions in the glob expression TEXT */
 static char *
-expand_tilde_glob(char *text)
+expand_tilde_glob(const char *text)
 {
 	if (!text || !*text || (*text != '~' && !strstr(text, "/..")))
 		return NULL;
 
-	char *ls = strrchr(text, '/');
-	if (!ls)
+	char *tmp = strdup(text);
+	if (!tmp)
 		return NULL;
+
+	char *ls = strrchr(tmp, '/');
+	if (!ls) {
+		free(tmp);
+		return NULL;
+	}
 
 	*ls = '\0';
-	char *q = normalize_path(text, strlen(text));
+	char *dir = normalize_path(tmp, strlen(tmp));
 	*ls = '/';
-	if (!q)
+
+	if (!dir) {
+		free(tmp);
 		return NULL;
+	}
 
-	const char *g = ls[1] ? ls + 1 : "";
-	size_t len = strlen(q) + 2 + strlen(g);
-	char *tmp = xnmalloc(len, sizeof(char));
-	snprintf(tmp, len, "%s/%s", q, g);
+	char *pattern = ls[1] ? strdup(ls + 1) : NULL;
+	size_t len = strlen(dir) + 2 + (pattern ? strlen(pattern) : 0);
+	tmp = xnrealloc(tmp, len, sizeof(char));
+	snprintf(tmp, len, "%s/%s", dir, pattern ? pattern : "");
 
-	free(q);
+	free(dir);
+	free(pattern);
 
 	return tmp;
 }
@@ -2260,7 +2270,7 @@ rl_mime_files(const char *text)
 /* Return the list of matches for the glob expression TEXT or NULL if
  * there are no matches. */
 static char **
-rl_glob(char *text)
+rl_glob(const char *text)
 {
 	char *tmp = expand_tilde_glob(text);
 	glob_t globbuf;
@@ -3131,7 +3141,7 @@ is_edit(const char *str, const size_t words_n)
 #endif /* !_NO_LIRA */
 
 static char **
-complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
+complete_bookmark_names(const char *text, const size_t words_n, int *exit_status)
 {
 	*exit_status = FUNC_SUCCESS;
 
@@ -3272,11 +3282,11 @@ complete_mime_type_filter(const char *text)
 }
 
 static char **
-complete_glob(char *text)
+complete_glob(const char *text)
 {
 	char **matches = NULL;
 
-	char *p = (*rl_line_buffer == '/' && rl_end > 1
+	const char *p = (*rl_line_buffer == '/' && rl_end > 1
 		&& !strchr(rl_line_buffer + 1, ' ')
 		&& !strchr(rl_line_buffer + 1, '/'))
 			? (text + 1) : text;
@@ -3397,7 +3407,7 @@ complete_tag_names(const char *text, char *start)
 }
 
 static char **
-complete_tag_names_t(char *text)
+complete_tag_names_t(const char *text)
 {
 	cur_comp_type = TCMP_TAGS_T;
 
@@ -3415,7 +3425,7 @@ complete_tag_names_t(char *text)
 }
 
 static char **
-complete_tags(char *text)
+complete_tags(const char *text)
 {
 	if (!text[2])
 		return complete_tag_names_t(text);
@@ -3439,7 +3449,7 @@ complete_tags(char *text)
 #endif /* !_NO_TAGS */
 
 static char **
-complete_bookmark_paths(char *text)
+complete_bookmark_paths(const char *text)
 {
 	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &bm_paths_generator);
@@ -3456,7 +3466,7 @@ complete_bookmark_paths(char *text)
 }
 
 static char **
-complete_bookmark_names_b(char *text)
+complete_bookmark_names_b(const char *text)
 {
 	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
@@ -3471,7 +3481,7 @@ complete_bookmark_names_b(char *text)
 }
 
 static char **
-complete_bookmarks(char *text, const size_t words_n)
+complete_bookmarks(const char *text, const size_t words_n)
 {
 	if (text[2]) {
 		char **matches = complete_bookmark_paths(text + 2);
@@ -3509,7 +3519,7 @@ complete_ownership(const char *text)
 }
 
 static char **
-complete_dirhist(char *text, const size_t words_n)
+complete_dirhist(const char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n > 2)
@@ -3530,7 +3540,7 @@ complete_dirhist(char *text, const size_t words_n)
 }
 
 static char **
-complete_backdir(char *text, const size_t words_n)
+complete_backdir(const char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n != 2)
@@ -3549,14 +3559,14 @@ complete_backdir(char *text, const size_t words_n)
 }
 
 static char **
-complete_workspaces(char *text)
+complete_workspaces(const char *text)
 {
 	rl_attempted_completion_over = 1;
 	if (words_num > 2)
 		return NULL;
 
 	rl_sort_completion_matches = 0;
-	char *t = (*text == 'w' && text[1] == ':') ? text + 2 : text;
+	const char *t = (*text == 'w' && text[1] == ':') ? text + 2 : text;
 	char *p = unescape_str(t, 0);
 
 	const enum comp_type ct = cur_comp_type;
@@ -3597,7 +3607,7 @@ int_cmd_no_filename(char *start)
 }
 
 static char **
-complete_net(char *text)
+complete_net(const char *text)
 {
 	rl_attempted_completion_over = 1;
 	char *p = unescape_str(text, 0);
@@ -3650,7 +3660,7 @@ complete_sort(const char *text, const size_t words_n)
 
 #ifndef _NO_PROFILES
 static char **
-complete_profiles(char *text, const size_t words_n)
+complete_profiles(const char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n > 3)
@@ -3674,7 +3684,7 @@ complete_profiles(char *text, const size_t words_n)
 #endif /* !_NO_PROFILES */
 
 static char **
-complete_colorschemes(char *text, const size_t words_n)
+complete_colorschemes(const char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n != 2)
@@ -3740,7 +3750,7 @@ complete_trashed_files(const char *text, const enum comp_type flag)
 #endif /* !_NO_TRASH */
 
 static char **
-complete_prompt_names(char *text, const size_t words_n)
+complete_prompt_names(const char *text, const size_t words_n)
 {
 	rl_attempted_completion_over = 1;
 	if (words_n > 3)
@@ -3867,7 +3877,7 @@ complete_eln(const char *text, const size_t words_n, char *cmd_name)
 }
 
 static char **
-complete_history(char *text)
+complete_history(const char *text)
 {
 	char *p = unescape_str(text, 0);
 	char **matches = rl_completion_matches(p ? p : text, &hist_generator);
@@ -4034,7 +4044,7 @@ my_rl_completion(const char *text, const int start, const int end)
 	if (g && !(rl_end == 2 && *rl_line_buffer == '/'
 	&& rl_line_buffer[1] == '*') && !strchr(g, '/')
 	&& access(text, F_OK) != 0) {
-		if ((matches = complete_glob((char *)text)))
+		if ((matches = complete_glob(text)))
 			return matches;
 	}
 
@@ -4049,18 +4059,18 @@ my_rl_completion(const char *text, const int start, const int end)
 #ifndef _NO_TAGS
 	/* ##### TAGS (t:) ##### */
 	if (tags_n > 0 && *text == 't' && text[1] == ':'
-	&& (matches = complete_tags((char *)text)))
+	&& (matches = complete_tags(text)))
 		return matches;
 #endif /* !_NO_TAGS */
 
 	/* #### BOOKMARKS (b:) #### */
 	if (*text == 'b' && text[1] == ':'
-	&& (matches = complete_bookmarks((char *)text, words_n)))
+	&& (matches = complete_bookmarks(text, words_n)))
 		return matches;
 
 	/* ##### WORKSPACES (w:) ##### */
 	if ((words_n > 1 || conf.autocd == 1) && *text == 'w' && text[1] == ':'
-	&& (matches = complete_workspaces((char *)text)))
+	&& (matches = complete_workspaces(text)))
 		return matches;
 
 	/* ##### SEL KEYWORD (both "sel" and "s:") ##### */
@@ -4070,7 +4080,7 @@ my_rl_completion(const char *text, const int start, const int end)
 		return matches;
 
 	/* ##### HISTORY COMPLETION ("!") ##### */
-	if (*text == '!' && (matches = complete_history((char *)text)))
+	if (*text == '!' && (matches = complete_history(text)))
 		return matches;
 
 FIRST_WORD_COMP:
@@ -4096,7 +4106,7 @@ FIRST_WORD_COMP:
 
 		/* SEARCH PATTERNS COMPLETION */
 		if (alt_prompt == 0 && *text == '/' && text[1] == '*'
-		&& (matches = complete_history((char *)text)))
+		&& (matches = complete_history(text)))
 			return matches;
 
 		/* Complete with files in CWD */
@@ -4152,17 +4162,17 @@ FIRST_WORD_COMP:
 	/* #### TAG NAMES COMPLETION #### */
 	/* 't? TAG' and 't? :tag' */
 	if (tags_n > 0 && s && *s == 't' && rl_end > 2
-	&& (matches = complete_tag_names((char *)text, s)))
+	&& (matches = complete_tag_names(text, s)))
 		return matches;
 #endif /* !_NO_TAGS */
 
 	/* #### DIRECTORY HISTORY COMPLETION (dh) #### */
 	if (s && *s == 'd' && s[1] == 'h' && s[2] == ' ' && !strchr(text, '/'))
-		return complete_dirhist((char *)text, words_n);
+		return complete_dirhist(text, words_n);
 
 	/* #### BACKDIR COMPLETION (bd) #### */
 	if (*text != '/' && s && *s == 'b' && s[1] == 'd' && s[2] == ' ')
-		return complete_backdir((char *)text, words_n);
+		return complete_backdir(text, words_n);
 
 #ifndef _NO_LIRA
 	/* #### OPENING APPS FOR INTERNAL CMDS TAKING 'EDIT' AS SUBCOMMAND */
@@ -4181,12 +4191,12 @@ FIRST_WORD_COMP:
 	/* #### OPEN WITH #### */
 	if (rl_end > 4 && s && *s == 'o' && s[1] == 'w' && s[2] == ' '
 	&& s[3] && s[3] != ' ' && words_n >= 3)
-		return complete_open_with((char *)text, s);
+		return complete_open_with(text, s);
 #endif /* _NO_LIRA */
 
 	/* #### PROMPT (only for 'prompt set') #### */
 	if (s && *s == 'p' && s[1] == 'r' && strncmp(s, "prompt set " , 11) == 0)
-		return complete_prompt_names((char *)text, words_n);
+		return complete_prompt_names(text, words_n);
 
 #ifndef _NO_TRASH
 	/* ### UNTRASH ### */
@@ -4215,7 +4225,7 @@ FIRST_WORD_COMP:
 	if (s && *s == 'b' && (s[1] == 'm' || s[1] == 'o')
 	&& (strncmp(s, "bm ", 3) == 0 || strncmp(s, "bookmarks ", 10) == 0)) {
 		int exit_status = FUNC_SUCCESS;
-		matches = complete_bookmark_names((char *)text, words_n, &exit_status);
+		matches = complete_bookmark_names(text, words_n, &exit_status);
 		if (exit_status == FUNC_SUCCESS)
 			return matches;
 	}
@@ -4240,13 +4250,13 @@ FIRST_WORD_COMP:
 	/* ### COLOR SCHEMES COMPLETION ### */
 	if (conf.colorize == 1 && s && *s == 'c' && ((s[1] == 's' && s[2] == ' ')
 	|| strncmp(s, "colorschemes ", 13) == 0))
-		return complete_colorschemes((char *)text, words_n);
+		return complete_colorschemes(text, words_n);
 
 #ifndef _NO_PROFILES
 	/* ### PROFILES COMPLETION ### */
 	if (s && *s == 'p' && (strncmp(s, "pf ", 3) == 0
 	|| strncmp(s, "profile ", 8) == 0))
-		return complete_profiles((char *)text, words_n);
+		return complete_profiles(text, words_n);
 #endif /* !_NO_PROFILES */
 
 	/* ### SORT COMMAND COMPLETION ### */
@@ -4256,7 +4266,7 @@ FIRST_WORD_COMP:
 
 	/* ### WORKSPACES COMPLETION ### */
 	if (s && *s == 'w' && strncmp(s, "ws ", 3) == 0)
-		return complete_workspaces((char *)text);
+		return complete_workspaces(text);
 
 	/* ### COMPLETIONS FOR THE 'UNSET' COMMAND ### */
 	if (s && *s == 'u' && strncmp(s, "unset ", 6) == 0)
@@ -4264,7 +4274,7 @@ FIRST_WORD_COMP:
 
 	/* ### NET COMMAND COMPLETION ### */
 	if (s && *s == 'n' && strncmp(s, "net ", 4) == 0)
-		return complete_net((char *)text);
+		return complete_net(text);
 
 	/* If we have an internal command not dealing with filenames,
 	 * do not perform any further completion. */
@@ -4366,6 +4376,15 @@ set_rl_input_file(void)
 }
 #endif /* CLIFM_TEST_INPUT */
 
+/* Just a wrapper around unescape_str() to keep TEXT const and still be able to
+ * pass it to readline (rl_filename_dequoting_function), which
+ * wants (char *, int) parameters instead. */
+static char *
+unescape_str_wrapper(char *text, int mt)
+{
+	return unescape_str((const char *)text, mt);
+}
+
 int
 initialize_readline(void)
 {
@@ -4448,7 +4467,7 @@ initialize_readline(void)
 	 * string so it won't conflict with system filenames: you want
 	 * "user file", because "user\ file" does not exist, and, in this
 	 * latter case, readline won't find any matches. */
-	rl_filename_dequoting_function = unescape_str;
+	rl_filename_dequoting_function = unescape_str_wrapper;
 
 	/* Initialize the keyboard bindings function. */
 	readline_kbinds();

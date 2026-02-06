@@ -575,8 +575,14 @@ fastback(const char *str)
 	/* At this point we know STR contains only dots. */
 	const size_t dots = strlen(str);
 
-	if (dots <= 2)
-		return dots == 2 ? normalize_path("..", 2) : NULL;
+	if (dots < 2)
+		return NULL;
+
+	if (dots == 2) {
+		char dir[] = "..";
+		char *ret = normalize_path(dir, 2);
+		return ret;
+	}
 
 	char dir[PATH_MAX + 1];
 	dir[0] = '.';

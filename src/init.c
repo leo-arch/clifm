@@ -2822,8 +2822,11 @@ check_options(void)
 	if (!conf.term)
 		conf.term = savestring(DEF_TERM_CMD, sizeof(DEF_TERM_CMD) - 1);
 
-	if (conf.colorize == 0)
-		expand_prompt_name(DEF_PROMPT_NO_COLOR_NAME);
+	if (conf.colorize == 0) {
+		char *name = strdup(DEF_PROMPT_NO_COLOR_NAME);
+		expand_prompt_name(name);
+		free(name);
+	}
 
 	if (!conf.encoded_prompt || !*conf.encoded_prompt)
 		set_encoded_prompt();

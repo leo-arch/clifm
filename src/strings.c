@@ -205,7 +205,7 @@ replace_slashes(const char *str, const char c)
  * Returns a pointer to the matching char in S if C was found, or NULL
  * otherwise. */
 char *
-xstrcasechr(char *s, char c)
+xstrcasechr(const char *s, const char c)
 {
 	if (!s || !*s)
 		return NULL;
@@ -213,7 +213,7 @@ xstrcasechr(char *s, char c)
 	const char uc = (char)TOUPPER(c);
 	while (*s) {
 		if (TOUPPER(*s) == uc)
-			return s;
+			return (char *)s;
 		s++;
 	}
 
@@ -223,7 +223,7 @@ xstrcasechr(char *s, char c)
 /* A reverse strpbrk(3): returns a pointer to the LAST char in S matching
  * a char in ACCEPT, or NULL if no match is found. */
 char *
-xstrrpbrk(char *s, const char *accept)
+xstrrpbrk(const char *s, const char *accept)
 {
 	if (!s || !*s || !accept || !*accept)
 		return NULL;
@@ -233,7 +233,7 @@ xstrrpbrk(char *s, const char *accept)
 	for (size_t i = l; i-- > 0;) {
 		for (size_t j = 0; accept[j]; j++) {
 			if (s[i] == accept[j])
-				return s + i;
+				return (char *)(s + i);
 		}
 	}
 
@@ -244,33 +244,29 @@ xstrrpbrk(char *s, const char *accept)
 /* strcasestr(3) is a not POSIX function: let's use this as replacement.
  * Find the first occurrence of the string B in the string A, ignoring case. */
 char *
-x_strcasestr(char *a, char *b)
+x_strcasestr(const char *haystack, const char *needle)
 {
-	if (!a || !b)
+	if (!haystack || !needle)
 		return NULL;
 
-	size_t f = 0;
-	char *p = NULL, *bb = b;
-	while (*a && *b) {
-		if (TOUPPER(*a) != TOUPPER(*b)) {
-			if (f == 1) {
-				b = bb;
-				f = 0;
-			} else {
-				a++;
-			}
+	if (*needle == '\0')
+		return (char *)haystack; /* Match at start for empty needle */
 
-			continue;
+	for (; *haystack != '\0'; haystack++) {
+		const char *h = haystack;
+		const char *n = needle;
+
+		while (*h != '\0' && *n != '\0' &&
+		TOUPPER((unsigned char)*h) == TOUPPER((unsigned char)*n)) {
+			h++;
+			n++;
 		}
 
-		if (f == 0)
-			p = a;
-		f = 1;
-		a++;
-		b++;
+		if (*n == '\0')
+			return (char *)haystack; /* Found match */
 	}
 
-	return (!*b && f == 1) ? p : NULL;
+	return NULL;
 }
 #endif /* _BE_POSIX */
 
@@ -3249,7 +3245,7 @@ get_substr(const char *str, const char ifs, const int fproc)
 /* This function simply unescapes whatever escaped chars it founds in
  * TEXT. Returns a string containing TEXT without escape sequences. */
 char *
-unescape_str(char *text, int mt)
+unescape_str(const char *text, int mt)
 {
 	UNUSED(mt);
 	if (!text || !*text)
