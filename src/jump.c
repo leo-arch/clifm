@@ -72,14 +72,18 @@ calculate_base_credit(const int days_since_first, const int hours_since_last,
 	const size_t visits, int *keep)
 {
 	const int ivisits = visits > INT_MAX ? INT_MAX : (int)visits;
+	long long visit_bonus = (long long)ivisits * (long long)VISIT_BONUS;
+	if (visit_bonus > INT_MAX)
+		visit_bonus = INT_MAX;
 
 	int rank = days_since_first > 1
-		? (ivisits * VISIT_BONUS) / days_since_first
-		: (ivisits * VISIT_BONUS);
+		? (int)visit_bonus / days_since_first
+		: (int)visit_bonus;
 
 	/* Credit or penalty based on last directory access. */
 	int tmp_rank = rank;
 
+	/* cppcheck-suppress-begin unreadVariable */
 	if (hours_since_last == 0) {          /* Last hour */
 		*keep = 1;
 		rank = JHOUR(tmp_rank);
@@ -91,7 +95,7 @@ calculate_base_credit(const int days_since_first, const int hours_since_last,
 	} else { 							  /* More than a week */
 		rank = JOLDER(tmp_rank);
 	}
-
+	/* cppcheck-suppress-end unreadVariable */
 	return rank;
 }
 
