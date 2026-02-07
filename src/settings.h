@@ -604,7 +604,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_TRUNC_NAMES 1
 #define DEF_WELCOME_MESSAGE 1
 
-/* This expands to "CliFM > The command line file manager" */
+/* This expands to "CliFM > The command-line file manager" */
 #define DEF_WELCOME_MESSAGE_STR PROGRAM_NAME_UPPERCASE " > " PROGRAM_DESC
 
 /* We have three search strategies: GLOB_ONLY, REGEX_ONLY, GLOB_REGEX */

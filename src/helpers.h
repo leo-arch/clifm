@@ -13,7 +13,7 @@
 
 #define PROGRAM_NAME_UPPERCASE "Clifm"
 #define PROGRAM_NAME "clifm"
-#define PROGRAM_DESC "The command line file manager"
+#define PROGRAM_DESC "The command-line file manager"
 #define VERSION "1.27.6"
 #define DATE "Feb 7, 2026"
 #define AUTHOR "L. Abramovich"
