@@ -1,14 +1,14 @@
 		###########################################
 		#                  CLIFM                  #
-		#      The Command Line File Manager      #
+		#      The Command-Line File Manager      #
 		###########################################
 
 # This is Clifm's main configuration file.
 
 # Lines starting with either '#' or ';' are commented out (ignored).
-# Options starting with a ';' hold the default value, but are commented out.
-# To override a default value uncomment the corresponding option (remove
-# the leading ';') and set the option to any supported value.
+# Options starting with ';' show default values and are commented out.
+# To override a default, uncomment the corresponding option (remove
+# the leading ';') and set it to a supported value.
 
 
 #=====================================#
@@ -221,7 +221,7 @@
 # or /usr/share/clifm/colors). You can place your custom themes in
 # $HOME/.config/clifm/colors.
 #
-# Use the 'cs' command or the '--color-scheme' command line option to set
+# Use the 'cs' command or the '--color-scheme' command-line option to set
 # a theme.
 #
 # Run 'cs edit' to modify the current theme.
@@ -548,7 +548,7 @@
 ;WelcomeMessage=true
 
 # Set a custom welcome message.
-# Colors are available via escape codes. E.g., "\e[34mWelcome!\e[0m".
+# Use escape codes to add colors: e.g., "\e[34mWelcome!\e[0m".
 # An ending new line character is appended automatically.
 ;WelcomeMessageStr=""
 

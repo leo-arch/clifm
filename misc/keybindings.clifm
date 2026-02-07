@@ -20,7 +20,7 @@
 # bookmarks:\e\C-b
 # bookmarks:\C-t
 #
-# will bind Alt+b, Ctrl+Alt+b, and Ctrl-t to the bookmarks function.
+# will bind Alt+b, Ctrl+Alt+b, and Ctrl+t to the bookmarks function.
 
 # ---------------------------
 # 1. NAVIGATION
@@ -164,11 +164,11 @@ show-kbinds:\e[13~
 #
 # 1) Make sure your plugin is in the plugins directory (or use any of the
 #    plugins in there)
-# 2) Link pluginx to your plugin using the 'actions edit' command. E.g.:
+# 2) Link pluginx to your plugin using the 'actions edit' command: e.g.,
 #    "plugin1=myplugin.sh"
-# 3) Set a keybinding here for pluginx. E.g.: "plugin1:\C-y"
+# 3) Set a keybinding here for pluginx: e.g., "plugin1:\C-y"
 #
-# Note: Up to 16 plugins are supported, i.e. from plugin1 through plugin16.
+# Note: Up to 16 plugins are supported, i.e., from plugin1 through plugin16.
 
 # Bound to the xclip plugin
 plugin1:\C-y

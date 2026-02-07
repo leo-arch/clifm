@@ -31,7 +31,7 @@
 #
 #autocmd ~/mounts/ftp_server/** lm=1,fc=0
 #
-# The light mode (lm) prevents some files processing, and the files
+# The light mode (lm) prevents some files processing, and the file
 # counter (fc) is expensive: disable it.
 
 # A few examples

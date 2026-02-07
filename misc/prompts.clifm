@@ -75,7 +75,7 @@
 #     add color to the prompt line (using full ANSI escape sequences)
 # \]: End a sequence of non-printing characters
 #
-# File statistics escape sequences (for the current directory):
+# File-statistic escape sequences (for the current directory):
 #
 # \D: Number of sub-directories
 # \R: Number of regular files
@@ -213,14 +213,14 @@
 # 4. SETTING YOUR PROMPT
 # ----------------------
 #
-# Use the 'cs' command to temporarily set a prompt. Type 'cs <TAB>' to get the list
-# of available prompts. To set a specific prompt run 'cs PROMPT_NAME'.
+# Use the 'prompt set' command to temporarily set a prompt. Type 'prompt set <TAB>' to
+# get the list of available prompts. To set a specific prompt run 'prompt set PROMPT_NAME'.
 #
-# To permanetly set a prompt edit your color scheme file (via the 'cs edit' command),
+# To permanetly set a prompt edit your color scheme file (with the 'cs edit' command),
 # set Prompt to the appropriate prompt name (e.g., Prompt="classic"), and comment out
 # the remaining prompt lines.
 #
-# NOTE: Since the below prompts are designed for Clifm's default color scheme, you may
+# NOTE: Since the prompts below are designed for Clifm's default color scheme, you may
 # want to edit the one you choose manually to make it fit your current color scheme.
 
 [clifm]
