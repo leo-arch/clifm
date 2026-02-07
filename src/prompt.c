@@ -930,19 +930,18 @@ static char *
 gen_last_cmd_time(char **line)
 {
 	if (last_cmd_time < (double)conf.prompt_b_min)
-		goto END;
+		{ (*line)++; return NULL; }
 
 	const int precision = conf.prompt_b_precision;
 	const int len = snprintf(NULL, 0, "%.*f", precision, last_cmd_time);
 	if (len < 0)
-		goto END;
+		{ (*line)++; return NULL; }
 
 	char *temp = xnmalloc((size_t)len + 1, sizeof(char));
 	snprintf(temp, (size_t)len + 1, "%.*f", precision, last_cmd_time);
 
 	return temp;
 
-END:
 	(*line)++;
 	return NULL;
 }
@@ -988,48 +987,48 @@ decode_prompt(char *line)
 			c = (int)*line;
 			switch (c) {
 			/* File statistics */
-			case 'B': temp = gen_stats_str(STATS_BLK); goto ADD_STRING;
-			case 'C': temp = gen_stats_str(STATS_CHR); goto ADD_STRING;
-			case 'D': temp = gen_stats_str(STATS_DIR); goto ADD_STRING;
-			case 'E': temp = gen_stats_str(STATS_EXTENDED); goto ADD_STRING;
-			case 'F': temp = gen_stats_str(STATS_FIFO); goto ADD_STRING;
-			case 'G': temp = gen_stats_str(STATS_SGID); goto ADD_STRING;
-			case 'K': temp = gen_stats_str(STATS_SOCK); goto ADD_STRING;
-			case 'L': temp = gen_stats_str(STATS_LNK); goto ADD_STRING;
-			case 'M': temp = gen_stats_str(STATS_MULTI_L); goto ADD_STRING;
-			case 'o': temp = gen_stats_str(STATS_BROKEN_L); goto ADD_STRING;
-			case 'O': temp = gen_stats_str(STATS_OTHER_W); goto ADD_STRING;
-			case 'Q': temp = gen_stats_str(STATS_NON_DIR); goto ADD_STRING;
-			case 'R': temp = gen_stats_str(STATS_REG); goto ADD_STRING;
-			case 'U': temp = gen_stats_str(STATS_SUID); goto ADD_STRING;
-			case 'x': temp = gen_stats_str(STATS_CAP); goto ADD_STRING;
-			case 'X': temp = gen_stats_str(STATS_EXE); goto ADD_STRING;
-			case '.': temp = gen_stats_str(STATS_HIDDEN); goto ADD_STRING;
-			case '"': temp = gen_stats_str(STATS_STICKY); goto ADD_STRING;
-			case '?': temp = gen_stats_str(STATS_UNKNOWN); goto ADD_STRING;
-			case '!': temp = gen_stats_str(STATS_UNSTAT); goto ADD_STRING;
+			case 'B': temp = gen_stats_str(STATS_BLK); break;
+			case 'C': temp = gen_stats_str(STATS_CHR); break;
+			case 'D': temp = gen_stats_str(STATS_DIR); break;
+			case 'E': temp = gen_stats_str(STATS_EXTENDED); break;
+			case 'F': temp = gen_stats_str(STATS_FIFO); break;
+			case 'G': temp = gen_stats_str(STATS_SGID); break;
+			case 'K': temp = gen_stats_str(STATS_SOCK); break;
+			case 'L': temp = gen_stats_str(STATS_LNK); break;
+			case 'M': temp = gen_stats_str(STATS_MULTI_L); break;
+			case 'o': temp = gen_stats_str(STATS_BROKEN_L); break;
+			case 'O': temp = gen_stats_str(STATS_OTHER_W); break;
+			case 'Q': temp = gen_stats_str(STATS_NON_DIR); break;
+			case 'R': temp = gen_stats_str(STATS_REG); break;
+			case 'U': temp = gen_stats_str(STATS_SUID); break;
+			case 'x': temp = gen_stats_str(STATS_CAP); break;
+			case 'X': temp = gen_stats_str(STATS_EXE); break;
+			case '.': temp = gen_stats_str(STATS_HIDDEN); break;
+			case '"': temp = gen_stats_str(STATS_STICKY); break;
+			case '?': temp = gen_stats_str(STATS_UNKNOWN); break;
+			case '!': temp = gen_stats_str(STATS_UNSTAT); break;
 #ifdef SOLARIS_DOORS
-			case '>': temp = gen_stats_str(STATS_DOOR); goto ADD_STRING;
-			case '<': temp = gen_stats_str(STATS_PORT); goto ADD_STRING;
+			case '>': temp = gen_stats_str(STATS_DOOR); break;
+			case '<': temp = gen_stats_str(STATS_PORT); break;
 #endif /* SOLARIS_DOORS */
 
-			case '*': temp = gen_notification(NOTIF_SEL); goto ADD_STRING;
-			case '%': temp = gen_notification(NOTIF_TRASH); goto ADD_STRING;
-			case '#': temp = gen_notification(NOTIF_ROOT); goto ADD_STRING;
-			case ')': temp = gen_notification(NOTIF_WARNING); goto ADD_STRING;
-			case '(': temp = gen_notification(NOTIF_ERROR); goto ADD_STRING;
-			case '=': temp = gen_notification(NOTIF_NOTICE); goto ADD_STRING;
+			case '*': temp = gen_notification(NOTIF_SEL); break;
+			case '%': temp = gen_notification(NOTIF_TRASH); break;
+			case '#': temp = gen_notification(NOTIF_ROOT); break;
+			case ')': temp = gen_notification(NOTIF_WARNING); break;
+			case '(': temp = gen_notification(NOTIF_ERROR); break;
+			case '=': temp = gen_notification(NOTIF_NOTICE); break;
 
-			case 'v': temp = gen_rl_vi_mode(1); goto ADD_STRING;
-			case 'y': temp = gen_notification(NOTIF_AUTOCMD); goto ADD_STRING;
+			case 'v': temp = gen_rl_vi_mode(1); break;
+			case 'y': temp = gen_notification(NOTIF_AUTOCMD); break;
 
 			case 'z': /* Exit status of last executed command */
-				temp = gen_exit_status(); goto ADD_STRING;
+				temp = gen_exit_status(); break;
 
 			case 'e': /* Escape char */
-				temp = gen_escape_char(&line, &c); goto ADD_STRING;
+				temp = gen_escape_char(&line, &c); break;
 
-			case 'j': temp = gen_cwd_perms(); goto ADD_STRING;
+			case 'j': temp = gen_cwd_perms(); break;
 
 			case '0': /* fallthrough */ /* Octal char */
 			case '1': /* fallthrough */
@@ -1039,79 +1038,78 @@ decode_prompt(char *line)
 			case '5': /* fallthrough */
 			case '6': /* fallthrough */
 			case '7':
-				temp = gen_octal(&line, &c); goto ADD_STRING;
+				temp = gen_octal(&line, &c); break;
 
 			case 'c': /* Program name */
 				temp = savestring(PROGRAM_NAME, sizeof(PROGRAM_NAME) - 1);
-				goto ADD_STRING;
+				break;
 
 			case 'b':
-				temp = gen_last_cmd_time(&line); goto ADD_STRING;
+				temp = gen_last_cmd_time(&line); break;
 
 			case 'P': /* Current profile name */
-				temp = gen_profile(); goto ADD_STRING;
+				temp = gen_profile(); break;
 
 			case 't': /* fallthrough */ /* Time: 24-hour HH:MM:SS format */
 			case 'T': /* fallthrough */ /* 12-hour HH:MM:SS format */
 			case 'A': /* fallthrough */ /* 24-hour HH:MM format */
 			case '@': /* fallthrough */ /* 12-hour HH:MM:SS am/pm format */
 			case 'd': /* Date: abrev_weak_day, abrev_month_day month_num */
-				temp = gen_time(c); goto ADD_STRING;
+				temp = gen_time(c); break;
 
 			case 'u': /* User name */
-				temp = gen_user_name(); goto ADD_STRING;
+				temp = gen_user_name(); break;
 
 			case 'g':
-				temp = gen_sort_name(); goto ADD_STRING;
+				temp = gen_sort_name(); break;
 
 			case 'h': /* fallthrough */ /* Hostname up to first '.' */
 			case 'H': /* Full hostname */
-				temp = gen_hostname(c); goto ADD_STRING;
+				temp = gen_hostname(c); break;
 
 			case 'i': /* fallthrough */ /* Nest level (number only) */
 			case 'I': /* Nest level (full format) */
-				temp = gen_nesting_level(c); goto ADD_STRING;
+				temp = gen_nesting_level(c); break;
 
 			case 's': /* Shell name (after last slash)*/
 				if (!user.shell) { line++; break; }
-				temp = gen_shell_name(); goto ADD_STRING;
+				temp = gen_shell_name(); break;
 
 			case 'S': /* Current workspace */
-				temp = gen_workspace(); goto ADD_STRING;
+				temp = gen_workspace(); break;
 
 			case 'l': /* Current mode */
-				temp = gen_mode(); goto ADD_STRING;
+				temp = gen_mode(); break;
 
 			case 'p': /* fallthrough */ /* Abbreviated if longer than PathMax */
 			case 'f': /* fallthrough */ /* Abbreviated, fish-like */
 			case 'w': /* fallthrough */ /* Full PWD */
 			case 'W': /* Short PWD */
 				if (!workspaces[cur_ws].path) {	line++;	break; }
-				temp = gen_pwd(c); goto ADD_STRING;
+				temp = gen_pwd(c); break;
 
 			case '$': /* '$' or '#' for normal and root user */
-				temp = gen_user_flag();	goto ADD_STRING;
+				temp = gen_user_flag();	break;
 
 			case 'a': /* fallthrough */ /* Bell character */
 			case 'r': /* fallthrough */ /* Carriage return */
 			case 'n': /* fallthrough */ /* New line char */
-				temp = gen_misc(c); goto ADD_STRING;
+				temp = gen_misc(c); break;
 
 			case '[': /* fallthrough */ /* Begin a sequence of non-printing characters */
 			case ']': /* End the sequence */
-				temp = gen_non_print_sequence(c); goto ADD_STRING;
+				temp = gen_non_print_sequence(c); break;
 
 			case '\\': /* Literal backslash */
-				temp = savestring("\\", 1); goto ADD_STRING;
+				temp = savestring("\\", 1); break;
 
 			default:
 				temp = savestring("\\ ", 2);
 				temp[1] = (char)c;
-
-ADD_STRING:
-				add_string(&temp, c, &line, &result, &result_len);
 				break;
 			}
+
+			add_string(&temp, c, &line, &result, &result_len);
 		}
 
 		/* If not an escape code, check for command substitution, and if not,
