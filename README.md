@@ -3,7 +3,7 @@
 		<img src="misc/logo/clifm-banner.png" alt="Clifm logo" width="500" height="300">
 	</a>
 </p>
-<h2 align="center">The Command Line File Manager</h2>
+<h2 align="center">The Command-Line File Manager</h2>
 <h4 align="center">No GUI, no TUI, and no menus: just you and a powerful, file-management-oriented command line.</h4>
 <h4 align="center"><a
 href="https://github.com/leo-arch/clifm/#floppy_disk-installation">Install</a> · <a
@@ -60,7 +60,7 @@ In addition to common file operations, such as copy, move, remove, etc., **clifm
   - [High performance](https://github.com/leo-arch/clifm/wiki/Performance). Incredibly lightweight and fast even on really old hardware
   - [Short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary)
   - [Entry list numbers (ELNs)](https://github.com/leo-arch/clifm/wiki/Common-Operations#elns) for filenames
-  - [Extended color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file-types and -extensions
+  - [Extended color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file types and file extensions
   - [File counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories
   - Support for files attributes, extended attributes, birth time, BSD flags, and Solaris doors.
   - Privacy: Zero data collection and no connection to the outside world at all
@@ -133,7 +133,7 @@ In addition to common file operations, such as copy, move, remove, etc., **clifm
   - [Desktop notifications](https://github.com/leo-arch/clifm/wiki/Specifics#desktop-notifications)
   - Unicode support.
   - [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions
-  - [A built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager) for files listing
+  - [A built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager) for file listing
   - Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input)
 <h4 align="center"><br><i>Auto-suggestions in action</i></h4>
 <p align="center"><img src="https://i.postimg.cc/1XSKBRh8/suggestions.gif"></a></p>
