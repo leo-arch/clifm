@@ -456,10 +456,8 @@ xmemrchr(const void *s, const int c, size_t n)
 #else
 	/* OpenBSD implementation of memrchr(), licensed MIT.
 	 * Modified code is licensed GPL2+. */
-	const unsigned char *cp;
-
 	if (n != 0) {
-		cp = (const unsigned char *)s + n;
+		const unsigned char *cp = (const unsigned char *)s + n;
 		do {
 			if (*(--cp) == (const unsigned char)c)
 				return((void *)cp);
