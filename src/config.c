@@ -2718,7 +2718,8 @@ set_pager_value(char *line, int *var, const size_t buflen)
 	if (!p || *p < '0')
 		return;
 
-	if (*p >= '0' && *p <= '9') {
+	/* We already know that p[0] >= '0'. If <= '9', it is a digit. */
+	if (*p <= '9') {
 		const size_t l = strnlen(p, buflen);
 		if (l > 0 && p[l - 1] == '\n')
 			p[l - 1] = '\0';
@@ -3485,6 +3486,10 @@ set_term_title_value(const char *line)
 	set_config_bool_value(line, &conf.term_title);
 }
 
+/* The buffer to store read lines is PATH_MAX + 16. But for some reason
+ * cppcheck does not expand PATH_MAX, so that it only sees 16 bytes, and
+ * thereby a lot of out-of-bounds read. */
+/* cppcheck-suppress-begin pointerOutOfBounds */
 /* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
@@ -4016,6 +4021,7 @@ read_config(void)
 	if (filter.str && filter.type == FILTER_FILE_NAME)
 		set_filename_filter();
 }
+/* cppcheck-suppress-end pointerOutOfBounds */
 #endif /* CLIFM_SUCKLESS */
 
 static int

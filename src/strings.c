@@ -569,7 +569,7 @@ replace_invalid_chars(const char *name)
 			continue;
 		}
 
-		const int ret = check_control_char((unsigned char *)q);
+		const int ret = check_control_char((const unsigned char *)q);
 		if (ret > 0) {
 			*n++ = INVALID_CHR;
 			q += ret;

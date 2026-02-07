@@ -273,6 +273,7 @@ check_third_party_cmds(void)
 		}
 #endif /* CHECK_COREUTILS */
 
+		/* cppcheck-suppress knownConditionTrueFalse */
 		if (udevilok == 1 && udisks2ok == 1 && check_coreutils == 0
 		&& (bin_flags & (FZF_BIN_OK & FNF_BIN_OK & SMENU_BIN_OK
 #if defined(USE_DU1) && !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)

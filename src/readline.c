@@ -2873,8 +2873,9 @@ tag_complete(const char *text, char *start)
 		if (!*p || strncmp(p, "untag ", 6) == 0) {
 			if (text && *text == ':') { /* We have a tag name */
 				comp = 1; cur_comp_type = TCMP_TAGS_C;
-			} else if (*p == 'u') { /* We have a tagged file */
-				comp = 2;
+			} else {
+				if (*p == 'u') /* We have a tagged file */
+					comp = 2;
 			}
 		} else if (strncmp(p, "del ", 4) == 0 || strncmp(p, "list ", 5) == 0
 		/*|| strncmp(p, "new ", 4) == 0 */ || strncmp(p, "rename ", 7) == 0
