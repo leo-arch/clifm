@@ -6,6 +6,7 @@
 */
 
 /* properties.h */
+/* cppcheck-suppress-file unusedStructMember */
 
 #ifndef PROPERTIES_H
 #define PROPERTIES_H

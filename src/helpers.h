@@ -6,6 +6,8 @@
 */
 /* helpers.h -- main header file */
 
+/* cppcheck-suppress-file unusedStructMember */
+
 #ifndef HELPERS_H
 #define HELPERS_H
 
