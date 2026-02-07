@@ -530,7 +530,7 @@ get_cmd_from_line(char **line)
 
 	/* Get the first field in LINE */
 	while (*l != '\0' && *l != ';' && *l != '\n'
-	&& *l != '\'' && *l != '"' && len < sizeof(tmp) - 1)
+	&& *l != '\'' && *l != '"' && len < sizeof(tmp) - 1) /* cppcheck-suppress unsignedLessThanZero*/
 		tmp[len++] = *l++;
 
 	tmp[len] = '\0';
@@ -642,7 +642,7 @@ get_app(const char *mime, const char *filename)
  * Returns the number of associations found, if any, or -1 in case of error
  * or no association found */
 static int
-mime_import(char *file)
+mime_import(const char *file)
 {
 #if defined(__HAIKU__)
 	xerror("%s: Importing MIME associations is not supported "
@@ -1211,7 +1211,7 @@ get_apps_from_file(FILE *fp, const char *file_name, const char *mime,
 }
 
 static char *
-construct_filename(char *filename)
+construct_filename(const char *filename)
 {
 	char *name = NULL;
 
@@ -1255,7 +1255,8 @@ construct_filename(char *filename)
  * applications for the 'edit' subcommand), only command names are returned
  * (not parameters). */
 char **
-mime_open_with_tab(char *filename, const char *prefix, const int only_names)
+mime_open_with_tab(const char *filename, const char *prefix,
+	const int only_names)
 {
 	if (!filename || !mime_file)
 		return NULL;
@@ -1631,7 +1632,7 @@ join_and_run(char **args, char *name)
  * Display available opening applications for FILENAME, get user input,
  * and open the file. */
 int
-mime_open_with(char *filename, char **args)
+mime_open_with(const char *filename, char **args)
 {
 	if (!filename || !mime_file)
 		return FUNC_FAILURE;
@@ -1751,7 +1752,7 @@ import_mime(void)
 }
 
 static int
-check_mime_info_file(char *arg, char **fpath)
+check_mime_info_file(const char *arg, char **fpath)
 {
 	if (!arg) {
 		fprintf(stderr, "%s\n", _(MIME_USAGE));
@@ -1781,7 +1782,7 @@ check_mime_info_file(char *arg, char **fpath)
 static int
 get_open_file_path(char **args, char **fpath)
 {
-	char *f = NULL;
+	const char *f = NULL;
 	if (*args[1] == 'o' && strcmp(args[1], "open") == 0 && args[2])
 		f = args[2];
 	else
