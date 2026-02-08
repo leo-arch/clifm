@@ -415,6 +415,13 @@ is_sgr_color(const char *restrict str)
 	size_t digits = 0, semicolon = 0;
 
 	while (*str) {
+		if (*str == ':' && digits > 0 && *(str - 1) == '4' && str[1] >= '0'
+		&& str[1] <= '5') { /* Allowed: styled underline (Kitty terminal). */
+			digits = 0;
+			str += 2;
+			continue;
+		}
+
 		if (IS_DIGIT(*str)) {
 			digits++;
 		} else if (IS_COLOR_DELIM(*str)) {
@@ -423,10 +430,7 @@ is_sgr_color(const char *restrict str)
 			digits = 0;
 			semicolon++;
 		} else {
-			if (*str != '\n'
-			/* Allow styled underline (Kitty terminal). */
-			&& !(digits > 0 && *(str - 1) == '4' && *str == ':'
-			&& str[1] >= '0' && str[1] <= '5'))
+			if (*str != '\n')
 				/* Neither digit nor semicolon nor styled underline. */
 				return 0;
 		}
