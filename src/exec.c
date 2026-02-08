@@ -1450,7 +1450,7 @@ trash_func(char **args, int *t_cont)
 
 	int exit_status = trash_function(args);
 
-	if (is_sel && sel_n > 0) { /* If 'tr sel', deselect everything */
+	if (is_sel > 0 && sel_n > 0) { /* If 'tr sel', deselect everything */
 		for (size_t i = sel_n; i-- > 0;)
 			free(sel_elements[i].name);
 		sel_n = 0;

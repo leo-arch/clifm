@@ -1503,7 +1503,7 @@ construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 	}
 
 	/* Append extra parameters as required. */
-	if (is_sel == 1 && sel_is_last == 1) { /* E.g., "m sel" */
+	if (is_sel > 0 && sel_is_last == 1) { /* E.g., "m sel" */
 		tcmd[n] = savestring(".", 1);
 		*cwd = 1;
 		n++;
@@ -1686,11 +1686,11 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		return vv_rename_files(args, files_num);
 
 	if (sel_n > 0 && IS_MVCMD(args[0])) {
-		if (is_sel == 1)
+		if (is_sel > 0) {
 			/* If 'mv sel' and command is successful deselect everything:
 			 * selected files are not there anymore. */
 			deselect_all();
-		else {
+		} else {
 			if (cwd_has_sel_files())
 			/* Just in case a selected file in the current dir was renamed. */
 				get_sel_files();
@@ -1906,7 +1906,7 @@ remove_files(char **args)
 			press_any_key_to_continue(0);
 	}
 
-	if (is_sel && exit_status == FUNC_SUCCESS)
+	if (is_sel > 0 && exit_status == FUNC_SUCCESS)
 		deselect_all();
 
 	list_removed_files(info, 3, cwd);

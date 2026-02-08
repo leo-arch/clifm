@@ -1631,13 +1631,13 @@ expand_sel(char ***substr)
 	char **sel_array = xnmalloc(args_n + sel_n + 2, sizeof(char *));
 
 	/* 1. Copy all words before 'sel' */
-	for (i = 0; i < (size_t)is_sel; i++) {
+	for (i = 0; i < is_sel; i++) {
 		if (!(*substr)[i])
 			continue;
 		sel_array[j++] = savestring((*substr)[i], strlen((*substr)[i]));
 	}
 
-	update_quoted_words_index((size_t)is_sel, sel_n);
+	update_quoted_words_index(is_sel, sel_n);
 
 	/* 2. Add all selected files (in place of 'sel') */
 	for (i = 0; i < sel_n; i++) {
@@ -1650,7 +1650,7 @@ expand_sel(char ***substr)
 	}
 
 	/* 3. Add words after 'sel' as well */
-	for (i = (size_t)is_sel + 1; i <= args_n; i++)
+	for (i = is_sel + 1; i <= args_n; i++)
 		sel_array[j++] = savestring((*substr)[i], strlen((*substr)[i]));
 	sel_array[j] = NULL;
 
@@ -1680,8 +1680,8 @@ expand_sel_keyword(char ***substr)
 		if ( ( ((*substr)[i][1] == ':' && !(*substr)[i][2])
 		|| strcmp((*substr)[i], "sel") == 0)
 		&& lstat((*substr)[i], &a) == -1) {
-			is_sel = (int)i;
-			if ((size_t)is_sel == args_n)
+			is_sel = i;
+			if (is_sel == args_n)
 				sel_is_last = 1;
 
 			expand_sel(substr);
@@ -2994,7 +2994,7 @@ parse_input_str(char *str)
 			there was some "sel" keyword in it. */
 			/* Strings between is_sel and sel_n are selected filenames.
 			 * Skip them. */
-			if (i >= (size_t)is_sel && i <= sel_n)
+			if (i >= is_sel && i <= sel_n)
 				continue;
 		}
 

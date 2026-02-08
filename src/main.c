@@ -160,7 +160,6 @@ int
 	hist_status = UNSET,
 	home_ok = 1,
 	internal_cmd = 0,
-	is_sel = 0,
 	is_cdpath = 0,
 	jump_total_rank = 0,
 	kbind_busy = 0,
@@ -202,6 +201,7 @@ size_t
 	current_hist_n = 0,
 	curhistindex = 0,
 	ext_colors_n = 0,
+	is_sel = 0, /* Index of the 'sel' keyword in the command line */
 	jump_n = 0,
 	kbinds_n = 0,
 	msgs_n = 0,

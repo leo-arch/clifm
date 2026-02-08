@@ -620,7 +620,7 @@ CONFIRM:
 	}
 
 	/* If renaming all selected files, deselect them */
-	if (rename == 1 && is_sel)
+	if (rename == 1 && is_sel > 0)
 		deselect_all();
 
 	int total_rename = rename == 1 ? (int)f : 0;

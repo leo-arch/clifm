@@ -1913,7 +1913,6 @@ extern int
 	hist_status,
 	home_ok,
 	internal_cmd,
-	is_sel,
 	is_cdpath,
 	jump_total_rank,
 	kbind_busy,
@@ -1956,6 +1955,7 @@ extern size_t
 	current_hist_n,
 	curhistindex,
 	ext_colors_n,
+	is_sel, /* Index of the 'sel' keyword in the command line */
 	jump_n,
 	kbinds_n,
 	msgs_n,
