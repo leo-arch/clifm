@@ -421,7 +421,7 @@ char
 	dim_c[] = "\x1b[2m";
 
 /* A buffer to store filenames to be displayed (wide string) */
-char name_buf[NAME_BUF_SIZE * sizeof(wchar_t)];
+wchar_t g_wcs_name_buf[NAME_BUF_SIZE];
 
 /* A list of all internal commands, including command name, name length,
  * and parameter type (as a bit flag). Used by is_internal_cmd(), in checks.c. */

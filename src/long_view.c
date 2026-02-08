@@ -135,46 +135,50 @@ construct_and_print_filename(const struct fileinfo *props,
 		}
 
 		if (props->utf8 == 1) {
-			if (wname)
-				xstrsncpy(name_buf, name, sizeof(name_buf));
-			else /* memcpy is faster: use it whenever possible. */
-				memcpy(name_buf, name, props->bytes + 1);
-
-			diff = u8truncstr(name_buf, (size_t)trunc_point);
+			mbstowcs(g_wcs_name_buf, name, NAME_BUF_SIZE);
+			diff = u8truncstr(g_wcs_name_buf, (size_t)trunc_point);
 		} else { /* Let's avoid u8truncstr() to get some extra speed. */
 			const char c = name[trunc_point];
 			name[trunc_point] = '\0';
-			mbstowcs((wchar_t *)name_buf, name, NAME_BUF_SIZE);
+			mbstowcs(g_wcs_name_buf, name, NAME_BUF_SIZE);
 			name[trunc_point] = c;
 		}
 
 		cur_len -= (size_t)rest;
-	} else {
-		mbstowcs((wchar_t *)name_buf, name, NAME_BUF_SIZE);
 	}
-
-	free(wname);
 
 	/* Calculate pad for each filename */
 	int pad = max_namelen - (int)cur_len;
 	if (pad < 0)
 		pad = 0;
 
-	const char *trunc_diff = diff > 0 ? gen_diff_str(diff) : "";
+	if (trunc == 0) {
+		printf("%s%s%s%s%s%s%s%-*s%s  ",
+			(conf.colorize == 1 && conf.icons == 1) ? props->icon_color : "",
+			conf.icons == 1 ? props->icon : "", conf.icons == 1 ? " " : "",
+			df_c, conf.colorize == 1 ? props->color : "", name,
+			conf.light_mode == 1 ? "\x1b[0m" : df_c, pad, "", df_c);
 
+		free(wname);
+		return;
+	}
+
+	const char *trunc_diff = diff > 0 ? gen_diff_str(diff) : "";
 	static char trunc_s[2] = {0};
-	*trunc_s = trunc > 0 ? TRUNC_FILE_CHR : 0;
+	trunc_s[0] = TRUNC_FILE_CHR;
 
 	printf("%s%s%s%s%s%ls%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  ",
 		(conf.colorize == 1 && conf.icons == 1) ? props->icon_color : "",
 		conf.icons == 1 ? props->icon : "", conf.icons == 1 ? " " : "", df_c,
 		conf.colorize == 1 ? props->color : "",
-		(wchar_t *)name_buf, trunc_diff,
+		g_wcs_name_buf, trunc_diff,
 		conf.light_mode == 1 ? "\x1b[0m" : df_c, pad, "", df_c,
-		trunc ? tt_c : "", trunc_s,
+		trunc > 0 ? tt_c : "", trunc_s,
 		trunc == TRUNC_EXT ? props->color : "",
 		trunc == TRUNC_EXT ? ext_name : "",
 		trunc == TRUNC_EXT ? df_c : "");
+
+	free(wname);
 }
 
 static size_t

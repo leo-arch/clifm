@@ -112,6 +112,7 @@
 #endif /* !_NO_GETTEXT*/
 
 #include <glob.h>
+#include <wchar.h>
 
 #ifndef _NO_MAGIC
 # include <magic.h>
@@ -2067,18 +2068,13 @@ extern char **environ;
 
 /* A buffer to store filenames to be displayed (wide string) */
 #define NAME_BUF_SIZE (NAME_MAX + 1)
-extern char name_buf[NAME_BUF_SIZE * sizeof(wchar_t)];
+extern wchar_t g_wcs_name_buf[NAME_BUF_SIZE];
 
 /* Longest supported color:
  * \x1b[4:4;38;2;000;000;000;48;2;000;000;000;58;2;000;000;000m\0
  * This is a complete SGR sequence, with 24bit colors: foreground, background,
  * and underline (kitty). */
 #define MAX_COLOR 64
-
-/* For the almost 100 color variables we use, we need more or less 6Kb.
- * It's not much, but it could be less if we'd use dynamically allocated
- * arrays for them (which, on the other side, would make the whole thing
- * slower and more tedious). */
 
 /* Colors */
 extern char

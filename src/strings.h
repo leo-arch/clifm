@@ -35,7 +35,7 @@ char **split_str(char *str, const int update_args);
 char *strbfrlst(char *str, const char c);
 char *strbtw(char *str, const char a, const char b);
 int  strcntchr(const char *str, const char c);
-int  u8truncstr(char *restrict str, size_t max);
+int  u8truncstr(wchar_t *restrict str, size_t max);
 char *unescape_str(const char *text);
 size_t wc_xstrlen(const char *restrict str);
 char *xstrrpbrk(const char *s, const char *accept);

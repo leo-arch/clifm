@@ -24,7 +24,6 @@
 #ifndef HAVE_ARC4RANDOM
 # include <time.h> /* time(2) */
 #endif /* !HAVE_ARC4RANDOM */
-#include <wchar.h>
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 # define HAVE_WORDEXP
 # include <wordexp.h>
@@ -428,14 +427,9 @@ wc_xstrlen(const char *restrict str)
  * than MAX. In this case, the programmer should take care of filling the
  * empty spaces (usually no more than one) theyself. */
 int
-u8truncstr(char *restrict str, const size_t max)
+u8truncstr(wchar_t *restrict buf, const size_t max)
 {
 	int len = 0;
-	static wchar_t buf[NAME_BUF_SIZE];
-	*buf = L'\0';
-	if (mbstowcs(buf, str, NAME_BUF_SIZE) == (size_t)-1)
-		return 0;
-
 	int bmax = (int)max;
 	if (bmax < 0)
 		bmax = conf.max_name_len;
@@ -448,8 +442,6 @@ u8truncstr(char *restrict str, const size_t max)
 		}
 		len += l;
 	}
-
-	wcsncpy((wchar_t *)str, buf, NAME_BUF_SIZE); /* flawfinder: ignore */
 
 	return bmax - len;
 }

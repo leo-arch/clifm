@@ -19,7 +19,6 @@
 #include <readline/readline.h>
 #include <readline/history.h> /* history_expand() */
 #include <errno.h>
-#include <wchar.h> /* mbstowcs, wcschr, wcwidth */
 
 #include "aux.h"
 #include "checks.h" /* is_number() */

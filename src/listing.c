@@ -1358,7 +1358,10 @@ get_ext_info(const filesn_t i, int *trunc_type)
 		ext_len = wc_xstrlen(ext);
 	}
 
-	if ((int)ext_len >= conf.max_name_len - 1 || (int)ext_len <= 0) {
+	const size_t max_allowed = conf.max_name_len > 0
+		? (size_t)(conf.max_name_len - 1) : 0;
+
+	if (ext_len >= max_allowed || ext_len == 0) {
 		ext_len = 0;
 		*trunc_type = TRUNC_NO_EXT;
 	}
@@ -1369,7 +1372,7 @@ get_ext_info(const filesn_t i, int *trunc_type)
 /* Construct the filename to be displayed.
  * The filename is truncated if longer than MAX_NAMELEN (if conf.max_name_len
  * is set). */
-static char *
+static void *
 construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	const int max_namelen)
 {
@@ -1398,7 +1401,7 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 
 	if ((int)namelen <= max_namelen || conf.max_name_len == UNSET
 	|| conf.long_view != 0 || g_files_num <= 1)
-		return name;
+		return (void *)name;
 
 	/* Let's truncate the filename (at MAX_NAMELEN, in this example, 11).
 	 * A. If no file extension, just truncate at 11:  "long_filen~"
@@ -1424,17 +1427,14 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	const int trunc_len = max_namelen - 1 - (int)ext_len;
 
 	if (file_info[i].utf8 == 1) {
-		if (wtrunc->wname)
-			xstrsncpy(name_buf, wtrunc->wname, sizeof(name_buf));
-		else /* memcpy is faster: use it whenever possible. */
-			memcpy(name_buf, file_info[i].name, file_info[i].bytes + 1);
-
-		wtrunc->diff = u8truncstr(name_buf, (size_t)trunc_len);
+		const char *name_str = wtrunc->wname ? wtrunc->wname : name;
+		mbstowcs(g_wcs_name_buf, name_str, NAME_BUF_SIZE);
+		wtrunc->diff = u8truncstr(g_wcs_name_buf, (size_t)trunc_len);
 	} else {
 		/* If not UTF-8, let's avoid u8truncstr(). It's a bit faster this way. */
 		const char c = name[trunc_len];
 		name[trunc_len] = '\0';
-		mbstowcs((wchar_t *)name_buf, name, NAME_BUF_SIZE);
+		mbstowcs(g_wcs_name_buf, name, NAME_BUF_SIZE);
 		name[trunc_len] = c;
 	}
 
@@ -1443,7 +1443,7 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	/* At this point we have truncated name. "~" and ".ext" will be appended
 	 * later by one of the print_entry functions. */
 
-	return name_buf;
+	return (void *)g_wcs_name_buf;
 }
 
 static void
@@ -1455,7 +1455,9 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 		(file_info[i].dir == 1 && conf.classify == 1) ? fc_c : df_c;
 
 	struct wtrunc_t wtrunc = (struct wtrunc_t){0};
-	const char *n = construct_filename(i, &wtrunc, max_namelen);
+	const void *ptr = construct_filename(i, &wtrunc, max_namelen);
+	const wchar_t *w = wtrunc.type > 0 ? (const wchar_t *)ptr : NULL;
+	const char *n = wtrunc.type == 0 ? (const char *)ptr : NULL;
 
 	const char *trunc_diff = wtrunc.diff > 0 ? gen_diff_str(wtrunc.diff) : "";
 
@@ -1473,7 +1475,7 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 			printf("%s%s%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				ind_chr_color, ind_chr, df_c,
 				file_info[i].icon_color, file_info[i].icon,
-				checks.icons_gap, file_info[i].color, (const wchar_t *)n,
+				checks.icons_gap, file_info[i].color, w,
 				trunc_diff, tt_c, TRUNC_FILE_CHR,
 				ext_color, ext_name, end_color);
 		} else {
@@ -1487,7 +1489,7 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 			printf("%s%*jd%s%s%s%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				el_c, pad, (intmax_t)i + 1, df_c, ind_chr_color, ind_chr,
 				df_c, file_info[i].icon_color, file_info[i].icon,
-				checks.icons_gap, file_info[i].color, (const wchar_t *)n,
+				checks.icons_gap, file_info[i].color, w,
 				trunc_diff, tt_c, TRUNC_FILE_CHR,
 				ext_color, ext_name, end_color);
 		} else {
@@ -1501,7 +1503,7 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 	case NO_ICONS_NO_ELN:
 		if (trunc > 0) {
 			printf("%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s", ind_chr_color,
-				ind_chr, df_c, file_info[i].color, (const wchar_t *)n, trunc_diff,
+				ind_chr, df_c, file_info[i].color, w, trunc_diff,
 				tt_c, TRUNC_FILE_CHR, ext_color, ext_name, end_color);
 		} else {
 			printf("%s%s%s%s%s%s", ind_chr_color, ind_chr,
@@ -1512,7 +1514,7 @@ print_entry_color(int *ind_char, const filesn_t i, const int pad,
 		if (trunc > 0) {
 			printf("%s%*jd%s%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				el_c, pad, (intmax_t)i + 1, df_c, ind_chr_color, ind_chr,
-				df_c, file_info[i].color, (const wchar_t *)n,
+				df_c, file_info[i].color, w,
 				trunc_diff, tt_c, TRUNC_FILE_CHR,
 				ext_color, ext_name, end_color);
 		} else {
@@ -1542,7 +1544,9 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 	const int max_namelen)
 {
 	struct wtrunc_t wtrunc = (struct wtrunc_t){0};
-	const char *n = construct_filename(i, &wtrunc, max_namelen);
+	const void *ptr = construct_filename(i, &wtrunc, max_namelen);
+	const wchar_t *w = wtrunc.type > 0 ? (const wchar_t *)ptr : NULL;
+	const char *n = wtrunc.type == 0 ? (const char *)ptr : NULL;
 
 	const char *trunc_diff = wtrunc.diff > 0 ? gen_diff_str(wtrunc.diff) : "";
 	char *ind_chr = NULL;
@@ -1553,7 +1557,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 	case ICONS_NO_ELN:
 		if (wtrunc.type > 0) {
 			printf("%s%s%s%ls%s%c%s", ind_chr, file_info[i].icon,
-				checks.icons_gap, (const wchar_t *)n, trunc_diff,
+				checks.icons_gap, w, trunc_diff,
 				TRUNC_FILE_CHR, wtrunc.type == TRUNC_EXT
 				? file_info[i].ext_name : "");
 		} else {
@@ -1565,7 +1569,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 		if (wtrunc.type > 0) {
 			printf("%s%*jd%s%s%s%s%ls%s%c%s", el_c, pad, (intmax_t)i + 1,
 				df_c, ind_chr, file_info[i].icon, checks.icons_gap,
-				(const wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
+				w, trunc_diff, TRUNC_FILE_CHR,
 				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
 		} else {
 			printf("%s%*jd%s%s%s%s%s", el_c, pad, (intmax_t)i + 1, df_c,
@@ -1575,7 +1579,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 #endif /* !_NO_ICONS */
 	case NO_ICONS_NO_ELN:
 		if (wtrunc.type > 0) {
-			printf("%s%ls%s%c%s", ind_chr, (const wchar_t *)n,
+			printf("%s%ls%s%c%s", ind_chr, w,
 				trunc_diff, TRUNC_FILE_CHR,
 				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
 		} else {
@@ -1585,7 +1589,7 @@ print_entry_nocolor(int *ind_char, const filesn_t i, const int pad,
 	case NO_ICONS_ELN:
 		if (wtrunc.type > 0) {
 			printf("%s%*jd%s%s%ls%s%c%s", el_c, pad, (intmax_t)i + 1,
-				df_c, ind_chr, (const wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
+				df_c, ind_chr, w, trunc_diff, TRUNC_FILE_CHR,
 				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
 		} else {
 			printf("%s%*jd%s%s%s", el_c, pad, (intmax_t)i + 1,
@@ -1653,7 +1657,9 @@ print_entry_color_light(int *ind_char, const filesn_t i,
 	const char *end_color = file_info[i].dir == 1 ? fc_c : df_c;
 
 	struct wtrunc_t wtrunc = (struct wtrunc_t){0};
-	const char *n = construct_filename(i, &wtrunc, max_namelen);
+	const void *ptr = construct_filename(i, &wtrunc, max_namelen);
+	const wchar_t *w = wtrunc.type > 0 ? (const wchar_t *)ptr : NULL;
+	const char *n = wtrunc.type == 0 ? (const char *)ptr : NULL;
 
 	const char *trunc_diff = wtrunc.diff > 0 ? gen_diff_str(wtrunc.diff) : "";
 
@@ -1667,7 +1673,7 @@ print_entry_color_light(int *ind_char, const filesn_t i,
 		if (trunc > 0) {
 			printf("%s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				file_info[i].icon_color, file_info[i].icon,
-				checks.icons_gap, file_info[i].color, (const wchar_t *)n,
+				checks.icons_gap, file_info[i].color, w,
 				trunc_diff, tt_c, TRUNC_FILE_CHR,
 				ext_color, ext_name, end_color);
 		} else {
@@ -1681,7 +1687,7 @@ print_entry_color_light(int *ind_char, const filesn_t i,
 			printf("%s%*jd%s %s%s%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				el_c, pad, (intmax_t)i + 1, df_c, file_info[i].icon_color,
 				file_info[i].icon, checks.icons_gap, file_info[i].color,
-				(const wchar_t *)n, trunc_diff, tt_c, TRUNC_FILE_CHR,
+				w, trunc_diff, tt_c, TRUNC_FILE_CHR,
 				ext_color, ext_name, end_color);
 		} else {
 			printf("%s%*jd%s %s%s%s%s%s%s", el_c, pad, (intmax_t)i + 1,
@@ -1693,7 +1699,7 @@ print_entry_color_light(int *ind_char, const filesn_t i,
 	case NO_ICONS_NO_ELN:
 		if (trunc > 0) {
 			printf("%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-				file_info[i].color, (const wchar_t *)n,
+				file_info[i].color, w,
 				trunc_diff, tt_c, TRUNC_FILE_CHR,
 				ext_color, ext_name, end_color);
 		} else {
@@ -1704,7 +1710,7 @@ print_entry_color_light(int *ind_char, const filesn_t i,
 		if (trunc > 0) {
 			printf("%s%*jd%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 				el_c, pad, (intmax_t)i + 1, df_c, file_info[i].color,
-				(const wchar_t *)n, trunc_diff, tt_c, TRUNC_FILE_CHR,
+				w, trunc_diff, tt_c, TRUNC_FILE_CHR,
 				ext_color, ext_name, end_color);
 		} else {
 			printf("%s%*jd%s %s%s%s", el_c, pad, (intmax_t)i + 1, df_c,
@@ -1732,7 +1738,9 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 	const int pad, const int max_namelen)
 {
 	struct wtrunc_t wtrunc = (struct wtrunc_t){0};
-	const char *n = construct_filename(i, &wtrunc, max_namelen);
+	const void *ptr = construct_filename(i, &wtrunc, max_namelen);
+	const wchar_t *w = wtrunc.type > 0 ? (const wchar_t *)ptr : NULL;
+	const char *n = wtrunc.type == 0 ? (const char *)ptr : NULL;
 
 	const char *trunc_diff = wtrunc.diff > 0 ? gen_diff_str(wtrunc.diff) : "";
 
@@ -1741,7 +1749,7 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 	case ICONS_NO_ELN:
 		if (wtrunc.type > 0) {
 			printf("%s%s%ls%s%c%s", file_info[i].icon,
-				checks.icons_gap, (const wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
+				checks.icons_gap, w, trunc_diff, TRUNC_FILE_CHR,
 				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
 		} else {
 			printf("%s%s%s", file_info[i].icon, checks.icons_gap, n);
@@ -1750,7 +1758,7 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 	case ICONS_ELN:
 		if (wtrunc.type > 0) {
 			printf("%s%*jd%s %s%s%ls%s%c%s", el_c, pad, (intmax_t)i + 1,
-				df_c, file_info[i].icon, checks.icons_gap, (const wchar_t *)n,
+				df_c, file_info[i].icon, checks.icons_gap, w,
 				trunc_diff, TRUNC_FILE_CHR, wtrunc.type == TRUNC_EXT
 				? file_info[i].ext_name : "");
 		} else {
@@ -1761,7 +1769,7 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 #endif /* !_NO_ICONS */
 	case NO_ICONS_NO_ELN:
 		if (wtrunc.type > 0) {
-			printf("%ls%s%c%s", (const wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
+			printf("%ls%s%c%s", w, trunc_diff, TRUNC_FILE_CHR,
 				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
 		} else {
 			fputs(file_info[i].name, stdout);
@@ -1770,7 +1778,7 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 	case NO_ICONS_ELN:
 		if (wtrunc.type > 0) {
 			printf("%s%*jd%s %ls%s%c%s", el_c, pad, (intmax_t)i + 1,
-				df_c, (const wchar_t *)n, trunc_diff, TRUNC_FILE_CHR,
+				df_c, w, trunc_diff, TRUNC_FILE_CHR,
 				wtrunc.type == TRUNC_EXT ? file_info[i].ext_name : "");
 		} else {
 			printf("%s%*jd%s %s", el_c, pad, (intmax_t)i + 1, df_c, n);
