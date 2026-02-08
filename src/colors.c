@@ -415,7 +415,7 @@ is_sgr_color(const char *restrict str)
 	size_t digits = 0, semicolon = 0;
 
 	while (*str) {
-		if (*str == ':' && digits > 0 && *(str - 1) == '4' && str[1] >= '0'
+		if (*str == ':' && digits == 1 && *(str - 1) == '4' && str[1] >= '0'
 		&& str[1] <= '5') { /* Allowed: styled underline (Kitty terminal). */
 			digits = 0;
 			str += 2;

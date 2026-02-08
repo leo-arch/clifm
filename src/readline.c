@@ -676,8 +676,7 @@ cb_linehandler(char *line)
 	/* alt_rl_getc returns EOF in case of Ctrl+d and Ctrl+x, in which case
 	 * LINE is NULL. */
 	if (line == NULL) {
-		if (line == 0)
-			putchar('\n');
+		putchar('\n');
 		free(line);
 		rl_callback_handler_remove();
 		cb_running = 0;

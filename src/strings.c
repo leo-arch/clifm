@@ -3040,9 +3040,8 @@ parse_input_str(char *str)
 			 * #   3.1) WILDCARDS AND BRACE EXPANSION   #
 			 * ########################################## */
 
-	if (glob_n > 0 && glob_expand(substr) == 1
-	&& expand_glob(&substr, glob_array, glob_n) == -1)
-		return NULL;
+	if (glob_n > 0 && glob_expand(substr) == 1)
+		expand_glob(&substr, glob_array, glob_n);
 
 	free(glob_array);
 
