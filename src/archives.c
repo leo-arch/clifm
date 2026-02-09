@@ -30,10 +30,15 @@
 #define OP_ISO    1
 #define OP_OTHERS 0
 
+/* Default format when creating an archive without extension. */
+#define DEF_ARCHIVE_EXTENSION ".tar.gz"
+/* Append this suffix to extraction directories */
+#define DEF_EXTRACTION_DIR_SUFFIX "extracted"
+
 static char *
 ask_user_for_path(void)
 {
-	const char *m = _("Extraction path ('q' to quit): ");
+	const char *m = _("Extraction dir ('q' to quit): ");
 
 	const int poffset_bk = prompt_offset;
 	prompt_offset = (int)strlen(m) + 1;
@@ -146,8 +151,10 @@ extract_iso(char *file)
 
 	/* 7z x -oDIR FILE (use FILE as DIR) */
 	const size_t flen = strlen(file);
-	char *o_option = xnmalloc(flen + 7, sizeof(char));
-	snprintf(o_option, flen + 7, "-o%s.dir", file);
+	const size_t ext_len = sizeof(DEF_EXTRACTION_DIR_SUFFIX) - 1;
+	char *o_option = xnmalloc(flen + ext_len + 4, sizeof(char));
+	snprintf(o_option, flen + ext_len + 4, "-o%s-%s",
+		file, DEF_EXTRACTION_DIR_SUFFIX);
 
 	/* Construct and execute cmd */
 	char *cmd[] = {"7z", "x", o_option, file, NULL};
@@ -315,14 +322,6 @@ handle_iso(char *file)
 
 	char sel_op = get_operation(OP_ISO);
 
-	if (strchr(file, '\\')) {
-		char *deq_file = unescape_str(file);
-		if (deq_file) {
-			xstrsncpy(file, deq_file, strlen(deq_file) + 1);
-			free(deq_file);
-		}
-	}
-
 	switch (sel_op) {
 	case 'e': return extract_iso(file);
 	case 'E': return extract_iso_to_dir(file);
@@ -389,7 +388,7 @@ create_iso(char *in_file, char *out_file)
 		return create_iso_from_block_dev(in_file, out_file);
 
 	/* If any other file format */
-	xerror(_("archiver: '%s': Invalid file format. File should be either "
+	xerror(_("archiver: '%s': Invalid file format. File must be either "
 		"a directory or a block device.\n"), in_file);
 	return FUNC_FAILURE;
 }
@@ -461,11 +460,11 @@ static char *
 add_default_extension(char *name)
 {
 	const size_t name_len = strlen(name);
+	const size_t ext_len = sizeof(DEF_ARCHIVE_EXTENSION) - 1;
+	const size_t total_len = name_len + ext_len + 1;
 
-	char *t = savestring(name, name_len);
-	name = xnrealloc(name, name_len + 8, sizeof(char));
-	snprintf(name, name_len + 8, "%s.tar.gz", t);
-	free(t);
+	name = xnrealloc(name, total_len, sizeof(char));
+	memcpy(name + name_len, DEF_ARCHIVE_EXTENSION, ext_len + 1);
 
 	return name;
 }
@@ -474,12 +473,13 @@ add_default_extension(char *name)
 static char *
 get_archive_filename(void)
 {
-	puts(_("Use extension to specify archive/compression type "
-	       "(defaults to .tar.gz)\nExample: myarchive.xz"));
+	printf(_("Use extension to pick archive format (default: %s)\n"
+		"Example: myarchive.tar.xz or myarchive.zip\n"), DEF_ARCHIVE_EXTENSION);
+
 	char *name = NULL;
 	while (!name) {
 		flags |= NO_FIX_RL_POINT;
-		name = rl_no_hist(_("Filename ('q' to quit): "), 0);
+		name = rl_no_hist(_("Archive filename ('q' to quit): "), 0);
 		flags &= ~NO_FIX_RL_POINT;
 
 		if (!name || !*name) {
@@ -494,7 +494,7 @@ get_archive_filename(void)
 		}
 
 		const char *dot = strrchr(name, '.');
-		if (!dot || (dot == name && dot[1]))
+		if (!dot || !dot[1] || dot == name)
 			/* No extension or hidden: add the default extension. */
 			return add_default_extension(name);
 
@@ -513,25 +513,19 @@ static int
 zstandard(char *in_file, char *out_file, const char mode, const char op)
 {
 	int exit_status = FUNC_SUCCESS;
-	char *deq_file = unescape_str(in_file);
-	if (!deq_file) {
-		xerror(_("archiver: '%s': Error unescaping filename\n"), in_file);
-		return FUNC_FAILURE;
-	}
 
 	if (mode == 'c') {
 		if (out_file) {
-			char *cmd[] = {"zstd", "-zo", out_file, deq_file, NULL};
+			char *cmd[] = {"zstd", "-zo", out_file, in_file, NULL};
 			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		} else {
-			char *cmd[] = {"zstd", "-z", deq_file, NULL};
+			char *cmd[] = {"zstd", "-z", in_file, NULL};
 
 			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		}
 
-		free(deq_file);
 		return exit_status;
 	}
 
@@ -549,9 +543,8 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 		default: break;
 		}
 
-		char *cmd[] = {"zstd", option, deq_file, NULL};
+		char *cmd[] = {"zstd", option, in_file, NULL};
 		exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
-		free(deq_file);
 
 		if (exit_status != FUNC_SUCCESS)
 			return FUNC_FAILURE;
@@ -575,26 +568,25 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 
 		switch (*operation) {
 		case 'e': {
-			char *cmd[] = {"zstd", "-d", deq_file, NULL};
+			char *cmd[] = {"zstd", "-d", in_file, NULL};
 			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		} break;
 
 		case 't': {
-			char *cmd[] = {"zstd", "-t", deq_file, NULL};
+			char *cmd[] = {"zstd", "-t", in_file, NULL};
 			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		} break;
 
 		case 'i': {
-			char *cmd[] = {"zstd", "-l", deq_file, NULL};
+			char *cmd[] = {"zstd", "-l", in_file, NULL};
 			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		} break;
 
 		case 'q':
 			free(operation);
-			free(deq_file);
 			return FUNC_SUCCESS;
 
 		default:
@@ -605,7 +597,6 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 	}
 
 	free(operation);
-	free(deq_file);
 	return exit_status;
 }
 
@@ -656,33 +647,23 @@ compress_zstandard(char *name, char **args)
 }
 
 static int
-compress_others(char **args, const char *name)
+compress_others(char **args, char *archive_name)
 {
-	size_t n = 0, i;
+	size_t i;
 	for (i = 1; args[i]; i++);
 
-	const char *ext_ok = strrchr(name, '.');
+	/* Build command */
+	size_t n = 0;
 	char **tcmd = xnmalloc(3 + i + 1, sizeof(char *));
-	tcmd[0] = savestring("atool", 5);
-	tcmd[1] = savestring("-a", 2);
-	const size_t len = strlen(name) + (ext_ok ? 0 : 7) + 1;
-	tcmd[2] = xnmalloc(len, sizeof(char *));
-	snprintf(tcmd[2], len, "%s%s", name, ext_ok ? "" : ".tar.gz");
+	tcmd[0] = "atool"; tcmd[1] = "-a"; tcmd[2] = archive_name;
 	n += 3;
 
-	for (i = 1; args[i]; i++) {
-		char *p = unescape_str(args[i]);
-		if (!p)
-			continue;
-		tcmd[n++] = savestring(p, strlen(p));
-		free(p);
-	}
+	for (i = 1; args[i]; i++)
+		tcmd[n++] = args[i];
 	tcmd[n] = NULL;
 
 	const int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
 
-	for (i = 0; tcmd[i]; i++)
-		free(tcmd[i]);
 	free(tcmd);
 
 	return ret;
@@ -693,29 +674,29 @@ compress_files(char **args)
 {
 	int exit_status = FUNC_SUCCESS;
 
-	char *name = get_archive_filename();
-	if (!name)
+	char *archive_name = get_archive_filename();
+	if (!archive_name)
 		return exit_status;
 
-	const char *ret = strrchr(name, '.');
+	const char *ret = strrchr(archive_name, '.');
 
 	/* # ZSTANDARD # */
-	if (ret && strcmp(ret, ".zst") == 0) {
-		exit_status = compress_zstandard(name, args);
-		free(name);
+	if (ret && ret != archive_name && strcmp(ret, ".zst") == 0) {
+		exit_status = compress_zstandard(archive_name, args);
+		free(archive_name);
 		return exit_status;
 	}
 
 	/* # ISO 9660 # */
-	if (ret && strcmp(ret, ".iso") == 0) {
-		exit_status = create_iso(args[1], name);
-		free(name);
+	if (ret && ret != archive_name && strcmp(ret, ".iso") == 0) {
+		exit_status = create_iso(args[1], archive_name);
+		free(archive_name);
 		return exit_status;
 	}
 
 	/* # OTHER FORMATS # */
-	exit_status = compress_others(args, name);
-	free(name);
+	exit_status = compress_others(args, archive_name);
+	free(archive_name);
 
 	return exit_status;
 }
@@ -725,13 +706,6 @@ static int
 check_not_compressed(char **args)
 {
 	for (size_t i = 1; args[i]; i++) {
-		char *deq = NULL;
-		if (strchr(args[i], '\\')) {
-			deq = unescape_str(args[i]);
-			xstrsncpy(args[i], deq, strlen(deq) + 1);
-			free(deq);
-		}
-
 		if (is_compressed(args[i], 1) != FUNC_SUCCESS)
 			return 1;
 	}
@@ -743,21 +717,24 @@ check_not_compressed(char **args)
 static size_t
 check_zstandard(char **args)
 {
-	size_t zst = 0;
+	size_t is_zst = 0;
 
 	for (size_t i = 1; args[i]; i++) {
 		char *mime = xmagic(args[i], MIME_TYPE);
-		if (!mime || !*mime)
+		if (!mime || !*mime) {
+			free(mime);
 			continue;
+		}
+
 		if (*mime == 'a' && strcmp(mime, "application/zstd") == 0) {
-			zst = 1;
+			is_zst = 1;
 			free(mime);
 			break;
 		}
 		free(mime);
 	}
 
-	return zst;
+	return is_zst;
 }
 
 static char
@@ -868,19 +845,17 @@ extract_to_dir_others(char **args)
 static int
 extract_others(char **args)
 {
-	char **tcmd = NULL;
-	size_t n = 0, i;
-
+	size_t i;
 	for (i = 1; args[i]; i++);
 
-	/* Construct the cmd */
-	tcmd = xnmalloc(3 + i + 1, sizeof(char *));
-	tcmd[0] = savestring("atool", 5);
-	tcmd[1] = savestring("-x", 2);
-	tcmd[2] = savestring("-e", 2);
+	/* Build the command */
+	size_t n = 0;
+	char **tcmd = xnmalloc(3 + i + 1, sizeof(char *));
+	tcmd[0] = "atool"; tcmd[1] = "-x"; tcmd[2] = "-e";
 	n += 3;
+
 	for (i = 1; args[i]; i++)
-		tcmd[n++] = savestring(args[i], strlen(args[i]));
+		tcmd[n++] = args[i];
 	tcmd[n] = NULL;
 
 	/* Launch it */
@@ -888,8 +863,6 @@ extract_others(char **args)
 	if (launch_execv(tcmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 		exit_status = FUNC_FAILURE;
 
-	for (i = 0; tcmd[i]; i++)
-		free(tcmd[i]);
 	free(tcmd);
 
 	return exit_status;
@@ -903,24 +876,19 @@ get_repack_format(void)
 	char *format = NULL;
 	while (!format) {
 		format = rl_no_hist(_("New format (e.g.: .tar.xz): "), 0);
-		if (!format)
-			continue;
-
-		/* Do not allow any of these characters (mitigate command injection) */
-		const char invalid_c[] = " \t\n\"\\/'`@$><=;|&{([*?!%";
-		if (!*format || (*format != '.' && *format != 'q')
-		|| strpbrk(format, invalid_c)) {
+		if (!format || !*format) {
 			free(format);
 			format = NULL;
 			continue;
 		}
 
-		if (*format == 'q' && format[1] == '\0') {
+		if (*format == 'q' && !format[1]) {
 			free(format);
 			return NULL;
 		}
 	}
 
+	/* Atool itself will take care of validating this format. */
 	return format;
 }
 
@@ -937,21 +905,17 @@ repack_others(char **args)
 	for (i = 1; args[i]; i++);
 
 	char **tcmd = xnmalloc(4 + i + 1, sizeof(char *));
-	tcmd[0] = savestring("arepack", 7);
-	tcmd[1] = savestring("-F", 2);
-	tcmd[2] = savestring(format, strlen(format));
-	tcmd[3] = savestring("-e", 2);
+	tcmd[0] = "arepack"; tcmd[1] = "-F"; tcmd[2] = format; tcmd[3] = "-e";
 	n += 4;
+
 	for (i = 1; args[i]; i++)
-		tcmd[n++] = savestring(args[i], strlen(args[i]));
+		tcmd[n++] = args[i];
 	tcmd[n] = NULL;
 
 	int exit_status = FUNC_SUCCESS;
 	if (launch_execv(tcmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 		exit_status = FUNC_FAILURE;
 
-	for (i = 0; tcmd[i]; i++)
-		free(tcmd[i]);
 	free(tcmd);
 	free(format);
 
@@ -1137,7 +1101,8 @@ extract_with_bsdtar(char *file, const char *suffix, size_t *increment)
 }
 
 static void
-report_extraction_dir(const char *file, const char *suffix, const size_t increment)
+report_extraction_dir(const char *file, const char *suffix,
+	const size_t increment)
 {
 	if (conf.autols == 0)
 		return;
@@ -1161,7 +1126,7 @@ handle_zip(char **args)
 	int success = 0;
 	int ret = FUNC_SUCCESS;
 	char dest_dir[PATH_MAX + 2];
-	const char *suffix = "extracted"; /* Append this suffix to extracted files */
+	const char *suffix = DEF_EXTRACTION_DIR_SUFFIX;
 
 	for (size_t i = 1; args[i]; i++) {
 		if (zip_app == ZIP_APP_NONE || is_probably_zip(args[i]) != 1) {
@@ -1212,19 +1177,46 @@ decompress_files(char **args)
 
 	/* # ISO 9660 # */
 	const char *ret = strrchr(args[1], '.');
-	if ((ret && strcmp(ret, ".iso") == 0) || check_iso(args[1]) == 0)
+	if ((ret && ret != args[1] && strcmp(ret, ".iso") == 0)
+	|| check_iso(args[1]) == 0)
 		return handle_iso(args[1]);
 
 	/* Check if we have at least one Zstandard file */
-	const size_t zst = check_zstandard(args);
+	const size_t is_zst = check_zstandard(args);
 
 	/* # ZSTANDARD # */
-	if (zst == 1)
+	if (is_zst == 1)
 		return decompress_zstandard(args);
 
 	/* # OTHER FORMATS # */
 	return decompress_others(args);
 
+}
+
+static char **
+unescape_files(char **args)
+{
+	if (!args || !args[0])
+		return NULL;
+
+	size_t n;
+	for (n = 0; args[n]; n++);
+
+	char **files = xnmalloc(n + 1, sizeof(char *));
+
+	n = 0;
+	for (size_t i = 0; args[i]; i++) {
+		if (!strchr(args[i], '\\')) {
+			files[n++] = strdup(args[i]);
+			continue;
+		}
+
+		char *tmp = unescape_str(args[i]);
+		files[n++] = tmp ? tmp : strdup(args[i]);
+	}
+
+	files[n] = NULL;
+	return files;
 }
 
 /* Handle archives and/or compressed files (ARGS) according to MODE:
@@ -1238,11 +1230,23 @@ archiver(char **args, const char mode)
 	if (!args || !args[0] || !args[1])
 		return FUNC_FAILURE;
 
-	if (mode == 'c')
-		return compress_files(args);
+	/* Let's unescape arguments here, so that we don't need to do it in any
+	 * of the functions below. */
+	char **uargs = unescape_files(args);
+	if (!uargs)
+		return FUNC_FAILURE;
 
-	/* Decompression: mode == 'd' */
-	return decompress_files(args);
+	int ret = 0;
+	if (mode == 'c')
+		ret = compress_files(uargs);
+	else
+		ret = decompress_files(uargs);
+
+	for (size_t i = 0; uargs[i]; i++)
+		free(uargs[i]);
+	free(uargs);
+
+	return ret;
 }
 
 #else
