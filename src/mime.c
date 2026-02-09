@@ -1870,11 +1870,11 @@ static int
 print_mime_info(char **app, char **fpath, char **mime)
 {
 	if (*(*app) == 'a' && (*app)[1] == 'd' && !(*app)[2]) {
-		printf(_("Opening application:    ad [builtin] [%s]\n"),
-			g_mime_match ? "MIME" : "FILENAME");
+		printf(_("Opening application: ad [builtin] (match: %s)\n"),
+			g_mime_match ? "MIME type" : "name");
 	} else {
-		printf(_("Opening application:    '%s' [%s]\n"), *app,
-			g_mime_match ? "MIME" : "FILENAME");
+		printf(_("Opening application: '%s' (match: %s)\n"), *app,
+			g_mime_match ? "MIME type" : "name");
 	}
 
 	if (!config_dir || !*config_dir)
@@ -1882,21 +1882,24 @@ print_mime_info(char **app, char **fpath, char **mime)
 
 	char *mime_file_ptr = mime_file;
 
-	char buf[PATH_MAX + 1];
+	char *buf = NULL;
 	if (alt_preview_file && *alt_preview_file) {
 		mime_file = alt_preview_file;
 	} else {
-		snprintf(buf, sizeof(buf), "%s/preview.clifm", config_dir);
+		const size_t len = config_dir_len + 15;
+		buf = xnmalloc(len, sizeof(char));
+		snprintf(buf, len, "%s/preview.clifm", config_dir);
 		mime_file = buf;
 	}
 
 	char *preview_app = get_app(*mime, *fpath);
-	printf(_("Previewing application: '%s' %s\n"),
+	printf(_("Preview application: '%s' %s\n"),
 		(preview_app && *preview_app) ? preview_app : "None",
 		(preview_app && *preview_app)
-		? (g_mime_match ? "[MIME]" : "[FILENAME]") : "");
+		? (g_mime_match ? "(match: MIME type)" : "(match: name)") : "");
 
 	mime_file = mime_file_ptr;
+	free(buf);
 	free(preview_app);
 
 END:
