@@ -86,7 +86,7 @@ get_block_devices(void)
 			continue;
 		}
 
-		char *name = blockdev[i]->d_name;
+		const char *name = blockdev[i]->d_name;
 
 		/* Skip /dev/ram and /dev/loop devices */
 		if ((*name == 'l' && strncmp(name, "loop", 4) == 0)
@@ -562,21 +562,21 @@ int
 media_menu(const int mode)
 {
 #if defined(__HAIKU__)
-	xerror(_("%s: This feature is not available on Haiku\n"),
+	xerror(_("%s: Function not available on this platform\n"),
 		mode == MEDIA_LIST ? _("mountpoints") : _("media"));
 	return FUNC_FAILURE;
 #endif /* __HAIKU__ */
 
 #ifndef HAVE_PROC_MOUNTS
 	if (mode == MEDIA_MOUNT) {
-		xerror("%s\n", _("media: Function only available on Linux systems"));
+		xerror(_("media: Function not available on this platform\n"));
 		return FUNC_FAILURE;
 	}
 #endif /* HAVE_PROC_MOUNTS */
 
 	if (mode == MEDIA_MOUNT && xargs.mount_cmd == UNSET) {
-		xerror("%s\n", _("media: No mount application found. Install either "
-			"udevil or udisks2."));
+		xerror(_("media: No mount application found. Install either "
+			"udevil or udisks2.\n"));
 		return FUNC_FAILURE;
 	}
 
