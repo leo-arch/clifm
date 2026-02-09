@@ -261,8 +261,8 @@ free_bm_input(char ***p)
 /* This function takes care of the bookmarks screen.
  * It prints available bookmarks, gets user input, and opens the appropriate
  * bookmark. */
-int
-open_bookmark(void)
+static int
+bookmark_screen(void)
 {
 	if (!bookmarks || bm_n == 0) {
 		puts(_(NO_BOOKMARKS));
@@ -322,7 +322,7 @@ open_bookmark(void)
 
 /* Open a bookmark by either shortcut or name. */
 static int
-bm_open(char **cmd)
+open_bookmark(char **cmd)
 {
 	int exit_status = FUNC_FAILURE;
 	char *p = unescape_str(cmd[1]);
@@ -748,7 +748,7 @@ bookmarks_function(char **cmd)
 	}
 
 	if (!cmd[1]) /* No arguments: load the bookmarks screen. */
-		return open_bookmark();
+		return bookmark_screen();
 
 	if (*cmd[1] == 'a' && (!cmd[1][1] || strcmp(cmd[1], "add") == 0))
 		return add_bookmark(cmd + 2);
@@ -765,5 +765,5 @@ bookmarks_function(char **cmd)
 	}
 
 	/* Shortcut or bm name: open it. */
-	return bm_open(cmd);
+	return open_bookmark(cmd);
 }

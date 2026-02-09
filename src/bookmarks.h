@@ -27,7 +27,6 @@ Example: 'bm del name'\nTry 'bm --help' for more information"
 __BEGIN_DECLS
 
 int  bookmarks_function(char **cmd);
-int  open_bookmark(void);
 void free_bookmarks(void);
 
 __END_DECLS
