@@ -1394,3 +1394,37 @@ octal2int(const char *restrict str)
 
 	return dec_value;
 }
+
+/* Make the filename FILE unique by appending an integer suffix until it is
+ * made unique.
+ * If FILE already exists, no suffix is appended and a copy of FILE is returned.
+ * Otherwise, FILE-SUFFIX is returned in case of success, or NULL on error. */
+char *
+make_filename_unique(const char *file)
+{
+	if (!file || !*file)
+		return NULL;
+
+	struct stat a;
+	if (lstat(file, &a) != 0)
+		return strdup(file);
+
+	const size_t file_len = strlen(file);
+	const size_t buf_len = file_len + MAX_INT_STR + 2;
+	char *buf = xnmalloc(buf_len, sizeof(char));
+	xstrsncpy(buf, file, file_len + 1);
+
+	size_t suffix;
+	for (suffix = 1; suffix <= MAX_FILE_CREATION_TRIES; suffix++) {
+		snprintf(buf + file_len, buf_len - file_len, "-%zu", suffix);
+		if (lstat(buf, &a) != 0)
+			break;
+	}
+
+	if (suffix > MAX_FILE_CREATION_TRIES) {
+		free(buf);
+		return NULL;
+	}
+
+	return buf;
+}

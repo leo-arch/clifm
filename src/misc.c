@@ -1551,7 +1551,7 @@ create_virtual_dir(const int user_provided)
 }
 
 static char *
-construct_name(char *file, const size_t flen)
+build_name(char *file, const size_t flen)
 {
 	char *name = NULL;
 
@@ -1603,13 +1603,13 @@ gen_symlink(char *file, const char *cwd)
 
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
-		/* "~" fails here. No need to check in construct_name(). */
+		/* "~" fails here. No need to check in build_name(). */
 		err('w', PRINT_PROMPT, "%s: '%s': %s\n",
 			PROGRAM_NAME, file, strerror(errno));
 		return 0;
 	}
 
-	/* Construct source and destiny files. */
+	/* Build source and destination files. */
 
 	/* symlink(3) doesn't like filenames ending with slash. */
 	size_t file_len = strlen(file);
@@ -1624,41 +1624,27 @@ gen_symlink(char *file, const char *cwd)
 	else
 		xstrsncpy(source, file, sizeof(source));
 
-	char *name = construct_name(file, file_len);
+	char *name = build_name(file, file_len);
 	if (!name)
 		return 0;
 
-	char dest[PATH_MAX + 32];
+	char dest[PATH_MAX + 1];
 	snprintf(dest, sizeof(dest), "%s/%s", stdin_tmp_dir, name);
+	free(name);
 
-	size_t suffix = 0;
+	char *unique_name = make_filename_unique(dest);
+	if (!unique_name)
+		return 0;
 
-	while (1) {
-		errno = 0;
-		if (symlink(source, dest) == 0)
-			break;
+	errno = 0;
+	const int ret = symlink(source, unique_name);
+	free(unique_name);
 
-		if (errno != EEXIST) {
-			err('w', PRINT_PROMPT, _("%s: Cannot create symbolic "
-				"link '%s': %s\n"), PROGRAM_NAME, dest, strerror(errno));
-			free(name);
-			return 0;
-		}
-
-		suffix++;
-		if (suffix > MAX_FILE_CREATION_TRIES) {
-			err('w', PRINT_PROMPT, _("%s: Cannot create symbolic "
-				"link to '%s': max attempts (%d) reached\n"),
-				PROGRAM_NAME, stdin_tmp_dir, name, MAX_FILE_CREATION_TRIES);
-			free(name);
-			return 0;
-		}
-
-		snprintf(dest, sizeof(dest), "%s/%s-%zu", stdin_tmp_dir,
-			name, suffix);
+	if (ret == -1) {
+		err('w', PRINT_PROMPT, _("%s: Cannot create symbolic "
+			"link '%s': %s\n"), PROGRAM_NAME, dest, strerror(errno));
 	}
 
-	free(name);
 	return 1;
 }
 

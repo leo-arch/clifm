@@ -16,7 +16,7 @@
 #include <readline/readline.h>
 #include <unistd.h> /* unlinkat() */
 
-#include "aux.h"
+#include "aux.h" /* make_filename_unique() */
 #include "checks.h"
 #include "history.h"
 #include "jump.h"
@@ -418,6 +418,8 @@ check_iso(const char *file)
 	return (is_iso == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
 }
 
+/* NOTE: A return value of 0 does not mean that the file is not an
+ * archive/compressed file, but rather that atool(1) can't handle it. */
 static int
 check_compressed(const char *line, const int test_iso)
 {
@@ -440,13 +442,13 @@ int
 is_compressed(const char *file, const int test_iso)
 {
 	if (!file || !*file) {
-		xerror("%s\n", _("Error querying file type"));
+		xerror(_("Error querying file type\n"));
 		return (-1);
 	}
 
 	char *t = xmagic(file, TEXT_DESC);
 	if (!t) {
-		xerror("%s\n", _("Error querying file type"));
+		xerror(_("Error querying file type\n"));
 		return (-1);
 	}
 
@@ -1060,20 +1062,12 @@ extract_with_bsdtar(char *file, const char *suffix, size_t *increment)
 	if (!file || !suffix || !increment)
 		return FUNC_FAILURE;
 
-	char out_dir[PATH_MAX + 1];
-	snprintf(out_dir, sizeof(out_dir), "%s-%s", file, suffix);
+	char buf[PATH_MAX + 1];
+	snprintf(buf, sizeof(buf), "%s-%s", file, suffix);
 
-	struct stat a;
-	size_t u_suffix = 1;
-	while (lstat(out_dir, &a) == 0 && u_suffix <= MAX_FILE_CREATION_TRIES) {
-		snprintf(out_dir, sizeof(out_dir), "%s-%s-%zu", file, suffix, u_suffix);
-		*increment = u_suffix;
-		u_suffix++;
-	}
-
-	if (u_suffix > MAX_FILE_CREATION_TRIES) {
-		xerror(_("ad: Cannot create extraction directory for '%s': "
-			"Max attempts (%d) reached\n"), file, MAX_FILE_CREATION_TRIES);
+	char *out_dir = make_filename_unique(buf);
+	if (!out_dir) {
+		xerror(_("ad: Cannot create extraction directory for '%s'"), file);
 		return FUNC_FAILURE;
 	}
 
@@ -1083,6 +1077,7 @@ extract_with_bsdtar(char *file, const char *suffix, size_t *increment)
 	errno = 0;
 	if (mkdirat(XAT_FDCWD, out_dir, mode) == -1) {
 		xerror("ad: '%s': %s\n", out_dir, strerror(errno));
+		free(out_dir);
 		return FUNC_FAILURE;
 	}
 
@@ -1094,9 +1089,11 @@ extract_with_bsdtar(char *file, const char *suffix, size_t *increment)
 		 * before failing. */
 		char *rm_cmd[] = {"rm", "-rf", "--", out_dir, NULL};
 		launch_execv(rm_cmd, FOREGROUND, E_MUTE);
+		free(out_dir);
 		return FUNC_FAILURE;
 	}
 
+	free(out_dir);
 	return FUNC_SUCCESS;
 }
 

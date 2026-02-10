@@ -21,7 +21,7 @@
 # undef CHAR_MAX /* Silence redefinition error */
 #endif /* __TINYC__ */
 
-#include "aux.h" /* gen_default_answer() */
+#include "aux.h" /* gen_default_answer, make_filename_unique */
 #include "checks.h"
 #include "colors.h"
 #include "file_operations.h"
@@ -277,21 +277,7 @@ construct_dup_destination(char *source, const char *dest_dir)
 		snprintf(tmp_dest, sizeof(tmp_dest), "%s/%s.copy",
 			dest_dir, source_name);
 
-	char bk[PATH_MAX + 11];
-	xstrsncpy(bk, tmp_dest, sizeof(bk));
-	struct stat attr;
-	size_t suffix = 0;
-	while (lstat(bk, &attr) == 0) {
-		suffix++;
-		if (suffix > MAX_FILE_CREATION_TRIES) {
-			xerror(_("dup: Cannot create unique filename for '%s': max "
-				"attempts (%d) reached\n"), source, MAX_FILE_CREATION_TRIES);
-			return NULL;
-		}
-		snprintf(bk, sizeof(bk), "%s-%zu", tmp_dest, suffix);
-	}
-
-	char *dest = savestring(bk, strnlen(bk, sizeof(bk)));
+	char *dest = make_filename_unique(tmp_dest);
 
 	if (rem_slash == 1)
 		source[source_len - 1] = '/';
@@ -1197,26 +1183,22 @@ symlink_file(char **args)
 
 	char *target = args[0];
 	char *link_name = args[1];
-	char tmp[PATH_MAX + 1];
+	char buf[PATH_MAX + 1];
 	struct stat a;
 
 	if (!link_name || !*link_name) {
 		const char *p = strrchr(target, '/');
-		snprintf(tmp, sizeof(tmp), "%s.link", (p && p[1]) ? p + 1 : target);
+		snprintf(buf, sizeof(buf), "%s-link", (p && p[1]) ? p + 1 : target);
 
-		size_t suffix = 0;
-		while (lstat(tmp, &a) == 0) {
-			suffix++;
-			if (suffix > MAX_FILE_CREATION_TRIES) {
-				xerror(_("link: Cannot create symbolic link to '%s': max "
-					"attempts (%d) reached\n"), target, MAX_FILE_CREATION_TRIES);
-				return FUNC_FAILURE;
-			}
-			snprintf(tmp, sizeof(tmp), "%s.link-%zu",
-				(p && p[1]) ? p + 1 : target, suffix);
+		char *unique_name = make_filename_unique(buf);
+		if (unique_name) {
+			xstrsncpy(buf, unique_name, sizeof(buf));
+			free(unique_name);
+			link_name = buf;
+		} else {
+			xerror(_("link: Cannot create symbolic link to '%s'\n"), target);
+			return FUNC_FAILURE;
 		}
-
-		link_name = tmp;
 	}
 
 	len = strlen(link_name);

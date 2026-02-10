@@ -215,7 +215,7 @@ remove_trashinfo_file(const char *name)
 	free(info_file);
 }
 
-/* Create the trashed filename: orig_filename.suffix, where SUFFIX is
+/* Create the trashed filename: orig_filename-suffix, where SUFFIX is
  * the current date and time (plus an integer in case of dups).
  * Returns the absolute path to this file and updates FILE_SUFFIX to
  * its basename. */
@@ -246,35 +246,24 @@ gen_dest_file(const char *file, char **file_suffix)
 		filename[filename_len - (size_t)size] = '\0';
 	}
 
-	/* Make room for an integer suffix in case of a duplicated file name. */
-	const size_t slen = filename_len + 2 + MAX_INT_STR;
-	*file_suffix = xnmalloc(slen, sizeof(char));
-	snprintf(*file_suffix, slen, "%s", filename);
-
 	/* NOTE: It is guaranteed (by check_trash_file(), called before from
 	 * trash_file_args()) that FILE does not end with a slash. */
-	const size_t dlen = strlen(trash_files_dir) + strlen(*file_suffix) + 2 + 16;
+	const size_t dlen = strlen(trash_files_dir) + strlen(filename) + 2;
 	char *dest = xnmalloc(dlen, sizeof(char));
-	snprintf(dest, dlen, "%s/%s", trash_files_dir, *file_suffix);
+	snprintf(dest, dlen, "%s/%s", trash_files_dir, filename);
 
-	/* If the destination file exists (there's already a trashed file with
-	 * this name), append an integer until it is made unique. */
-	struct stat a;
-	size_t inc = 0;
-	while (lstat(dest, &a) == 0) {
-		inc++;
-		if (inc > MAX_FILE_CREATION_TRIES) {
-			xerror(_("trash: Cannot create trashinfo file for '%s': max "
-				"attempts (%d) reached\n"), filename, MAX_FILE_CREATION_TRIES);
-			free(dest);
-			free(*file_suffix);
-			*file_suffix = NULL;
-			return NULL;
-		}
+	char *unique_name = make_filename_unique(dest);
+	free(dest);
 
-		snprintf(*file_suffix, slen, "%s-%zu", filename, inc);
-		snprintf(dest, dlen, "%s/%s", trash_files_dir, *file_suffix);
+	if (!unique_name) {
+		xerror(_("trash: Cannot create trashinfo file for '%s'\n"), filename);
+		return NULL;
 	}
+
+	dest = unique_name;
+	char *s = strrchr(dest, '/');
+	if (s && s[1])
+		*file_suffix = strdup(s + 1);
 
 	return dest;
 }

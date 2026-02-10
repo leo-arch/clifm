@@ -1423,7 +1423,7 @@ create_tmp_files(void)
 		}
 
 		/* Append suffix and try again. */
-		snprintf(tmp_dir, tmp_len, "%s/%s-%s.%zu", tmp_rootdir,
+		snprintf(tmp_dir, tmp_len, "%s/%s-%s-%zu", tmp_rootdir,
 			PROGRAM_NAME, user.name ? user.name : "unknown", suffix);
 	}
 
