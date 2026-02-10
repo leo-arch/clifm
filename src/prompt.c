@@ -730,7 +730,7 @@ gen_color(char **color_begin, char **color_end)
 		return NULL;
 
 	char *l = *color_begin;
-	if (!l || *l != '%' || l[1] != '{' || !l[2])
+	if (*l != '%' || l[1] != '{' || !l[2])
 		return NULL;
 
 	l += 2; /* L is now "color}" */
