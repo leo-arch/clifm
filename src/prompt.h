@@ -95,7 +95,7 @@ __BEGIN_DECLS
 char *prompt(const int prompt_flag, const int screen_refresh);
 char *decode_prompt(char *line);
 int  prompt_function(char **args);
-char *gen_color(char **line);
+char *gen_color(char **color_begin, char **color_end);
 void set_prompt_options(void);
 
 __END_DECLS

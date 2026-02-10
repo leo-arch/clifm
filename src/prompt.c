@@ -237,6 +237,9 @@ reduce_path_fish(char *str)
 static char *
 gen_pwd(const int c)
 {
+	if (!workspaces[cur_ws].path)
+		return NULL;
+
 	char *temp = NULL;
 	char *tmp_path = NULL;
 	int free_tmp_path = 0;
@@ -308,11 +311,8 @@ gen_exit_status(void)
 }
 
 static char *
-gen_escape_char(char **line, int *c)
+gen_escape_char(void)
 {
-	(*line)++;
-	*c = 0;
-	/* 27 (dec) == 033 (octal) == 0x1b (hex) == \e */
 	char *temp = xnmalloc(2, sizeof(char));
 	*temp = '\033';
 	temp[1] = '\0';
@@ -321,7 +321,7 @@ gen_escape_char(char **line, int *c)
 }
 
 static char *
-gen_octal(char **line, int *c)
+gen_octal(char **line, const int c)
 {
 	char octal_string[4];
 	xstrsncpy(octal_string, *line, sizeof(octal_string));
@@ -339,20 +339,19 @@ gen_octal(char **line, int *c)
 	char *temp = xnmalloc(3, sizeof(char));
 
 	if (n == CTLESC || n == CTLNUL) {
-		*line += 3;
 		temp[0] = CTLESC;
 		temp[1] = (char)n;
 		temp[2] = '\0';
-	} else if (n == -1) {
+		*line += 2; /* Advance line to the last octal character */
+	} else if (n == -1) { /* Error */
 		temp[0] = '\\';
-		temp[1] = '\0';
+		temp[1] = (const char)c;
+		temp[2] = '\0';
 	} else {
-		*line += 3;
 		temp[0] = (char)n;
 		temp[1] = '\0';
+		*line += 2; /* Advance line to the last octal character */
 	}
-
-	*c = 0;
 
 	return temp;
 }
@@ -452,27 +451,27 @@ gen_shell_name(void)
 	return savestring("unknown", 7);
 }
 
+/* Append the string STR to the buffer BUF, whose current length is BUF_LEN. */
 static void
-add_string(char **tmp, const int c, char **line, char **res, size_t *len)
+add_string(char **str, char **buf, size_t *buf_len)
 {
-	if (!*tmp)
+	if (!*str)
 		return;
 
-	if (c)
-		(*line)++;
+	const size_t orig_buf_len = *buf_len;
+	*buf_len += strlen(*str);
 
-	*len += strlen(*tmp);
-
-	const size_t l = *len + 2 + (wrong_cmd ? (MAX_COLOR + 6) : 0);
-	if (!*res) {
-		*res = xnmalloc(l + 1, sizeof(char));
-		*(*res) = '\0';
+	const size_t l = *buf_len + 1;
+	if (!*buf) {
+		*buf = xnmalloc(l, sizeof(char));
+		*(*buf) = '\0';
 	} else {
-		*res = xnrealloc(*res, l + 1, sizeof(char));
+		*buf = xnrealloc(*buf, l, sizeof(char));
 	}
 
-	xstrncat(*res, strlen(*res), *tmp, l + 1);
-	free(*tmp);
+	xstrncat(*buf, orig_buf_len, *str, l);
+	free(*str);
+	*str = NULL;
 }
 
 #ifndef NO_WORDEXP
@@ -719,17 +718,22 @@ is_valid_hex(const char *s)
 	return (i == 3 || i == 6);
 }
 
-/* Convert a color notation ("%{color}") into an actual color escape
- * sequence. Return this latter on success or NULL on error (invalid
- * color notation). */
+/* Convert a color notation ("%{color}") into an SGR escape sequence.
+ * On success returns a malloc'd NUL-terminated string containing the
+ * escape sequence (caller must free it), and sets COLOR_END (if not NULL)
+ * to point at the closing '}' of the color token. On error, NULL is returned
+ * and COLOR_END is left unmodified. */
 char *
-gen_color(char **line)
+gen_color(char **color_begin, char **color_end)
 {
-	if (!*line || !*(*line))
+	if (!color_begin || !*color_begin)
 		return NULL;
 
-	/* At this point LINE is "{color}" */
-	char *l = (*line) + 1; /* L is now "color}" */
+	char *l = *color_begin;
+	if (!l || *l != '%' || l[1] != '{' || !l[2])
+		return NULL;
+
+	l += 2; /* L is now "color}" */
 
 	const int bg = (l[0] == 'k' && l[1] == ':' && l[2]);
 	const char *attr = bg == 0 ? get_color_attribute(l) : NULL;
@@ -822,7 +826,8 @@ gen_color(char **line)
 	}
 
 	*p = '}'; /* Restore the trailing '}' */
-	*line = p; /* Set LINE to the end of the color notation */
+	if (color_end)
+		*color_end = p; /* Set to the end of the color notation */
 	return temp;
 
 #undef GEN_COLOR
@@ -926,23 +931,20 @@ run_prompt_module(char **line, char **res, size_t *len)
 #endif /* !NO_WORDEXP */
 
 static char *
-gen_last_cmd_time(char **line)
+gen_last_cmd_time(void)
 {
 	if (last_cmd_time < (double)conf.prompt_b_min)
-		{ (*line)++; return NULL; }
+		return NULL;
 
 	const int precision = conf.prompt_b_precision;
 	const int len = snprintf(NULL, 0, "%.*f", precision, last_cmd_time);
 	if (len < 0)
-		{ (*line)++; return NULL; }
+		return NULL;
 
 	char *temp = xnmalloc((size_t)len + 1, sizeof(char));
 	snprintf(temp, (size_t)len + 1, "%.*f", precision, last_cmd_time);
 
 	return temp;
-
-	(*line)++;
-	return NULL;
 }
 
 static char *
@@ -975,15 +977,21 @@ decode_prompt(char *line)
 	while ((c = (int)*line++)) {
 		/* Color notation: "%{color}" */
 		if (c == '%' && *line == '{' && line[1]) {
-			temp = gen_color(&line);
-			if (temp)
-				add_string(&temp, c, &line, &result, &result_len);
+			char *color_end = NULL;
+			char *color_begin = line - 1; /* Points to '%' */
+			temp = gen_color(&color_begin, &color_end);
+			if (!temp) {
+				temp = savestring("%", 1);
+				color_end = color_begin;
+			}
+
+			add_string(&temp, &result, &result_len);
+			line = color_end + 1;
 		}
 
 		/* We have an escape char */
 		else if (c == '\\') {
-			/* Now move on to the next char */
-			c = (int)*line;
+			c = (int)*line; /* Move on to the next char */
 			switch (c) {
 			/* File statistics */
 			case 'B': temp = gen_stats_str(STATS_BLK); break;
@@ -1025,7 +1033,7 @@ decode_prompt(char *line)
 				temp = gen_exit_status(); break;
 
 			case 'e': /* Escape char */
-				temp = gen_escape_char(&line, &c); break;
+				temp = gen_escape_char(); break;
 
 			case 'j': temp = gen_cwd_perms(); break;
 
@@ -1037,14 +1045,14 @@ decode_prompt(char *line)
 			case '5': /* fallthrough */
 			case '6': /* fallthrough */
 			case '7':
-				temp = gen_octal(&line, &c); break;
+				temp = gen_octal(&line, c); break;
 
 			case 'c': /* Program name */
 				temp = savestring(PROGRAM_NAME, sizeof(PROGRAM_NAME) - 1);
 				break;
 
-			case 'b':
-				temp = gen_last_cmd_time(&line); break;
+			case 'b': /* Elapsed time of the last executed command */
+				temp = gen_last_cmd_time(); break;
 
 			case 'P': /* Current profile name */
 				temp = gen_profile(); break;
@@ -1071,7 +1079,6 @@ decode_prompt(char *line)
 				temp = gen_nesting_level(c); break;
 
 			case 's': /* Shell name (after last slash)*/
-				if (!user.shell) { line++; break; }
 				temp = gen_shell_name(); break;
 
 			case 'S': /* Current workspace */
@@ -1084,7 +1091,6 @@ decode_prompt(char *line)
 			case 'f': /* fallthrough */ /* Abbreviated, fish-like */
 			case 'w': /* fallthrough */ /* Full PWD */
 			case 'W': /* Short PWD */
-				if (!workspaces[cur_ws].path) {	line++;	break; }
 				temp = gen_pwd(c); break;
 
 			case '$': /* '$' or '#' for normal and root user */
@@ -1102,13 +1108,14 @@ decode_prompt(char *line)
 			case '\\': /* Literal backslash */
 				temp = savestring("\\", 1); break;
 
-			default:
+			default: /* Unknown sequence: copy it verbatim */
 				temp = savestring("\\ ", 2);
 				temp[1] = (char)c;
 				break;
 			}
 
-			add_string(&temp, c, &line, &result, &result_len);
+			add_string(&temp, &result, &result_len);
+			line++;
 		}
 
 		/* If not an escape code, check for command substitution, and if not,
@@ -1119,20 +1126,20 @@ decode_prompt(char *line)
 				continue;
 
 #ifndef NO_WORDEXP
-			/* Command substitution */
+			/* Command substitution: "$(cmd)" */
 			if (c == '$' && *line == '(') {
 				substitute_cmd(&line, &result, &result_len);
 				continue;
 			}
 
+			/* Prompt module: "${module}" */
 			if (c == '$' && *line == '{') {
 				run_prompt_module(&line, &result, &result_len);
 				continue;
 			}
 #endif /* !NO_WORDEXP */
 
-			const size_t new_len = result_len + 2
-				+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
+			const size_t new_len = result_len + 2;
 			result = xnrealloc(result, new_len, sizeof(char));
 			result[result_len++] = (char)c;
 
@@ -1195,20 +1202,23 @@ print_user_message(void)
 		return;
 	}
 
-	int c = 0;
 	char *tmp = NULL;
 
 	fputs(wc_c, stdout);
 
 	while (*s) {
-		if (*s == '\\' && *(s + 1)) {
+		if (*s == '\\' && s[1]) {
 			s++;
-			if (*s >= '0' && *s <= '7' && (tmp = gen_octal(&s, &c))) { /* NOLINT */
+			if (*s >= '0' && *s <= '7' && (tmp = gen_octal(&s, *s))) { /* NOLINT */
 				fputs(tmp, stdout);
 				free(tmp);
-			} else if (*s == 'e' && (tmp = gen_escape_char(&s, &c))) {
+				/* Line is set to the last char of the octal string by
+				 * gen_octal itself. */
+				s++;
+			} else if (*s == 'e' && (tmp = gen_escape_char())) {
 				fputs(tmp, stdout);
 				free(tmp);
+				s++;
 			} else if (*s == 'n') {
 				putchar('\n');
 				s++;

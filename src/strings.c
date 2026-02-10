@@ -3109,7 +3109,7 @@ home_tilde(const char *new_path, int *free_buf)
 	return (char *)new_path;
 }
 
-/* Returns a pointer to a copy of the string STR, malloc'ed with size SIZE, or
+/* Return a pointer to a copy of the string STR (malloc'ed with size SIZE), or
  * NULL on error. */
 char *
 savestring(const char *restrict str, const size_t size)

@@ -495,8 +495,7 @@ update_warning_prompt_text_color_new_syntax(void)
 	if (!start || start[1] != '{')
 		return;
 
-	start++;
-	char *color = gen_color(&start);
+	char *color = gen_color(&start, NULL);
 	if (!color || !*color) {
 		free(color);
 		return;
@@ -504,7 +503,7 @@ update_warning_prompt_text_color_new_syntax(void)
 
 	/* Remove trailing \002 and leading \001 */
 	size_t len = strlen(color);
-	color[len - 1] = '\0'; /* LEN is guaranteed to be > 0 */
+	color[len - 1] = '\0'; /* LEN is guaranteed to be >0 (*color is not NUL) */
 	len--;
 
 	if (len < sizeof(wp_c)) {
