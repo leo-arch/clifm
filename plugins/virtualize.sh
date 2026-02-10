@@ -13,7 +13,7 @@
 
 term_cmd="xterm -e"
 clifm_bin="clifm"
-clifm_opts=""
+clifm_opts="--unicode"
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
