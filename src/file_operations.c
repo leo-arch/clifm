@@ -1580,8 +1580,17 @@ check_overwrite(char **args, const int force, size_t *skipped)
 		if (answer == RL_ANSWER_ALL)
 			return 1;
 
-		if (answer == RL_ANSWER_QUIT)
-			return 0;
+		if (answer == RL_ANSWER_QUIT) {
+			if (i == 1) /* First file */
+				return 0;
+
+			/* At least one file has been processed: skip the remainig ones. */
+			for (size_t j = i; j < files_num; j++) {
+				*args[i] = '\0';
+				(*skipped)++;
+			}
+			break;
+		}
 
 		if (answer == RL_ANSWER_NO) {
 			/* Nullify this entry. It will be skipped later. */
