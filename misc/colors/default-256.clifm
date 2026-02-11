@@ -32,7 +32,7 @@
 # For example, for bold red the hex code is #ff0000-1, while the 256-colors code
 # is @160-1.
 #
-# Note: For more information about SGR sequences consult
+# Note: For more information about SGR sequences, consult
 # https://en.wikipedia.org/wiki/ANSI_escape_code
 
 ### Use some variables to hold your color codes
@@ -46,28 +46,28 @@
 #
 # For example;
 #
-# define BOLD_CYAN=@6-1
-# el=BOLD_CYAN
+# define FTYPE_DIR=@4-1
+# FiletypeColors="di=FTYPE_DIR:..."
 #
-# Here we define 'BOLD_CYAN' as "@6-1", and then we use this color for ELNs,
-# whose code is 'el' (see below).
+# Here we define 'FTYPE_DIR' as "@4-1", and then we use this color for directories,
+# whose code is 'di' (see below).
 
-### Xterm-like color names are also supported. For example, let's use DarkSeaGreen1
-# for ELNs:
+### Xterm-like color names are also supported. For example, to use DarkSeaGreen1
+# for directories:
 #
-# el=DarkSeaGreen1
+# di=DarkSeaGreen1
 #
 # Or, as a definition:
 #
 # define Green=DarkSeaGreen1
-# el=Green
+# di=Green
 #
 # Just as with hex colors, a single attribute can be added to color names.
 # For example, 'DarkSeaGreen1-1' to get the bold version of this color.
 #
 # For the complete list of color names consult the manpage.
 
-## Edit the value of the below defintions to change colors. For example, to change
+## Edit the value of the definitions below to change colors. For example, to change
 # the color of directories to bold red: 'define FTYPE_DIR=@1-1'.
 
 #=====================================#
@@ -100,9 +100,9 @@ define FTYPE_UNKNOWN=4;31;47        # Unknown file type
 define FTYPE_NON_STAT=4;2;37        # Non-stat'able file
 
 # (1) If unset, the corresponding file type color is used and an
-# exclamation mark is printed before the file name in the files list
+# exclamation mark is printed before the file name in the file list
 # (provided icons are disabled -otherwise the lock icon is used- and
-# clifm is not running in light mode -in light mode access checks are
+# clifm is not running in light mode -in light mode, access checks are
 # not performed). The color used for the exclamation mark is
 # PROMPT_EXIT_FAILURE (see below).
 
@@ -225,7 +225,7 @@ ExtColors="7z=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arj=ARCHIVE:br=ARCHIVE:bz=ARCHIVE:
 
 # AUDIO FILES
 define AUDIO=@214
-ExtColors="aac=AUDIO:ac3=AUDIO:au=AUDIO:cue=AUDIO:m4a=AUDIO:m4b=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp2=AUDIO:mp3=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:ra=AUDIO:spx=AUDIO:wma=AUDIO:"
+ExtColors="aac=AUDIO:ac3=AUDIO:au=AUDIO:cue=AUDIO:m4a=AUDIO:m4b=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp2=AUDIO:mp3=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:opus=AUDIO:ra=AUDIO:spx=AUDIO:wma=AUDIO:"
 
 # LOSSLESS AUDIO
 define LAUDIO=@214-1
@@ -261,7 +261,7 @@ ExtColors="arw=RAW:cr2=RAW:cr3=RAW:dng=RAW:nef=RAW:orf=RAW:raf=RAW:rw2=RAW:rwl=R
 
 # VIDEO FILES
 define VIDEO=@141-1
-ExtColors="3gp=VIDEO:3gpp=VIDEO:asf=VIDEO:avi=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mpeg=VIDEO:mpg=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:swf=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:"
+ExtColors="3gp=VIDEO:3gpp=VIDEO:asf=VIDEO:avi=VIDEO:flv=VIDEO:h264=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mpeg=VIDEO:mpg=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:swf=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:"
 
 # MARKUP FILES
 define MARKUP=@85
@@ -287,7 +287,7 @@ ExtColors="db=DB:db3=DB:dbf=DB:fdb=DB:gdb=DB:kdb=DB:kdbx=DB:mdb=DB:mdf=DB:ndf=DB
 # SHADEn is the color used for the shade N
 #
 # The meaning of each date shade is (in order, excluding COLOR-TYPE and ERROR):
-# hour, day, weak, month, older
+# hour, day, week, month, older
 #
 # For 4-bit colors (1), valid colors are in the range 30-37
 # For 8-bit colors (2), valid colors are in the range 0-255
@@ -311,8 +311,10 @@ DateShades="2,197-2,231,253,250,247,244"
 SizeShades="2,197-2,79,77,228,215,203"
 #SizeShades="3,#ff005f-2,#5fd7af,#5fd75f,#ffff87,#ffaf5f,#ff5f5f"
 
-### If icons are enabled, use this color for directories icon (only for icons-in-terminal and Nerd-fonts)
-DirIconColor="Y"
+### If icons are enabled, use this color for the directory icon (only for
+# icons-in-terminal and Nerd-fonts). Defaults to yellow.
+#define DIR_ICON_COLOR=@3    # Yellow
+#DirIconColor=DIR_ICON_COLOR
 
 #=====================================#
 #           PROMPT STYLE              #

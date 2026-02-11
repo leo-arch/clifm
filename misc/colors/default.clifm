@@ -46,28 +46,28 @@
 #
 # For example;
 #
-# define BOLD_CYAN=@6-1
-# el=BOLD_CYAN
+# define FTYPE_DIR=@4-1
+# FiletypeColors="di=FTYPE_DIR:..."
 #
-# Here we define 'BOLD_CYAN' as "@6-1", and then we use this color for ELNs,
-# whose code is 'el' (see below).
+# Here we define 'FTYPE_DIR' as "@4-1", and then we use this color for directories,
+# whose code is 'di' (see below).
 
 ### Xterm-like color names are also supported. For example, let's use DarkSeaGreen1
-# for ELNs:
+# for directories:
 #
-# el=DarkSeaGreen1
+# di=DarkSeaGreen1
 #
 # Or, as a definition:
 #
 # define Green=DarkSeaGreen1
-# el=Green
+# di=Green
 #
 # Just as with hex colors, a single attribute can be added to color names.
 # For example, 'DarkSeaGreen1-1' to get the bold version of this color.
 #
 # For the complete list of color names consult the manpage.
 
-## Edit the value of the below defintions to change colors. For example, to change
+## Edit the value of the definitions below to change colors. For example, to change
 # the color of directories to bold red: 'define FTYPE_DIR=@1-1'.
 
 #=====================================#
@@ -100,7 +100,7 @@ define FTYPE_UNKNOWN=4;31;47      # Unknown file type
 define FTYPE_NON_STAT=4;2;37      # Non-stat'able file
 
 # (1) If unset, the corresponding file type color is used and an
-# exclamation mark is printed before the file name in the files list
+# exclamation mark is printed before the file name in the file list
 # (provided icons are disabled -otherwise the lock icon is used- and
 # clifm is not running in light mode -in light mode access checks are
 # not performed). The color used for the exclamation mark is
@@ -224,7 +224,7 @@ ExtColors="7z=ARCHIVE:alz=ARCHIVE:apk=ARCHIVE:arj=ARCHIVE:br=ARCHIVE:bz=ARCHIVE:
 
 # AUDIO FILES
 define AUDIO=36 # Cyan
-ExtColors="aac=AUDIO:ac3=AUDIO:aif=AUDIO:aifc=AUDIO:aiff=AUDIO:alac=AUDIO:ape=AUDIO:au=AUDIO:cue=AUDIO:flac=AUDIO:m2a=AUDIO:m4a=AUDIO:m4b=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp2=AUDIO:mp3=AUDIO:mpc=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:ogx=AUDIO:opus=AUDIO:pcm=AUDIO:ra=AUDIO:spx=AUDIO:wav=AUDIO:wma=AUDIO:wv=AUDIO:"
+ExtColors="aac=AUDIO:ac3=AUDIO:aif=AUDIO:aifc=AUDIO:aiff=AUDIO:alac=AUDIO:ape=AUDIO:au=AUDIO:cue=AUDIO:flac=AUDIO:m4a=AUDIO:m4b=AUDIO:mid=AUDIO:midi=AUDIO:mka=AUDIO:mp2=AUDIO:mp3=AUDIO:mpga=AUDIO:oga=AUDIO:ogg=AUDIO:opus=AUDIO:pcm=AUDIO:ra=AUDIO:spx=AUDIO:wav=AUDIO:wma=AUDIO:wv=AUDIO:"
 
 # SOURCE FILES
 define CODE=1;33 # Bold yellow
@@ -256,7 +256,7 @@ ExtColors="bak=TEMP:bk=TEMP:bkp=TEMP:cache=TEMP:class=TEMP:crdownload=TEMP:hi=TE
 
 # VIDEO FILES
 define VIDEO=1;35 # Bold magenta
-ExtColors="3gp=VIDEO:3gpp=VIDEO:asf=VIDEO:avi=VIDEO:flv=VIDEO:h264=VIDEO:heics=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mpeg=VIDEO:mpg=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:swf=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:"
+ExtColors="3gp=VIDEO:3gpp=VIDEO:asf=VIDEO:avi=VIDEO:flv=VIDEO:h264=VIDEO:m2ts=VIDEO:m2v=VIDEO:m4v=VIDEO:mkv=VIDEO:mov=VIDEO:mp4=VIDEO:mpeg=VIDEO:mpg=VIDEO:ogm=VIDEO:ogv=VIDEO:qt=VIDEO:rm=VIDEO:swf=VIDEO:vob=VIDEO:webm=VIDEO:wmv=VIDEO:"
 
 #=====================================#
 #           COLOR SHADES              #
@@ -296,10 +296,13 @@ SizeShades="1,31-2,36,32,33,31,35"
 #SizeShades="2,196-2,43,112,227,214,202"
 #SizeShades="3,#ff0000-2,#00d7af,#87d700,#ffff5f,#ffaf00,#ff5f00"
 
-#NOTE: For SizeShades to work, the 'dz' color code (solid color for sizes) needs to be unset (default).
+#NOTE: For SizeShades to work, the 'dz' color code (solid color for sizes) needs to
+# be unset (default).
 
-# If icons are enabled, use this color for directories icon (only for icons-in-terminal and Nerd-fonts).
-DirIconColor="Y"
+# If icons are enabled, use this color for directories icon (only for
+# icons-in-terminal and Nerd-fonts). Defaults to yellow.
+#define DIR_ICON_COLOR=@3
+#DirIconColor=DIR_ICON_COLOR
 
 #=====================================#
 #           PROMPT STYLE              #
