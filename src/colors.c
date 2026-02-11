@@ -451,7 +451,7 @@ is_sgr_color(const char *restrict str)
 
 /* Check if STR has the format of a color code string (a number or a
  * semicolon list (max 16 fields) of numbers of at most 3 digits each).
- * Hex color codes (#RRGGBB) and 256 colors short (@NUM) are also validated.
+ * Hex-color codes (#RRGGBB) and 256-color short (@NUM) are also validated.
  * Returns 1 if true and 0 if false. */
 static int
 is_color_code(const char *restrict str)

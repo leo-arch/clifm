@@ -12,7 +12,7 @@
 
 /* User settings */
 
-/* We provide 2 default color schemes: 16 and 256 colors. The 256 colors
+/* Clifm provides 2 default color schemes: 16 and 256-color. The 256-color
  * version is used if supported by the running terminal. */
 
 		/* ############################################

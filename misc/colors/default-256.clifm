@@ -1,14 +1,14 @@
 # Theme file for Clifm
-# Theme name: clifm (256 colors version)
+# Theme name: clifm (256-color version)
 # Author: L. Abramovich
 # License: GPL2+
 
 ### How do we define colors?
 #
-# The FiletypeColors, InterfaceColors, and ExtColors options take SGR sequences
-# (excluding the initial escape character and the ending 'm') as color values,
-# just like the LS_COLORS environment variable. However, shortcuts for 8-bit
-# (256-colors) and 24-bit (true color) colors are available. For example:
+# The FiletypeColors, InterfaceColors, and ExtColors options accept SGR sequences
+# as color values (omit the initial escape character and the trailing 'm'), just
+# like the LS_COLORS environment variable. Shortcuts are also supported for 8‑bit
+# (256-color) and 24-bit (true-color) specifications.
 #
 # 31            4-bit
 # 38;5;160      8-bit

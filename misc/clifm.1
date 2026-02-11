@@ -1606,7 +1606,7 @@ The color scheme (or just theme) can be set either via the command line (\fB--co
 .TP
 .B 1. COLORS
 .TP
-If 256 colors support is detected for the current terminal, and not set in any other way (either via the \fBColorScheme\fR option in the configuration file or the \fB--color-scheme\fR command-line switch), \fBclifm\fR will attempt to load the 256 colors version of the default color scheme: default-256. Otherwise, it falls back to the 16 colors version.
+If 256 colors support is detected for the current terminal, and not set in any other way (either via the \fBColorScheme\fR option in the configuration file or the \fB--color-scheme\fR command-line switch), \fBclifm\fR will attempt to load the 256-color version of the default color scheme: default-256. Otherwise, it falls back to the 16 colors version.
 .TP
 All color codes are specified in the corresponding color scheme file (by default \fI~/.config/clifm/colors/default.clifm\fR). You can edit this file pressing \fBF8\fR or entering `\fBcs edit\fR`.
 .TP
@@ -1718,9 +1718,9 @@ The following codes are used for different interface elements (in the \fBInterfa
 .TP
 \fBb. Supported colors\fR
 .TP
-4-bit, 8-bit (256-colors), and 24-bit (true colors) colors are supported.
+4-bit, 8-bit (256-color), and 24-bit (true-color) specifications are supported.
 .TP
-Colors are defined basically as SGR sequences (excluding the initial escape character and the ending 'm'), the same sequences used by the \fBLS_COLORS\fR environment variable. However, shortcuts for 8-bit (256-colors) and 24-bit (true color) colors are available. For example:
+Colors are defined basically as SGR sequences (excluding the initial escape character and the ending 'm'), the same sequences used by the \fBLS_COLORS\fR environment variable. However, shortcuts for 8-bit (256-color) and 24-bit (true-color) specifications are available. For example:
 .sp
  31            4-bit
  38;5;160      8-bit
@@ -1744,7 +1744,7 @@ A \fBsingle\fR attribute can be added to hex colors and 256 colors (in the form 
 .TP
 \fBNote\fR: Some attributes may not be supported by all terminal emulators.
 .TP
-For example, for bold red the hex code is \fB#ff0000-1\fR, while the 256-colors code is \fB\@160-1\fR. (for more information about SGR sequences consult \fIhttps://en.wikipedia.org/wiki/ANSI_escape_code\fR).
+For example, for bold red the hex code is \fB#ff0000-1\fR, while the 256-color code is \fB\@160-1\fR. (for more information about SGR sequences consult \fIhttps://en.wikipedia.org/wiki/ANSI_escape_code\fR).
 .TP
 \fBc. Color names\fR
 .TP

@@ -2194,9 +2194,9 @@ create_def_color_scheme(void)
 # just as InterfaceColors defines colors for Clifm's interface and ExtColors\n\
 # for file extensions. They all make use of the same format used by the\n\
 # LS_COLORS environment variable. Thus, \"di=1;34\" means that (non-empty)\n\
-# directories will be listed in bold blue.\n\
-# Color codes are traditional ANSI escape sequences less the escape char and\n\
-# the final 'm'. 8 bit, 256 colors, RGB, and hex (#rrggbb) colors are supported.\n\
+# directories will be displayed in bold blue.\n\
+# Color codes are SGR escape sequences (omit the initial escape char and the\n\
+# trailing 'm'). 8 bit, 256-color, RGB, and hex (#rrggbb) specs are supported.\n\
 # A detailed explanation of all these codes can be found in the manpage.\n\n"
 
 			"FiletypeColors=\"%s\"\n\n"
