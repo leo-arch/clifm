@@ -10,6 +10,8 @@
 #
 # RegularPrompt="... ${m_git_prompt_status} ..."
 
+ESC=$(printf '\033')
+
 cmd_output="$(git -c color.status=false status -sb 2>/dev/null)"
 
 [ -z "$cmd_output" ] && exit 1
@@ -33,33 +35,32 @@ status=""
 
 for i in $files; do
 	case "$i" in
-		".") status="${status}\e[36m+" ;;
-		"D"*) status="${status}\e[31mD" ;;
-		"M"*) status="${status}\e[32mM" ;;
-		"R"*) status="${status}\e[35mR" ;;
-		"U"*) status="${status}\e[33mU" ;;
-		"A"*) status="${status}\e[32mA" ;;
-		"??"*) status="${status}\e[31m?" ;;
+		".") status="${status}${ESC}[36m+" ;;
+		"D"*) status="${status}${ESC}[31mD" ;;
+		"M"*) status="${status}${ESC}[32mM" ;;
+		"R"*) status="${status}${ESC}[35mR" ;;
+		"U"*) status="${status}${ESC}[33mU" ;;
+		"A"*) status="${status}${ESC}[32mA" ;;
+		"??"*) status="${status}${ESC}[31m?" ;;
     esac
 done
 
-branch_color="\e[22;35m"
-sep_color="\e[2;37m"
-end_color="\e[22;39m"
+branch_color="${ESC}[22;35m"
+sep_color="${ESC}[2;37m"
+end_color="${ESC}[22;39m"
 
-output="$branch_color$branch$sep_color|"
+output="${branch_color}${branch}${sep_color}|"
 
 if [ -n "$ahead_behind" ]; then
-	ab_color="\e[22;32m"
-	[ "$(echo "$ahead_behind" | cut -b1)" != "a" ] && ab_color="\e[22;31m"
-	output="$output$ab_color$ahead_behind$end_color"
+	ab_color="${ESC}[22;32m"
+	[ "$(echo "$ahead_behind" | cut -b1)" != "a" ] && ab_color="${ESC}[22;31m"
+	output="${output}${ab_color}${ahead_behind}${end_color}"
 else
-	output="$output\e[22;32m=$end_color"
+	output="${output}${ESC}[22;32m=${end_color}"
 fi
 
-[ -n "$status" ] && output="$output$sep_color|$end_color$status$end_color"
+[ -n "$status" ] && output="${output}${sep_color}|${end_color}${status}${end_color}"
 
-# FIXME: The POSIX version of echo does not support flags
-echo -e "($output)"
+printf '(%s)\n' "$output"
 
 exit 0
