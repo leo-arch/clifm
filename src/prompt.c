@@ -485,51 +485,53 @@ reset_ifs(const char *value)
 }
 
 static void
-substitute_cmd(char **line, char **res, size_t *len)
+substitute_cmd(char **cmd, char **res, size_t *len, char **cmd_end)
 {
-	char *p = strchr(*line, ')');
+	if (!cmd || !res || !len)
+		return;
+
+	char *p = strchr(*cmd, ')');
 	if (!p)
-		return; /* No ending bracket */
+		return; /* No trailing parenthesis */
 
 	/* Extract the command to be executed */
 	const char c = p[1];
 	p[1] = '\0';
-	const size_t cmd_len = strlen(*line) + 2;
-	char *cmd = xnmalloc(cmd_len, sizeof(char));
-	snprintf(cmd, cmd_len, "$%s", *line); /* Reinsert leading '$' */
-	p[1] = c;
-
-	/* Set LINE after the ending bracket to continue processing */
-	*line = p + 1;
 
 	char *old_value = xgetenv("IFS", 1);
 	setenv("IFS", "", 1);
 
 	wordexp_t wordbuf;
-	const int ret = wordexp(cmd, &wordbuf, 0);
+	const int ret = wordexp(*cmd, &wordbuf, 0);
+
+	p[1] = c;
+
+	/* Set cmd_end to the trailing parenthesis to continue processing. */
+	if (cmd_end)
+		*cmd_end = p;
 
 	reset_ifs(old_value);
 	free(old_value);
-	free(cmd);
 
 	if (ret != 0)
 		return;
 
-	if (wordbuf.we_wordc == 0)
-		goto END;
+	if (wordbuf.we_wordc == 0) {
+		wordfree(&wordbuf);
+		return;
+	}
 
 	for (size_t j = 0; j < wordbuf.we_wordc; j++) {
 		*len += strlen(wordbuf.we_wordv[j]);
 		if (!*res) {
-			*res = xnmalloc(*len + 2, sizeof(char));
+			*res = xnmalloc(*len + 1, sizeof(char));
 			*(*res) = '\0';
 		} else {
-			*res = xnrealloc(*res, *len + 2, sizeof(char));
+			*res = xnrealloc(*res, *len + 1, sizeof(char));
 		}
-		xstrncat(*res, strlen(*res), wordbuf.we_wordv[j], *len + 2);
+		xstrncat(*res, strlen(*res), wordbuf.we_wordv[j], *len + 1);
 	}
 
-END:
 	wordfree(&wordbuf);
 }
 #endif /* !NO_WORDEXP */
@@ -910,6 +912,9 @@ get_prompt_module_path(const char *name)
 static void
 run_prompt_module(char **line, char **res, size_t *len)
 {
+	if (!line || !res || !len)
+		return;
+
 	char *p = strchr(*line, '}');
 	if (!p)
 		return;
@@ -918,11 +923,11 @@ run_prompt_module(char **line, char **res, size_t *len)
 
 	const char *p_path = get_prompt_module_path(*line + 1);
 	if (p_path) {
-		char cmd[PATH_MAX + 3];
-		snprintf(cmd, sizeof(cmd), "(%s)", p_path);
+		char cmd[PATH_MAX + 4];
+		snprintf(cmd, sizeof(cmd), "$(%s)", p_path);
 
 		char *ptr = &cmd[0];
-		substitute_cmd(&ptr, res, len);
+		substitute_cmd(&ptr, res, len, NULL);
 	}
 
 	*p = '}';
@@ -1128,7 +1133,12 @@ decode_prompt(char *line)
 #ifndef NO_WORDEXP
 			/* Command substitution: "$(cmd)" */
 			if (c == '$' && *line == '(') {
-				substitute_cmd(&line, &result, &result_len);
+				char *cmd_begin = line - 1;
+				char *cmd_end = NULL;
+				substitute_cmd(&cmd_begin, &result, &result_len, &cmd_end);
+				if (cmd_end)
+					/* Line points now after the trailing parenthesis */
+					line = cmd_end + 1;
 				continue;
 			}
 
@@ -1602,7 +1612,9 @@ expand_history(char **input)
 	const int ret = history_expand(*input, &exp_input);
 
 	if (ret == -1) { /* Error in expansion */
-		xerror("%s: %s\n", PROGRAM_NAME, exp_input);
+		/* From history_expand: If an error occurred in expansion (-1), then
+		 * exp_input contains a descriptive error message. */
+		xerror("%s: %s\n", PROGRAM_NAME, exp_input ? exp_input : UNKNOWN_STR);
 		free(*input);
 		free(exp_input);
 		return FUNC_FAILURE;
