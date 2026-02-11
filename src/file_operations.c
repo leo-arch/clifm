@@ -1586,7 +1586,7 @@ check_overwrite(char **args, const int force, size_t *skipped)
 
 			/* At least one file has been processed: skip the remainig ones. */
 			for (size_t j = i; j < files_num; j++) {
-				*args[i] = '\0';
+				*args[j] = '\0';
 				(*skipped)++;
 			}
 			break;
