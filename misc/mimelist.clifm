@@ -14,10 +14,10 @@
 # Lines starting with either '#' or ';' are comments.
 
 # The settings below cover the most common filetypes.
-# It is recommended to edit this file placing your prefered applications
+# It is recommended to edit this file by placing your preferred applications
 # at the beginning of the apps list to speed up the opening process.
 
-# The file is read top to bottom and left to right; the first existent
+# The file is read top to bottom and left to right; the first existing
 # application found will be used.
 
 # Applications defined here are NOT desktop files, but commands (arguments
@@ -29,13 +29,13 @@
 
 # Use 'X' to specify a GUI environment and '!X' for non-GUI environments:
 # X  = GUI only
-# !X = Non-GUI only (like the kernel console or a SSH session)
+# !X = Non-GUI only (like the kernel console or an SSH session)
 #
 # If a line applies to both environments, simply omit the 'X'. For example:
 # 'text/plain=vi'
 
 # Use 'N' to match filenames instead of MIME types.
-# 'N:.*\.txt$=vi' to open all .txt files with vi (both GUI and non-GUI)
+# 'N:.*\.txt$=vi' will open all .txt files with vi (both GUI and non-GUI)
 # 'X:N:.*\.txt$=geany' (GUI only)
 # '!X:N:.*\.txt$=vi' (non-GUI only)
 
@@ -57,9 +57,9 @@
 
 # To suppress STDERR and/or STDOUT use !E and !O respectively (they can be
 # combined). Examples:
-# Supress STDERR only and run in the foreground:
+# Suppress STDERR only and run in the foreground:
 #    mpv %f !E
-# Supress both (STDERR and STDOUT) and run in the background:
+# Suppress both (STDERR and STDOUT) and run in the background:
 #    mpv %f !EO &
 
 # The '%x' flag is a shorthand for "%f !EO &". For example:
@@ -80,11 +80,11 @@
 #
 # Note: This will hide error messages. To display error messages use:
 #    cmd %f !O &
-# This will run 'cmd' in the background supressing STDOUT only.
+# This will run 'cmd' in the background suppressing STDOUT only.
 
 # Important: If the opening application is already running, the file will
 # typically open in a new tab, and Clifm will not wait for the file to be
-# closed (as the procecss already returned).
+# closed (as the process already returned).
 # To ensure a new instance is created, use options like:
 # geany -i, gedit -s, kate -n, pluma --new-window, etc.
 
@@ -152,7 +152,7 @@ X:N:.*\.ora$=mypaint %x;krita %x;gimp %x;pinta %x;scribus %x;display %x
 # Directories
 #-----------------------------
 # Only for the open-with command (ow) and the --open command line switch.
-# In graphical environments directories will be opened in a new window.
+# In graphical environments, directories will be opened in a new window.
 
 X:inode/directory=xterm -e clifm %x;xterm -e vifm %x;pcmanfm %x;thunar %x;xterm -e ncdu %x
 !X:inode/directory=vifm;ranger;nnn;ncdu
@@ -231,10 +231,12 @@ X:^font/.*|^application/(font.*|.*opentype)=fontforge %x;fontpreview
 # Torrent
 #-----------------------------
 
-X:application/x-bittorrent=rtorrent;transimission-gtk %x;transmission-qt %x;deluge-gtk %x;ktorrent %x
+X:application/x-bittorrent=rtorrent;transmission-gtk %x;transmission-qt %x;deluge-gtk %x;ktorrent %x
+
+#X:application/x-doom-wad=gzdoom %x;
 
 #-----------------------------
 # Fallback
 #-----------------------------
-# Let's fallback to an external opener as last resource
+# Let's fallback to an external opener as the last resource
 .*=handlr open;mimeopen -n;rifle;mimeo;xdg-open;open;
