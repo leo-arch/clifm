@@ -79,13 +79,16 @@ static int cb_running = 0;
 static char rl_default_answer = 0;
 
 static const char *
-gen_y_n_str(const char def_answer)
+gen_yes_no_str(char def_answer, int allow_all)
 {
 	switch (def_answer) {
-	case 'y': return "[Y/n]";
-	case 'n': return "[y/N]";
+	case 'y':
+		return allow_all ? "[Y/n/all/quit]" : "[Y/n]";
+	case 'n':
+		return allow_all ? "[y/N/all/quit]" : "[y/N]";
 	case 'u': /* fallthrough */
-	default:  return "[y/n]";
+	default:
+		return allow_all ? "[y/n/all/quit]" : "[y/n]";
 	}
 }
 
@@ -101,55 +104,86 @@ set_default_answer(const char default_answer)
 	return default_answer;
 }
 
-/* Get user input (y/n, uppercase is allowed) using MSG_STR as prompt message.
- * If DEFAULT_ANSWER isn't zero, it will be used in case the user just
- * presses Enter on an empty line.
- * Returns 1 if 'y' or 0 if 'n'. */
-int
-rl_get_y_or_n(const char *msg_str, char default_answer)
+static int
+rl_get_y_n_common(const char *msg_str, char default_answer, int allow_all)
 {
 	char def_answer = set_default_answer(default_answer);
 	rl_default_answer = def_answer;
 
-	const char *yes_no_str = gen_y_n_str(rl_default_answer);
+	const char *yes_no_str = gen_yes_no_str(rl_default_answer, allow_all);
 	const size_t msg_len = strlen(msg_str) + strlen(yes_no_str) + 3;
 	char *msg = xnmalloc(msg_len, sizeof(char));
 	snprintf(msg, msg_len, "%s %s ", msg_str, yes_no_str);
 
-	int ret = 0;
-
-	char *answer = NULL;
-	while (!answer) {
-		answer = rl_no_hist(msg, 0);
+	for (;;) {
+		char *answer = rl_no_hist(msg, 0);
 		rl_default_answer = def_answer;
-		if (!answer)
-			continue;
-
-		if (!*answer) {
+		if (!answer || !*answer) {
 			free(answer);
 			answer = NULL;
 			continue;
 		}
 
 		switch (*answer) {
+		case 'q': /* fallthrough */
+		case 'Q':
+			if (allow_all) {
+				if (!answer[1] || strcasecmp(answer, "quit") == 0)
+					{ free(answer); free(msg); return RL_ANSWER_QUIT; }
+			}
+			/* If not allow_all or doesn't match "all", fall through to reject */
+			free(answer); answer = NULL; continue;
+
+		case 'a': /* fallthrough */
+		case 'A':
+			if (allow_all) {
+				if (!answer[1] || strcasecmp(answer, "all") == 0)
+					{ free(answer); free(msg); return RL_ANSWER_ALL; }
+			}
+			/* If not allow_all or doesn't match "all", fall through to reject */
+			free(answer); answer = NULL; continue;
+
 		case 'y': /* fallthrough */
 		case 'Y':
-			if (!answer[1] || strcasecmp(answer + 1, "es") == 0)
-				{ free(answer); ret = 1; break; }
+			if (!answer[1] || strcasecmp(answer, "yes") == 0)
+				{ free(answer); free(msg); return RL_ANSWER_YES; }
 			else
 				{ free(answer); answer = NULL; continue; }
+
 		case 'n': /* fallthrough */
 		case 'N':
-			if (!answer[1] || (TOLOWER(answer[1]) == 'o' && !answer[2]))
-				{ free(answer); ret = 0; break; }
+			if (!answer[1] || strcasecmp(answer, "no") == 0)
+				{ free(answer); free(msg); return RL_ANSWER_NO; }
 			else
 				{ free(answer); answer = NULL; continue; }
+
 		default: free(answer); answer = NULL; continue;
 		}
 	}
 
+	/* Unreachable, but satisfies compilers/analyzers */
 	free(msg);
-	return ret;
+	return 0;
+}
+
+/* Get user input (y/n, uppercase is allowed) using MSG_STR as prompt message.
+ * If DEFAULT_ANSWER isn't zero, it will be used in case the user just
+ * presses Enter on an empty line.
+ * Returns RL_ANSWER_YES if 'y' or RL_ANSWER_NO if 'n'. */
+int
+rl_get_y_or_n(const char *msg_str, char default_answer)
+{
+	return rl_get_y_n_common(msg_str, default_answer, 0);
+}
+
+/* Same as rl_get_y_or_n, but accepts a third and fourth options (all/quit).
+ * Besides RL_ANSWER_YES and RL_ANSWER_NO, it returns RL_ANSWER_ALL if
+ * the answer is 'a' (or all) and RL_ANSWER_QUIT if 'q' (or quit).
+ * Useful when applying a single operation to multiple items. */
+int
+rl_get_y_n_all(const char *msg_str, char default_answer)
+{
+	return rl_get_y_n_common(msg_str, default_answer, 1);
 }
 
 /* Delete key implementation */

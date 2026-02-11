@@ -1514,7 +1514,8 @@ handle_nodir_overwrite(char *arg, const char *cmd_name)
 		char msg[PATH_MAX + 28];
 		snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
 			cmd_name, file);
-		if (rl_get_y_or_n(msg, conf.default_answer.overwrite) == 0) {
+		const int answer = rl_get_y_or_n(msg, conf.default_answer.overwrite);
+		if (answer == RL_ANSWER_NO) {
 			free(file);
 			return 0;
 		}
@@ -1575,7 +1576,14 @@ check_overwrite(char **args, const int force, size_t *skipped)
 
 		snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
 			cmd_name, buf);
-		if (rl_get_y_or_n(msg, conf.default_answer.overwrite) == 0) {
+		const int answer = rl_get_y_n_all(msg, conf.default_answer.overwrite);
+		if (answer == RL_ANSWER_ALL)
+			return 1;
+
+		if (answer == RL_ANSWER_QUIT)
+			return 0;
+
+		if (answer == RL_ANSWER_NO) {
 			/* Nullify this entry. It will be skipped later. */
 			*args[i] = '\0';
 			(*skipped)++;
