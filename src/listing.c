@@ -290,7 +290,8 @@ get_dir_icon(const filesn_t n)
 		if (dir_hash != dir_icon_hashes[i])
 			continue;
 		file_info[n].icon = icon_dirnames[i].icon;
-		file_info[n].icon_color = icon_dirnames[i].color;
+		file_info[n].icon_color =
+			*dir_ico_c ? dir_ico_c : icon_dirnames[i].color;
 		return;
 	}
 }

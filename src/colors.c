@@ -2159,20 +2159,17 @@ set_cs_extcolors(char *line, char **extcolors, const ssize_t line_len)
 
 #ifndef _NO_ICONS
 static void
-set_cs_dir_icon_color(char *line, const ssize_t line_len)
+set_cs_dir_icon_color(char *line)
 {
-	const char *p = line + 13; /* 13 == "DirIconColor=" */
-	if (IS_CTRL_CHR(*p) || ((*p == '\'' || *p == '"') && !*(++p)))
+	char *p = line + 13; /* 13 == "DirIconColor=" */
+	if (IS_CTRL_CHR(*p))
 		return;
 
-	if (line[line_len - 1] == '\'' || line[line_len - 1] == '"')
-		line[line_len - 1] = '\0';
-
-	const char *c = NULL;
-	if (is_color_code(p) == 0 && (c = check_defs(p)) == NULL)
+	char *str = remove_quotes(p);
+	if (!str || !*str)
 		return;
 
-	snprintf(dir_ico_c, sizeof(dir_ico_c), "\x1b[%sm", c ? c : p);
+	set_color(str, dir_ico_c, RL_NO_PRINTABLE);
 }
 #endif /* !_NO_ICONS */
 
@@ -2312,7 +2309,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 #ifndef _NO_ICONS
 		/* Directory icon color */
 		else if (*line == 'D' && strncmp(line, "DirIconColor=", 13) == 0) {
-			set_cs_dir_icon_color(line, line_len);
+			set_cs_dir_icon_color(line);
 		}
 #endif /* !_NO_ICONS */
 
