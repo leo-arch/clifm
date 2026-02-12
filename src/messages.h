@@ -430,18 +430,18 @@ To learn how to enable image previews run 'help image-previews'."
 #define IMAGE_PREVIEWS "\x1b[1mENABLING IMAGE PREVIEWS\x1b[22m\n\
 \n\
 Edit Shotgun's configuration file ('view edit' or F7) and uncomment the\n\
-'clifmimg' lines at the top of the file.\n\
+'clifmimg' lines at the top of the file (i.e., remove the leading ';').\n\
 \n\
 This instructs Clifm to use the 'clifmimg' script (~/.config/clifm/clifmimg)\n\
 to generate image previews (for both tab completion in fzf mode and the\n\
 'view' command).\n\
 \n\
-By default, Clifm tries to guess the most suitable method. However, you\n\
-can edit the 'clifmimg' script and set the 'method' variable to any of the\n\
-available previewing methods: sixel, iterm, ueberzug, kitty, ansi (text mode).\n\
+By default, Clifm tries to guess the most suitable preview method. However,\n\
+you can edit the 'clifmimg' script and set the 'method' variable to any of\n\
+the available methods: sixel, iterm, ueberzug, kitty, ansi (text mode).\n\
 \n\
-If using the 'ueberzug' method, Clifm must be started with the 'clifmrun' script\n\
-(~/.config/clifm/clifmrun)"
+If using the 'ueberzug' method, Clifm must be started with the 'clifmrun'\n\
+script (~/.config/clifm/clifmrun)"
 
 #define FILTER_USAGE "Set a filter for the file list\n\n\
 \x1b[1mUSAGE\x1b[22m\n\

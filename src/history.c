@@ -31,7 +31,7 @@ get_date(void)
 {
 	const time_t rawtime = time(NULL);
 	struct tm t;
-	if (!localtime_r(&rawtime, &t))
+	if (rawtime == (time_t)-1 || !localtime_r(&rawtime, &t))
 		return NULL;
 
 	const size_t date_max = MAX_TIME_STR;
@@ -96,8 +96,7 @@ clear_logs(const int flag)
 		return errno;
 	}
 
-	const int ret = gen_file(file);
-	if (ret != FUNC_SUCCESS)
+	if (gen_file(file) != FUNC_SUCCESS)
 		return FUNC_FAILURE;
 
 	free(last_cmd);
