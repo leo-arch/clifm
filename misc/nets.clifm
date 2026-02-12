@@ -10,20 +10,24 @@
 # and will be available for tab completion
 #[work_smb]
 
-# Comment=My work samba server
+# A comment describing the remote
+#Comment=My work samba server
+
+# The directory where the remote will be mounted
 #Mountpoint=/home/user/.config/clifm/mounts/work_smb
 
-# Use %m as a placeholder for Mountpoint
+# Command to mount and unmount this remote
+# Note: Use %m as a placeholder for Mountpoint
 #MountCmd=mount.cifs //WORK_IP/shared %m -o OPTIONS
 #UnmountCmd=umount %m
 
-# Automatically mount this remote at startup
+# Automatically mount this remote at program startup
 #AutoMount=true
 
-# Automatically unmount this remote at exit
+# Automatically unmount this remote at program exit
 #AutoUnmount=true
 
-# TIP: When mounting a slow file system (say, an FTP server), it
+# TIP: When mounting a slow file system (e.g., an FTP server), it
 # is recommended to set an autocommand for the mount point disabling
 # some Clifm features that might slow things down. Open the
 # configuration file ('config' or F10), go to the AUTOCOMMANDS
@@ -31,7 +35,7 @@
 #
 #autocmd ~/mounts/ftp_server/** lm=1,fc=0
 #
-# The light mode (lm) prevents some files processing, and the file
+# The light mode (lm) prevents some file processing, and the file
 # counter (fc) is expensive: disable it.
 
 # A few examples

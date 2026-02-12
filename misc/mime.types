@@ -1,5 +1,29 @@
-# The following MIME-types are currently not recognized by file(1)
-# As a workaround, we add them here.
+#------------------------------------------------------------------
+# Custom MIME type mappings for Clifm
+#------------------------------------------------------------------
+#
+# This file maps MIME types to file extensions.
+# Lines beginning with '#' and blank lines are ignored.
+#
+# Expected location: ~/.mime.types
+# Clifm will consult this file, if it exists, before attempting
+# content-based identification of files. If a matching file extension
+# is found, the corresponding MIME type will be used.
+#
+# Note: Use only for file types known to be unrecognized by file(1);
+# extension-based file identification is fine most of the time, but
+# not as reliable as content-based identification.
+#
+# Line format: MIME-Type  extension [extension ...]
+# Example:
+# application/x-bzip3       bz3 tbz3
+#
+# If an extension appears multiple times, later entries override
+# earlier ones.
+#
+# For more information about MIME types, consult
+# https://www.iana.org/assignments/media-types/media-types.xhtml
+#------------------------------------------------------------------
 
 application/x-alz         alz
 application/x-bzip3       bz3 tbz3
