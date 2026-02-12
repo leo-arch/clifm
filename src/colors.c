@@ -495,7 +495,7 @@ update_warning_prompt_text_color_new_syntax(void)
 	if (!start || start[1] != '{')
 		return;
 
-	char *color = gen_color(&start, NULL);
+	char *color = gen_color(start, NULL);
 	if (!color || !*color) {
 		free(color);
 		return;

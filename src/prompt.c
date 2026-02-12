@@ -58,35 +58,32 @@ int g_prompt_ignore_empty_line = 0;
 static char *
 gen_time(const int c)
 {
-	char *temp = NULL;
 	const time_t rawtime = time(NULL);
-	struct tm tm;
+	if (rawtime == (time_t)-1)
+		return NULL;
 
+	struct tm tm;
 	if (!localtime_r(&rawtime, &tm)) {
-		temp = savestring(UNKNOWN_STR, sizeof(UNKNOWN_STR) - 1);
-	} else if (c == 't') {
-		char time[9] = "";
-		strftime(time, sizeof(time), "%H:%M:%S", &tm);
-		temp = savestring(time, sizeof(time));
-	} else if (c == 'T') {
-		char time[9] = "";
-		strftime(time, sizeof(time), "%I:%M:%S", &tm);
-		temp = savestring(time, sizeof(time));
-	} else if (c == 'A') {
-		char time[6] = "";
-		strftime(time, sizeof(time), "%H:%M", &tm);
-		temp = savestring(time, sizeof(time));
-	} else if (c == '@') {
-		char time[12] = "";
-		strftime(time, sizeof(time), "%I:%M:%S %p", &tm);
-		temp = savestring(time, sizeof(time));
-	} else { /* c == 'd' */
-		char time[12] = "";
-		strftime(time, sizeof(time), "%a %b %d", &tm);
-		temp = savestring(time, sizeof(time));
+		char *tmp = savestring(UNKNOWN_STR, sizeof(UNKNOWN_STR) - 1);
+		return tmp;
 	}
 
-	return temp;
+	char buf[64] = "";
+	size_t len = 0;
+
+	switch (c) {
+	case 't': len = strftime(buf, sizeof(buf), "%H:%M:%S", &tm); break;
+	case 'T': len = strftime(buf, sizeof(buf), "%I:%M:%S", &tm); break;
+	case 'A': len = strftime(buf, sizeof(buf), "%H:%M", &tm); break;
+	case '@': len = strftime(buf, sizeof(buf), "%I:%M:%S %p", &tm); break;
+	case 'd': len = strftime(buf, sizeof(buf), "%a %b %d", &tm); break;
+	default: break;
+	}
+
+	if (len == 0)
+		return NULL;
+
+	return savestring(buf, len);
 }
 
 static char *
@@ -287,13 +284,16 @@ gen_workspace(void)
 		}
 	}
 
+	int len = 0;
 	if (workspaces[cur_ws].name)
-		snprintf(s, sizeof(s), "%s%s", cl, workspaces[cur_ws].name);
+		len = snprintf(s, sizeof(s), "%s%s", cl, workspaces[cur_ws].name);
 	else
-		snprintf(s, sizeof(s), "%s%d", cl, cur_ws + 1);
+		len = snprintf(s, sizeof(s), "%s%d", cl, cur_ws + 1);
 
-	/* Using strnlen() here avoids a Redhat hardened compilation warning. */
-	return savestring(s, strnlen(s, sizeof(s)));
+	if (len <= 0)
+		return NULL;
+
+	return savestring(s, (size_t)len);
 }
 
 static char *
@@ -321,10 +321,10 @@ gen_escape_char(void)
 }
 
 static char *
-gen_octal(char **line, const int c)
+gen_octal(char *line, const int c, char **end)
 {
 	char octal_string[4];
-	xstrsncpy(octal_string, *line, sizeof(octal_string));
+	xstrsncpy(octal_string, line, sizeof(octal_string));
 
 	int n = octal2int(octal_string);
 #ifdef CHAR_MAX
@@ -342,7 +342,7 @@ gen_octal(char **line, const int c)
 		temp[0] = CTLESC;
 		temp[1] = (char)n;
 		temp[2] = '\0';
-		*line += 2; /* Advance line to the last octal character */
+		if (end) *end = line + 2;
 	} else if (n == -1) { /* Error */
 		temp[0] = '\\';
 		temp[1] = (const char)c;
@@ -350,7 +350,7 @@ gen_octal(char **line, const int c)
 	} else {
 		temp[0] = (char)n;
 		temp[1] = '\0';
-		*line += 2; /* Advance line to the last octal character */
+		if (end) *end = line + 2;
 	}
 
 	return temp;
@@ -377,7 +377,11 @@ gen_user_name(void)
 static char *
 gen_sort_name(void)
 {
-	return strdup(num_to_sort_name(conf.sort, 1));
+	const char *name = num_to_sort_name(conf.sort, 1);
+	if (!name)
+		return NULL;
+
+	return strdup(name);
 }
 
 static char *
@@ -485,12 +489,12 @@ reset_ifs(const char *value)
 }
 
 static void
-substitute_cmd(char **cmd, char **res, size_t *len, char **cmd_end)
+substitute_cmd(char *cmd, char **buf, size_t *buf_len, char **cmd_end)
 {
-	if (!cmd || !res || !len)
+	if (!cmd || !buf || !buf_len)
 		return;
 
-	char *p = strchr(*cmd, ')');
+	char *p = strchr(cmd, ')');
 	if (!p)
 		return; /* No trailing parenthesis */
 
@@ -502,7 +506,7 @@ substitute_cmd(char **cmd, char **res, size_t *len, char **cmd_end)
 	setenv("IFS", "", 1);
 
 	wordexp_t wordbuf;
-	const int ret = wordexp(*cmd, &wordbuf, 0);
+	const int ret = wordexp(cmd, &wordbuf, 0);
 
 	p[1] = c;
 
@@ -522,14 +526,17 @@ substitute_cmd(char **cmd, char **res, size_t *len, char **cmd_end)
 	}
 
 	for (size_t j = 0; j < wordbuf.we_wordc; j++) {
-		*len += strlen(wordbuf.we_wordv[j]);
-		if (!*res) {
-			*res = xnmalloc(*len + 1, sizeof(char));
-			*(*res) = '\0';
+		const size_t cur_buf_len = *buf_len;
+
+		*buf_len += strlen(wordbuf.we_wordv[j]);
+		if (!*buf) {
+			*buf = xnmalloc(*buf_len + 1, sizeof(char));
+			*(*buf) = '\0';
 		} else {
-			*res = xnrealloc(*res, *len + 1, sizeof(char));
+			*buf = xnrealloc(*buf, *buf_len + 1, sizeof(char));
 		}
-		xstrncat(*res, strlen(*res), wordbuf.we_wordv[j], *len + 1);
+
+		xstrncat(*buf, cur_buf_len, wordbuf.we_wordv[j], *buf_len + 1);
 	}
 
 	wordfree(&wordbuf);
@@ -726,12 +733,12 @@ is_valid_hex(const char *s)
  * to point at the closing '}' of the color token. On error, NULL is returned
  * and COLOR_END is left unmodified. */
 char *
-gen_color(char **color_begin, char **color_end)
+gen_color(char *color_begin, char **color_end)
 {
 	if (!color_begin || !*color_begin)
 		return NULL;
 
-	char *l = *color_begin;
+	char *l = color_begin;
 	if (*l != '%' || l[1] != '{' || !l[2])
 		return NULL;
 
@@ -910,28 +917,28 @@ get_prompt_module_path(const char *name)
 }
 
 static void
-run_prompt_module(char **line, char **res, size_t *len)
+run_prompt_module(char *module, char **buf, size_t *buf_len, char **end)
 {
-	if (!line || !res || !len)
+	if (!module || !buf || !buf_len)
 		return;
 
-	char *p = strchr(*line, '}');
+	char *p = strchr(module, '}');
 	if (!p)
 		return;
 
 	*p = '\0';
 
-	const char *p_path = get_prompt_module_path(*line + 1);
+	const char *p_path = get_prompt_module_path(module + 1);
 	if (p_path) {
 		char cmd[PATH_MAX + 4];
 		snprintf(cmd, sizeof(cmd), "$(%s)", p_path);
-
-		char *ptr = &cmd[0];
-		substitute_cmd(&ptr, res, len, NULL);
+		substitute_cmd(cmd, buf, buf_len, NULL);
 	}
 
 	*p = '}';
-	*line = p + 1;
+
+	if (end)
+		*end = p;
 }
 #endif /* !NO_WORDEXP */
 
@@ -966,17 +973,20 @@ gen_cwd_perms(void)
 	return buf;
 }
 
-/* Decode the prompt string (encoded_prompt global variable) taken from
- * the configuration file. */
+/* Decode the prompt string LINE, as taken from the configuration file,
+ * expanding escape sequences, prompt color notation, prompt modules, and
+ * performning command substitution. Returns a pointer to the expanded prompt
+ * (must be free'd by the caller) or NULL on error. */
 char *
 decode_prompt(char *line)
 {
 	if (!line)
 		return NULL;
 
-	char *temp = NULL;
-	char *result = NULL;
-	size_t result_len = 0;
+	char *tmp = NULL;
+	char *buf = NULL;
+	char *ptr = NULL;
+	size_t buf_len = 0;
 	int c;
 
 	while ((c = (int)*line++)) {
@@ -984,63 +994,63 @@ decode_prompt(char *line)
 		if (c == '%' && *line == '{' && line[1]) {
 			char *color_end = NULL;
 			char *color_begin = line - 1; /* Points to '%' */
-			temp = gen_color(&color_begin, &color_end);
-			if (!temp) {
-				temp = savestring("%", 1);
+			tmp = gen_color(color_begin, &color_end);
+			if (!tmp) {
+				tmp = savestring("%", 1);
 				color_end = color_begin;
 			}
 
-			add_string(&temp, &result, &result_len);
+			add_string(&tmp, &buf, &buf_len);
 			line = color_end + 1;
 		}
 
 		/* We have an escape char */
 		else if (c == '\\') {
-			c = (int)*line; /* Move on to the next char */
+			c = (int)*line; /* c holds the character next to the backslash */
 			switch (c) {
 			/* File statistics */
-			case 'B': temp = gen_stats_str(STATS_BLK); break;
-			case 'C': temp = gen_stats_str(STATS_CHR); break;
-			case 'D': temp = gen_stats_str(STATS_DIR); break;
-			case 'E': temp = gen_stats_str(STATS_EXTENDED); break;
-			case 'F': temp = gen_stats_str(STATS_FIFO); break;
-			case 'G': temp = gen_stats_str(STATS_SGID); break;
-			case 'K': temp = gen_stats_str(STATS_SOCK); break;
-			case 'L': temp = gen_stats_str(STATS_LNK); break;
-			case 'M': temp = gen_stats_str(STATS_MULTI_L); break;
-			case 'o': temp = gen_stats_str(STATS_BROKEN_L); break;
-			case 'O': temp = gen_stats_str(STATS_OTHER_W); break;
-			case 'Q': temp = gen_stats_str(STATS_NON_DIR); break;
-			case 'R': temp = gen_stats_str(STATS_REG); break;
-			case 'U': temp = gen_stats_str(STATS_SUID); break;
-			case 'x': temp = gen_stats_str(STATS_CAP); break;
-			case 'X': temp = gen_stats_str(STATS_EXE); break;
-			case '.': temp = gen_stats_str(STATS_HIDDEN); break;
-			case '"': temp = gen_stats_str(STATS_STICKY); break;
-			case '?': temp = gen_stats_str(STATS_UNKNOWN); break;
-			case '!': temp = gen_stats_str(STATS_UNSTAT); break;
+			case 'B': tmp = gen_stats_str(STATS_BLK); break;
+			case 'C': tmp = gen_stats_str(STATS_CHR); break;
+			case 'D': tmp = gen_stats_str(STATS_DIR); break;
+			case 'E': tmp = gen_stats_str(STATS_EXTENDED); break;
+			case 'F': tmp = gen_stats_str(STATS_FIFO); break;
+			case 'G': tmp = gen_stats_str(STATS_SGID); break;
+			case 'K': tmp = gen_stats_str(STATS_SOCK); break;
+			case 'L': tmp = gen_stats_str(STATS_LNK); break;
+			case 'M': tmp = gen_stats_str(STATS_MULTI_L); break;
+			case 'o': tmp = gen_stats_str(STATS_BROKEN_L); break;
+			case 'O': tmp = gen_stats_str(STATS_OTHER_W); break;
+			case 'Q': tmp = gen_stats_str(STATS_NON_DIR); break;
+			case 'R': tmp = gen_stats_str(STATS_REG); break;
+			case 'U': tmp = gen_stats_str(STATS_SUID); break;
+			case 'x': tmp = gen_stats_str(STATS_CAP); break;
+			case 'X': tmp = gen_stats_str(STATS_EXE); break;
+			case '.': tmp = gen_stats_str(STATS_HIDDEN); break;
+			case '"': tmp = gen_stats_str(STATS_STICKY); break;
+			case '?': tmp = gen_stats_str(STATS_UNKNOWN); break;
+			case '!': tmp = gen_stats_str(STATS_UNSTAT); break;
 #ifdef SOLARIS_DOORS
-			case '>': temp = gen_stats_str(STATS_DOOR); break;
-			case '<': temp = gen_stats_str(STATS_PORT); break;
+			case '>': tmp = gen_stats_str(STATS_DOOR); break;
+			case '<': tmp = gen_stats_str(STATS_PORT); break;
 #endif /* SOLARIS_DOORS */
 
-			case '*': temp = gen_notification(NOTIF_SEL); break;
-			case '%': temp = gen_notification(NOTIF_TRASH); break;
-			case '#': temp = gen_notification(NOTIF_ROOT); break;
-			case ')': temp = gen_notification(NOTIF_WARNING); break;
-			case '(': temp = gen_notification(NOTIF_ERROR); break;
-			case '=': temp = gen_notification(NOTIF_NOTICE); break;
+			case '*': tmp = gen_notification(NOTIF_SEL); break;
+			case '%': tmp = gen_notification(NOTIF_TRASH); break;
+			case '#': tmp = gen_notification(NOTIF_ROOT); break;
+			case ')': tmp = gen_notification(NOTIF_WARNING); break;
+			case '(': tmp = gen_notification(NOTIF_ERROR); break;
+			case '=': tmp = gen_notification(NOTIF_NOTICE); break;
 
-			case 'v': temp = gen_rl_vi_mode(1); break;
-			case 'y': temp = gen_notification(NOTIF_AUTOCMD); break;
+			case 'v': tmp = gen_rl_vi_mode(1); break;
+			case 'y': tmp = gen_notification(NOTIF_AUTOCMD); break;
 
 			case 'z': /* Exit status of last executed command */
-				temp = gen_exit_status(); break;
+				tmp = gen_exit_status(); break;
 
 			case 'e': /* Escape char */
-				temp = gen_escape_char(); break;
+				tmp = gen_escape_char(); break;
 
-			case 'j': temp = gen_cwd_perms(); break;
+			case 'j': tmp = gen_cwd_perms(); break;
 
 			case '0': /* fallthrough */ /* Octal char */
 			case '1': /* fallthrough */
@@ -1050,76 +1060,79 @@ decode_prompt(char *line)
 			case '5': /* fallthrough */
 			case '6': /* fallthrough */
 			case '7':
-				temp = gen_octal(&line, c); break;
+				ptr = NULL;
+				tmp = gen_octal(line, c, &ptr);
+				if (ptr) line = ptr;
+				break;
 
 			case 'c': /* Program name */
-				temp = savestring(PROGRAM_NAME, sizeof(PROGRAM_NAME) - 1);
+				tmp = savestring(PROGRAM_NAME, sizeof(PROGRAM_NAME) - 1);
 				break;
 
 			case 'b': /* Elapsed time of the last executed command */
-				temp = gen_last_cmd_time(); break;
+				tmp = gen_last_cmd_time(); break;
 
 			case 'P': /* Current profile name */
-				temp = gen_profile(); break;
+				tmp = gen_profile(); break;
 
 			case 't': /* fallthrough */ /* Time: 24-hour HH:MM:SS format */
 			case 'T': /* fallthrough */ /* 12-hour HH:MM:SS format */
 			case 'A': /* fallthrough */ /* 24-hour HH:MM format */
 			case '@': /* fallthrough */ /* 12-hour HH:MM:SS am/pm format */
 			case 'd': /* Date: abrev_weak_day, abrev_month_day month_num */
-				temp = gen_time(c); break;
+				tmp = gen_time(c); break;
 
 			case 'u': /* User name */
-				temp = gen_user_name(); break;
+				tmp = gen_user_name(); break;
 
 			case 'g':
-				temp = gen_sort_name(); break;
+				tmp = gen_sort_name(); break;
 
 			case 'h': /* fallthrough */ /* Hostname up to first '.' */
 			case 'H': /* Full hostname */
-				temp = gen_hostname(c); break;
+				tmp = gen_hostname(c); break;
 
 			case 'i': /* fallthrough */ /* Nest level (number only) */
 			case 'I': /* Nest level (full format) */
-				temp = gen_nesting_level(c); break;
+				tmp = gen_nesting_level(c); break;
 
 			case 's': /* Shell name (after last slash)*/
-				temp = gen_shell_name(); break;
+				tmp = gen_shell_name(); break;
 
 			case 'S': /* Current workspace */
-				temp = gen_workspace(); break;
+				tmp = gen_workspace(); break;
 
 			case 'l': /* Current mode */
-				temp = gen_mode(); break;
+				tmp = gen_mode(); break;
 
 			case 'p': /* fallthrough */ /* Abbreviated if longer than PathMax */
 			case 'f': /* fallthrough */ /* Abbreviated, fish-like */
 			case 'w': /* fallthrough */ /* Full PWD */
 			case 'W': /* Short PWD */
-				temp = gen_pwd(c); break;
+				tmp = gen_pwd(c); break;
 
 			case '$': /* '$' or '#' for normal and root user */
-				temp = gen_user_flag();	break;
+				tmp = gen_user_flag();	break;
 
 			case 'a': /* fallthrough */ /* Bell character */
 			case 'r': /* fallthrough */ /* Carriage return */
 			case 'n': /* fallthrough */ /* New line char */
-				temp = gen_misc(c); break;
+				tmp = gen_misc(c); break;
 
 			case '[': /* fallthrough */ /* Begin a sequence of non-printing characters */
 			case ']': /* End the sequence */
-				temp = gen_non_print_sequence(c); break;
+				tmp = gen_non_print_sequence(c); break;
 
 			case '\\': /* Literal backslash */
-				temp = savestring("\\", 1); break;
+				tmp = savestring("\\", 1); break;
 
 			default: /* Unknown sequence: copy it verbatim */
-				temp = savestring("\\ ", 2);
-				temp[1] = (char)c;
+				tmp = savestring("\\ ", 2);
+				tmp[1] = (char)c;
 				break;
 			}
 
-			add_string(&temp, &result, &result_len);
+			add_string(&tmp, &buf, &buf_len);
 			line++;
 		}
 
@@ -1135,7 +1148,7 @@ decode_prompt(char *line)
 			if (c == '$' && *line == '(') {
 				char *cmd_begin = line - 1;
 				char *cmd_end = NULL;
-				substitute_cmd(&cmd_begin, &result, &result_len, &cmd_end);
+				substitute_cmd(cmd_begin, &buf, &buf_len, &cmd_end);
 				if (cmd_end)
 					/* Line points now after the trailing parenthesis */
 					line = cmd_end + 1;
@@ -1144,28 +1157,32 @@ decode_prompt(char *line)
 
 			/* Prompt module: "${module}" */
 			if (c == '$' && *line == '{') {
-				run_prompt_module(&line, &result, &result_len);
+				char *end = NULL;
+				run_prompt_module(line, &buf, &buf_len, &end);
+				if (end)
+					/* Line points now after the trailing bracket */
+					line = end + 1;
 				continue;
 			}
 #endif /* !NO_WORDEXP */
 
-			const size_t new_len = result_len + 2;
-			result = xnrealloc(result, new_len, sizeof(char));
-			result[result_len++] = (char)c;
+			const size_t new_len = buf_len + 2;
+			buf = xnrealloc(buf, new_len, sizeof(char));
+			buf[buf_len++] = (char)c;
 
-			result[result_len] = '\0';
+			buf[buf_len] = '\0';
 		}
 	}
 
 	/* Remove trailing new line char, if any */
-	if (result && result_len > 0 && result[result_len - 1] == '\n')
-		result[result_len - 1] = '\0';
+	if (buf && buf_len > 0 && buf[buf_len - 1] == '\n')
+		buf[buf_len - 1] = '\0';
 
 	/* Emergency prompt, just in case something went wrong */
-	if (!result)
-		result = gen_emergency_prompt();
+	if (!buf)
+		buf = gen_emergency_prompt();
 
-	return result;
+	return buf;
 }
 
 /* Make sure CWD exists; if not, go up to the parent, and so on */
@@ -1188,23 +1205,27 @@ check_cwd(void)
 		refresh_screen();
 }
 
-/* Remove all final slash(es) from path, if any */
+/* Remove trailing slashes from DIR. */
 static void
-trim_final_slashes(void)
+remove_trailing_slashes(char *dir)
 {
-	const size_t path_len = strlen(workspaces[cur_ws].path);
+	if (!dir || !*dir)
+		return;
 
-	for (size_t i = path_len - 1; workspaces[cur_ws].path[i] && i > 0; i--) {
-		if (workspaces[cur_ws].path[i] != '/')
-			break;
-		else
-			workspaces[cur_ws].path[i] = '\0';
+	const size_t dir_len = strlen(dir);
+	for (size_t i = dir_len - 1; dir[i] && i > 0; i--) {
+		if (dir[i] != '/')
+			return;
+		dir[i] = '\0';
 	}
 }
 
 static void
 print_user_message(void)
 {
+	if (!conf.welcome_message_str || !*conf.welcome_message_str)
+		return;
+
 	char *s = conf.welcome_message_str;
 
 	if (!strchr(s, '\\')) {
@@ -1219,11 +1240,11 @@ print_user_message(void)
 	while (*s) {
 		if (*s == '\\' && s[1]) {
 			s++;
-			if (*s >= '0' && *s <= '7' && (tmp = gen_octal(&s, *s))) { /* NOLINT */
+			char *end = NULL;
+			if (*s >= '0' && *s <= '7' && (tmp = gen_octal(s, *s, &end))) { /* NOLINT */
 				fputs(tmp, stdout);
 				free(tmp);
-				/* Line is set to the last char of the octal string by
-				 * gen_octal itself. */
+				if (end) s = end;
 				s++;
 			} else if (*s == 'e' && (tmp = gen_escape_char())) {
 				fputs(tmp, stdout);
@@ -1438,7 +1459,7 @@ static void
 initialize_prompt_data(const int prompt_flag, size_t *ac_matches)
 {
 	check_cwd();
-	trim_final_slashes();
+	remove_trailing_slashes(workspaces[cur_ws].path);
 	print_welcome_msg();
 	print_tips_func();
 
