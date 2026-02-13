@@ -993,10 +993,10 @@ count_dir(const char *dir, const int pop)
 }
 
 /* Return 1 if CMD is an executable file in $PATH or 0 otherwise.
- * In case of success, and if PATH_PTR is not null, a pointer to a malloc'd
- * copy of the command's absolute path is placed in PATH_PTR. */
+ * In case of success, and if cmd_path is not null, a pointer to a malloc'd
+ * copy of the command's absolute path is placed in cmd_path. */
 int
-is_cmd_in_path(const char *cmd, char **path_ptr)
+is_cmd_in_path(const char *cmd, char **cmd_path)
 {
 	if (!cmd || !*cmd)
 		return 0;
@@ -1004,8 +1004,8 @@ is_cmd_in_path(const char *cmd, char **path_ptr)
 	if (*cmd == '~') {
 		char *p = tilde_expand(cmd);
 		const int found = (p && is_exec_cmd(p) == 1);
-		if (path_ptr && found == 1)
-			*path_ptr = p;
+		if (cmd_path && found == 1)
+			*cmd_path = p;
 		else
 			free(p);
 		return found;
@@ -1013,12 +1013,12 @@ is_cmd_in_path(const char *cmd, char **path_ptr)
 
 	if (*cmd == '/') {
 		const int exec = is_exec_cmd(cmd);
-		if (path_ptr && exec == 1)
-			*path_ptr = strdup(cmd);
+		if (cmd_path && exec == 1)
+			*cmd_path = strdup(cmd);
 		return exec;
 	}
 
-	char cmd_path[PATH_MAX + 1];
+	char buf[PATH_MAX + 1];
 	const int is_secure_env =
 		(xargs.secure_env == 1 || xargs.secure_env_full == 1);
 
@@ -1030,10 +1030,10 @@ is_cmd_in_path(const char *cmd, char **path_ptr)
 		if (is_secure_env == 1 && *paths[i].path == '.' && !paths[i].path[1])
 			continue;
 
-		snprintf(cmd_path, sizeof(cmd_path), "%s/%s", paths[i].path, cmd);
-		if (is_exec_cmd(cmd_path) == 1) {
-			if (path_ptr)
-				*path_ptr = strdup(cmd_path);
+		snprintf(buf, sizeof(buf), "%s/%s", paths[i].path, cmd);
+		if (is_exec_cmd(buf) == 1) {
+			if (cmd_path)
+				*cmd_path = strdup(buf);
 			return 1;
 		}
 	}

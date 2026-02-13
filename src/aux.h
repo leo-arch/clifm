@@ -38,7 +38,7 @@ int  get_link_ref(const char *link);
 int  get_rgb(const char *hex, int *attr, int *r, int *g, int *b);
 size_t hashme(const char *str, const int case_sensitive);
 char *hex2rgb(const char *hex);
-int  is_cmd_in_path(const char *cmd, char **path_ptr);
+int  is_cmd_in_path(const char *cmd, char **cmd_path);
 char *make_filename_unique(const char *file);
 char *normalize_path(char *src, const size_t src_len);
 int  octal2int(const char *restrict str);
