@@ -373,7 +373,7 @@ preview_function(char **args)
 	const int fzftab_bk = fzftab;
 
 	if (tabmode != FZF_TAB) {
-		if (is_cmd_in_path("fzf") == 0) {
+		if (is_cmd_in_path("fzf", NULL) == 0) {
 			err(0, NOPRINT_PROMPT, "%s: fzf: %s\n", PROGRAM_NAME, NOTFOUND_MSG);
 			return E_NOTFOUND; /* 127, as required by exit(1) */
 		}

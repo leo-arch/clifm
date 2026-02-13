@@ -461,7 +461,7 @@ check_new_instance_init_conditions(void)
 	if (s)
 		*s = '\0';
 
-	if (is_cmd_in_path(conf.term) == 0) {
+	if (is_cmd_in_path(conf.term, NULL) == 0) {
 		xerror("%s: %s: %s\n", PROGRAM_NAME, conf.term, NOTFOUND_MSG);
 		if (s)
 			*s = ' ';
@@ -639,7 +639,7 @@ new_instance(char *dir, int sudo)
 	char *sudo_prog = NULL;
 #ifndef __HAIKU__
 	if (sudo == 1 && !(sudo_prog = get_sudo_path()))
-		return errno;
+		return FUNC_FAILURE;
 #endif /* !__HAIKU__ */
 
 	char *deq_dir = unescape_str(dir);
@@ -649,10 +649,11 @@ new_instance(char *dir, int sudo)
 		return FUNC_FAILURE;
 	}
 
-	char *self = get_cmd_path(PROGRAM_NAME);
+	char *self = NULL;
+	(void)is_cmd_in_path(PROGRAM_NAME, &self);
 	if (!self) {
 		free(sudo_prog); free(deq_dir);
-		xerror("%s: %s: %s\n", PROGRAM_NAME, PROGRAM_NAME, strerror(errno));
+		xerror("%s: %s: %s\n", PROGRAM_NAME, PROGRAM_NAME, strerror(ENOENT));
 		return errno;
 	}
 

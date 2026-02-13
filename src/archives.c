@@ -1042,11 +1042,11 @@ is_probably_zip(const char *file)
 static int
 get_zip_app(void)
 {
-	if (is_cmd_in_path("unzip"))
+	if (is_cmd_in_path("unzip", NULL))
 		return ZIP_APP_UNZIP;
-	if (is_cmd_in_path("7z"))
+	if (is_cmd_in_path("7z", NULL))
 		return ZIP_APP_7Z;
-	if (is_cmd_in_path("bsdtar"))
+	if (is_cmd_in_path("bsdtar", NULL))
 		return ZIP_APP_BSDTAR;
 	return ZIP_APP_NONE;
 }

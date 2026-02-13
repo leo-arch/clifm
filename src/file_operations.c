@@ -303,7 +303,7 @@ dup_file(char **cmd)
 		dlen--;
 	}
 
-	const int rsync_ok = is_cmd_in_path("rsync");
+	const int rsync_ok = is_cmd_in_path("rsync", NULL);
 	int exit_status = FUNC_SUCCESS;
 
 	for (size_t i = 1; cmd[i]; i++) {
@@ -865,7 +865,7 @@ open_function(char **cmd)
 		return open_file(file);
 
 	/* Multiple files */
-	if (!is_cmd_in_path(cmd[2])) {
+	if (!is_cmd_in_path(cmd[2], NULL)) {
 		return mime_open_multiple_files(cmd + 1);
 	}
 

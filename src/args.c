@@ -583,7 +583,8 @@ resolve_basename(const char *s)
 	if (!s || !*s)
 		return NULL;
 
-	char *p = get_cmd_path(s);
+	char *p = NULL;
+	(void)is_cmd_in_path(s, &p);
 	if (!p)
 		return NULL;
 

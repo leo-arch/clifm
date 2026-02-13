@@ -67,7 +67,7 @@ define_find_name(void)
 	/* Let's run this only once. */
 	if (check == 1) {
 		check = 0;
-		if (is_cmd_in_path("gfind") == 1)
+		if (is_cmd_in_path("gfind", NULL) == 1)
 			have_gfind = 1;
 	}
 

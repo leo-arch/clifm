@@ -32,14 +32,13 @@ void gen_time_str(char *buf, const size_t size, const time_t curtime);
 #if defined(__sun) && defined(ST_BTIME)
 struct timespec get_birthtime(const char *filename);
 #endif /* __sun && ST_BTIME */
-char *get_cmd_path(const char *cmd);
 char *get_cwd(char *buf, const size_t buflen, const int check_workspace);
 mode_t get_dt(const mode_t mode);
 int  get_link_ref(const char *link);
 int  get_rgb(const char *hex, int *attr, int *r, int *g, int *b);
 size_t hashme(const char *str, const int case_sensitive);
 char *hex2rgb(const char *hex);
-int  is_cmd_in_path(const char *cmd);
+int  is_cmd_in_path(const char *cmd, char **path_ptr);
 char *make_filename_unique(const char *file);
 char *normalize_path(char *src, const size_t src_len);
 int  octal2int(const char *restrict str);

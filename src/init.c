@@ -2486,16 +2486,11 @@ set_sudo_cmd(void)
 		return;
 	}
 
-	char *sudo_path = get_cmd_path(sudo_cmd);
-	if (sudo_path) {
-		free(sudo_path);
-		return;
+	if (!is_cmd_in_path(sudo_cmd, NULL)) {
+		err('w', PRINT_PROMPT, _("%s: %s: Invalid authentication program "
+			"(falling back to '%s')\n"), PROGRAM_NAME, sudo_cmd, DEF_SUDO_CMD);
+		sudo_cmd = DEF_SUDO_CMD;
 	}
-
-	err('w', PRINT_PROMPT, _("%s: %s: %s\nInvalid authentication program "
-		"(falling back to '%s')\n"), PROGRAM_NAME, sudo_cmd,
-		strerror(errno), DEF_SUDO_CMD);
-	sudo_cmd = DEF_SUDO_CMD;
 }
 
 #ifndef _NO_FZF

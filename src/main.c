@@ -1293,7 +1293,7 @@ main(int argc, char *argv[])
 
 	/* Get paths from PATH environment variable. These paths will be
 	 * used later by get_path_programs (for the autocomplete function)
-	 * and get_cmd_path(). */
+	 * and is_cmd_in_path(). */
 	path_n = get_path_env(1);
 	cdpath_n = get_cdpath();
 

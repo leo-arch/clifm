@@ -174,34 +174,34 @@ check_third_party_cmds_alt(void)
 {
 	int udisks2ok = 0, udevilok = 0;
 
-	if (is_cmd_in_path("fzf") == 1) {
+	if (is_cmd_in_path("fzf", NULL) == 1) {
 		bin_flags |= FZF_BIN_OK;
 		if (fzftab == UNSET) fzftab = 1;
 	}
 
-	if (is_cmd_in_path("fnf") == 1) {
+	if (is_cmd_in_path("fnf", NULL) == 1) {
 		bin_flags |= FNF_BIN_OK;
 		if (fzftab == UNSET) fzftab = 1;
 	}
 
-	if (is_cmd_in_path("smenu") == 1) {
+	if (is_cmd_in_path("smenu", NULL) == 1) {
 		bin_flags |= SMENU_BIN_OK;
 		if (fzftab == UNSET) fzftab = 1;
 	}
 
-	if (is_cmd_in_path("udiskctl") == 1)
+	if (is_cmd_in_path("udiskctl", NULL) == 1)
 		udisks2ok = 1;
 
-	if (is_cmd_in_path("udevil") == 1)
+	if (is_cmd_in_path("udevil", NULL) == 1)
 		udevilok = 1;
 
 #if defined(USE_DU1) && !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
-	if (is_cmd_in_path("gdu") == 1)
+	if (is_cmd_in_path("gdu", NULL) == 1)
 		bin_flags |= GNU_DU_BIN_GDU;
 #endif /* USE_DU1 && !HAVE_GNU_DU && !_BE_POSIX */
 
 #if defined(CHECK_COREUTILS)
-	if (is_cmd_in_path("grm") == 1)
+	if (is_cmd_in_path("grm", NULL) == 1)
 		bin_flags |= BSD_HAVE_COREUTILS;
 #endif /* CHECK_COREUTILS */
 
@@ -370,17 +370,14 @@ is_exec_cmd(const char *cmd)
 char *
 get_sudo_path(void)
 {
-	if (!sudo_cmd) {
-		errno = ENOENT;
+	if (!sudo_cmd)
 		return NULL;
-	}
 
-	char *sudo_path = get_cmd_path(sudo_cmd);
-	int ret = errno;
+	char *sudo_path = NULL;
+	(void)is_cmd_in_path(sudo_cmd, &sudo_path);
 
 	if (!sudo_path) {
 		xerror("%s: '%s': %s\n", PROGRAM_NAME, sudo_cmd, strerror(ENOENT));
-		errno = ret;
 		return NULL;
 	}
 

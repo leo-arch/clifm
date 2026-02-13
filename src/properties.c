@@ -1968,7 +1968,7 @@ do_stat_and_exit(const int full_stat)
 # if defined(HAVE_GNU_DU)
 	bin_flags |= GNU_DU_BIN_DU;
 # elif !defined(_BE_POSIX)
-	if (is_cmd_in_path("gdu") == 1)
+	if (is_cmd_in_path("gdu", NULL) == 1)
 		bin_flags |= GNU_DU_BIN_GDU;
 # endif /* HAVE_GNU_DU */
 

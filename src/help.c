@@ -13,7 +13,7 @@
 #include <string.h>
 #include <unistd.h> /* unlink */
 
-#include "aux.h"      /* get_cmd_path */
+#include "aux.h"      /* is_cmd_in_path */
 #include "listing.h"  /* reload_dirlist */
 #include "messages.h" /* USAGE macros */
 #include "misc.h"     /* xerror */
@@ -230,28 +230,21 @@ print_tips(const int all)
 static char *
 get_pager(void)
 {
-	char *pager_cmd = NULL;
 	char *p = getenv("PAGER");
 	if (p) {
 		char *s = strchr(p, ' ');
-		if (s) *s = '\0';
-		pager_cmd = savestring(p, strlen(p));
-		return pager_cmd;
+		if (s)
+			*s = '\0';
+		return strdup(p);
 	}
 
-	p = get_cmd_path("less");
-	if (p) {
-		pager_cmd = savestring(p, strlen(p));
-		free(p);
-		return pager_cmd;
-	}
+	(void)is_cmd_in_path("less", &p);
+	if (p)
+		return p;
 
-	p = get_cmd_path("more");
-	if (p) {
-		pager_cmd = savestring(p, strlen(p));
-		free(p);
-		return pager_cmd;
-	}
+	(void)is_cmd_in_path("more", &p);
+	if (p)
+		return p;
 
 	return NULL;
 }

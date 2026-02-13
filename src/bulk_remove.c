@@ -42,7 +42,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 	int ret = 0;
 	struct stat a;
 	if ((ret = stat(s1, &a)) == -1 || !S_ISDIR(a.st_mode)) {
-		if (is_cmd_in_path(BULK_APP(s1)) == 0) {
+		if (is_cmd_in_path(BULK_APP(s1), NULL) == 0) {
 			/* S1 is neither a directory nor a valid application. */
 			int ec = (ret == -1 && *s1 == ':') ? E_NOTFOUND : ENOTDIR;
 			if (ec == ENOTDIR)
@@ -67,7 +67,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 	if (!s2 || !*s2) /* No S2. APP defaults to default associated app. */
 		return FUNC_SUCCESS;
 
-	if (is_cmd_in_path(BULK_APP(s2)) == 1) {
+	if (is_cmd_in_path(BULK_APP(s2), NULL) == 1) {
 		/* S2 is a valid application name. */
 		*app = BULK_APP(s2);
 		return FUNC_SUCCESS;

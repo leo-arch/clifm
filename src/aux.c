@@ -992,76 +992,31 @@ count_dir(const char *dir, const int pop)
 	return (filesn_t)(c > FILESN_MAX ? FILESN_MAX : c);
 }
 
-/* Get the path of the command CMD inspecting all paths in the PATH
- * environment variable (it basically does the same as which(1)).
- * Returns the appropriate path or NULL in case of error (in which case
- * errno is set to either EINVAL or ENOENT). */
-char *
-get_cmd_path(const char *cmd)
+/* Return 1 if CMD is an executable file in $PATH or 0 otherwise.
+ * In case of success, and if PATH_PTR is not null, a pointer to a malloc'd
+ * copy of the command's absolute path is placed in PATH_PTR. */
+int
+is_cmd_in_path(const char *cmd, char **path_ptr)
 {
-	errno = 0;
-	if (!cmd || !*cmd) {
-		errno = EINVAL;
-		return NULL;
-	}
+	if (!cmd || !*cmd)
+		return 0;
 
 	if (*cmd == '~') {
 		char *p = tilde_expand(cmd);
-		if (p && is_exec_cmd(p) == 1)
-			return p;
-
-		free(p);
-		return NULL;
+		const int found = (p && is_exec_cmd(p) == 1);
+		if (path_ptr && found == 1)
+			*path_ptr = p;
+		else
+			free(p);
+		return found;
 	}
 
 	if (*cmd == '/') {
-		if (is_exec_cmd(cmd) == 1)
-			return savestring(cmd, strlen(cmd));
-		return NULL;
+		const int exec = is_exec_cmd(cmd);
+		if (path_ptr && exec == 1)
+			*path_ptr = strdup(cmd);
+		return exec;
 	}
-
-	char *cmd_path = xnmalloc(PATH_MAX + 2, sizeof(char));
-
-	for (size_t i = 0; i < path_n; i++) { /* Check each path in PATH */
-		if (!paths[i].path || !*paths[i].path)
-			continue;
-
-		/* Skip '.' (CWD) if running with secure environment */
-		if ((xargs.secure_env == 1 || xargs.secure_env_full == 1)
-		&& *paths[i].path == '.' && !paths[i].path[1])
-			continue;
-
-		snprintf(cmd_path, PATH_MAX + 1, "%s/%s", paths[i].path, cmd);
-		if (is_exec_cmd(cmd_path) == 1)
-			return cmd_path;
-	}
-
-	errno = ENOENT;
-	free(cmd_path);
-	return NULL;
-}
-
-/* Same thing as get_cmd_path(), but returns 1 in case of success or 0
- * otherwise instead of the absolute path to CMD. Unlike get_cmd_path(),
- * it does not allocate memory in the heap, so that it's faster. */
-int
-is_cmd_in_path(const char *cmd)
-{
-	errno = 0;
-	if (!cmd || !*cmd) {
-		errno = EINVAL;
-		return 0;
-	}
-
-	if (*cmd == '~') {
-		char *p = tilde_expand(cmd);
-		const int ret = (p && is_exec_cmd(p) == 1);
-		free(p);
-		return ret;
-	}
-
-	if (*cmd == '/')
-		return is_exec_cmd(cmd);
 
 	char cmd_path[PATH_MAX + 1];
 	const int is_secure_env =
@@ -1076,11 +1031,13 @@ is_cmd_in_path(const char *cmd)
 			continue;
 
 		snprintf(cmd_path, sizeof(cmd_path), "%s/%s", paths[i].path, cmd);
-		if (is_exec_cmd(cmd_path) == 1)
+		if (is_exec_cmd(cmd_path) == 1) {
+			if (path_ptr)
+				*path_ptr = strdup(cmd_path);
 			return 1;
+		}
 	}
 
-	errno = ENOENT;
 	return 0;
 }
 

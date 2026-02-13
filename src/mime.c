@@ -78,9 +78,9 @@ check_mimetype_fallback_program(void)
 	if (mime_fallback != -1)
 		return mime_fallback;
 
-	if (is_cmd_in_path("mimetype"))
+	if (is_cmd_in_path("mimetype", NULL))
 		mime_fallback = MIME_FALLBACK_MIMETYPE;
-	else if (is_cmd_in_path("xdg-mime"))
+	else if (is_cmd_in_path("xdg-mime", NULL))
 		mime_fallback = MIME_FALLBACK_XDG_MIME;
 	else
 		mime_fallback = MIME_FALLBACK_NONE;
@@ -514,7 +514,7 @@ check_app_existence(char **app, const char *params, const size_t params_len)
 	}
 
 	/* Either a command name or an absolute path */
-	return is_cmd_in_path(*app);
+	return is_cmd_in_path(*app, NULL);
 }
 
 /* Return a copy the first cmd found in LINE (NULL terminated) or NULL.
@@ -1171,7 +1171,7 @@ get_apps_from_file(FILE *fp, const char *file_name, const char *mime,
 			} else if (*app == 'a' && app[1] == 'd' && !app[2]) {
 				file_path = savestring("ad", 2);
 			} else {
-				file_path = get_cmd_path(app);
+				(void)is_cmd_in_path(app, &file_path);
 			}
 
 			if (ret && only_names == 0)
@@ -1529,7 +1529,7 @@ mime_open_multiple_files(char **files)
 	for (i = 0; files[i]; i++);
 
 	char *app = NULL;
-	if (i > 0 && is_cmd_in_path(files[i - 1])) {
+	if (i > 0 && is_cmd_in_path(files[i - 1], NULL)) {
 		app = strdup(files[i - 1]); /* Opening app specified in command line. */
 		/* Nullify this entry: it will be skipped by build_command(). */
 		*files[i - 1] = '\0';
