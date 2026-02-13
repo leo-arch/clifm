@@ -1005,25 +1005,24 @@ get_cmd_path(const char *cmd)
 		return NULL;
 	}
 
-	char *cmd_path = NULL;
-
 	if (*cmd == '~') {
 		char *p = tilde_expand(cmd);
 		if (p && is_exec_cmd(p) == 1)
-			cmd_path = p;
-		return cmd_path;
+			return p;
+
+		free(p);
+		return NULL;
 	}
 
 	if (*cmd == '/') {
 		if (is_exec_cmd(cmd) == 1)
-			cmd_path = savestring(cmd, strlen(cmd));
-		return cmd_path;
+			return savestring(cmd, strlen(cmd));
+		return NULL;
 	}
 
-	cmd_path = xnmalloc(PATH_MAX + 2, sizeof(char));
+	char *cmd_path = xnmalloc(PATH_MAX + 2, sizeof(char));
 
-	size_t i;
-	for (i = 0; i < path_n; i++) { /* Check each path in PATH */
+	for (size_t i = 0; i < path_n; i++) { /* Check each path in PATH */
 		if (!paths[i].path || !*paths[i].path)
 			continue;
 
