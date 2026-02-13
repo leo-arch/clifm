@@ -79,6 +79,12 @@
 #include "spawn.h"
 #include "xdu.h"        /* dir_size() */
 
+/* Macros for the return value of the pager_run function */
+#define PAGER_RET_OK   0
+#define PAGER_RET_BACK 1
+#define PAGER_RET_HELP 2
+#define PAGER_RET_QUIT 3
+
 /* Macros for run_dir_cmd function */
 #define AUTOCMD_DIR_IN  0
 #define AUTOCMD_DIR_OUT 1
@@ -928,7 +934,7 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 			if (conf.listing_mode == HORLIST)
 				*i = 0;
 			else
-				return (-2);
+				return PAGER_RET_HELP;
 		}
 
 		*counter = 0;
@@ -950,19 +956,19 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 		if (conf.long_view == 0 && conf.columned == 1
 		&& conf.max_name_len != UNSET)
 			MOVE_CURSOR_UP(1);
-		return (-3);
+		return PAGER_RET_QUIT;
 
 	/* If another key is pressed, go back one position.
 	 * Otherwise, some filenames won't be listed.*/
 	default:
 		putchar('\r');
 		ERASE_TO_RIGHT;
-		return (-1);
+		return PAGER_RET_BACK;
 	}
 
 	putchar('\r');
 	ERASE_TO_RIGHT;
-	return 0;
+	return PAGER_RET_OK;
 }
 
 static int
@@ -1275,14 +1281,14 @@ print_long_mode(int *reset_pager, const int eln_len)
 			if (pager_counter > s_term_lines) {
 				const int ret = run_pager(-1, reset_pager, &i, &pager_counter);
 
-				if (ret == -3) {
+				if (ret == PAGER_RET_QUIT) {
 					pager_quit = 1;
 					break;
 				}
 
-				if (ret == -1 || ret == -2) {
+				if (ret == PAGER_RET_BACK || ret == PAGER_RET_HELP) {
 					i--;
-					if (ret == -2)
+					if (ret == PAGER_RET_HELP)
 						pager_counter = 0;
 					continue;
 				}
@@ -2079,12 +2085,12 @@ list_files_horizontal(int *reset_pager, const int eln_len, size_t columns_n)
 			&& pager_counter > columns_n * ((size_t)term_lines - 2))
 				ret = run_pager((int)columns_n, reset_pager, &i, &pager_counter);
 
-			if (ret == -3) {
+			if (ret == PAGER_RET_QUIT) {
 				pager_quit = 1;
 				goto END;
 			}
 
-			if (ret == -1) {
+			if (ret == PAGER_RET_BACK) {
 				i = backup_i ? backup_i - 1 : backup_i;
 				cur_cols = bcur_cols;
 				last_column = backup_last_column;
@@ -2231,12 +2237,12 @@ list_files_vertical(int *reset_pager, const int eln_len, size_t num_columns)
 				ret = run_pager((int)num_columns,
 					reset_pager, &file_index, &pager_counter);
 
-			if (ret == -3) {
+			if (ret == PAGER_RET_QUIT) {
 				pager_quit = 1;
 				goto END;
 			}
 
-			if (ret == -1) {
+			if (ret == PAGER_RET_BACK) {
 				/* Restore previous values */
 				i = backup_i ? backup_i - 1: backup_i;
 				file_index = backup_file_index;
@@ -2244,7 +2250,7 @@ list_files_vertical(int *reset_pager, const int eln_len, size_t num_columns)
 				column_count = backup_column_count;
 				continue;
 			} else {
-				if (ret == -2) {
+				if (ret == PAGER_RET_HELP) {
 					i = file_index = row_index = 0;
 					last_column = backup_last_column = 0;
 					pager_counter = 0;
