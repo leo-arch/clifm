@@ -1233,7 +1233,7 @@ compute_maxes(void)
 }
 
 static void
-print_long_mode(size_t *counter, int *reset_pager, const int eln_len)
+print_long_mode(int *reset_pager, const int eln_len)
 {
 	struct maxes_t maxes = compute_maxes();
 
@@ -1259,21 +1259,21 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len)
 
 	/* Cache conf struct values for faster access. */
 	const filesn_t conf_max_files = conf.max_files;
-	const filesn_t conf_pager = (filesn_t)conf.pager;
 	const int conf_no_eln = conf.no_eln;
 
 	filesn_t i;
 	const filesn_t f = g_files_num; /* Cache global variable. */
 	const size_t s_term_lines = term_lines > 2 ? (size_t)(term_lines - 2) : 0;
+	size_t pager_counter = 0;
 
 	for (i = 0; i < f; i++) {
 		if (conf_max_files != UNSET && i == conf_max_files)
 			break;
 
-		if (conf_pager == 1 || (*reset_pager == 0 && conf_pager > 1
-		&& g_files_num >= conf_pager)) {
-			if (*counter > s_term_lines) {
-				const int ret = run_pager(-1, reset_pager, &i, counter);
+		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
+		&& g_files_num >= (filesn_t)conf.pager)) {
+			if (pager_counter > s_term_lines) {
+				const int ret = run_pager(-1, reset_pager, &i, &pager_counter);
 
 				if (ret == -3) {
 					pager_quit = 1;
@@ -1281,13 +1281,13 @@ print_long_mode(size_t *counter, int *reset_pager, const int eln_len)
 				}
 
 				if (ret == -1 || ret == -2) {
-					--i;
+					i--;
 					if (ret == -2)
-						*counter = 0;
+						pager_counter = 0;
 					continue;
 				}
 			}
-			++(*counter);
+			pager_counter++;
 		}
 
 		char *ind_chr = NULL;
@@ -2023,8 +2023,7 @@ pad_filename(const int ind_char, const filesn_t i, const int eln_len,
  * 1 AAA	2 AAB	3 AAC
  * 4 AAD	5 AAE	6 AAF */
 static void
-list_files_horizontal(size_t *counter, int *reset_pager,
-	const int eln_len, size_t columns_n)
+list_files_horizontal(int *reset_pager, const int eln_len, size_t columns_n)
 {
 	const filesn_t nn = (conf.max_files != UNSET
 		&& (filesn_t)conf.max_files < g_files_num)
@@ -2051,6 +2050,7 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 	int backup_last_column = last_column;
 
 	pager_quit = pager_help = 0;
+	size_t pager_counter = 0;
 
 	for (i = 0; i < nn; i++) {
 		/* If current entry is in the last column, we need to print a
@@ -2075,8 +2075,9 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 			 * the screen are filled with the corresponding filenames */
 			int ret = 0;
 			filesn_t backup_i = i;
-			if (backup_last_column && *counter > columns_n * ((size_t)term_lines - 2))
-				ret = run_pager((int)columns_n, reset_pager, &i, counter);
+			if (backup_last_column
+			&& pager_counter > columns_n * ((size_t)term_lines - 2))
+				ret = run_pager((int)columns_n, reset_pager, &i, &pager_counter);
 
 			if (ret == -3) {
 				pager_quit = 1;
@@ -2089,7 +2090,7 @@ list_files_horizontal(size_t *counter, int *reset_pager,
 				last_column = backup_last_column;
 				continue;
 			}
-			(*counter)++;
+			pager_counter++;
 		}
 
 		backup_last_column = last_column;
@@ -2128,8 +2129,7 @@ END:
  * 1 AAA	3 AAC	5 AAE
  * 2 AAB	4 AAD	6 AAF */
 static void
-list_files_vertical(size_t *counter, int *reset_pager,
-	const int eln_len, size_t num_columns)
+list_files_vertical(int *reset_pager, const int eln_len, size_t num_columns)
 {
 	/* Total number of files to be listed. */
 	const filesn_t total_files = (conf.max_files != UNSET
@@ -2173,11 +2173,11 @@ list_files_vertical(size_t *counter, int *reset_pager,
 	filesn_t i = 0; // Index of the current entry being analyzed
 
 	const int conf_max_name_len = conf.max_name_len;
-	const int conf_pager = conf.pager;
 	const int conf_no_eln = conf.no_eln;
 	const int conf_classify = conf.classify;
 
 	pager_quit = pager_help = 0;
+	size_t pager_counter = 0;
 
 	for ( ; ; i++) {
 		/* Copy current values to restore them if necessary. */
@@ -2220,16 +2220,16 @@ list_files_vertical(size_t *counter, int *reset_pager,
 				 * #  MAS: A SIMPLE PAGER   #
 				 * ########################## */
 
-		if (conf_pager == 1 || (*reset_pager == 0 && conf_pager > 1
-		&& g_files_num >= (filesn_t)conf_pager)) {
+		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
+		&& g_files_num >= (filesn_t)conf.pager)) {
 			int ret = 0;
 			filesn_t backup_i = i;
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding filenames. */
 			if (backup_last_column
-			&& *counter > num_columns * ((size_t)term_lines - 2))
+			&& pager_counter > num_columns * ((size_t)term_lines - 2))
 				ret = run_pager((int)num_columns,
-					reset_pager, &file_index, counter);
+					reset_pager, &file_index, &pager_counter);
 
 			if (ret == -3) {
 				pager_quit = 1;
@@ -2247,12 +2247,12 @@ list_files_vertical(size_t *counter, int *reset_pager,
 				if (ret == -2) {
 					i = file_index = row_index = 0;
 					last_column = backup_last_column = 0;
-					*counter = 0;
+					pager_counter = 0;
 					column_count = num_columns;
 					continue;
 				}
 			}
-			(*counter)++;
+			pager_counter++;
 		}
 
 		backup_last_column = last_column;
@@ -2884,15 +2884,12 @@ list_dir_light(const int autocmd_ret)
 	if (conf.sort != SNONE)
 		ENTSORT(file_info, (size_t)n, entrycmp);
 
-	size_t counter = 0;
-	size_t columns_n = 1;
-
 	/* Get the longest filename */
 	if (conf.columned == 1 || conf.long_view == 1)
 		get_longest_filename(n, (size_t)eln_len);
 
 	/* Get possible number of columns for the dirlist screen */
-	columns_n = (conf.pager_view == PAGER_AUTO
+	const size_t columns_n = (conf.pager_view == PAGER_AUTO
 		&& (conf.columned == 0 || conf.long_view == 1)) ? 1 : get_columns();
 
 	set_pager_view((filesn_t)columns_n);
@@ -2904,18 +2901,22 @@ list_dir_light(const int autocmd_ret)
 	if (conf.long_view == 1) {
 		if (prop_fields.size == PROP_SIZE_HUMAN)
 			construct_human_sizes();
-		print_long_mode(&counter, &reset_pager, eln_len);
-		goto END;
+		print_long_mode(&reset_pager, eln_len);
 	}
 
 				/* ########################
 				 * #   NORMAL VIEW MODE   #
 				 * ######################## */
 
-	if (conf.listing_mode == VERTLIST) /* ls(1)-like listing */
-		list_files_vertical(&counter, &reset_pager, eln_len, columns_n);
-	else
-		list_files_horizontal(&counter, &reset_pager, eln_len, columns_n);
+	else if (conf.listing_mode == VERTLIST) { /* ls(1)-like listing */
+		list_files_vertical(&reset_pager, eln_len, columns_n);
+	} else {
+		list_files_horizontal(&reset_pager, eln_len, columns_n);
+	}
+
+				/* #########################
+				 * #   POST LISTING STUFF  #
+				 * ######################### */
 
 END:
 	if (hidden_list)
@@ -3669,8 +3670,6 @@ list_dir(void)
 		 * #    GET INFO TO PRINT COLUMNED OUTPUT   #
 		 * ########################################## */
 
-	size_t counter = 0;
-
 	/* Get the longest filename. */
 	if (conf.columned == 1 || conf.long_view == 1
 	|| conf.pager_view != PAGER_AUTO)
@@ -3689,18 +3688,18 @@ list_dir(void)
 	if (conf.long_view == 1) {
 		if (prop_fields.size == PROP_SIZE_HUMAN)
 			construct_human_sizes();
-		print_long_mode(&counter, &reset_pager, eln_len);
-		goto END;
+		print_long_mode(&reset_pager, eln_len);
 	}
 
 				/* ########################
 				 * #   NORMAL VIEW MODE   #
 				 * ######################## */
 
-	if (conf.listing_mode == VERTLIST) /* ls(1) like listing */
-		list_files_vertical(&counter, &reset_pager, eln_len, columns_n);
-	else
-		list_files_horizontal(&counter, &reset_pager, eln_len, columns_n);
+	else if (conf.listing_mode == VERTLIST) { /* ls(1) like listing */
+		list_files_vertical(&reset_pager, eln_len, columns_n);
+	} else {
+		list_files_horizontal(&reset_pager, eln_len, columns_n);
+	}
 
 				/* #########################
 				 * #   POST LISTING STUFF  #
