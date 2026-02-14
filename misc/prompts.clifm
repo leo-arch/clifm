@@ -127,68 +127,69 @@
 # 2. COLORS
 # ---------
 #
-# Colors are set using one of the two following methods:
-# 1) ANSI escape codes (e.g. "\[\e[1;31m\]", for bold red)
+# Colorization is done using one of the following two methods:
+# 1) Bash-style ANSI escape codes (e.g., "\[\e[1;31m\]" for bold red).
 #
-# 2) The %{COLOR} syntax, where COLOR is:
-#  a) A color/attribute name:
+# 2) Using the %{COLOR} syntax, where COLOR can be:
+#  a) A color or attribute name:
 #   Color names: black, red, green, yellow, blue, magenta, cyan, white.
 #
-#    To get the full-brightness variant of any of the above colors use the
-#    'br' prefix followed by the color name. E.g. "brblue" or "brblack".
-#    Note that "brblack" has higher brightness than "black" (close to gray).
+#    To get the full-brightness variant of any of the above colors, use the
+#    'br' prefix before the color name: e.g., "brblue" or "brblack".
+#    Note that "brblack" is brighter than "black" (close to gray).
 #
-#   Attribute names: bold, dim, italic, underline, reverse, strike.
+#   Attribute names: bold, dim, italic, underline, overline, reverse, strike.
 #
-#    To disable a specific attribute use the 'no' prefix followed by the
-#    attribute name. E.g. "nounderline" or "nobold".
+#    To disable a specific attribute, use the 'no' prefix before the
+#    attribute name: e.g., "nounderline" or "nobold".
 #
-#    To disable all previous attributes use the "reset" keyword.
+#    To disable all previous attributes, use the "reset" keyword.
 #
 #   Example: "%{bold}%{underline}%{brred}text%{nounderline}text%{reset}"
-#   prints "text" twice, first in a bold underlined bright red, and then
-#   in a bold bright red (no underline).
+#   prints "text" twice: first in bold, underlined bright red, and then
+#   in bold bright red (no underline).
 #
 #   Use the special "fgreset" and "bgreset" keywords to set the foreground
-#   and background color respectively to the default terminal value. For
+#   and background color, respectively, to the terminal's default value. For
 #   example, "%{k:red}%{blue}text%{bgreset}" prints "text" in blue on a
-#   red background, and then resets the background color (keeping the
+#   red background, then resets the background color (keeping the
 #   foreground color).
 #
-#  b) A number in the range 0-255 (256-colors). E.g. "%{196}"
+#  b) A number in the range 0-255 (256-colors). E.g., "%{196}".
 #
-#  c) A '#' followed by a three or six digits hexadecimal number.
-#   E.g. "%{#ff0000}" or "%{f00}"
+#  c) A '#' followed by three or six hexadecimal digits.
+#   E.g., "%{#ff0000}" or "%{#f00}".
 #
-#  Attribute names can be used in all the three cases. E.g., "%{bold}%{red}",
-#   "%{dim}%{196}", or "%{reverse}%{#ff0000}"
+#  Attribute names can be used with any of the three cases: e.g.,
+#   "%{bold}%{red}", "%{dim}%{196}", or "%{reverse}%{#ff0000}"
 #
-#  A single attribute can also be added via a character prefix followed by
-#  a colon (':'). Allowed prefixes are:
+#  A single attribute can also be added with a single-character prefix
+#  followed by a colon (':') and a color code. Allowed prefixes are:
 #
 #    b: Bold
 #    d: Dim
 #    i: Italic
 #    k: bacKground
 #    n: Normal/reset
+#    o: Overline
 #    r: Reverse
 #    s: Strike
 #    u: Underline
 #
 #  For example, "%{d:red}" (dimmed red) or "%{u:#ff0000}" (underlined red).
-#  To specify two or more attributes use the standalone attribute names.
+#  To specify two or more attributes, use the standalone attribute names.
 #  E.g., %{bold}%{u:green} or %{bold}%{underline}%{green} (bold underlined green).
 #
 #  To specify a background color (instead of foreground), use the "k:" prefix.
-#  E.g., "%{u:red}%{k:blue}" will print underlined red on a blue background.
+#  E.g., "%{u:red}%{k:blue}" prints underlined red on a blue background.
 #
 #  Writing a prefix in UPPERCASE turns off the corresponding attribute
-#  (unlike 'n', which turns off ALL attributes).
+#  (with the exception of 'n', which turns off ALL attributes).
 #
-#  E.g.: "%{b:red}%{k:blue}text%{B:red}text" prints "text" twice, first in
-#  bold red on a blue background, and then in red (no bold) keeping the blue
-#  background. Note that 'N' sets the terminal default foreground color,
-#  while 'K' sets the terminal default background color.
+#  For example, "%{b:red}%{k:blue}text%{B:red}text" prints "text" twice, first
+#  in bold red on a blue background, and then in red (no bold) keeping the blue
+#  background. Note that 'N' restores the terminal default foreground color,
+#  while 'K' restores the terminal default background color.
 
 # 3. PROMPT MODULES AND COMMAND SUBSTITUTION
 # ------------------------------------------
