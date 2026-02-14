@@ -417,17 +417,17 @@ wc_xstrlen(const char *restrict str)
 	return 0;
 }
 
-/* Truncate a UTF-8 string at width MAX.
+/* Truncate a wide-char string at width MAX.
  * Returns the difference beetween MAX and the point at which STR was actually
  * truncated (this difference should be added to STR as spaces to equate MAX
  * and get a correct length).
  * Since a wide char could take two o more columns to be drawn, and since
- * you might want to truncate the name in the middle of a wide char, this
+ * you may want to truncate the name in the middle of a wide char, this
  * function won't store the last wide char to avoid taking more columns
  * than MAX. In this case, the programmer should take care of filling the
  * empty spaces (usually no more than one) theyself. */
 int
-u8truncstr(wchar_t *restrict buf, const size_t max)
+wctruncstr(wchar_t *restrict buf, const size_t max)
 {
 	int len = 0;
 	int bmax = (int)max;

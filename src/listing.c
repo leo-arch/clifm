@@ -1436,9 +1436,9 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	if (file_info[i].utf8 == 1) {
 		const char *name_str = wtrunc->wname ? wtrunc->wname : name;
 		mbstowcs(g_wcs_name_buf, name_str, NAME_BUF_SIZE);
-		wtrunc->diff = u8truncstr(g_wcs_name_buf, (size_t)trunc_len);
+		wtrunc->diff = wctruncstr(g_wcs_name_buf, (size_t)trunc_len);
 	} else {
-		/* If not UTF-8, let's avoid u8truncstr(). It's a bit faster this way. */
+		/* If not UTF-8, let's avoid wctruncstr(). It's a bit faster this way. */
 		const char c = name[trunc_len];
 		name[trunc_len] = '\0';
 		mbstowcs(g_wcs_name_buf, name, NAME_BUF_SIZE);

@@ -136,7 +136,7 @@ construct_and_print_filename(const struct fileinfo *props,
 
 		if (props->utf8 == 1) {
 			mbstowcs(g_wcs_name_buf, name, NAME_BUF_SIZE);
-			diff = u8truncstr(g_wcs_name_buf, (size_t)trunc_point);
+			diff = wctruncstr(g_wcs_name_buf, (size_t)trunc_point);
 		} else { /* Let's avoid u8truncstr() to get some extra speed. */
 			const char c = name[trunc_point];
 			name[trunc_point] = '\0';
