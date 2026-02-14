@@ -696,12 +696,14 @@ get_color_attribute(const char *line)
 	case 'd': return "2;"; /* Dim */
 	case 'i': return "3;"; /* Italic */
 	case 'n': return "0;"; /* Normal/reset */
+	case 'o': return "53;"; /* Overline */
 	case 'r': return "7;"; /* Reverse */
 	case 's': return "9;"; /* Strikethrough */
 	case 'u': return "4;"; /* Underline */
 	case 'B': /* fallthrough */
 	case 'D': return "22;"; /* Disable bold/dim: normal intensity */
 	case 'I': return "23;"; /* Disable italic */
+	case 'O': return "55;"; /* Disable overline */
 	case 'R': return "27;"; /* Disable reverse */
 	case 'S': return "29;"; /* Disable strikethrough */
 	case 'U': return "24;"; /* Disable underline */
@@ -810,6 +812,8 @@ gen_color(char *color_begin, char **color_end)
 		GEN_ATTR(attr_off ? "24" : "4");
 	} else if (l[0] == 's' && strcmp(l, "strike") == 0) {
 		GEN_ATTR(attr_off ? "29" : "9");
+	} else if (l[0] == 'o' && strcmp(l, "overline") == 0) {
+		GEN_ATTR(attr_off ? "55" : "53");
 	} else if (l[0] == 'f' && l[1] == 'g' && strcmp(l + 2, "reset") == 0) {
 		GEN_ATTR("39");
 	} else if (l[0] == 'b' && l[1] == 'g' && strcmp(l + 2, "reset") == 0) {
