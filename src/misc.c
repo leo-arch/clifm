@@ -1556,7 +1556,7 @@ build_name(char *file, const size_t flen)
 {
 	char *name = NULL;
 
-	/* Should we construct destiny file as full path or using only the
+	/* Should we construct destination file as full path or using only the
 	 * last path component (the file's basename)? */
 	if (xargs.virtual_dir_full_paths != 1) {
 		const char *p = strrchr(file, '/');

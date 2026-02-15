@@ -1228,9 +1228,9 @@ symlink_file(char **args)
 	char *resolved_target = target;
 
 	switch (conf.link_creat_mode) {
-	case LNK_CREAT_ABS:
+	case LNK_CREAT_ABSOLUTE:
 		resolved_target = normalize_path(target, strlen(target)); break;
-	case LNK_CREAT_REL:
+	case LNK_CREAT_RELATIVE:
 		resolved_target = gen_relative_target(link_name, target); break;
 	default: break;
 	}
@@ -1953,8 +1953,7 @@ export_files(char **filenames, const int open)
 			char *name = file_info[i].name;
 			if (virtual_dir == 1) {
 				*buf = '\0';
-				if (xreadlink(XAT_FDCWD, name, buf,	sizeof(buf)) == -1
-				|| !*buf)
+				if (xreadlink(XAT_FDCWD, name, buf, sizeof(buf)) == -1)
 					continue;
 				name = buf;
 			}

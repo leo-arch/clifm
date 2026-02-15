@@ -190,10 +190,10 @@ static char *
 get_link_creat_mode(const int mode)
 {
 	switch (mode) {
-	case LNK_CREAT_ABS: return "absolute";
-	case LNK_CREAT_REL: return "relative";
-	case LNK_CREAT_REG: /* fallthrough */
-	default: return "literal";
+	case LNK_CREAT_ABSOLUTE: return "absolute";
+	case LNK_CREAT_RELATIVE: return "relative";
+	case LNK_CREAT_LITERAL: return "literal";
+	default: return "relative"; /* Default */
 	}
 }
 
@@ -206,7 +206,7 @@ get_ia_value_str(const int val)
 	case AUTOCMD_MSG_LONG: return "long";
 	case AUTOCMD_MSG_PROMPT: return "prompt";
 	case AUTOCMD_MSG_NONE: return "none";
-	default: return "prompt";
+	default: return "prompt"; /* Default */
 	}
 }
 
@@ -373,7 +373,7 @@ dump_config(void)
 
 	print_config_value("DesktopNotifications",
 		gen_desktop_notif_str(conf.desktop_notifications),
-		gen_desktop_notif_str(DEF_DESKTOP_NOTIFICATIONS), DUMP_CONFIG_STR);
+		gen_desktop_notif_str(DEF_DESKTOP_NOTIFICATIONS), DUMP_CONFIG_STR_NO_QUOTE);
 
 	s = "";
 	print_config_value("DirhistIgnore", &conf.dirhistignore_regex,
@@ -425,14 +425,14 @@ dump_config(void)
 #endif /* !_NO_ICONS */
 
 	print_config_value("InformAutocmd", get_ia_value_str(conf.autocmd_msg),
-		get_ia_value_str(DEF_AUTOCMD_MSG), DUMP_CONFIG_STR);
+		get_ia_value_str(DEF_AUTOCMD_MSG), DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_LIGHT_MODE;
 	print_config_value("LightMode", &conf.light_mode, &n, DUMP_CONFIG_BOOL);
 
 	print_config_value("LinkCreationMode",
 		get_link_creat_mode(conf.link_creat_mode),
-		get_link_creat_mode(DEF_LINK_CREATION_MODE), DUMP_CONFIG_STR);
+		get_link_creat_mode(DEF_LINK_CREATION_MODE), DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_LIST_DIRS_FIRST;
 	print_config_value("ListDirsFirst", &conf.list_dirs_first, &n,
@@ -523,7 +523,7 @@ dump_config(void)
 	print_config_value("PurgeJumpDB", &conf.purge_jumpdb, &n, DUMP_CONFIG_BOOL);
 
 	print_config_value("QuotingStyle", get_quoting_style(conf.quoting_style),
-		get_quoting_style(DEF_QUOTING_STYLE), DUMP_CONFIG_STR);
+		get_quoting_style(DEF_QUOTING_STYLE), DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_READ_AUTOCMD_FILES;
 	print_config_value("ReadAutocmdFiles", &conf.read_autocmd_files, &n,
@@ -544,7 +544,7 @@ dump_config(void)
 	print_config_value("rmForce", &conf.rm_force, &n, DUMP_CONFIG_BOOL);
 
 	print_config_value("SafeFilenames", gen_safenames_str(conf.safe_filenames),
-		gen_safenames_str(DEF_SAFE_FILENAMES), DUMP_CONFIG_STR);
+		gen_safenames_str(DEF_SAFE_FILENAMES), DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_SEARCH_STRATEGY;
 	print_config_value("SearchStrategy", &conf.search_strategy, &n,
@@ -562,7 +562,7 @@ dump_config(void)
 		DUMP_CONFIG_BOOL);
 
 	print_config_value("Sort", num_to_sort_name(conf.sort, 0),
-		num_to_sort_name(DEF_SORT, 0), DUMP_CONFIG_STR);
+		num_to_sort_name(DEF_SORT, 0), DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_SORT_REVERSE;
 	print_config_value("SortReverse", &conf.sort_reverse, &n, DUMP_CONFIG_BOOL);
@@ -601,7 +601,7 @@ dump_config(void)
 #else
 		"standard",
 #endif /* !_NO_FZF */
-		DUMP_CONFIG_STR);
+		DUMP_CONFIG_STR_NO_QUOTE);
 
 	s = DEF_TERM_CMD;
 	print_config_value("TerminalCmd", conf.term, s, DUMP_CONFIG_STR);
@@ -1870,8 +1870,8 @@ create_main_config_file(char *file)
 # To enable this feature consult the manpage.\n\
 ;CdOnQuit=%s\n\n",
 
-		DEF_LINK_CREATION_MODE == LNK_CREAT_ABS ? "absolute"
-			: (DEF_LINK_CREATION_MODE == LNK_CREAT_REL ? "relative"
+		DEF_LINK_CREATION_MODE == LNK_CREAT_ABSOLUTE ? "absolute"
+			: (DEF_LINK_CREATION_MODE == LNK_CREAT_RELATIVE ? "relative"
 			: "literal"),
 		DEF_FUZZY_MATCH == 1 ? "true" : "false",
 		DEF_FUZZY_MATCH_ALGO,
@@ -3109,9 +3109,11 @@ set_link_creation_mode(const char *val)
 	}
 
 	if (*val == 'a' && strncmp(val, "absolute\n", 9) == 0)
-		conf.link_creat_mode = LNK_CREAT_ABS;
+		conf.link_creat_mode = LNK_CREAT_ABSOLUTE;
 	else if (*val == 'r' && strncmp(val, "relative\n", 9) == 0)
-		conf.link_creat_mode = LNK_CREAT_REL;
+		conf.link_creat_mode = LNK_CREAT_RELATIVE;
+	else if (*val == 'l' && strncmp(val, "literal\n", 8) == 0)
+		conf.link_creat_mode = LNK_CREAT_LITERAL;
 	else
 		conf.link_creat_mode = DEF_LINK_CREATION_MODE;
 }

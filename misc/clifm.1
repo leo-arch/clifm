@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 8, 2026" "clifm 1.27.7" "Clifm Manual"
+.TH "CLIFM" "1" "Feb 15, 2026" "clifm 1.27.9" "Clifm Manual"
 .SH NAME
 clifm - The Command-Line File Manager
 .SH SYNOPSIS
@@ -924,7 +924,7 @@ Create (\fBl\fR) or edit (\fBle\fR) symbolic links.
 .sp
 The syntax for the \fBl\fR command is: l \fITARGET\fR [\fILINK_NAME\fR]\fR. Note that if \fILINK_NAME\fR is omitted, the symbolic link is created as \fITARGET_BASENAME\fR.link in the current directory.
 .sp
-By default, the link target is created literally (like `\fBln -s\fR` would). The link creation mode can be set using the \fBLinkCreationMode\fR option in the configuration file. Available modes are: \fBabsolute\fR, \fBliteral\fR, and \fBrelative\fR (like `\fBln -rs\fR` would).
+By default, the link target is created relative to the link location. The link creation mode can be set using the \fBLinkCreationMode\fR option in the configuration file. Available modes are: \fBabsolute\fR, and \fBrelative\fR (like `\fBln -rs\fR`), and \fBliteral\fR (like `\fBln -s\fR`).
 .sp
 To edit the target of a symbolic link use the \fBle\fR command followed by the desired link name. The user will be prompted to enter a new link target, using the current target as template.
 .TP

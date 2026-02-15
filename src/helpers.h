@@ -684,9 +684,9 @@ extern time_t curdir_mtime;
 #define MV_CMD_AVAILABLE 4
 
 /* Macros for LinkCreationMode */
-#define LNK_CREAT_REG 0 /* Like ln -s */
-#define LNK_CREAT_REL 1 /* Like ln -rs */
-#define LNK_CREAT_ABS 2 /* Create absolute target */
+#define LNK_CREAT_LITERAL  0 /* Like ln -s */
+#define LNK_CREAT_RELATIVE 1 /* Like ln -rs */
+#define LNK_CREAT_ABSOLUTE 2 /* Create absolute target */
 
 /* Macros for listing_mode */
 #define VERTLIST 0 /* ls-like listing mode */

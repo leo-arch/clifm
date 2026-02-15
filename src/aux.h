@@ -61,7 +61,7 @@ char xgetchar(void);
 char *xgetenv(const char *s, const int alloc);
 void *xmemrchr(const void *s, const int c, size_t n);
 int  xmkdir(const char *dir, const mode_t mode);
-ssize_t xreadlink(const int fd, char *restrict path, char *restrict buf,
+ssize_t xreadlink(const int fd, const char *restrict path, char *restrict buf,
 	const size_t bufsize);
 void xregerror(const char *cmd_name, const char *pattern, const int errcode,
 	const regex_t regexp, const int prompt_err);

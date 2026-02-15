@@ -697,47 +697,55 @@ xmkdir(const char *dir, const mode_t mode)
 	return FUNC_SUCCESS;
 }
 
-/* Same as readlinkat(3), but resolves relative symbolic links and NUL
- * terminates the returned string (BUF). */
+/* Same as readlinkat(3), but NUL-terminates BUF.
+ * If we are in a virtual directory, relative links are resolved by
+ * prepending the path to the link itself to its target.
+ * Returns the number of bytes written in BUF (excluding the NUL byte),
+ * or -1 on error. */
 ssize_t
-xreadlink(const int fd, char *restrict path, char *restrict buf,
+xreadlink(const int fd, const char *restrict path, char *restrict buf,
 	const size_t bufsize)
 {
 	buf[0] = '\0';
-	const ssize_t buf_len = readlinkat(fd, path, buf, bufsize - 1);
-	if (buf_len == -1)
+	ssize_t buf_len = readlinkat(fd, path, buf, bufsize - 1);
+	if (buf_len == -1 || !*buf)
 		return (-1);
 
-	buf[buf_len] = '\0';
+	buf[buf_len] = '\0'; /* NUL-terminate the buffer. */
 
+	/* Remove trailing slash. */
 	if (buf_len > 1 && buf[buf_len - 1] == '/')
-		buf[buf_len - 1] = '\0';
+		buf[--buf_len] = '\0';
 
-	int rem_slash = 0;
+	if (virtual_dir == 0 || *buf == '~' || *buf == '/')
+		return buf_len;
+
+	/* We have a relative link in a virtual directory. */
 	size_t path_len = strlen(path);
-	if (path_len > 1 && path[path_len - 1] == '/') {
-		path[path_len - 1] = '\0';
-		rem_slash = 1;
-	}
+	char *tmp_path = savestring(path, path_len);
+	if (!tmp_path)
+		return (-1);
 
-	char *p = NULL;
-	if (*buf != '/' && (p = strrchr(path, '/'))) { /* Relative link */
+	if (path_len > 1 && tmp_path[path_len - 1] == '/')
+		tmp_path[path_len - 1] = '\0';
+
+	char *p = strrchr(tmp_path, '/');
+	if (p) { /* Relative link */
 		*p = '\0';
 
-		char *temp = savestring(buf, strlen(buf));
+		char *tmp = savestring(buf, strlen(buf));
 
-		if (p == path) /* Root */
-			snprintf(buf, bufsize, "/%s", temp);
+		int len;
+		if (p == tmp_path) /* Root */
+			len = snprintf(buf, bufsize, "/%s", tmp);
 		else
-			snprintf(buf, bufsize, "%s/%s", path, temp);
+			len = snprintf(buf, bufsize, "%s/%s", tmp_path, tmp);
 
-		*p = '/';
-		free(temp);
+		buf_len = len > 0 ? (ssize_t)len : 0;
+		free(tmp);
 	}
 
-	if (rem_slash == 1)
-		path[path_len - 1] = '/';
-
+	free(tmp_path);
 	return buf_len;
 }
 
