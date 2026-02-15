@@ -436,10 +436,14 @@ wctruncstr(wchar_t *restrict buf, const size_t max)
 
 	for (size_t i = 0; buf[i]; i++) {
 		int l = wcwidth(buf[i]);
+		if (l <= 0)
+			continue;
+
 		if (len + l > bmax) {
 			buf[i] = L'\0';
 			break;
 		}
+
 		len += l;
 	}
 
