@@ -2870,7 +2870,11 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 		return FUNC_SUCCESS;
 
 	xchmod(stdin_tmp_dir, "0700", 1);
-	xargs.virtual_dir_full_paths = !xargs.virtual_dir_full_paths;
+
+	static int full_paths = -1;
+	if (full_paths == -1)
+		full_paths = xargs.virtual_dir_full_paths == 1;
+	full_paths = !full_paths;
 
 	filesn_t i = g_files_num;
 	while (--i >= 0) {
@@ -2878,20 +2882,22 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 		if (!rp) continue;
 
 		char *p = NULL;
-		if (xargs.virtual_dir_full_paths != 1) {
+		if (full_paths != 1) {
 			if ((p = strrchr(rp, '/')) && p[1])
 				++p;
 		} else {
 			p = replace_slashes(rp, ':');
 		}
 
-		if (!p || !*p) continue;
+		if (!p || !*p)
+			continue;
 
 		if (renameat(XAT_FDCWD, file_info[i].name, XAT_FDCWD, p) == -1)
 			err('w', PRINT_PROMPT, "renameat: %s: %s\n",
 				file_info[i].name, strerror(errno));
 
-		if (xargs.virtual_dir_full_paths == 1) free(p);
+		if (full_paths == 1)
+			free(p);
 		free(rp);
 	}
 
