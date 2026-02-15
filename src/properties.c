@@ -886,7 +886,7 @@ xattr_val_is_printable(const char *val, const size_t len)
 }
 
 static int
-print_extended_attributes(char *s, const mode_t mode, const int xattr)
+print_extended_attributes(const char *s, const mode_t mode, const int xattr)
 {
 	if (xattr == 0 || S_ISLNK(mode)) {
 		puts(S_ISLNK(mode) ? _("unavailable") : _("none"));
@@ -1049,67 +1049,78 @@ print_file_perms(const struct stat *attr, const char file_type_char,
 }
 
 static void
-print_filename(char *filename, const char *color, const int follow_link,
-	const mode_t mode, const char *link_target)
+print_link_target_name(const char *link_name, const char *link_target,
+	const char *color)
 {
-	char *wname = wc_xstrlen(filename) == 0
+	const char *name = link_name ? link_name : UNKNOWN_STR;
+	if (!link_target || !*link_target) {
+		printf(_("\tName: %s%s%s\n"), color, name, df_c);
+		return;
+	}
+
+	char quoted_target[PATH_MAX * sizeof(wchar_t) + 3];
+	*quoted_target = '\0';
+	if (detect_space(link_target) == 1)
+		snprintf(quoted_target, sizeof(quoted_target), "'%s'", link_target);
+
+	const char *target = *quoted_target ? quoted_target : link_target;
+	char *ptr = term_caps.unicode == 1 ? MSG_PTR_STR_LEFT_U : MSG_PTR_STR_LEFT;
+	printf(_("\tName: %s%s%s %s%s%s %s%s%s\n"),
+		color, target, df_c, dn_c, ptr, df_c, ln_c, name, df_c);
+}
+
+static void
+print_filename(const char *filename, const char *color, const int follow_link,
+	const mode_t mode, const char *target)
+{
+	char *fixed_name = wc_xstrlen(filename) == 0
 		? replace_invalid_chars(filename) : NULL;
 
-	char name[(NAME_MAX * sizeof(wchar_t)) + 3]; *name = '\0';
-	if (detect_space(wname ? wname : filename) == 1)
-		snprintf(name, sizeof(name), "'%s'", wname ? wname : filename);
+	char quoted_name[(NAME_MAX * sizeof(wchar_t)) + 3];
+	*quoted_name = '\0';
+	const char *tmp_name = fixed_name ? fixed_name : filename;
+	if (detect_space(tmp_name) == 1)
+		snprintf(quoted_name, sizeof(quoted_name), "'%s'", tmp_name);
 
-	const char *n = *name ? name : (wname ? wname : filename);
+	const char *name = *quoted_name ? quoted_name : tmp_name;
 
 	if (follow_link == 1) { /* 'pp' command */
-		if (link_target && *link_target) {
-			char t[PATH_MAX * sizeof(wchar_t) + 3]; *t = '\0';
-			if (detect_space(link_target) == 1)
-				snprintf(t, sizeof(t), "'%s'", link_target);
-			printf(_("\tName: %s%s%s %s%s%s %s%s%s\n"), color,
-				*t ? t : link_target, df_c, dn_c,
-				term_caps.unicode == 1 ? MSG_PTR_STR_LEFT_U : MSG_PTR_STR_LEFT,
-				df_c, ln_c, n, df_c);
-		} else {
-			printf(_("\tName: %s%s%s\n"), color, n, df_c);
-		}
-
-		free(wname);
+		print_link_target_name(name, target, color);
+		free(fixed_name);
 		return;
 	}
 
 	/* 'p' command */
 	if (!S_ISLNK(mode)) {
-		printf(_("\tName: %s%s%s\n"), color, n, df_c);
-		free(wname);
+		printf(_("\tName: %s%s%s\n"), color, name, df_c);
+		free(fixed_name);
 		return;
 	}
 
-	char target[PATH_MAX + 1];
-	const ssize_t tlen =
-		xreadlink(XAT_FDCWD, filename, target, sizeof(target));
+	char quoted_target[PATH_MAX * sizeof(wchar_t) + 3];
+	*quoted_target = '\0';
+	if (target && detect_space(target) == 1)
+		snprintf(quoted_target, sizeof(quoted_target), "'%s'", target);
 
-	char t[PATH_MAX * sizeof(wchar_t) + 3]; *t = '\0';
-	if (tlen != -1 && *target && detect_space(target) == 1)
-		snprintf(t, sizeof(t), "'%s'", target);
+	const char *target_str = *quoted_target ? quoted_target : target;
 
 	struct stat a;
-	if (tlen != -1 && *target && lstat(target, &a) != -1) {
+	if (target && lstat(target, &a) != -1) {
 		const char *link_color = get_link_color(target);
-		printf(_("\tName: %s%s%s %s%s%s %s%s%s\n"), ln_c, n, df_c,
-			dn_c, SET_MSG_PTR, df_c, link_color, *t ? t : target, df_c);
+		printf(_("\tName: %s%s%s %s%s%s %s%s%s\n"), ln_c, name, df_c,
+			dn_c, SET_MSG_PTR, df_c, link_color, target_str, df_c);
 
 	} else { /* Broken link */
-		if (tlen != -1 && *target) {
-			printf(_("\tName: %s%s%s %s%s%s %s%s%s (broken link)\n"), or_c,
-				n, df_c, dn_c, SET_MSG_PTR, df_c, uf_c, *t ? t : target, df_c);
+		if (target) {
+			printf(_("\tName: %s%s%s %s%s%s %s%s%s (broken symlink)\n"), or_c,
+				name, df_c, dn_c, SET_MSG_PTR, df_c, uf_c, target_str, df_c);
 		} else {
-			printf(_("\tName: %s%s%s %s%s ???%s\n"), or_c, n, df_c,
+			printf(_("\tName: %s%s%s %s%s ???%s\n"), or_c, name, df_c,
 				dn_c, SET_MSG_PTR, df_c);
 		}
 	}
 
-	free(wname);
+	free(fixed_name);
 }
 
 #ifdef LINUX_FILE_CAPS
@@ -1175,7 +1186,7 @@ list_acl(acl_t acl, int *found, const acl_type_t type)
 /* Print ACLs for FILE, whose mode is MODE.
  * If FILE is a directory, default ACLs are checked besides access ACLs. */
 static void
-print_file_acl(char *file, const mode_t mode, const int xattr)
+print_file_acl(const char *file, const mode_t mode, const int xattr)
 {
 #ifndef __linux__
 	UNUSED(file); UNUSED(mode);
@@ -1222,7 +1233,7 @@ END:
 #endif /* HAVE_ACL */
 
 static void
-print_file_details(char *filename, const struct stat *attr,
+print_file_details(const char *filename, const struct stat *attr,
 	const char file_type, const int file_perm, const int xattr)
 {
 #if !defined(LINUX_FILE_ATTRS) && !defined(LINUX_FILE_XATTRS) \
@@ -1530,21 +1541,6 @@ print_timestamps(const char *filename, const struct stat *attr)
 #endif /* ST_BTIME */
 }
 
-static int
-err_no_file(const char *filename, const char *target, const int errnum)
-{
-	char *errname = xargs.stat > 0 ? PROGRAM_NAME : "prop";
-
-	if (*target) {
-		xerror(_("%s: %s %s%s%s %s: Broken symbolic link\n"),
-			errname, filename, mi_c, SET_MSG_PTR, df_c, target);
-	} else {
-		xerror("%s: '%s': %s\n", errname, filename, strerror(errnum));
-	}
-
-	return errnum;
-}
-
 static void
 print_file_mime(const char *name)
 {
@@ -1839,39 +1835,47 @@ print_dir_info(const char *dir, const int file_perm)
 }
 #endif /* USE_DU1 */
 
+static int
+err_no_file(const char *filename, const char *target)
+{
+	const int errnum = errno == 0 ? ENOENT : errno;
+	char *errname = xargs.stat > 0 ? PROGRAM_NAME : "prop";
+
+	if (target && *target) {
+		xerror(_("%s: %s %s%s%s %s: Broken symbolic link\n"),
+			errname, filename, mi_c, SET_MSG_PTR, df_c, target);
+	} else {
+		xerror("%s: '%s': %s\n", errname, filename, strerror(errnum));
+	}
+
+	return errnum;
+}
+
 /* Retrieve information for the file named FILENAME in a stat(1)-like fashion.
  * If FOLLOW_LINK is set to 1, in which case we're running the 'pp' command
- * instead of just 'p', symbolic links are followed and directories size is
+ * instead of just 'p', symbolic links are followed and directory sizes are
  * calculated recursively. */
 static int
-do_stat(char *filename, const int follow_link)
+do_stat(const char *filename, const int follow_link)
 {
 	if (!filename || !*filename)
 		return FUNC_FAILURE;
 
-	/* Remove leading "./" */
-	if (*filename == '.' && filename[1] == '/' && filename[2])
-		filename += 2;
-
 	/* Check file existence. */
 	struct stat attr;
 	int ret = lstat(filename, &attr);
+	const int is_link = (ret != -1 && S_ISLNK(attr.st_mode));
 
-	char link_target[PATH_MAX + 1]; *link_target = '\0';
-	if (follow_link == 1 && ret != -1 && S_ISLNK(attr.st_mode)) {
-		/* pp: In case of a symlink we want both the symlink name (FILENAME)
-		 * and the target name (LINK_TARGET): the Name field in the output
-		 * will be printed as follows: "Name: target <- link_name". */
-		const ssize_t tlen = xreadlink(XAT_FDCWD, filename, link_target,
-			sizeof(link_target));
-		if (tlen != -1)
-			ret = lstat(link_target, &attr);
-		else
-			ret = -1;
+	char target[PATH_MAX + 1]; target[0] = '\0';
+	if (is_link == 1) {
+		(void)xreadlink(XAT_FDCWD, filename, target, sizeof(target));
+
+		if (follow_link == 1)
+			ret = *target ? stat(target, &attr) : -1;
 	}
 
 	if (ret == -1)
-		return err_no_file(filename, link_target, errno);
+		return err_no_file(filename, target);
 
 	char file_type = 0; /* File type char indicator. */
 	char *ctype = dn_c; /* Color for file type char. */
@@ -1886,12 +1890,15 @@ do_stat(char *filename, const int follow_link)
 		1;
 #endif /* !__CYGWIN__ */
 
-	const char *color = get_file_type_and_color(*link_target
-		? link_target : filename, &attr, &file_type, &ctype);
+	/* At this point, we know that target isn't empty. */
+	const char *file_name = (follow_link == 1 && is_link == 1)
+		? target : filename;
+	const char *color = get_file_type_and_color(file_name,
+		&attr, &file_type, &ctype);
 
 #if defined(LINUX_FILE_XATTRS)
 	const int xattr =
-		llistxattr(*link_target ? link_target : filename, NULL, 0) > 0;
+		llistxattr(file_name, NULL, 0) > 0;
 #else
 	const int xattr = 0;
 #endif /* LINUX_FILE_XATTRS */
@@ -1899,19 +1906,19 @@ do_stat(char *filename, const int follow_link)
 	HIDE_CURSOR;
 
 	print_file_perms(&attr, file_type, ctype, xattr);
-	print_filename(filename, color, follow_link, attr.st_mode, link_target);
+	print_filename(filename, color, follow_link, attr.st_mode, target);
 	print_file_details(filename, &attr, file_type, file_perm, xattr);
-	print_file_mime(*link_target ? link_target : filename);
-	print_timestamps(*link_target ? link_target : filename, &attr);
+	print_file_mime(file_name);
+	print_timestamps(file_name, &attr);
 
 #ifdef USE_DU1
 	print_file_size(filename, &attr, file_perm, follow_link);
 	if (S_ISDIR(attr.st_mode) && follow_link == 1)
-		print_dir_items(*link_target ? link_target : filename, file_perm);
+		print_dir_items(file_name, file_perm);
 #else
 	if (S_ISDIR(attr.st_mode)) {
 		if (follow_link == 1)
-			print_dir_info(*link_target ? link_target : filename, file_perm);
+			print_dir_info(file_name, file_perm);
 	} else {
 		print_file_size(&attr);
 	}
