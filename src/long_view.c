@@ -121,6 +121,8 @@ construct_and_print_filename(const struct fileinfo *props,
 	int diff = 0;
 	char *name = wname ? wname : props->name;
 	const char *ext_name = NULL;
+	char truncated_char = 0;
+	int trunc_point = 0;
 
 	if (cur_len > (size_t)max_namelen) {
 		const int rest = (int)cur_len - max_namelen;
@@ -128,7 +130,7 @@ construct_and_print_filename(const struct fileinfo *props,
 		size_t ext_len = 0;
 		ext_name = get_ext_info_long(props, plen, &trunc, &ext_len);
 
-		int trunc_point = (int)plen - rest - 1 - (int)ext_len;
+		trunc_point = (int)plen - rest - 1 - (int)ext_len;
 		if (trunc_point <= 0) {
 			trunc_point = (int)plen - rest - 1;
 			trunc = TRUNC_NO_EXT;
@@ -137,11 +139,9 @@ construct_and_print_filename(const struct fileinfo *props,
 		if (props->utf8 == 1) {
 			mbstowcs(g_wcs_name_buf, name, NAME_BUF_SIZE);
 			diff = wctruncstr(g_wcs_name_buf, (size_t)trunc_point);
-		} else { /* Let's avoid u8truncstr() to get some extra speed. */
-			const char c = name[trunc_point];
+		} else {
+			truncated_char = name[trunc_point];
 			name[trunc_point] = '\0';
-			mbstowcs(g_wcs_name_buf, name, NAME_BUF_SIZE);
-			name[trunc_point] = c;
 		}
 
 		cur_len -= (size_t)rest;
@@ -167,16 +167,38 @@ construct_and_print_filename(const struct fileinfo *props,
 	static char trunc_s[2] = {0};
 	trunc_s[0] = TRUNC_FILE_CHR;
 
-	printf("%s%s%s%s%s%ls%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  ",
-		(conf.colorize == 1 && conf.icons == 1) ? props->icon_color : "",
-		conf.icons == 1 ? props->icon : "", conf.icons == 1 ? " " : "", df_c,
-		conf.colorize == 1 ? props->color : "",
-		g_wcs_name_buf, trunc_diff,
-		conf.light_mode == 1 ? "\x1b[0m" : df_c, pad, "", df_c,
-		trunc > 0 ? tt_c : "", trunc_s,
-		trunc == TRUNC_EXT ? props->color : "",
-		trunc == TRUNC_EXT ? ext_name : "",
-		trunc == TRUNC_EXT ? df_c : "");
+	/* I hate using two almost identical pieces of code, but this allows us
+	 * to use mbstowcs only for UTF-8 names and printing non-UTF8 directly,
+	 * without conversion (which makes the whole thing faster).
+	 * NOTE: The only difference between the two printf calls is the filename:
+	 * %ls (pointer to wchar_t string) or %s (pointer to char string). Any
+	 * modification must be applied to both calls to keep output consistent. */
+	if (props->utf8 == 1) {
+		printf("%s%s%s%s%s%ls%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  ",
+			(conf.colorize == 1 && conf.icons == 1) ? props->icon_color : "",
+			conf.icons == 1 ? props->icon : "", conf.icons == 1 ? " " : "", df_c,
+			conf.colorize == 1 ? props->color : "",
+			g_wcs_name_buf, trunc_diff,
+			conf.light_mode == 1 ? "\x1b[0m" : df_c, pad, "", df_c,
+			trunc > 0 ? tt_c : "", trunc_s,
+			trunc == TRUNC_EXT ? props->color : "",
+			trunc == TRUNC_EXT ? ext_name : "",
+			trunc == TRUNC_EXT ? df_c : "");
+	} else {
+		printf("%s%s%s%s%s%s%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  ",
+			(conf.colorize == 1 && conf.icons == 1) ? props->icon_color : "",
+			conf.icons == 1 ? props->icon : "", conf.icons == 1 ? " " : "", df_c,
+			conf.colorize == 1 ? props->color : "",
+			name, trunc_diff,
+			conf.light_mode == 1 ? "\x1b[0m" : df_c, pad, "", df_c,
+			trunc > 0 ? tt_c : "", trunc_s,
+			trunc == TRUNC_EXT ? props->color : "",
+			trunc == TRUNC_EXT ? ext_name : "",
+			trunc == TRUNC_EXT ? df_c : "");
+
+		/* Reinsert the character removed when truncating the string. */
+		name[trunc_point] = truncated_char;
+	}
 
 	free(wname);
 }
