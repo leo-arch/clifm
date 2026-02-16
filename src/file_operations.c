@@ -364,7 +364,7 @@ err_file_exists(char *name, const int multi, const int is_md)
 }
 
 static char *
-extract_template_name_from_filename(const char *basename, int *t_auto)
+extract_template_name_from_filename(char *basename, int *t_auto)
 {
 	/* Explicit template name: file@template */
 	char *tname = strrchr(basename, '@');
@@ -404,7 +404,7 @@ find_template(const char *name)
  * Returns 1 in case of success, 0 in there's no template for this file
  * (or cp(1) fails), or -1 in case of error. */
 static int
-create_from_template(char *abs_path, const char *basename)
+create_from_template(char *abs_path, char *basename)
 {
 	if (!file_templates || !templates_dir || !*templates_dir
 	|| !abs_path || !*abs_path || !basename || !*basename)
@@ -462,7 +462,7 @@ create_file(char *name, const int is_md)
 {
 	struct stat a;
 	char *ret = NULL;
-	const char *n = name;
+	char *n = name;
 	char *errname = is_md == 1 ? "md" : "new";
 	int status = FUNC_SUCCESS;
 

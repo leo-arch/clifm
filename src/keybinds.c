@@ -1282,7 +1282,7 @@ rl_accept_suggestion(int count, int key)
 	char *s = NULL, truncated_char = 0;
 	int truncated = 0, accept_first_word_last = 0;
 	if (accept_first_word == 1) {
-		const char *p = suggestion_buf + (rl_point - suggestion.offset);
+		char *p = suggestion_buf + (rl_point - suggestion.offset);
 		/* Skip leading spaces */
 		while (*p == ' ')
 			p++;

@@ -220,7 +220,7 @@ remove_trashinfo_file(const char *name)
  * Returns the absolute path to this file and updates FILE_SUFFIX to
  * its basename. */
 static char *
-gen_dest_file(const char *file, char **file_suffix)
+gen_dest_file(char *file, char **file_suffix)
 {
 	char *filename = strrchr(file, '/');
 	if (!filename || !*(++filename)) {
@@ -277,7 +277,7 @@ trash_file(char *file)
 		return errno;
 	}
 
-	const char *tmpfile = file;
+	char *tmpfile = file;
 	char full_path[PATH_MAX + 1];
 
 	if (*file != '/') { /* If relative path, make it absolute. */

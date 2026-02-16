@@ -466,7 +466,7 @@ END:
  * (malformed prompt: either RL_PROMPT_START_IGNORE or RL_PROMPT_END_IGNORE
  * is missing). */
 static int
-xrl_expand_prompt(const char *str)
+xrl_expand_prompt(char *str)
 {
 	if (!str || !*str)
 		return 0;
@@ -475,7 +475,7 @@ xrl_expand_prompt(const char *str)
 	while (*str) {
 		char *start = strchr(str, RL_PROMPT_START_IGNORE);
 		if (!start) {
-			const char *end = strchr(str, RL_PROMPT_END_IGNORE);
+			char *end = strchr(str, RL_PROMPT_END_IGNORE);
 			if (end) {
 				err('w', PRINT_PROMPT, "%s: Malformed prompt: "
 					"RL_PROMPT_END_IGNORE (\\%d) without "
@@ -495,7 +495,7 @@ xrl_expand_prompt(const char *str)
 			*start = c;
 		}
 
-		const char *end = strchr(start, RL_PROMPT_END_IGNORE);
+		char *end = strchr(start, RL_PROMPT_END_IGNORE);
 		if (!end) {
 			err('w', PRINT_PROMPT, "%s: Malformed prompt: "
 				"RL_PROMPT_START_IGNORE (\\%d) without "
@@ -515,12 +515,12 @@ xrl_expand_prompt(const char *str)
 
 /* Get the number of visible chars in the last line of the prompt (STR). */
 static int
-get_prompt_offset(const char *str)
+get_prompt_offset(char *str)
 {
 	if (!str || !*str)
 		return 0;
 
-	const char *newline = strrchr(str, '\n');
+	char *newline = strrchr(str, '\n');
 	return xrl_expand_prompt((newline && *(++newline)) ? newline : str) + 1;
 }
 
@@ -1586,23 +1586,25 @@ env_vars_generator(const char *text, int state)
 
 	static int i;
 	static size_t len;
-	const char *name;
+	const char *var;
 
 	if (state == 0) {
 		i = 0;
 		len = strlen(text);
 	}
 
-	while ((name = environ[i++]) != NULL) {
-		if (conf.case_sens_path_comp ? strncmp(name, text, len) == 0
-		: strncasecmp(name, text, len) == 0) {
-			char *p = strchr(name, '=');
-			if (!p)
+	while ((var = environ[i++]) != NULL) {
+		if (conf.case_sens_path_comp ? strncmp(var, text, len) == 0
+		: strncasecmp(var, text, len) == 0) {
+			const char *eq = strchr(var, '=');
+			if (!eq || eq == var)
 				continue;
-			*p = '\0';
-			char *q = strdup(name);
-			*p = '=';
-			return q;
+
+			/* Copy everything before '=' */
+			const size_t namelen = (size_t)(eq - var);
+			char *buf = xnmalloc(namelen + 1, sizeof(char));
+			xstrsncpy(buf, var, namelen + 1);
+			return buf;
 		}
 	}
 
@@ -1618,25 +1620,25 @@ environ_generator(const char *text, int state)
 
 	static int i;
 	static size_t len;
-	const char *name;
+	const char *var;
 
 	if (state == 0) {
 		i = 0;
 		len = strlen(text + 1);
 	}
 
-	while ((name = environ[i++]) != NULL) {
-		if (conf.case_sens_path_comp ? strncmp(name, text + 1, len) == 0
-		: strncasecmp(name, text + 1, len) == 0) {
-			char *p = strrchr(name, '=');
-			if (!p)
+	while ((var = environ[i++]) != NULL) {
+		if (conf.case_sens_path_comp ? strncmp(var, text + 1, len) == 0
+		: strncasecmp(var, text + 1, len) == 0) {
+			const char *eq = strrchr(var, '=');
+			if (!eq || eq == var)
 				continue;
-			*p = '\0';
-			char tmp[NAME_MAX];
-			snprintf(tmp, sizeof(tmp), "$%s", name);
-			char *q = strdup(tmp);
-			*p = '=';
-			return q;
+
+			const size_t name_len = (size_t)(eq - var);
+			char *buf = xnmalloc(name_len + 2, sizeof(char));
+			buf[0] = '$';
+			xstrsncpy(buf + 1, var, name_len + 1);
+			return buf;
 		}
 	}
 
@@ -2343,7 +2345,7 @@ rl_glob(const char *text)
 
 	char *str = (last_word && *last_word)
 		? unescape_str(last_word) : NULL;
-	const char *word = str ? str : NULL;
+	char *word = str ? str : NULL;
 
 	int char_copy = -1;
 	char *basename = NULL;
@@ -3144,7 +3146,7 @@ cmd_takes_edit(const char *str)
 /* Return 1 if command in STR is an internal command and takes a text editor as
  * parameter. Otherwise, return 0. */
 static int
-is_edit(const char *str, const size_t words_n)
+is_edit(char *str, const size_t words_n)
 {
 	if (!str || !*str)
 		return 0;
@@ -3206,19 +3208,24 @@ complete_bookmark_names(const char *text, const size_t words_n, int *exit_status
 static char **
 complete_ranges(const char *text)
 {
-	char *dash = strchr(text, '-');
+	const char *dash = strchr(text, '-');
 	if (!dash || dash[1] < '0' || dash[1] > '9')
 		return NULL;
 
-	*dash = '\0';
-	if (!is_number(text) || !is_number(dash + 1)) {
-		*dash = '-';
-		return NULL;
-	}
+	const char *num_b = dash + 1;
+	char num_a[MAX_INT_STR];
+	num_a[0] = '\0';
 
-	const int a = xatoi(text) - 1;
-	const int b = xatoi(dash + 1) - 1;
-	*dash = '-';
+	const size_t num_a_len = (size_t)(dash - text);
+	if (num_a_len >= sizeof(num_a))
+		return NULL;
+
+	xstrsncpy(num_a, text, num_a_len + 1);
+	if (!num_a[0] || !is_number(num_a) || !is_number(num_b))
+		return NULL;
+
+	const int a = xatoi(num_a) - 1;
+	const int b = xatoi(num_b) - 1;
 
 	if (a < 0 || b < 0 || a >= b || (filesn_t)b >= g_files_num)
 		return NULL;
@@ -3531,7 +3538,7 @@ complete_ownership(const char *text)
 	char **matches = NULL;
 
 	rl_attempted_completion_over = 1;
-	char *sc = strchr(text, ':');
+	const char *sc = strchr(text, ':');
 	if (!sc) {
 		matches = rl_completion_matches(text, &owners_generator);
 		endpwent();
@@ -3732,7 +3739,7 @@ complete_colorschemes(const char *text, const size_t words_n)
 }
 
 static char **
-complete_file_templates(char *text)
+complete_file_templates(const char *text)
 {
 	rl_attempted_completion_over = 1;
 	char *p = unescape_str(text);
@@ -4263,7 +4270,7 @@ FIRST_WORD_COMP:
 	/* ### FILE TEMPLATES COMPLETION ('n/new' command) ### */
 	if (file_templates && s && *s == 'n' && (s[1] == ' ' || (s[1] == 'e'
 	&& s[2] == 'w' && s[3] == ' '))) {
-		char *p = strrchr(text, '@');
+		const char *p = strrchr(text, '@');
 		if (p)
 			return complete_file_templates(p + 1);
 	}

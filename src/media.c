@@ -176,7 +176,7 @@ get_dev_label(void)
 			continue;
 		}
 
-		const char *name = labels[i]->d_name;
+		char *name = labels[i]->d_name;
 		char lpath[PATH_MAX + 1];
 		snprintf(lpath, sizeof(lpath), "%s/%s", DISK_LABELS_PATH, name);
 		char *rpath = xrealpath(lpath, NULL);

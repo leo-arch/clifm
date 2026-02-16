@@ -409,7 +409,7 @@ try_datadir(const char *dir)
 
 /* Same as try_datadir(), but performs a few extra checks. */
 static char *
-try_datadir_from_param(const char *dir)
+try_datadir_from_param(char *dir)
 {
 	if (!dir || !*dir)
 		return NULL;
@@ -541,13 +541,13 @@ try_standard_data_dirs(void)
 }
 
 static char *
-resolve_absolute_path(const char *s)
+resolve_absolute_path(char *s)
 {
 	if (!s || !*s)
 		return NULL;
 
 	char *p = strrchr(s, '/');
-	const char *t = NULL;
+	char *t = NULL;
 
 	if (p && p != s)
 		*p = '\0';

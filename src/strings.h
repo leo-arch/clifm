@@ -29,7 +29,7 @@ char *quote_str(const char *str);
 char *remove_quotes(char *str);
 char *replace_invalid_chars(const char *name);
 char *replace_slashes(const char *str, const char c);
-char *replace_substr(const char *haystack, const char *needle, const char *rep);
+char *replace_substr(char *haystack, const char *needle, const char *rep);
 char *savestring(const char *restrict str, const size_t size);
 char **split_str(char *str, const int update_args);
 char *strbfrlst(char *str, const char c);

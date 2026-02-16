@@ -350,7 +350,7 @@ sanitize_blacklist(const char *cmd)
  * zero otherwise. This means: do not allow custom scripts or binaries,
  * but only whatever can be found in the sanitized PATH variable. */
 static int
-clean_cmd(const char *str)
+clean_cmd(char *str)
 {
 	if (!str || !*str)
 		return FUNC_FAILURE;
@@ -376,42 +376,53 @@ clean_cmd(const char *str)
 /* Sanitize CMD according to TYPE. Returns FUNC_SUCCESS if command is safe or
  * FUNC_FAILURE if not. */
 int
-sanitize_cmd(const char *str, const int type)
+sanitize_cmd(const char *cmd, const int type)
 {
-	if (!str || !*str)
+	if (!cmd || !*cmd)
 		return FUNC_FAILURE;
 
-	int exit_status = FUNC_FAILURE;
+	char *str = strdup(cmd);
+	if (!str)
+		return FUNC_FAILURE;
+
+	int ret = FUNC_FAILURE;
 
 	switch (type) {
 	case SNT_MIME:
-		if (clean_cmd(str) != FUNC_SUCCESS)
+		if (clean_cmd(str) != FUNC_SUCCESS) {
 			/* Error message already printed by clean_cmd() */
+			free(str);
 			return FUNC_FAILURE;
-		exit_status = sanitize_mime(str);
+		}
+		ret = sanitize_mime(str);
 		break;
 	case SNT_NET:
-		exit_status = sanitize_whitelist(str, ALLOWED_CHARS_NET); break;
-	case SNT_DISPLAY: return sanitize_whitelist(str, ALLOWED_CHARS_DISPLAY);
-	case SNT_MISC: return sanitize_whitelist(str, ALLOWED_CHARS_MISC);
+		ret = sanitize_whitelist(str, ALLOWED_CHARS_NET); break;
+	case SNT_DISPLAY:
+		ret = sanitize_whitelist(str, ALLOWED_CHARS_DISPLAY); break;
+	case SNT_MISC: ret = sanitize_whitelist(str, ALLOWED_CHARS_MISC); break;
 	case SNT_PROFILE: /* fallthrough */
 	case SNT_PROMPT:  /* fallthrough */
 	case SNT_AUTOCMD: /* fallthrough */
 	case SNT_GRAL:
-		if (clean_cmd(str) != FUNC_SUCCESS)
+		if (clean_cmd(str) != FUNC_SUCCESS) {
+			free(str);
 			return FUNC_FAILURE;
-		exit_status = sanitize_whitelist(str, ALLOWED_CHARS_GRAL);
+		}
+		ret = sanitize_whitelist(str, ALLOWED_CHARS_GRAL);
 		break;
-	case SNT_BLACKLIST: return sanitize_blacklist(str);
+	case SNT_BLACKLIST: ret = sanitize_blacklist(str); break;
 	case SNT_NONE: /* fallthrough */
-	default: return FUNC_SUCCESS;
+	default: free(str); return FUNC_SUCCESS;
 	}
 
-	if (exit_status == FUNC_FAILURE) {
+	if (ret == FUNC_FAILURE) {
 		err('w', PRINT_PROMPT, "%s: '%s': %s\n",
 			PROGRAM_NAME, str, _(UNSAFE_CMD));
+		free(str);
 		return FUNC_FAILURE;
 	}
 
+	free(str);
 	return FUNC_SUCCESS;
 }

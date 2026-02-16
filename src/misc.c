@@ -806,8 +806,8 @@ alias_import(char *file)
 	return FUNC_SUCCESS;
 }
 
-char *
-parse_usrvar_value(const char *str, const char c)
+static char *
+parse_usrvar_value(char *str, const char c)
 {
 	if (c == '\0' || !str)
 		return NULL;
@@ -820,6 +820,9 @@ parse_usrvar_value(const char *str, const char c)
 	/* Remove leading quotes */
 	if (*tmp == '"' || *tmp == '\'')
 		tmp++;
+
+	if (!*tmp)
+		return NULL;
 
 	/* Remove trailing spaces, tabs, new line chars, and quotes */
 	const size_t tmp_len = strlen(tmp);
@@ -840,7 +843,7 @@ parse_usrvar_value(const char *str, const char c)
 }
 
 int
-create_usr_var(const char *str)
+create_usr_var(char *str)
 {
 	if (!str || !*str)
 		return FUNC_FAILURE;
@@ -850,10 +853,11 @@ create_usr_var(const char *str)
 		return FUNC_FAILURE;
 
 	*p = '\0';
-	const size_t len = (size_t)(p - str);
-	char *name = xnmalloc(len + 1, sizeof(char));
-	xstrsncpy(name, str, len + 1);
+	char *name = strdup(str);
 	*p = '=';
+
+	if (!name)
+		return FUNC_FAILURE;
 
 	char *value = parse_usrvar_value(str, '=');
 
@@ -864,13 +868,12 @@ create_usr_var(const char *str)
 	}
 
 	usr_var = xnrealloc(usr_var, (size_t)(usrvar_n + 2), sizeof(struct usrvar_t));
-	usr_var[usrvar_n].name = savestring(name, strlen(name));
+	usr_var[usrvar_n].name = name;
 	usr_var[usrvar_n++].value = savestring(value, strlen(value));
 
 	usr_var[usrvar_n].name = NULL;
 	usr_var[usrvar_n].value = NULL;
 
-	free(name);
 	free(value);
 	return FUNC_SUCCESS;
 }

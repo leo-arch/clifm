@@ -2817,7 +2817,7 @@ set_colorscheme(char *line)
 }
 
 static int
-set_files_filter(const char *line)
+set_file_filter(char *line)
 {
 	char *p = strchr(line, '=');
 	if (!p || !*(++p))
@@ -3141,7 +3141,7 @@ set_autocmd_msg_value(const char *val)
 }
 
 static char *
-get_term_env(const char *cmd)
+get_term_env(char *cmd)
 {
 	if (!cmd || !*cmd)
 		return NULL;
@@ -3644,7 +3644,7 @@ read_config(void)
 
 		else if (!filter.str && *line == 'F'
 		&& strncmp(line, "Filter=", 7) == 0) {
-			if (set_files_filter(line) == -1)
+			if (set_file_filter(line) == -1)
 				continue;
 		}
 
@@ -4216,7 +4216,7 @@ END:
 static void
 get_fzf_win_height_and_preview(void)
 {
-	const char *p = xargs.secure_env_full == 1 ? NULL
+	char *p = xargs.secure_env_full == 1 ? NULL
 		: getenv("FZF_DEFAULT_OPTS");
 	if (!p || !*p)
 		return;

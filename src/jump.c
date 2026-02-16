@@ -686,7 +686,7 @@ mark_target_segment(char *str)
  * resulting string will be checked to match for the first or last segment
  * of the full match (MATCH). If not NULL is returned. */
 static char *
-get_needle(const char *needle, const char *match, const char *query,
+get_needle(char *needle, const char *match, const char *query,
 	const int segment)
 {
 	char *ret = conf.case_sens_dirjump == 1 ? strstr(needle, query)

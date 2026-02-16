@@ -553,7 +553,7 @@ update_warning_prompt_text_color(void)
  * If an attribute is appended to the name (e.g.: NAME-1), return value for this
  * name plus the corresponding attribute. */
 static char *
-check_names(const char *str)
+check_names(char *str)
 {
 	char attr = 0;
 	char *dash = strchr(str, '-');
@@ -588,7 +588,7 @@ check_names(const char *str)
 
 /* If STR is a valid color variable name, return the value of this variable. */
 static char *
-check_defs(const char *str)
+check_defs(char *str)
 {
 	if (defs_n == 0 || !str || !*str)
 		return NULL;
@@ -1393,7 +1393,7 @@ set_default_size_shades(void)
  * ext_colors global array.
  * If LINE contains a color variable, expand it, check it, and store it. */
 static int
-store_extension_line(const char *line)
+store_extension_line(char *line)
 {
 	if (!line || !*line)
 		return FUNC_FAILURE;
@@ -1911,12 +1911,12 @@ get_colors_from_env(char **file, char **ext, char **iface)
 /* Store the color variable STR (in the form VAR=VALUE) in the global
  * defs struct. */
 static void
-store_definition(const char *str)
+store_definition(char *str)
 {
 	if (!str || !*str || *str == '\n' || defs_n > MAX_DEFS)
 		return;
 
-	const char *name = str;
+	char *name = str;
 	char *value = strchr(name, '=');
 	if (!value || !value[1] || value == name)
 		return;

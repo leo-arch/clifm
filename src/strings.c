@@ -684,7 +684,7 @@ strbtw(char *str, const char a, const char b)
 
 /* Replace the first occurrence of NEEDLE in HAYSTACK by REP. */
 char *
-replace_substr(const char *haystack, const char *needle, const char *rep)
+replace_substr(char *haystack, const char *needle, const char *rep)
 {
 	if (!haystack || !*haystack || !needle || !*needle || !rep)
 		return NULL;

@@ -43,7 +43,7 @@ is_portable_filename(const char *name, const size_t len)
 }
 
 static int
-is_range(const char *str)
+is_range(char *str)
 {
 	if (!str || !*str)
 		return 0;
@@ -90,7 +90,7 @@ is_whitespace(const char c)
 /* Return 1 if NAME is a safe filename, or 0 if not.
  * See https://dwheeler.com/essays/fixing-unix-linux-filenames.html */
 static int
-is_safe_filename(const char *name)
+is_safe_filename(char *name)
 {
 	if (!name || !*name)
 		return 0;
@@ -99,7 +99,7 @@ is_safe_filename(const char *name)
 		return 1;
 
 	int safe = 1;
-	const char *n = name;
+	char *n = name;
 	const size_t namelen = strlen(name);
 
 	if (is_whitespace(*name))
@@ -204,7 +204,7 @@ validate_filename(char **name, const int is_md)
 	if (*tmp == '~' && tmp[1] == '/' && tmp[2])
 		tmp += 2;
 
-	const char *p = tmp;
+	char *p = tmp;
 	char *q = tmp;
 	struct stat a;
 	int ret = 1;

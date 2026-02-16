@@ -813,10 +813,10 @@ mime_edit(char **args)
 	return exit_status;
 }
 
-static char *
+static const char *
 get_basename(const char *file_path)
 {
-	char *f = strrchr(file_path, '/');
+	const char *f = strrchr(file_path, '/');
 	if (f && *(++f))
 		return f;
 
@@ -1084,7 +1084,7 @@ get_apps_from_file(FILE *fp, const char *file_name, const char *mime,
 		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
 
-		const char *p = skip_line_prefix(line);
+		char *p = skip_line_prefix(line);
 		if (!p)
 			continue;
 
