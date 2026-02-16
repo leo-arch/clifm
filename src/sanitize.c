@@ -355,17 +355,17 @@ clean_cmd(char *str)
 	if (!str || !*str)
 		return FUNC_FAILURE;
 
-	char *p = strchr(str, ' ');
-	if (p)
-		*p = '\0';
+	char *space = strchr(str, ' ');
+	if (space)
+		*space = '\0';
 
-	const char *q = strchr(str, '/');
-	if (p)
-		*p = ' ';
+	const char *slash = strchr(str, '/');
+	if (space)
+		*space = ' ';
 
-	if (q) {
+	if (slash) {
 		err('w', PRINT_PROMPT, _("%s: '%s': Only command base names "
-			"are allowed. E.g.: 'nano' instead of '/usr/bin/nano'\n"),
+			"are allowed. E.g., 'nano' instead of '/usr/bin/nano'\n"),
 			PROGRAM_NAME, str);
 		return FUNC_FAILURE;
 	}
