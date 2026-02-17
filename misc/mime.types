@@ -26,6 +26,7 @@
 #------------------------------------------------------------------
 
 application/x-alz         alz
+application/x-blender     blend
 application/x-bzip3       bz3 tbz3
 application/vnd.comicbook-rar cbr
 application/vnd.comicbook+zip cbz
