@@ -97,8 +97,8 @@ set_cmd_signals(void)
 static int
 xsystem(const char *cmd)
 {
-	char *shell_path = user.shell;
-	char *shell_name = user.shell_basename;
+	const char *shell_path = user.shell;
+	const char *shell_name = user.shell_basename;
 	if (!shell_path || !*shell_path || !shell_name || !*shell_name) {
 		shell_path = "/bin/sh";
 		shell_name = "sh";

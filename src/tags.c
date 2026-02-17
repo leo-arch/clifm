@@ -509,7 +509,7 @@ tag_files(char **args)
 	if (!tag_names || tag_names[0] == -1) {
 		free(tag_names);
 		xerror("%s\n", _("tag: No tag specified. Specify a tag via :TAG. "
-			"E.g. 'tag add FILE1 FILE2 :TAG'"));
+			"E.g., 'tag add FILE1 FILE2 :TAG'"));
 		return FUNC_FAILURE;
 	}
 
