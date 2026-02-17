@@ -114,7 +114,7 @@ N:.*\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown;
 #--------------------------------
 
 # Torrent files
-^application/x-bittorrent$=transmission-show;
+^application/x-bittorrent$=dumptorrent -v;transmission-show;
 # Email files
 ^message/rfc822$=mu -q view;cat;
 # Object files (*.o)
