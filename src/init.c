@@ -176,7 +176,7 @@ init_conf_struct(void)
 	conf.disk_usage = UNSET;
 	conf.ext_cmd_ok = UNSET;
 	conf.file_counter = UNSET;
-	conf.follow_symlinks = DEF_FOLLOW_SYMLINKS;
+	conf.follow_symlinks = UNSET;
 	conf.follow_symlinks_long = DEF_FOLLOW_SYMLINKS_LONG;
 	conf.full_dir_size = UNSET;
 	conf.fuzzy_match = UNSET;
@@ -2602,6 +2602,10 @@ check_options(void)
 	conf.max_name_len_bk = conf.max_name_len;
 	if (conf.trunc_names == 0)
 		conf.max_name_len = UNSET;
+
+	if (conf.follow_symlinks == UNSET)
+		conf.follow_symlinks =
+			SETOPT(xargs.follow_symlinks, DEF_FOLLOW_SYMLINKS);
 
 	if (conf.fuzzy_match == UNSET)
 		conf.fuzzy_match = SETOPT(xargs.fuzzy_match, DEF_FUZZY_MATCH);

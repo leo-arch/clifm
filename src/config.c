@@ -396,6 +396,9 @@ dump_config(void)
 	s = "";
 	print_config_value("Filter", filter.str, s, DUMP_CONFIG_STR);
 
+	n = DEF_FOLLOW_SYMLINKS;
+	print_config_value("FollowSymlinks", &conf.follow_symlinks, &n, DUMP_CONFIG_BOOL);
+
 	n = DEF_FULL_DIR_SIZE;
 	print_config_value("FullDirSize", &conf.full_dir_size, &n, DUMP_CONFIG_BOOL);
 
@@ -3646,6 +3649,11 @@ read_config(void)
 		&& strncmp(line, "Filter=", 7) == 0) {
 			if (set_file_filter(line) == -1)
 				continue;
+		}
+
+		else if (xargs.follow_symlinks == UNSET && *line == 'F'
+		&& strncmp(line, "FollowSymlinks=", 15) == 0) {
+			set_config_bool_value(line + 15, &conf.follow_symlinks);
 		}
 
 		else if (xargs.full_dir_size == UNSET && *line == 'F'

@@ -66,19 +66,16 @@ xclearenv(void)
 static void
 set_path_env(void)
 {
-	int ret = -1;
-
 #if defined(_PATH_STDPATH)
-	ret = setenv("PATH", _PATH_STDPATH, 1);
+	const int ret = setenv("PATH", _PATH_STDPATH, 1);
 #elif defined(_CS_PATH)
-	char *p = NULL;
-	size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
-	p = xnmalloc(n, sizeof(char)); /* Allocate space */
-	confstr(_CS_PATH, p, n);               /* Get value */
-	ret = setenv("PATH", p, 1);            /* Set it */
-	free(p);
+	const size_t size = confstr(_CS_PATH, NULL, 0); /* Get value's size */
+	char *buf = xnmalloc(size, sizeof(char));
+	confstr(_CS_PATH, buf, size);             /* Get value */
+	const int ret = setenv("PATH", buf, 1);   /* Set it */
+	free(buf);
 #else
-	ret = setenv("PATH", MINIMAL_PATH, 1);
+	const int ret = setenv("PATH", MINIMAL_PATH, 1);
 #endif /* _PATH_STDPATH */
 
 	if (ret == -1) {

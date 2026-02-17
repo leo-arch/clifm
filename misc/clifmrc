@@ -61,6 +61,9 @@
 # Note: Disabling this option also disables the file counter.
 ;Classify=true
 
+# Dereference symbolic links when listing files
+;FollowSymlinks=true
+
 # Colorize symbolic links according to their target. A link indicator
 # (by default '@') is prefixed to the file name.
 # The color of this indicator can be customized in the color scheme file
