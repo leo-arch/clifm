@@ -929,6 +929,7 @@ struct icons_t const icon_ext[] = {
 	{"flatpak", ICON_PACKAGE, YELLOW}, // Linux Flatpak Application Bundle
 	{"gem", ICON_PACKAGE, YELLOW}, // RubyGems Package
 	{"msi", ICON_PACKAGE, YELLOW}, // Windows installer
+	{"oxt", ICON_PACKAGE, YELLOW},  // Libreoffice/Apache extension
 	{"pkg", ICON_PACKAGE, YELLOW}, // Generic package file (used by several vendors)
 	{"rpm", ICON_PACKAGE, YELLOW}, // Red Hat Package Manager File
 	{"snap", ICON_PACKAGE, YELLOW}, // Snap Application Package
