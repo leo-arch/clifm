@@ -110,16 +110,15 @@ N:.*\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown;
 ^audio/.*=mediainfo;exiftool;
 
 #--------------------------------
-# Torrent
+# Misc
 #--------------------------------
 
-application/x-bittorrent=transmission-show;
-
-#--------------------------------
-# Email
-#--------------------------------
-
-message/rfc822=mu -q view;cat;
+# Torrent files
+^application/x-bittorrent$=transmission-show;
+# Email files
+^message/rfc822$=mu -q view;cat;
+# Object files (*.o)
+^application/x-object$=nm;
 
 #--------------------------------
 # Fallback
