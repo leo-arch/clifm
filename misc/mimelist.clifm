@@ -207,6 +207,10 @@ X:.*/pdf$=mupdf %x;sioyek %x;llpp %x;lpdf %x;zathura %x;mupdf-x11 %x;apvlv %x;xp
 # Images
 #-----------------------------
 
+# Raw images
+X:N:.*\.(3fr|ari|arw|bay|bmq|cap|cine|cr2|cr3|crw|cs1|dc2|dcr|dng|gpr|erf|fff|ia|iiq|k25|kc2|kdc|mdc|mef|mos|mrw|nef|nrw|orf|pef|pfm|pxn|qtk|raf|raw|rdc|rw1|rw2|sr2|srf|srw|sti|x3f)=darktable %x;rawtherapee %x
+
+# Raster images
 X:^image/gif$=animate %x;pqiv %x;sxiv -a %x;nsxiv -a %x;feh %x
 X:^image/svg=inkscape %x
 X:^image/x-xcf$=gimp %x
