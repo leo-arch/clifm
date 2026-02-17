@@ -144,8 +144,11 @@ X:N:.*\.sla$=scribus %x
 # but you most likely want to open them with an image viewer.
 X:N:.*\.ora$=mypaint %x;krita %x;gimp %x;pinta %x;scribus %x;display %x
 
-# These are ZIP files too, but blender is more appropriate
+# These are ZIP files too, but blender is more appropriate.
 X:N:.*\.blend$=blender %x
+
+# OpenOffice/LibreOffice extension files
+X:N:.*\.oxt$=unopkg gui %x
 
 ################################
 # 2. MIME types                #
