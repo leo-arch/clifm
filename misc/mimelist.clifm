@@ -198,10 +198,10 @@ X:^application/(gzip|java-archive|vnd.(debian.binary-package|ms-cab-compressed|r
 !X:^application/(gzip|java-archive|vnd.(debian.binary-package|ms-cab-compressed|rar)|x-(7z-compressed|ace|arc|archive|arj|bzip|compress|cpio|iso9660-image|lha|lrzip|lzh|lzip|lzma|lzop|rpm|tar|tarz|tzo|xz)|zip|zstd)=ad
 
 #-----------------------------
-# PDF
+# PDFs
 #-----------------------------
 
-X:.*/pdf$=mupdf %x;sioyek %x;llpp %x;lpdf %x;zathura %x;mupdf-x11 %x;apvlv %x;xpdf %x;xreader %x;papers %x;evince %x;atril %x;okular %x;epdfview %x;qpdfview %x
+X:^application/pdf$=mupdf %x;sioyek %x;llpp %x;lpdf %x;zathura %x;mupdf-x11 %x;apvlv %x;xpdf %x;xreader %x;papers %x;evince %x;atril %x;okular %x;epdfview %x;qpdfview %x
 
 #-----------------------------
 # Images
@@ -232,18 +232,15 @@ X:^audio/.*=iina --music-mode %x;gmplayer %x;smplayer %x;vlc %x;showtime %x;tote
 !X:^audio/.*=ffplay -nodisp -autoexit -hide_banner %f !EO;mplayer %f !EO;mpv --no-terminal
 
 #-----------------------------
+# Misc
+#-----------------------------
+
 # Fonts
-#-----------------------------
-
 X:^font/.*|^application/(font.*|.*opentype)=fontforge %x;fontpreview
-
-#-----------------------------
-# Torrent
-#-----------------------------
-
-X:application/x-bittorrent=rtorrent;transmission-gtk %x;transmission-qt %x;deluge-gtk %x;ktorrent %x
-
-#X:application/x-doom-wad=gzdoom %x;
+# Torrent files
+X:^application/x-bittorrent$=rtorrent;transmission-gtk %x;transmission-qt %x;deluge-gtk %x;ktorrent %x
+# Doom WADs
+X:^application/x-doom-wad$=gzdoom %x;
 
 #-----------------------------
 # Fallback
