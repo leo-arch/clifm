@@ -542,7 +542,7 @@ init_history(void)
 		history_truncate_file(hist_file, conf.max_hist);
 	} else {
 	/* If the history file doesn't exist, create it */
-		int fd = 0;
+		int fd = -1;
 		FILE *hist_fp = open_fwrite(hist_file, &fd);
 		if (!hist_fp) {
 			err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",

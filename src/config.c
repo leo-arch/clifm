@@ -948,7 +948,7 @@ create_kbinds_file(void)
 		return FUNC_SUCCESS;
 
 	/* Else, create it */
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fwrite(kbinds_file, &fd);
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create keybindings file "
@@ -1105,7 +1105,7 @@ create_preview_file(void)
 		return FUNC_SUCCESS;
 #endif /* !BSD */
 
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create preview file "
@@ -1217,7 +1217,7 @@ create_actions_file(char *file)
 		return FUNC_SUCCESS;
 
 	/* Else, create it */
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create actions file "
@@ -2262,7 +2262,7 @@ create_remotes_file(void)
 		return FUNC_SUCCESS;
 
 	/* If not in DATADIR, let's create a minimal file here */
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fwrite(remotes_file, &fd);
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create remotes file "
@@ -2313,7 +2313,7 @@ create_main_config_dir(void)
 static void
 create_profile_file(void)
 {
-	int fd = 0;
+	int fd = -1;
 	FILE *profile_fp = open_fwrite(profile_file, &fd);
 	if (!profile_fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create profile file "
@@ -2588,7 +2588,7 @@ create_bm_file(void)
 	if (stat(bm_file, &attr) != -1)
 		return FUNC_SUCCESS;
 
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fwrite(bm_file, &fd);
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: Cannot create bookmarks file "

@@ -60,7 +60,7 @@ save_sel(void)
 		return FUNC_SUCCESS;
 	}
 
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fwrite(sel_file, &fd);
 	if (!fp) {
 		xerror("sel: '%s': %s\n", sel_file, strerror(errno));

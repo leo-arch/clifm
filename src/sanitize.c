@@ -131,9 +131,9 @@ get_open_max(void)
 static void
 sanitize_file_descriptors(void)
 {
-	int fd = 0, fds = get_open_max();
+	const int fds = get_open_max();
 
-	for (fd = 3; fd < fds; fd++)
+	for (int fd = 3; fd < fds; fd++)
 		close(fd);
 }
 

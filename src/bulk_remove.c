@@ -150,7 +150,7 @@ static int
 write_files_to_tmp(struct dirent ***a, filesn_t *n, const char *target,
 	char *tmpfile)
 {
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fwrite(tmpfile, &fd);
 	if (!fp) {
 		err('e', PRINT_PROMPT, "rr: fopen: '%s': %s\n",
@@ -391,7 +391,7 @@ bulk_remove(char *s1, char *s2)
 
 	char *app = NULL;
 	char *target = NULL;
-	int fd = 0, ret = 0, i = 0;
+	int fd = -1, ret = 0, i = 0;
 	filesn_t n = 0;
 
 	char dpath[PATH_MAX + 1]; *dpath = '\0';

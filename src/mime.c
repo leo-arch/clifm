@@ -602,7 +602,7 @@ get_app(const char *mime, const char *filename)
 	if (!mime || !mime_file || !*mime_file)
 		return NULL;
 
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fread(mime_file, &fd);
 	if (!fp) {
 		xerror("%s: '%s': %s\n", err_name, mime_file, strerror(errno));
@@ -666,7 +666,7 @@ mime_import(const char *file)
 	}
 
 	/* Open the new mimelist file */
-	int fd = 0;
+	int fd = -1;
 	FILE *mime_fp = open_fwrite(file, &fd);
 	if (!mime_fp) {
 		xerror("%s: fopen: '%s': %s\n", err_name, file, strerror(errno));

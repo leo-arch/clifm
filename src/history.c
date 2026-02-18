@@ -69,7 +69,7 @@ print_logs(const int flag)
 static int
 gen_file(const char *file)
 {
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fwrite(file, &fd);
 
 	if (!fp)
@@ -439,7 +439,7 @@ clear_history_func(char **args)
 		return FUNC_SUCCESS;
 
 	/* Let's overwrite whatever was there. */
-	int fd = 0;
+	int fd = -1;
 	FILE *hist_fp = open_fwrite(hist_file, &fd);
 	if (!hist_fp) {
 		err(0, NOPRINT_PROMPT, "history: '%s': %s\n", hist_file, strerror(errno));

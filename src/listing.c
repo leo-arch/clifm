@@ -2330,7 +2330,7 @@ run_dir_cmd(const int mode, const char *dir)
 		path = dpath;
 	}
 
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fread(path, &fd);
 	if (!fp)
 		return;

@@ -31,7 +31,7 @@ load_dothidden(void)
 {
 	struct dothidden_t *h = NULL;
 	FILE *fp;
-	int fd = 0;
+	int fd = -1;
 	struct stat a;
 
 	if (lstat(DOTHIDDEN_FILE, &a) == -1 || !S_ISREG(a.st_mode)

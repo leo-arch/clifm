@@ -672,7 +672,7 @@ del_bookmarks(char **args)
 		rstr ? rstr : "gX6&55#0fa");
 	free(rstr);
 
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fread(bm_file, &fd);
 	if (!fp) {
 		xerror(_("'%s': %s\nbookmarks: Error reading the bookmarks file\n"),

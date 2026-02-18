@@ -597,7 +597,7 @@ read_original_path(const char *file, const char *src, int *status)
 {
 	*status = FUNC_SUCCESS;
 
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fread(file, &fd);
 	if (!fp) {
 		xerror(_("untrash: Info file for '%s' not found. Try restoring "

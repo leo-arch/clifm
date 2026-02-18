@@ -1094,7 +1094,7 @@ save_last_path(char *last_path_tmp)
 	char *last_path = xnmalloc(config_dir_len + 7, sizeof(char));
 	snprintf(last_path, config_dir_len + 7, "%s/.last", config_dir);
 
-	int fd = 0;
+	int fd = -1;
 	FILE *last_fp = open_fwrite(last_path, &fd);
 	if (!last_fp) {
 		xerror(_("%s: Error saving last visited directory: %s\n"),
@@ -1812,7 +1812,7 @@ save_pinned_dir(void)
 	char *pin_file = xnmalloc(config_dir_len + 7, sizeof(char));
 	snprintf(pin_file, config_dir_len + 7, "%s/.pin", config_dir);
 
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fwrite(pin_file, &fd);
 	if (!fp) {
 		xerror(_("pin: Error saving pinned directory: %s\n"), strerror(errno));

@@ -242,7 +242,7 @@ purge_thumbnails_cache(void)
 		return FUNC_FAILURE;
 	}
 
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fread(thumb_file, &fd);
 	if (!fp) {
 		xerror(_("view: Cannot open '%s': %s\n"), thumb_file, strerror(errno));

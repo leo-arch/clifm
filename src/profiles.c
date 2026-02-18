@@ -183,7 +183,7 @@ profile_set(const char *prof)
 			read_history(hist_file);
 			history_truncate_file(hist_file, conf.max_hist);
 		} else {
-			int fd = 0;
+			int fd = -1;
 			FILE *hist_fp = open_fwrite(hist_file, &fd);
 			if (hist_fp) {
 				fputs("edit\n", hist_fp);
@@ -298,7 +298,7 @@ profile_add(const char *prof)
 	/* Create config files */
 
 	/* #### CREATE THE HISTORY FILE #### */
-	int fd = 0;
+	int fd = -1;
 	FILE *hist_fp = open_fwrite(nhist_file, &fd);
 	if (!hist_fp) {
 		xerror("pf: fopen: %s: %s\n", nhist_file, strerror(errno));

@@ -267,7 +267,7 @@ set_fzf_preview_border_type(void)
 static void
 ueberzug_clear(const char *file)
 {
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fwrite(file, &fd);
 	if (!fp)
 		return;
