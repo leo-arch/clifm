@@ -2055,18 +2055,18 @@ When running for the first time, or whenever the MIME list file cannot be found,
 .TP
 \fBA note about MIME types
 .TP
-File MIME types are determined using \fBlibmagic\fR –the same library used by \fBfile\fR(1)–, which, though highly reliable, is not bullet-proof. Sometimes it fails, either because the appropriate MIME type is not in its database, or because the database is just wrong. In either case, you can manually map file extensions to MIME types using a specific file (by default, \fI~/.mime.types\fR).\fB(1)\fR
+File MIME types are determined using \fBlibmagic\fR –the same library used by \fBfile\fR(1)–, which, although highly reliable, is not bullet-proof. Sometimes it fails, either because the appropriate MIME type is not in its database, or because the database is just wrong. In either case, you can manually map file extensions to MIME types using a specific file: \fI~/.config/clifm/mime.types\fR or \fI~/.mime.types\fR.\fB(1)\fR
 .TP
-By way of example, \fBlibmagic\fR knows nothing about ILBM image files, and returns \fBapplication/zip\fR for OpenRaster images. Create \fI~/.mime.types\fR with the following content:
+For example, \fBlibmagic\fR knows nothing about ILBM image files, and returns \fBapplication/zip\fR for OpenRaster images. Create \fI~/.config/clifm/mime.types\fR with the following content:
 
  image/x-ilbm       iff lbm
  image/openraster   ora
 .TP
 Restart \fBclifm\fR and these MIME types will be immediately associated to all files having the specified extensions (to test it, run `\fBmm info\fR` on any of these files).\fB(2)\fR
 .TP
-If required, edit the mimelist and the preview files (`\fBmm edit\fR` and `\fBview edit\fR`, to specify how files are opened and previewed respectively), and add a new line handling the corresponding MIME types (say, "image/x-ilbm=APP" and "image/openraster=APP"). See below for more information.
+If required, edit the mimelist and the preview files (`\fBmm edit\fR` and `\fBview edit\fR`, to specify how files are opened and previewed respectively), and add a new line handling the corresponding MIME types (e.g., "image/x-ilbm=APP" and "image/openraster=APP"). See below for more information.
 .TP
-\fB(1)\fR To use a different file, set \fB$CLIFM_MIMETYPES_FILE\fR to the desired file, for example, `\fBCLIFM_MIMETYPES_FILE=/etc/mime.types clifm\fR`.
+\fB(1)\fR To use a custom location, set \fB$CLIFM_MIMETYPES_FILE\fR to the desired file path: e.g., `\fBCLIFM_MIMETYPES_FILE=/etc/mime.types clifm\fR`. Note that Shared MIME-info XML files are supported as well: e.g., `CLIFM_MIMETYPES_FILE=/usr/share/mime/packages/freedesktop.org.xml clifm`. For more information about this file consult https://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec/.
 .TP
 \fB(2)\fR In case of issues, bear in mind that the \fImime.types\fR file is read top to bottom, and that, in case of conclicts (mostly duplicate extensions), only the last entry is effective.
 .TP

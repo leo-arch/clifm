@@ -26,25 +26,49 @@ check_hash_conflicts(void)
 	}
 }
 
-static char *
+static FILE *
+try_open_file(const char *file)
+{
+	int fd = -1;
+	FILE *fp = open_fread(file, &fd);
+	if (!fp)
+		return NULL;
+
+	struct stat a;
+	if (fstat(fd, &a) == 0 && S_ISREG(a.st_mode))
+		return fp;
+
+	fclose(fp);
+	return NULL;
+}
+
+static FILE *
 get_mimetypes_file(void)
 {
-	char *p = NULL;
+	FILE *fp = NULL;
 
 	if (xargs.secure_env != 1 && xargs.secure_env_full != 1) {
-		p = getenv("CLIFM_MIMETYPES_FILE");
-		if (p && *p)
-			return strdup(p);
+		const char *env = getenv("CLIFM_MIMETYPES_FILE");
+		if (env && *env && (fp = try_open_file(env)) != NULL)
+			return fp;
+	}
+
+	char buf[PATH_MAX + 1];
+
+	if (config_dir_gral && *config_dir_gral) {
+		snprintf(buf, sizeof(buf), "%s/mime.types", config_dir_gral);
+		if ((fp = try_open_file(buf)) != NULL)
+			return fp;
 	}
 
 	if (!user.home || !*user.home)
 		return NULL;
 
-	const size_t len = user.home_len + 13;
-	p = xnmalloc(len, sizeof(char));
-	snprintf(p, len, "%s/.mime.types", user.home);
+	snprintf(buf, sizeof(buf), "%s/.mime.types", user.home);
+	if ((fp = try_open_file(buf)) != NULL)
+		return fp;
 
-	return p;
+	return NULL;
 }
 
 static void
@@ -227,27 +251,16 @@ parse_mime_types_file(FILE *fp)
 int
 load_user_mimetypes(void)
 {
-	char *mimetypes_file = get_mimetypes_file();
-	if (!mimetypes_file)
+	FILE *fp = get_mimetypes_file();
+	if (!fp)
 		return FUNC_FAILURE;
-
-	struct stat a;
-	int fd = 0;
-	FILE *fp = open_fread(mimetypes_file, &fd);
-	if (!fp || fstatat(fd, mimetypes_file, &a, 0) == -1 || !S_ISREG(a.st_mode)) {
-		if (fp)
-			fclose(fp);
-		free(mimetypes_file);
-		return FUNC_FAILURE;
-	}
-
-	free(mimetypes_file);
 
 	int c = fgetc(fp); /* flawfinder: ignore */
 	if (c == EOF) {
 		fclose(fp);
 		return FUNC_FAILURE;
 	}
+
 	const int is_xml = ((unsigned char)c == (unsigned char)'<');
 	ungetc(c, fp);
 
