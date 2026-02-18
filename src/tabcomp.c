@@ -944,7 +944,7 @@ get_glob_file_target(char *str, const char *initial_path)
 static char *
 get_finder_output(const int multi, char *base)
 {
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fread(finder_out_file, &fd);
 	if (!fp) {
 		unlinkat(XAT_FDCWD, finder_out_file, 0);
@@ -1063,7 +1063,7 @@ normalize_prefix(char *prefix)
 static size_t
 store_completions(char **matches)
 {
-	int fd = 0;
+	int fd = -1;
 	FILE *fp = open_fwrite(finder_in_file, &fd);
 	if (!fp) {
 		err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,

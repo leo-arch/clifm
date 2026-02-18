@@ -1377,7 +1377,8 @@ struct icons_t const icon_ext[] = {
 
 	/* Misc */
 	{"cache", ICON_CACHE, WHITE},
-	{"chm", ICON_HELP, WHITE},
+	{"chm", ICON_HELP, WHITE}, // Compiled HTML help file
+	{"hlp", ICON_HELP, WHITE}, // Windows help file
 	{"log", ICON_LOG, WHITE},
 	{"rst", ICON_TXT, WHITE},
 	{"txt", ICON_TXT, WHITE},
@@ -1427,7 +1428,7 @@ struct icons_t const icon_ext[] = {
 
 /* Legacy
  * Amiga: nfo, diz, mod, pic, lbm, ilbm, dib, rle, adf, dms
- * MS-DOS: voc, sou, bas, sys, vxd, drv, hlp, ffn, qfs (archive),
+ * MS-DOS: voc, sou, bas, sys, vxd, drv, ffn, qfs (archive),
  * tgv (video), mdi (image), pif (info, binary) */
 
 /*	{"tf", ICON_TERRAFORM, MAGENTA},
