@@ -1054,7 +1054,7 @@ toggle-hidden:\\ei\n\
 toggle-hidden:\\e.\n\
 toggle-light:\\ey\n\
 toggle-long:\\el\n\
-toggle-follow-links-long:\\e+\n\
+toggle-follow-symlinks:\\e+\n\
 toggle-max-name-len:\\e\\C-l\n\
 toggle-disk-usage:\\e\\C-i\n\
 toggle-virtualdir-full-paths:\\ew\n\
