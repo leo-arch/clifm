@@ -295,8 +295,11 @@ get_time_char(void)
 		case SATIME: return conf.relative_time == 1 ? "A" : "a";
 		case SBTIME: return conf.relative_time == 1 ? "B" : "b";
 		case SCTIME: return conf.relative_time == 1 ? "C" : "c";
-		case SMTIME: /* fallthrough */
-		default: return conf.relative_time == 1 ? "M" : "m";
+		case SMTIME: return conf.relative_time == 1 ? "M" : "m";
+		default:
+			/* Not sorting by time: fallthrough to the time field
+			 * in PropFields. */
+			break;
 		}
 	}
 

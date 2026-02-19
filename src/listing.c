@@ -3049,20 +3049,23 @@ set_long_view_time(const filesn_t n, const struct stat *a,
 {
 	if (checks.time_follows_sort == 1) {
 		switch (conf.sort) {
-		case SATIME: file_info[n].ltime = a->st_atime; break;
-		case SBTIME: file_info[n].ltime = birth_time; break;
-		case SCTIME: file_info[n].ltime = a->st_ctime; break;
-		case SMTIME: /* fallthrough */
-		default: file_info[n].ltime = a->st_mtime; break;
+		case SATIME: file_info[n].ltime = a->st_atime; return;
+		case SBTIME: file_info[n].ltime = birth_time; return;
+		case SCTIME: file_info[n].ltime = a->st_ctime; return;
+		case SMTIME: file_info[n].ltime = a->st_mtime; return;
+		default:
+			/* Not sorting by time: fallthrough to the time field
+			 * in PropFields. */
+			break;
 		}
-	} else {
-		switch (prop_fields.time) {
-		case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
-		case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
-		case PROP_TIME_MOD: file_info[n].ltime = a->st_mtime; break;
-		case PROP_TIME_BIRTH: file_info[n].ltime = birth_time; break;
-		default: file_info[n].ltime = a->st_mtime; break;
-		}
+	}
+
+	switch (prop_fields.time) {
+	case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
+	case PROP_TIME_BIRTH: file_info[n].ltime = birth_time; break;
+	case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
+	case PROP_TIME_MOD: /* fallthrough */
+	default: file_info[n].ltime = a->st_mtime; break;
 	}
 }
 
@@ -3216,7 +3219,8 @@ set_long_attribs_link_target(const filesn_t n, const struct stat *a)
 	file_info[n].mode = a->st_mode;
 	file_info[n].uid = a->st_uid;
 	file_info[n].gid = a->st_gid;
-	get_id_names(n);
+	if (checks.id_names == 1)
+		get_id_names(n);
 
 	/* While we do want to show info about the link target, it is
 	 * misleading to show the size of the file it points to, because that
