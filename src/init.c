@@ -167,7 +167,7 @@ init_conf_struct(void)
 	conf.clear_screen = UNSET;
 	conf.cmd_desc_sug = DEF_CMD_DESC_SUG;
 	conf.colorize = UNSET;
-	conf.color_lnk_as_target = UNSET;
+	conf.colorize_lnk_as_target = UNSET;
 	conf.columned = DEF_COLUMNS;
 	conf.cp_cmd = DEF_CP_CMD;
 	conf.default_answer = (struct default_answer_t){0};
@@ -2591,9 +2591,9 @@ check_options(void)
 	if (conf.pager_view == UNSET)
 		conf.pager_view = SETOPT(xargs.pager_view, DEF_PAGER_VIEW);
 
-	if (conf.color_lnk_as_target == UNSET)
-		conf.color_lnk_as_target =
-			SETOPT(xargs.color_lnk_as_target, DEF_COLOR_LNK_AS_TARGET);
+	if (conf.colorize_lnk_as_target == UNSET)
+		conf.colorize_lnk_as_target =
+			SETOPT(xargs.colorize_lnk_as_target, DEF_COLORIZE_LNK_AS_TARGET);
 
 	if (conf.trunc_names == UNSET)
 		conf.trunc_names = SETOPT(xargs.trunc_names, DEF_TRUNC_NAMES);

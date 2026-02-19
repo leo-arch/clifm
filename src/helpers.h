@@ -1123,7 +1123,7 @@ struct config_t {
 	int clear_screen;
 	int cmd_desc_sug;
 	int colorize;
-	int color_lnk_as_target;
+	int colorize_lnk_as_target;
 	int columned;
 	int cp_cmd;
 	int desktop_notifications;
@@ -1453,7 +1453,7 @@ struct param_t {
 	int case_sens_path_comp;
 	int case_sens_list;
 	int clear_screen;
-	int color_lnk_as_target;
+	int colorize_lnk_as_target;
 	int colorize;
 	int columned;
 	int config;
@@ -2111,7 +2111,7 @@ extern char
 	dl_c[MAX_COLOR], /* Dividing line */
 	el_c[MAX_COLOR], /* ELN color */
 	fc_c[MAX_COLOR], /* File counter */
-	lc_c[MAX_COLOR], /* Symlink character (ColorLinkAsTarget only) */
+	lc_c[MAX_COLOR], /* Symlink character (ColorizeLinksAsTarget only) */
 	mi_c[MAX_COLOR], /* Misc indicators */
 	ts_c[MAX_COLOR], /* Tab completion suffix */
 	tt_c[MAX_COLOR], /* Tilde for truncated filenames */

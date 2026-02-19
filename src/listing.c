@@ -182,7 +182,7 @@ init_checks_struct(void)
 
 	checks.id_names = (prop_fields.ids == PROP_ID_NAME
 		&& (conf.long_view == 1 || conf.sort == SOWN || conf.sort == SGRP));
-	checks.lnk_char = (conf.color_lnk_as_target == 1 && conf.follow_symlinks == 1
+	checks.lnk_char = (conf.colorize_lnk_as_target == 1 && conf.follow_symlinks == 1
 		&& conf.icons == 0 && conf.light_mode == 0 && conf.colorize == 1);
 	checks.min_name_trunc = (conf.long_view == 1 && conf.max_name_len != UNSET
 		&& conf.min_name_trunc > conf.max_name_len);
@@ -3242,7 +3242,7 @@ load_link_info(const int fd, const filesn_t n)
 
 #ifndef _NO_ICONS
 	file_info[n].icon = DEF_LINK_ICON;
-	file_info[n].icon_color = conf.color_lnk_as_target == 1 ?
+	file_info[n].icon_color = conf.colorize_lnk_as_target == 1 ?
 		DEF_LINK_ICON_COLOR : DEF_FILE_ICON_COLOR;
 #endif /* !_NO_ICONS */
 
@@ -3268,7 +3268,7 @@ load_link_info(const int fd, const filesn_t n)
 	 * but we have already executed this function. */
 	static char tmp[PATH_MAX + 1]; *tmp = '\0';
 	const ssize_t ret =
-		(conf.color_lnk_as_target == 1 && !S_ISDIR(a.st_mode))
+		(conf.colorize_lnk_as_target == 1 && !S_ISDIR(a.st_mode))
 		? readlinkat(XAT_FDCWD, file_info[n].name, tmp, sizeof(tmp) - 1) : 0;
 	if (ret > 0)
 		tmp[ret] = '\0';
@@ -3276,7 +3276,7 @@ load_link_info(const int fd, const filesn_t n)
 	const char *lname = *tmp ? tmp : file_info[n].name;
 
 	if (!S_ISDIR(a.st_mode)) {
-		if (conf.color_lnk_as_target == 1)
+		if (conf.colorize_lnk_as_target == 1)
 			set_link_target_color(lname, &a, n);
 		else
 			file_info[n].color = ln_c;
@@ -3293,9 +3293,9 @@ load_link_info(const int fd, const filesn_t n)
 			 * actually contains). */
 
 		if (files_in_dir < 0 && *nd_c) { /* count_dir() failed. */
-			file_info[n].color = conf.color_lnk_as_target == 1 ? nd_c : ln_c;
+			file_info[n].color = conf.colorize_lnk_as_target == 1 ? nd_c : ln_c;
 		} else {
-			file_info[n].color = conf.color_lnk_as_target == 1
+			file_info[n].color = conf.colorize_lnk_as_target == 1
 				? get_dir_color(lname, &a, files_in_dir) : ln_c;
 		}
 	}

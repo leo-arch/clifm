@@ -357,8 +357,8 @@ dump_config(void)
 	n = DEF_CLEAR_SCREEN;
 	print_config_value("ClearScreen", &conf.clear_screen, &n, DUMP_CONFIG_BOOL);
 
-	n = DEF_COLOR_LNK_AS_TARGET;
-	print_config_value("ColorLinksAsTarget", &conf.color_lnk_as_target,
+	n = DEF_COLORIZE_LNK_AS_TARGET;
+	print_config_value("ColorizeLinksAsTarget", &conf.colorize_lnk_as_target,
 		&n, DUMP_CONFIG_BOOL);
 
 	s = term_caps.color < 256 ? DEF_COLOR_SCHEME : DEF_COLOR_SCHEME_256;
@@ -2041,7 +2041,7 @@ create_main_config_file(char *file)
 
 		DEF_LIGHT_MODE == 1 ? "true" : "false",
 		DEF_CLASSIFY == 1 ? "true" : "false",
-		DEF_COLOR_LNK_AS_TARGET == 1 ? "true" : "false",
+		DEF_COLORIZE_LNK_AS_TARGET == 1 ? "true" : "false",
 		DEF_SHARE_SELBOX == 1 ? "true" : "false",
 		DEF_TERM_CMD,
 		DEF_SORT_REVERSE == 1 ? "true" : "false",
@@ -3594,9 +3594,11 @@ read_config(void)
 			set_clear_screen(line + 12);
 		}
 
-		else if (xargs.color_lnk_as_target == UNSET && *line == 'C'
-		&& strncmp(line, "ColorLinksAsTarget=", 19) == 0) {
-			set_config_bool_value(line + 19, &conf.color_lnk_as_target);
+		else if (xargs.colorize_lnk_as_target == UNSET && *line == 'C'
+		&& (strncmp(line, "ColorLinksAsTarget=", 19) == 0
+		|| strncmp(line, "ColorizeSymlinksAsTarget=", 25) == 0)) {
+			set_config_bool_value(line + (line[5] == 'L' ? 19 : 25),
+				&conf.colorize_lnk_as_target);
 		}
 
 		else if (!conf.usr_cscheme && *line == 'C'

@@ -481,7 +481,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_COLOR_SCHEME "default"
 #define DEF_COLOR_SCHEME_256 "default-256"
 #define DEF_COLORS 1
-#define DEF_COLOR_LNK_AS_TARGET 0
+#define DEF_COLORIZE_LNK_AS_TARGET 0
 #define DEF_COLUMNS 1
 #define DEF_CP_CMD CP_CP
 #define DEF_CUR_WS 0 /* First workspace */

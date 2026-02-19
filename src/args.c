@@ -135,7 +135,7 @@
 #define LOPT_PROP_FIELDS            275
 #define LOPT_TIME_STYLE             276
 #define LOPT_PTIME_STYLE            277
-#define LOPT_COLOR_LNK_AS_TARGET    278
+#define LOPT_COLORIZE_LNK_AS_TARGET 278
 #define LOPT_PAGER_VIEW             279
 #define LOPT_NO_UNICODE             280
 #define LOPT_UNICODE                281
@@ -192,7 +192,8 @@ static struct option const longopts[] = {
 	{"case-sens-path-comp", no_argument, 0, LOPT_CASE_SENS_PATH_COMP},
 	{"cd-on-quit", no_argument, 0, LOPT_CD_ON_QUIT},
 	{"color-scheme", required_argument, 0, LOPT_COLOR_SCHEME},
-	{"color-links-as-target", no_argument, 0, LOPT_COLOR_LNK_AS_TARGET},
+	{"color-links-as-target", no_argument, 0, LOPT_COLORIZE_LNK_AS_TARGET}, /* Deprecated */
+	{"colorize-symlinks-as-target", no_argument, 0, LOPT_COLORIZE_LNK_AS_TARGET},
 	{"cwd-in-title", no_argument, 0, LOPT_CWD_IN_TITLE},
 	{"data-dir", required_argument, 0, LOPT_DATA_DIR},
 	{"desktop-notifications", optional_argument, 0, LOPT_DESKTOP_NOTIFICATIONS},
@@ -1471,7 +1472,7 @@ xset_pager_view(const char *arg)
 static void
 print_follow_symlinks_long_deprecation_warning(void)
 {
-	err('w', PRINT_PROMPT, "%s: --follow-symlinks-long is deprecated and "
+	err('w', PRINT_PROMPT, "%s: '--follow-symlinks-long' is deprecated and "
 		"has no effect. It will be removed in a future release.\n",
 		PROGRAM_NAME);
 }
@@ -1764,8 +1765,8 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.cd_on_quit = conf.cd_on_quit = 1; break;
 		case LOPT_COLOR_SCHEME:
 			set_color_scheme(optarg, "--color-scheme"); break;
-		case LOPT_COLOR_LNK_AS_TARGET:
-			xargs.color_lnk_as_target = conf.color_lnk_as_target = 1; break;
+		case LOPT_COLORIZE_LNK_AS_TARGET:
+			xargs.colorize_lnk_as_target = conf.colorize_lnk_as_target = 1; break;
 		case LOPT_CWD_IN_TITLE:
 			print_cwd_in_title_deprecation_warning(); break;
 		case LOPT_DATA_DIR:
