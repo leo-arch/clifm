@@ -143,7 +143,7 @@ Set an alternative keybindings file.
 Print file extended metadata next to filenames (long view). The displayed fields can be customized using \fB--prop-fields\fR (or the \fBPropFields\fR option in the configuration file). Set a custom time/date format with \fB--time-style\fR (or the \fBTimeStyle\fR option in the configuration file).
 .TP
 \fB-L\fR, \fB--no-follow-symlinks\fR
-Do not follow symbolic links when listing files (overrides \fB--color-links-as-target\fR)
+Do not follow symbolic links when listing files (overrides \fB--colorize-symlinks-as-target\fR)
 .TP
 \fB-m\fR, \fB--dirhist-map\fR
 Enable the directory history map to keep in view previous, current, and next entries in the directory history list.
@@ -202,11 +202,8 @@ Write the last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR for later
 \fB--color-scheme\fR=\fI\,NAME\/\fR
 Use the color scheme specified by \fINAME\fR.
 .TP
-\fB--color-links-as-target\fR
-Color symbolic links using the color of the target file (an '@' character is prepended to the filename to mark it as a symbolic link).
-.TP
-\fB--cwd-in-title\fR
-Print the current working directory in the terminal window title (otherwise, only the program name is printed).
+\fB--colorize-symlinks-as-target\fR
+Colorize symbolic links using the color of the target file (an '@' character is prepended to the filename to mark it as a symbolic link).
 .TP
 \fB--data-dir=\fI\,DIR\/\fR
 Load data files, such as plugins, color schemes, and default configuration files, from \fIDIR\fR (this is by default the installation directory, usually \fI/usr/share/clifm\fR).
@@ -1704,7 +1701,7 @@ The following codes are used for different interface elements (in the \fBInterfa
  df  = default color
  dl  = dividing line
  el  = ELN color
- lc  = symbolic link indicator (\fBColorLinksAsTarget\fR only)
+ lc  = symbolic link indicator (\fBColorizeSymlinksAsTarget\fR only)
  mi  = misc indicators (disk usage, sort method, bulk rename, jump database list)
  ts  = matching suffix for possible tab completed entries
  tt  = tilde for truncated filenames
