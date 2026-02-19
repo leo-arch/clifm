@@ -1069,23 +1069,43 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 	}
 }
 
+static inline void
+set_long_view_time(const filesn_t n, const struct stat *a,
+	const time_t birth_time)
+{
+	if (checks.time_follows_sort == 1) {
+		switch (conf.sort) {
+		case SATIME: file_info[n].ltime = a->st_atime; return;
+		case SBTIME: file_info[n].ltime = birth_time; return;
+		case SCTIME: file_info[n].ltime = a->st_ctime; return;
+		case SMTIME: file_info[n].ltime = a->st_mtime; return;
+		default:
+			/* Not sorting by time: fallthrough to the time field
+			 * in PropFields. */
+			break;
+		}
+	}
+
+	switch (prop_fields.time) {
+	case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
+	case PROP_TIME_BIRTH: file_info[n].ltime = birth_time; break;
+	case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
+	case PROP_TIME_MOD: /* fallthrough */
+	default: file_info[n].ltime = a->st_mtime; break;
+	}
+}
+
 /* Set a few extra properties needed for long view mode */
 static void
 set_long_attribs(const filesn_t n, const struct stat *a)
 {
-	if (conf.light_mode == 1) {
-		switch (prop_fields.time) {
-		case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
-		case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
-		case PROP_TIME_MOD: file_info[n].ltime = a->st_mtime; break; /* NOLINT */
-		case PROP_TIME_BIRTH:
+	if (conf.light_mode == 1) { /* Coming from list_dir_light() */
 #ifdef ST_BTIME_LIGHT
-			file_info[n].ltime = a->ST_BTIME.tv_sec; break;
+		const time_t birth_time = a->ST_BTIME.tv_sec
 #else
-			file_info[n].ltime = a->st_mtime; break;
-#endif /* ST_BTIME_LIGHT */
-		default: file_info[n].ltime = a->st_mtime; break; /* NOLINT */
-		}
+		const time_t birth_time = a->st_mtime;
+#endif
+		set_long_view_time(n, a, birth_time);
 
 		file_info[n].blocks = a->st_blocks;
 		file_info[n].linkn = a->st_nlink;
@@ -2932,7 +2952,8 @@ END:
 		post_listing(close_dir == 1 ? dir : NULL, reset_pager, autocmd_ret);
 
 #ifndef ST_BTIME_LIGHT
-	if (conf.long_view == 1 && prop_fields.time == PROP_TIME_BIRTH)
+	if (conf.long_view == 1 && (prop_fields.time == PROP_TIME_BIRTH
+	|| (conf.time_follows_sort == 1 && conf.sort == SBTIME)))
 		print_reload_msg(NULL, NULL, _("Long view: Birth time not available "
 			"in light mode. Using %smodification time%s.\n"), BOLD, NC);
 #endif /* !ST_BTIME_LIGHT */
@@ -3040,32 +3061,6 @@ check_extra_file_types(mode_t *mode, const struct stat *a)
 	} else {
 		if (S_TYPEISTMO(a))
 			*mode = DT_TPO;
-	}
-}
-
-static inline void
-set_long_view_time(const filesn_t n, const struct stat *a,
-	const time_t birth_time)
-{
-	if (checks.time_follows_sort == 1) {
-		switch (conf.sort) {
-		case SATIME: file_info[n].ltime = a->st_atime; return;
-		case SBTIME: file_info[n].ltime = birth_time; return;
-		case SCTIME: file_info[n].ltime = a->st_ctime; return;
-		case SMTIME: file_info[n].ltime = a->st_mtime; return;
-		default:
-			/* Not sorting by time: fallthrough to the time field
-			 * in PropFields. */
-			break;
-		}
-	}
-
-	switch (prop_fields.time) {
-	case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
-	case PROP_TIME_BIRTH: file_info[n].ltime = birth_time; break;
-	case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
-	case PROP_TIME_MOD: /* fallthrough */
-	default: file_info[n].ltime = a->st_mtime; break;
 	}
 }
 

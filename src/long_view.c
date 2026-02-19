@@ -290,26 +290,38 @@ gen_perms(const mode_t mode, char *perm_str, const char file_type,
 static const char *
 get_time_char(void)
 {
+	const char *time_char = NULL;
+
 	if (conf.time_follows_sort == 1) {
 		switch (conf.sort) {
-		case SATIME: return conf.relative_time == 1 ? "A" : "a";
-		case SBTIME: return conf.relative_time == 1 ? "B" : "b";
-		case SCTIME: return conf.relative_time == 1 ? "C" : "c";
-		case SMTIME: return conf.relative_time == 1 ? "M" : "m";
-		default:
-			/* Not sorting by time: fallthrough to the time field
-			 * in PropFields. */
-			break;
+		case SATIME: time_char = conf.relative_time == 1 ? "A" : "a"; break;
+		case SBTIME: time_char = conf.relative_time == 1 ? "B" : "b"; break;
+		case SCTIME: time_char = conf.relative_time == 1 ? "C" : "c"; break;
+		case SMTIME: time_char = conf.relative_time == 1 ? "M" : "m"; break;
+		default: break;
 		}
 	}
 
-	switch (prop_fields.time) {
-	case PROP_TIME_ACCESS: return conf.relative_time == 1 ? "A" : "a";
-	case PROP_TIME_BIRTH:  return conf.relative_time == 1 ? "B" : "b";
-	case PROP_TIME_CHANGE: return conf.relative_time == 1 ? "C" : "c";
-	case PROP_TIME_MOD: /* fallthrough */
-	default: return conf.relative_time == 1 ? "M" : "m";
+	if (!time_char) {
+		switch (prop_fields.time) {
+		case PROP_TIME_ACCESS:
+			time_char = conf.relative_time == 1 ? "A" : "a"; break;
+		case PROP_TIME_BIRTH:
+			time_char = conf.relative_time == 1 ? "B" : "b"; break;
+		case PROP_TIME_CHANGE:
+			time_char = conf.relative_time == 1 ? "C" : "c"; break;
+		case PROP_TIME_MOD:
+			time_char = conf.relative_time == 1 ? "M" : "m"; break;
+		default: time_char = conf.relative_time == 1 ? "M" : "m"; break;
+		}
 	}
+
+#ifndef ST_BTIME_LIGHT
+	if (conf.light_mode == 1 && (*time_char == 'B' || *time_char == 'b'))
+		time_char = conf.relative_time == 1 ? "M" : "m";
+#endif /* !ST_BTIME_LIGHT */
+
+	return time_char;
 }
 
 /* GCC (not clang) complains about tfmt being not a string literal. Let's
@@ -365,9 +377,9 @@ gen_time(char *time_str, const struct fileinfo *props)
 		xstrsncpy(file_time, invalid_time_str, sizeof(file_time));
 	}
 
+	const char *time_char = conf.timestamp_mark == 1 ? get_time_char() : "";
 	const int bytes = snprintf(time_str, buf_rem_space, "%s%s%s%s%s", cdate,
-		*file_time ? file_time : UNKNOWN_STR, dt_c,
-		conf.timestamp_mark == 1 ? get_time_char() : "", df_c);
+		*file_time ? file_time : UNKNOWN_STR, dt_c, time_char, df_c);
 
 	return bytes > 0 ? (size_t)bytes : 0;
 }
