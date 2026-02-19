@@ -1405,7 +1405,7 @@ c: Quit paging (printing remaining files)\n"
 \n -J FILE  Run the 'pp' command on FILE and exit\
 \n -k FILE  Set an alternative keybindings file\
 \n -l       Display extended file metadata (long view)\
-\n -L       Follow symbolic links when running in long view\
+\n -L       Do not follow symbolic links when listing files\
 \n -m       Enable fuzzy matching\
 \n -M       Disable colors\
 \n -n       Disable the command history\
@@ -1453,7 +1453,7 @@ c: Quit paging (printing remaining files)\n"
 \n  -I, --case-sensitive\t\t Do not ignore case when listing files\
 \n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
 \n  -l, --long-view\t\t Display extended file metadata (long view)\
-\n  -L, --follow-symlinks-long\t Follow symbolic links when running in long view\
+\n  -L, --no-follow-symlinks\t Do not follow symbolic links when listing files (overrides --color-links-as-target)\
 \n  -m, --dirhist-map\t\t Enable the directory history map\
 \n  -o, --autols\t\t\t List files automatically (default)\
 \n  -O, --no-autols\t\t Do not list files automatically\
@@ -1506,7 +1506,6 @@ and paths\
 \n      --no-file-cap\t\t Do not check file capabilities when listing files\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\
 \n      --no-file-counter\t\t Disable the file counter for directories\
-\n      --no-follow-symlink\t Do not follow symbolic links when listing files (overrides -L and --color-links-as-target)\
 \n      --no-fzfpreview\t\t Disable file previews for tab completion (fzf mode only)\
 \n      --no-highlight\t\t Disable syntax highlighting\
 \n      --no-history\t\t Do not write commands to the history file\
@@ -1654,7 +1653,7 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  Alt+q              Delete the last entered word\n\
  Alt+g              Toggle list-directories-first\n\
  Alt+l              Toggle long-view\n\
- Alt+Plus           Toggle follow-links (long-view only)\n\
+ Alt+Plus           Toggle follow-symbolic-links\n\
  Alt+.              Toggle show-hidden-files\n\
  Alt+,              Toggle list-only-directories\n\
  Alt+-              Preview files in the current directory (requires fzf)\n\
@@ -1876,7 +1875,7 @@ q | F12         I'm tired, quit"
 #define HIST_DESC    " (manage the command history)"
 #define ICONS_DESC   " (toggle icons)"
 #define J_DESC       " (jump to a visited directory)"
-#define K_DESC       " (toggle follow-links - long view only)"
+#define K_DESC       " (toggle follow-symbolic-links)"
 #define KK_DESC      " (toggle max-filename-len)"
 #define KB_DESC      " (manage keybindings)"
 #define L_DESC       " (create a symbolic link)"

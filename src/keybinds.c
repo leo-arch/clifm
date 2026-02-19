@@ -1588,10 +1588,10 @@ rl_toggle_long_view(int count, int key)
 }
 
 int
-rl_toggle_follow_link_long(int count, int key)
+rl_toggle_follow_symlinks(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy == 1 || conf.long_view == 0 || conf.light_mode == 1)
+	if (kbind_busy == 1 || (conf.light_mode == 1 && conf.long_view == 0))
 		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
@@ -1599,7 +1599,7 @@ rl_toggle_follow_link_long(int count, int key)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
 
-	conf.follow_symlinks_long = !conf.follow_symlinks_long;
+	conf.follow_symlinks = !conf.follow_symlinks;
 
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
@@ -1609,8 +1609,8 @@ rl_toggle_follow_link_long(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg(NULL, NULL, _("Follow links: %s\n"),
-		conf.follow_symlinks_long == 1 ? _("on") : _("off"));
+	print_reload_msg(NULL, NULL, _("Follow symbolic links: %s\n"),
+		conf.follow_symlinks == 1 ? _("on") : _("off"));
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
 }
@@ -3037,7 +3037,7 @@ set_keybinds_from_file(void)
 		{"quit", rl_quit}, {"lock", rl_lock}, {"refresh-screen", rl_refresh},
 		{"clear-line", rl_clear_line}, {"toggle-hidden", rl_toggle_hidden_files},
 		{"toggle-long", rl_toggle_long_view},
-		{"toggle-follow-links-long", rl_toggle_follow_link_long},
+		{"toggle-follow-symlinks", rl_toggle_follow_symlinks},
 		{"toggle-light", rl_toggle_light_mode},
 		{"invert-selection", rl_invert_selection},
 		{"dirs-first", rl_toggle_dirs_first},
@@ -3115,7 +3115,7 @@ set_default_keybinds(void)
 		{"\\M-t", rl_clear_msgs}, {"\\M-o", rl_lock},
 		{"\\C-r", rl_refresh}, {"\\M-c", rl_clear_line},
 		{"\\M-i", rl_toggle_hidden_files}, {"\\M-.", rl_toggle_hidden_files},
-		{"\\M-l", rl_toggle_long_view}, {"\\M-+", rl_toggle_follow_link_long},
+		{"\\M-l", rl_toggle_long_view}, {"\\M-+", rl_toggle_follow_symlinks},
 		{"\\M-y", rl_toggle_light_mode}, {"\\M-g", rl_toggle_dirs_first},
 		{"\\M-z", rl_sort_previous}, {"\\M-x", rl_sort_next},
 		{"\\M-,", rl_toggle_only_dirs}, {"\\M-0", rl_run_pager},

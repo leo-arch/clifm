@@ -1132,7 +1132,6 @@ struct config_t {
 	int ext_cmd_ok;
 	int file_counter;
 	int follow_symlinks;
-	int follow_symlinks_long;
 	int full_dir_size;
 	int fuzzy_match;
 	int fuzzy_match_algo;
@@ -1472,7 +1471,6 @@ struct param_t {
 	int ext_cmd_ok;
 	int file_counter;
 	int follow_symlinks;
-	int follow_symlinks_long;
 	int full_dir_size;
 	int fuzzy_match;
 	int fuzzy_match_algo;

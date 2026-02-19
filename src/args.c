@@ -97,7 +97,7 @@
 #define LOPT_NO_HIGHLIGHT           235
 #define LOPT_NO_FILE_CAP            236
 #define LOPT_NO_FILE_EXT            237
-#define LOPT_NO_FOLLOW_SYMLINKS     238
+//#define LOPT_NO_FOLLOW_SYMLINKS     238 // deprecated
 #define LOPT_INT_VARS               240
 #define LOPT_STDTAB                 241
 #define LOPT_NO_WARNING_PROMPT      242
@@ -143,6 +143,7 @@
 #define LOPT_REPORT_CWD             283
 #define LOPT_KITTY_KEYS             284
 #define LOPT_TABMODE                285
+#define LOPT_FOLLOW_SYMLINKS_LONG   286 /* Deprecated */
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -168,7 +169,7 @@ static struct option const longopts[] = {
 	{"case-sensitive", no_argument, 0, 'I'},
 	{"keybindings-file", required_argument, 0, 'k'},
 	{"long-view", no_argument, 0, 'l'},
-	{"follow-symlinks-long", no_argument, 0, 'L'},
+	{"no-follow-symlinks", no_argument, 0, 'L'},
 	{"dirhist-map", no_argument, 0, 'm'},
 	{"autols", no_argument, 0, 'o'},
 	{"no-autols", no_argument, 0, 'O'},
@@ -196,6 +197,7 @@ static struct option const longopts[] = {
 	{"data-dir", required_argument, 0, LOPT_DATA_DIR},
 	{"desktop-notifications", optional_argument, 0, LOPT_DESKTOP_NOTIFICATIONS},
 	{"disk-usage", no_argument, 0, LOPT_DISK_USAGE},
+	{"follow-symlinks-long", no_argument, 0, LOPT_FOLLOW_SYMLINKS_LONG}, /* Deprecated */
 	{"fnftab", no_argument, 0, LOPT_FNFTAB},
 	{"full-dir-size", no_argument, 0, LOPT_FULL_DIR_SIZE},
 	{"fuzzy-matching", no_argument, 0, LOPT_FUZZY_MATCHING},
@@ -227,7 +229,6 @@ static struct option const longopts[] = {
 	{"no-files-counter", no_argument, 0, LOPT_NO_FILE_COUNTER}, /* Deprecated */
 	{"no-file-counter", no_argument, 0, LOPT_NO_FILE_COUNTER},
 	{"no-file-ext", no_argument, 0, LOPT_NO_FILE_EXT},
-	{"no-follow-symlinks", no_argument, 0, LOPT_NO_FOLLOW_SYMLINKS},
 	{"no-fzfpreview", no_argument, 0, LOPT_NO_FZFPREVIEW},
 	{"no-highlight", no_argument, 0, LOPT_NO_HIGHLIGHT},
 	{"no-history", no_argument, 0, LOPT_NO_HISTORY},
@@ -1467,6 +1468,14 @@ xset_pager_view(const char *arg)
 	}
 }
 
+static void
+print_follow_symlinks_long_deprecation_warning(void)
+{
+	err('w', PRINT_PROMPT, "%s: --follow-symlinks-long is deprecated and "
+		"has no effect. It will be removed in a future release.\n",
+		PROGRAM_NAME);
+}
+
 #endif /* !_BE_POSIX */
 
 #ifdef _BE_POSIX
@@ -1586,8 +1595,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'J': set_stat(optc, optarg); break;
 		case 'k': set_alt_file(optarg, &alt_kbinds_file, "-k"); break;
 		case 'l': xargs.long_view = conf.long_view = 1; break;
-		case 'L':
-			xargs.follow_symlinks_long = conf.follow_symlinks_long = 1; break;
+		case 'L': xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case 'm': xargs.fuzzy_match = conf.fuzzy_match = 1; break;
 		case 'M': set_no_colors(); break;
 		case 'n': xargs.history = 0; break;
@@ -1729,8 +1737,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'I': xargs.case_sens_list = conf.case_sens_list = 1; break;
 		case 'k': set_alt_file(optarg, &alt_kbinds_file, "-k"); break;
 		case 'l': xargs.long_view = conf.long_view = 1; break;
-		case 'L':
-			xargs.follow_symlinks_long = conf.follow_symlinks_long = 1; break;
+		case 'L': xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case 'm': xargs.dirhist_map = conf.dirhist_map = 1; break;
 		case 'o': xargs.autols = conf.autols = 1; break;
 		case 'O': xargs.autols = conf.autols = 0; break;
@@ -1769,6 +1776,8 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.disk_usage = conf.disk_usage = 1; break;
 		case LOPT_FNFTAB:
 			set_fnftab(1); break;
+		case LOPT_FOLLOW_SYMLINKS_LONG: /* Deprecated */
+			print_follow_symlinks_long_deprecation_warning(); break;
 		case LOPT_FULL_DIR_SIZE:
 			xargs.full_dir_size = conf.full_dir_size = 1; break;
 		case LOPT_FUZZY_ALGO:
@@ -1841,8 +1850,6 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.check_ext = conf.check_ext = 0; break;
 		case LOPT_NO_FILE_COUNTER:
 			xargs.file_counter = conf.file_counter = 0; break;
-		case LOPT_NO_FOLLOW_SYMLINKS:
-			xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case LOPT_NO_FZFPREVIEW:
 			xargs.fzf_preview = conf.fzf_preview = 0; break;
 		case LOPT_NO_HIGHLIGHT:

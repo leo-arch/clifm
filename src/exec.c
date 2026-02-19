@@ -1865,23 +1865,18 @@ toggle_follow_links(const char *arg)
 		return FUNC_SUCCESS;
 	}
 
-	if (conf.long_view == 0) {
-		puts(_("k: Not in long view"));
-		return FUNC_SUCCESS;
-	}
-
-	if (conf.light_mode == 1) {
+	if (conf.light_mode == 1 && conf.long_view == 0) {
 		puts(_("k: Feature not available in light mode"));
 		return FUNC_SUCCESS;
 	}
 
-	conf.follow_symlinks_long = conf.follow_symlinks_long == 1 ? 0 : 1;
+	conf.follow_symlinks = !conf.follow_symlinks;
 
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(NULL, NULL, _("Follow links: %s\n"),
-		conf.follow_symlinks_long == 1 ? _("on") : _("off"));
+	print_reload_msg(NULL, NULL, _("Follow symbolic links: %s\n"),
+		conf.follow_symlinks == 1 ? _("on") : _("off"));
 
 	return FUNC_SUCCESS;
 }

@@ -1607,14 +1607,8 @@ eln_expand(char ***substr, const size_t i)
 		flags |= FIRST_WORD_IS_ELN;
 
 	/* Replace the ELN by the corresponding escaped filename */
-	struct stat a;
 	if (file_info[j].type == DT_DIR && file_info[j].name[file_info[j].len > 0
-	? file_info[j].len - 1 : 0] != '/'
-	/* If running with --follow-links-long, do not expand symlink to dir: we
-	 * don't want to operate on the link target, but on the link itself
-	 * (despite the fact that we're showing information about the target). */
-	&& (conf.long_view == 0 || xargs.follow_symlinks_long != 1
-	|| (lstat(file_info[j].name, &a) == 0 && !S_ISLNK(a.st_mode)) ) ) {
+	? file_info[j].len - 1 : 0] != '/') {
 		const size_t len = strlen(esc_str) + 2;
 		(*substr)[i] = xnrealloc((*substr)[i], len, sizeof(char));
 		snprintf((*substr)[i], len, "%s/", esc_str);

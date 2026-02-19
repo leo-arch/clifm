@@ -498,7 +498,6 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_EXT_CMD_OK 1
 #define DEF_FILE_COUNTER 1
 #define DEF_FOLLOW_SYMLINKS 1
-#define DEF_FOLLOW_SYMLINKS_LONG 0
 #define DEF_FULL_DIR_SIZE 0
 #define DEF_FUZZY_MATCH 0
 #define DEF_FUZZY_MATCH_ALGO 2 /* 1 or 2. 2 is Unicode aware, but slower than 1 */

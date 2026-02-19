@@ -3044,6 +3044,51 @@ check_extra_file_types(mode_t *mode, const struct stat *a)
 }
 
 static inline void
+set_long_view_time(const filesn_t n, const struct stat *a,
+	const time_t birth_time)
+{
+	if (checks.time_follows_sort == 1) {
+		switch (conf.sort) {
+		case SATIME: file_info[n].ltime = a->st_atime; break;
+		case SBTIME: file_info[n].ltime = birth_time; break;
+		case SCTIME: file_info[n].ltime = a->st_ctime; break;
+		case SMTIME: /* fallthrough */
+		default: file_info[n].ltime = a->st_mtime; break;
+		}
+	} else {
+		switch (prop_fields.time) {
+		case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
+		case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
+		case PROP_TIME_MOD: file_info[n].ltime = a->st_mtime; break;
+		case PROP_TIME_BIRTH: file_info[n].ltime = birth_time; break;
+		default: file_info[n].ltime = a->st_mtime; break;
+		}
+	}
+}
+
+static inline time_t
+get_birth_time(const filesn_t n)
+{
+	time_t birth_time = (time_t)-1;
+
+#if defined(ST_BTIME)
+# ifdef LINUX_STATX
+	struct statx attx;
+	if (statx(AT_FDCWD, file_info[n].name, AT_SYMLINK_NOFOLLOW,
+	STATX_BTIME, &attx) == 0 && (attx.stx_mask & STATX_BTIME))
+		birth_time = attx.ST_BTIME.tv_sec;
+# elif defined(__sun)
+	struct timespec birthtim = get_birthtime(file_info[n].name);
+	birth_time = birthtim.tv_sec;
+# else
+	birth_time = a->ST_BTIME.tv_sec;
+# endif /* LINUX_STATX */
+#endif /* ST_BTIME */
+
+	return birth_time;
+}
+
+static inline void
 load_file_gral_info(const struct stat *a, const filesn_t n)
 {
 	if (check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0) {
@@ -3102,50 +3147,20 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	}
 #endif /* LINUX_FILE_XATTRS */
 
-	time_t btime = (time_t)-1;
-	if (checks.birthtime == 1) {
-#if defined(ST_BTIME)
-# ifdef LINUX_STATX
-		struct statx attx;
-		if (statx(AT_FDCWD, file_info[n].name, AT_SYMLINK_NOFOLLOW,
-		STATX_BTIME, &attx) == 0 && (attx.stx_mask & STATX_BTIME))
-			btime = attx.ST_BTIME.tv_sec;
-# elif defined(__sun)
-		struct timespec birthtim = get_birthtime(file_info[n].name);
-		btime = birthtim.tv_sec;
-# else
-		btime = a->ST_BTIME.tv_sec;
-# endif /* LINUX_STATX */
-#endif /* ST_BTIME */
-	}
-
-	if (conf.long_view == 1) {
-		if (checks.time_follows_sort == 1) {
-			switch (conf.sort) {
-			case SATIME: file_info[n].ltime = a->st_atime; break;
-			case SBTIME: file_info[n].ltime = btime; break;
-			case SCTIME: file_info[n].ltime = a->st_ctime; break;
-			case SMTIME: /* fallthrough */
-			default: file_info[n].ltime = a->st_mtime; break;
-			}
-		} else {
-			switch (prop_fields.time) {
-			case PROP_TIME_ACCESS: file_info[n].ltime = a->st_atime; break;
-			case PROP_TIME_CHANGE: file_info[n].ltime = a->st_ctime; break;
-			case PROP_TIME_MOD: file_info[n].ltime = a->st_mtime; break;
-			case PROP_TIME_BIRTH: file_info[n].ltime = btime; break;
-			default: file_info[n].ltime = a->st_mtime; break;
-			}
-		}
-	}
+	const time_t birth_time =
+		checks.birthtime == 1 ? get_birth_time(n) : (time_t)-1;
 
 	switch (conf.sort) {
 	case SATIME: file_info[n].time = a->st_atime; break;
-	case SBTIME: file_info[n].time = btime; break;
+	case SBTIME: file_info[n].time = birth_time; break;
 	case SCTIME: file_info[n].time = a->st_ctime; break;
 	case SMTIME: file_info[n].time = a->st_mtime; break;
 	default: file_info[n].time = 0; break;
 	}
+
+	/* Set the time field (ltime) for long view. */
+	if (conf.long_view == 1)
+		set_long_view_time(n, a, birth_time);
 }
 
 static inline void
@@ -3191,6 +3206,34 @@ load_dir_info(const mode_t mode, const filesn_t n)
 }
 
 static inline void
+set_long_attribs_link_target(const filesn_t n, const struct stat *a)
+{
+	file_info[n].blocks = a->st_blocks;
+	file_info[n].inode = a->st_ino;
+	file_info[n].linkn = a->st_nlink;
+	file_info[n].mode = a->st_mode;
+	file_info[n].uid = a->st_uid;
+	file_info[n].gid = a->st_gid;
+
+	/* While we do want to show info about the link target, it is
+	 * misleading to show the size of the file it points to, because that
+	 * space is not really consumed by the link. This is what nnn and vifm do,
+	 * and I think they're right: If we display the target size, we would end
+	 * up showing duplicate/mirrored sizes: once for the link, another one for
+	 * its target. */
+/*	if (conf.full_dir_size == 1 && S_ISDIR(a->st_mode)) {
+		file_info[n].size = dir_size(file_info[n].name, 1,
+			&file_info[n].du_status);
+	} else {
+	file_info[n].size = FILE_SIZE_PTR(a);
+	} */
+
+	const time_t birth_time =
+		checks.birthtime == 1 ? get_birth_time(n) : (time_t)-1;
+	set_long_view_time(n, a, birth_time);
+}
+
+static inline void
 load_link_info(const int fd, const filesn_t n)
 {
 	file_info[n].symlink = 1;
@@ -3213,6 +3256,9 @@ load_link_info(const int fd, const filesn_t n)
 		stats.broken_link++;
 		return;
 	}
+
+	if (conf.long_view == 1)
+		set_long_attribs_link_target(n, &a);
 
 	/* We only need the symlink target name provided the target is not a
 	 * directory, because set_link_target_color() will check the filename
@@ -3491,10 +3537,6 @@ list_dir(void)
 	const int conf_long_view = conf.long_view;
 	const int xargs_disk_usage_analyzer = xargs.disk_usage_analyzer;
 
-	const int stat_flag =
-		(conf.follow_symlinks == 1 && conf.long_view == 1
-		&& conf.follow_symlinks_long == 1) ? 0 : AT_SYMLINK_NOFOLLOW;
-
 	while ((ent = readdir(dir))) {
 		const char *ename = ent->d_name;
 		/* Skip self and parent directories */
@@ -3531,7 +3573,7 @@ list_dir(void)
 
 		const int stat_ok =
 			((virtual_dir == 1 ? vt_stat(fd, ent->d_name, &attr)
-			: fstatat(fd, ename, &attr, stat_flag)) == 0);
+			: fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW)) == 0);
 
 		if (stat_ok == 0) {
 			if (virtual_dir == 1)
@@ -3623,7 +3665,10 @@ list_dir(void)
 		if (checks_icons_use_file_color == 1)
 			file_info[n].icon_color = file_info[n].color;
 #endif /* !_NO_ICONS */
-		if (conf_long_view == 1 && stat_ok == 1)
+		/* In the case of symlinks, info has already been gathered, by
+		 * load_file_gral_info (if not following symlinks), or by
+		 * load_link_info otherwise. */
+		if (conf_long_view == 1 && stat_ok == 1 && !S_ISLNK(attr.st_mode))
 			set_long_attribs(n, &attr);
 
 		if (xargs_disk_usage_analyzer == 1) {

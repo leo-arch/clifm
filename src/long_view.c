@@ -520,13 +520,19 @@ set_file_type_and_color(const struct fileinfo *props, char **color)
 		cscheme_bk = cur_cscheme;
 	}
 
-	struct stat a;
-	if (props->stat_err == 1 && conf.follow_symlinks_long == 1
-	&& conf.long_view == 1 && conf.follow_symlinks == 1
-	&& lstat(props->name, &a) == 0 && S_ISLNK(a.st_mode)) {
+	/* In case we want to keep the symlink identification char (l) when
+	 * displaying info about a link target (follow-symlinks).
+	 * Note: nnn keeps it, vifm doesn't. I think vifm's approach is better:
+	 * if we use the target identification char, the user can easily see
+	 * what kind of file the link points to (and this is useful). But if we
+	 * keep the symlink char, no only that info is lost, but we are also
+	 * providing duplicate data: the user already knows the file is a symlink,
+	 * either by the file name color, its icon, or the link character printed
+	 * before the name (if color-links-as-target is enabled). */
+/*	if (props->symlink == 1) {
 		*color = conf.colorize == 1 ? ln_nb : df_nb;
 		return LNK_PCHR;
-	}
+	} */
 
 	char type = 0;
 
