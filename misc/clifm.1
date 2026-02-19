@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 15, 2026" "clifm 1.27.9" "Clifm Manual"
+.TH "CLIFM" "1" "Feb 18, 2026" "clifm 1.27.10" "Clifm Manual"
 .SH NAME
 clifm - The Command-Line File Manager
 .SH SYNOPSIS
@@ -142,8 +142,8 @@ Set an alternative keybindings file.
 \fB-l\fR, \fB--long-view\fR
 Print file extended metadata next to filenames (long view). The displayed fields can be customized using \fB--prop-fields\fR (or the \fBPropFields\fR option in the configuration file). Set a custom time/date format with \fB--time-style\fR (or the \fBTimeStyle\fR option in the configuration file).
 .TP
-\fB-L\fR, \fB--follow-symlinks-long\fR
-When in long view, display information for the files referenced by symbolic links instead of the symbolic links themselves.
+\fB-L\fR, \fB--no-follow-symlinks\fR
+Do not follow symbolic links when listing files (overrides \fB--color-links-as-target\fR)
 .TP
 \fB-m\fR, \fB--dirhist-map\fR
 Enable the directory history map to keep in view previous, current, and next entries in the directory history list.
@@ -298,9 +298,6 @@ Do not check file extensions (mostly used to colorize specific filenames) when l
 .TP
 \fB--no-file-counter\fR
 Disable the file counter for directories (speeding up the listing process: counting files in directories is particularly expensive).
-.TP
-\fB--no-follow-symlinks\fR
-Do not follow symbolic links when listing files (overrides both \fB--follow-symlinks-long\fR and \fB--color-links-as-target\fR).
 .TP
 \fB--no-fzfpreview\fR
 Disable file previews for tab completion (fzf mode only).
@@ -895,7 +892,7 @@ Take a look at the \fBdh\fR command as well.
 .TP
 .B k
 .br
-If running in long view, toggle follow-links (\fBAlt++\fR is also available). See the \fB-L/--follow-symlinks-long\fR command-line switch.
+Toggle follow-simbolic-links (\fBAlt+Plus\fR is also available). See the \fB-L/--no-follow-symlinks\fR command-line switch.
 .TP
 .B kk
 .br
@@ -3086,7 +3083,7 @@ Set to the file filter string. Unset if no file filter is set.
 Set to 1 if filter-reverse is set. Unset otherwise (or if no file filter is set).
 .TP
 .B CLIFM_FOLLOW_LINKS
-Set to 1 if follow-symlinks is enabled. Unset otherwise.
+Set to 1 if follow-symbolic-links is enabled. Unset otherwise.
 .TP
 .B CLIFM_LIGHT_MODE
 Set to 1 if light-mode is enabled. Unset otherwise.
