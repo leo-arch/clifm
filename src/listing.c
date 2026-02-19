@@ -1101,7 +1101,7 @@ set_long_attribs(const filesn_t n, const struct stat *a)
 {
 	if (conf.light_mode == 1) { /* Coming from list_dir_light() */
 #ifdef ST_BTIME_LIGHT
-		const time_t birth_time = a->ST_BTIME.tv_sec
+		const time_t birth_time = a->ST_BTIME.tv_sec;
 #else
 		const time_t birth_time = a->st_mtime;
 #endif
