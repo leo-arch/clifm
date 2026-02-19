@@ -440,12 +440,12 @@ get_sys_shell(void)
 
 	char tmp[PATH_MAX + 1];
 	*tmp = '\0';
-	char *ret = xrealpath(user.shell, tmp);
+	const char *ret = xrealpath(user.shell, tmp);
 	if (!ret || !*tmp)
 		return SHELL_POSIX;
 
 	ret = strrchr(tmp, '/');
-	if (!ret || !*(ret + 1))
+	if (!ret || !ret[1])
 		return SHELL_POSIX;
 
 	const char *s = ret + 1;
@@ -910,9 +910,9 @@ load_tags(void)
 	struct dirent **t = NULL;
 	int i;
 	const int n = scandir(tags_dir, &t, NULL, alphasort);
-	if (n == -1) return;
+	if (n == -1) return; /* Error */
 
-	if (n <= 2) {
+	if (n <= 2) { /* Empty dir */
 		for (i = 0; i < n; i++)
 			free(t[i]);
 		free(t);

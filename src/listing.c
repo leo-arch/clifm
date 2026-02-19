@@ -3216,6 +3216,7 @@ set_long_attribs_link_target(const filesn_t n, const struct stat *a)
 	file_info[n].mode = a->st_mode;
 	file_info[n].uid = a->st_uid;
 	file_info[n].gid = a->st_gid;
+	get_id_names(n);
 
 	/* While we do want to show info about the link target, it is
 	 * misleading to show the size of the file it points to, because that

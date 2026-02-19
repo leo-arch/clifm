@@ -3595,7 +3595,7 @@ read_config(void)
 		}
 
 		else if (xargs.colorize_lnk_as_target == UNSET && *line == 'C'
-		&& (strncmp(line, "ColorLinksAsTarget=", 19) == 0
+		&& (strncmp(line, "ColorLinksAsTarget=", 19) == 0 /* Old name */
 		|| strncmp(line, "ColorizeSymlinksAsTarget=", 25) == 0)) {
 			set_config_bool_value(line + (line[5] == 'L' ? 19 : 25),
 				&conf.colorize_lnk_as_target);
