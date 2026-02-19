@@ -46,7 +46,7 @@ args=(
 	'--case-sens-path-comp[do not ignore case when completing filenames]'
 	'--cd-on-quit[write last visited path to $XDG_CONFIG_HOME/clifm/.last]'
 	'--color-scheme=[set color scheme]:color:->colorschemes'
-	'--color-links-as-target[color symbolic links using the target file color]'
+	'--colorize-symlinks-as-target[colorize symbolic links using the target file color]'
 	'--data-dir=[use PATH as data directory]:directory:_directories'
 	'--desktop-notifications[enable desktop notifications]'
 	'--disk-usage[display disk usage for the filesystem where the current directory resides]'

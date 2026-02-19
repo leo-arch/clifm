@@ -83,7 +83,7 @@ _clifm ()
         --case-sens-path-comp
         --cd-on-quit
         --color-scheme
-        --color-links-as-target
+        --colorize-symlinks-as-target
         --data-dir
         --dektop-notifications
         --disk-usage

@@ -68,7 +68,7 @@
 # (by default '@') is prefixed to the file name.
 # The color of this indicator can be customized in the color scheme file
 # (InterfaceColors field) using the 'lc' code.
-;ColorLinksAsTarget=false
+;ColorizeSymlinksAsTarget=false
 
 # Control the use of the file list pager. Supported values are:
 # 0/false = Disable the pager.
