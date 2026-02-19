@@ -3067,17 +3067,19 @@ set_long_view_time(const filesn_t n, const struct stat *a,
 }
 
 static inline time_t
-get_birth_time(const filesn_t n)
+get_birth_time(const filesn_t n, const struct stat *a)
 {
 	time_t birth_time = (time_t)-1;
 
 #if defined(ST_BTIME)
 # ifdef LINUX_STATX
+	UNUSED(a);
 	struct statx attx;
 	if (statx(AT_FDCWD, file_info[n].name, AT_SYMLINK_NOFOLLOW,
 	STATX_BTIME, &attx) == 0 && (attx.stx_mask & STATX_BTIME))
 		birth_time = attx.ST_BTIME.tv_sec;
 # elif defined(__sun)
+	UNUSED(a);
 	struct timespec birthtim = get_birthtime(file_info[n].name);
 	birth_time = birthtim.tv_sec;
 # else
@@ -3148,7 +3150,7 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 #endif /* LINUX_FILE_XATTRS */
 
 	const time_t birth_time =
-		checks.birthtime == 1 ? get_birth_time(n) : (time_t)-1;
+		checks.birthtime == 1 ? get_birth_time(n, a) : (time_t)-1;
 
 	switch (conf.sort) {
 	case SATIME: file_info[n].time = a->st_atime; break;
@@ -3229,7 +3231,7 @@ set_long_attribs_link_target(const filesn_t n, const struct stat *a)
 	} */
 
 	const time_t birth_time =
-		checks.birthtime == 1 ? get_birth_time(n) : (time_t)-1;
+		checks.birthtime == 1 ? get_birth_time(n, a) : (time_t)-1;
 	set_long_view_time(n, a, birth_time);
 }
 
