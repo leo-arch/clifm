@@ -47,7 +47,7 @@ _clifm ()
         -l
         --long-view
         -L
-        --follow-symlinks-long
+        --no-follow-symlinks
         -m
         --dirhist-map
         -o
@@ -112,7 +112,6 @@ _clifm ()
         --no-file-cap
         --no-file-ext
         --no-file-counter
-        --no-follow-symlinks
         --no-fzfpreview
         --no-highlight
         --no-history
