@@ -1345,6 +1345,7 @@ struct fileinfo {
 	time_t time;
 	ino_t inode;
 	off_t size;
+	off_t link_size; /* If a symlink, size of the link itself (not its target) */
 	nlink_t linkn; /* 4 bytes on Solaris/BSD/HAIKU; 8 on Linux */
 	uid_t uid;
 	gid_t gid;

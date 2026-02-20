@@ -2395,8 +2395,12 @@ get_largest_file_info(const filesn_t i, off_t *size, char **name,
 		*color = file_info[i].color;
 	}
 
+	/* In long view, a symlink metadata refers to its target when
+	 * follow-symlinks is enabled. In this case, its inode and size is that
+	 * of the target, which is why we exclude this values from the tests below. */
+
 	/* Do not recount hardlinks in the same directory. */
-	if (file_info[i].linkn > 1 && i > 0) {
+	if (file_info[i].linkn > 1 && i > 0 && file_info[i].type != DT_LNK) {
 		filesn_t j = i;
 		while (--j >= 0) {
 			if (file_info[i].inode == file_info[j].inode)
@@ -2404,7 +2408,9 @@ get_largest_file_info(const filesn_t i, off_t *size, char **name,
 		}
 	}
 
-	*total += file_info[i].size;
+	const off_t file_size = file_info[i].type == DT_LNK
+		? file_info[i].link_size : file_info[i].size;
+	*total += file_size;
 }
 
 static int
@@ -2507,7 +2513,7 @@ init_default_file_info(void)
 }
 
 static inline void
-get_id_names(const filesn_t n)
+set_id_names(const filesn_t n)
 {
 	size_t i;
 
@@ -2873,7 +2879,7 @@ list_dir_light(const int autocmd_ret)
 				file_info[n].stat_err = 1;
 #endif /* !_DIRENT_HAVE_D_TYPE */
 			if (prop_fields.ids == PROP_ID_NAME && file_info[n].stat_err == 0)
-				get_id_names(n);
+				set_id_names(n);
 		}
 
 		if (xargs.disk_usage_analyzer == 1) {
@@ -3064,6 +3070,10 @@ check_extra_file_types(mode_t *mode, const struct stat *a)
 	}
 }
 
+/* Return the birth time of the file file_info[N] or (time_t)-1 in case of
+ * error.
+ * Note: The stat struct A is only used in the case of those systems providing
+ * the file's birth/creation time in this struct. */
 static inline time_t
 get_birth_time(const filesn_t n, const struct stat *a)
 {
@@ -3103,7 +3113,8 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	switch (a->st_mode & S_IFMT) {
 	case S_IFREG: file_info[n].type = DT_REG; stats.reg++; break;
 	case S_IFDIR: file_info[n].type = DT_DIR; stats.dir++; break;
-	case S_IFLNK: file_info[n].type = DT_LNK; stats.link++; break;
+	case S_IFLNK: file_info[n].type = DT_LNK; stats.link++;
+		file_info[n].link_size = a->st_size; break;
 	case S_IFIFO: file_info[n].type = DT_FIFO; stats.fifo++; break;
 	case S_IFSOCK: file_info[n].type = DT_SOCK; stats.socket++; break;
 	case S_IFBLK: file_info[n].type = DT_BLK; stats.block_dev++; break;
@@ -3136,7 +3147,7 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	file_info[n].gid = a->st_gid;
 
 	if (checks.id_names == 1)
-		get_id_names(n);
+		set_id_names(n);
 
 #if defined(LINUX_FILE_XATTRS)
 	if (file_info[n].type != DT_LNK
@@ -3205,6 +3216,8 @@ load_dir_info(const mode_t mode, const filesn_t n)
 	}
 }
 
+/* Set the metadata of the symbolic link file_info[N] to that of its target,
+ * specified in the A stat struct. */
 static inline void
 set_long_attribs_link_target(const filesn_t n, const struct stat *a)
 {
@@ -3215,20 +3228,14 @@ set_long_attribs_link_target(const filesn_t n, const struct stat *a)
 	file_info[n].uid = a->st_uid;
 	file_info[n].gid = a->st_gid;
 	if (checks.id_names == 1)
-		get_id_names(n);
+		set_id_names(n);
 
-	/* While we do want to show info about the link target, it is
-	 * misleading to show the size of the file it points to, because that
-	 * space is not really consumed by the link. This is what nnn and vifm do,
-	 * and I think they're right: If we display the target size, we would end
-	 * up showing duplicate/mirrored sizes: once for the link, another one for
-	 * its target. */
-/*	if (conf.full_dir_size == 1 && S_ISDIR(a->st_mode)) {
+	if (conf.full_dir_size == 1 && S_ISDIR(a->st_mode)) {
 		file_info[n].size = dir_size(file_info[n].name, 1,
 			&file_info[n].du_status);
 	} else {
 	file_info[n].size = FILE_SIZE_PTR(a);
-	} */
+	}
 
 	const time_t birth_time =
 		checks.birthtime == 1 ? get_birth_time(n, a) : (time_t)-1;
