@@ -14,7 +14,7 @@ __BEGIN_DECLS
 
 void dir_info(const char *dir, const int first_level, struct dir_info_t *info);
 #ifdef USE_DU1
-off_t dir_size(char *dir, const int first_level, int *status);
+off_t dir_size(const char *dir, const int first_level, int *status);
 #else
 off_t dir_size(const char *dir, const int first_level, int *status);
 #endif /* USE_DU1 */

@@ -1556,7 +1556,7 @@ print_file_mime(const char *name)
 
 #ifdef USE_DU1
 static off_t
-get_total_size(char *filename, int *status)
+get_total_size(const char *filename, int *status)
 {
 	off_t total_size = 0;
 
@@ -1589,7 +1589,7 @@ get_total_size(char *filename, int *status)
 }
 
 static void
-print_file_size(char *filename, const struct stat *attr, const int file_perm,
+print_file_size(const char *filename, const struct stat *attr, const int file_perm,
 	const int full_dirsize)
 {
 	const off_t size =

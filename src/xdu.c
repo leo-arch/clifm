@@ -200,7 +200,7 @@ dir_size(const char *dir, const int first_level, int *status)
  * Otherwise, human format is used.
  * STATUS is updated to the command exit code. */
 off_t
-dir_size(char *dir, const int size_in_bytes, int *status)
+dir_size(const char *dir, const int size_in_bytes, int *status)
 {
 	if (!dir || !*dir)
 		return (-1);
@@ -238,15 +238,15 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 
 		char *bin = (bin_flags & GNU_DU_BIN_DU) ? "du" : "gdu";
 		if (conf.apparent_size != 1) {
-			char *cmd[] = {bin, "-s", block_size, "--", dir, NULL};
+			char *cmd[] = {bin, "-s", block_size, "--", (char *)dir, NULL};
 			*status = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 		} else {
 			char *cmd[] = {bin, "-s", "--apparent-size", block_size,
-				"--", dir, NULL};
+				"--", (char *)dir, NULL};
 			*status = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 		}
 	} else {
-		char *cmd[] = {"du", "-ks", "--", dir, NULL};
+		char *cmd[] = {"du", "-ks", "--", (char *)dir, NULL};
 		*status = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	}
 
