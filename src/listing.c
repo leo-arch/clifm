@@ -1107,6 +1107,7 @@ set_long_attribs(const filesn_t n, const struct stat *a)
 #endif
 		set_long_view_time(n, a, birth_time);
 
+		file_info[n].link_size = a->st_size;
 		file_info[n].blocks = a->st_blocks;
 		file_info[n].linkn = a->st_nlink;
 		file_info[n].mode = a->st_mode;
