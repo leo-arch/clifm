@@ -117,6 +117,7 @@ toggle-follow-symlinks:\e+
 toggle-max-name-len:\e\C-l
 toggle-disk-usage:\e\C-i
 toggle-virtualdir-full-paths:\ew
+#toggle-case-sensitive-sort:\er
 next-profile:\e\C-p
 previous-profile:\e\C-o
 
