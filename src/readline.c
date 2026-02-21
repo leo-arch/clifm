@@ -1295,6 +1295,7 @@ int_cmds_generator(const char *text, int state)
 		"br      (bulk-rename files)",
 		"c       (copy files)",
 		"cd      (change directory)",
+		"ci      (toggle case-sensitive-sort)",
 		"cl      (toggle columns)",
 		"cmd     (jump to the COMMANDS section in the manpage)",
 		"colors  (preview the current color scheme)",
@@ -1307,13 +1308,14 @@ int_cmds_generator(const char *text, int state)
 		"f       (change to the next visited directory)",
 		"fc      (toggle the file-counter)",
 		"ff      (toggle list-directories-first)",
+		"fs      (toggle follow-symlinks)",
 		"ft      (set a file filter)",
-		"fz      (print directories full size - long view only)",
+		"fz      (toggle recursive-directory-size: long view only)",
 		"hh      (toggle hidden files)",
 		"history (manage the commands history)",
 		"icons   (toggle icons)",
 		"j       (jump to a visited directory)",
-		"k       (toggle follow-links - long view only)",
+		"k       (toggle follow-symlinks: long view only)",
 		"kk      (toggle max-filename-len)",
 		"kb      (manage keybindings)",
 		"l       (create a symbolic link)",
@@ -1332,6 +1334,7 @@ int_cmds_generator(const char *text, int state)
 		"net     (manage remote resources)",
 		"o       (open file)",
 		"oc      (change ownership of files)",
+		"od      (toggle list-only-directories)",
 		"opener  (set a custom file opener)",
 		"ow      (open file with...)",
 		"p       (print file properties)",
@@ -1339,7 +1342,7 @@ int_cmds_generator(const char *text, int state)
 		"pf      (manage profiles)",
 		"pg      (run the file-pager)",
 		"pin     (pin a directory)",
-		"pp      (print file properties - follow links/full dir size)",
+		"pp      (print file properties: follow-links/full-dir-size)",
 		"prompt  (switch/edit prompt)",
 		"q       (quit)",
 		"r       (remove files)",
@@ -1362,6 +1365,39 @@ int_cmds_generator(const char *text, int state)
 		"ws      (switch workspaces)",
 		"x       (launch a new instance of clifm)",
 		"X       (launch a new instance of clifm as root)",
+		NULL
+	};
+
+	const char *name;
+	while ((name = cmd_desc[i++]))
+		return strdup(name);
+
+	return NULL;
+}
+
+/* Generate a list of z commands aliases and a brief description for z<TAB> */
+static char *
+int_z_cmds_generator(const char *text, int state)
+{
+	UNUSED(text);
+	static int i;
+
+	if (state == 0)
+		i = 0;
+
+	static const char *const cmd_desc[] = {
+		"zd (toggle the file counter)",
+		"zf (toggle list-directories-first)",
+		"zh (toggle hidden files)",
+		"zi (toggle icons)",
+		"zl (toggle follow-symlinks)",
+		"zn (toggle max-filename-len)",
+		"zo (toggle list-only-directories)",
+		"zp (preview files in the current directory)",
+		"zr (toggle recursive-directory-size)",
+		"zx (toggle long-view)",
+		"zs (toggle case-sensitive-sort)",
+		"zz (quit)",
 		NULL
 	};
 
@@ -2679,7 +2715,6 @@ fill_opts(const char *cmd_name, const char *word_start, const size_t w)
 		{"ll", {"on", "off", NULL}},
 		{"lv", {"on", "off", NULL}},
 		{"lm", {"on", "off", NULL}},
-		{"fz", {"on", "off", NULL}},
 		{"config", {"edit", "dump", "reload", "reset", NULL}},
 		{"actions", {"list", "edit", NULL}},
 		{"log", {"cmd", "msg", NULL}},
@@ -3961,6 +3996,15 @@ complete_cmd_desc(const char *text)
 }
 
 static char **
+complete_z_cmd_desc(const char *text)
+{
+	char **matches = rl_completion_matches(text, &int_z_cmds_generator);
+	if (matches)
+		cur_comp_type = TCMP_CMD_DESC;
+	return matches;
+}
+
+static char **
 complete_fastback(const char *text)
 {
 	char **matches = rl_fastback(text);
@@ -4140,6 +4184,10 @@ FIRST_WORD_COMP:
 		if (alt_prompt == 0 && ((*text == 'c' && text[1] == 'm'
 		&& text[2] == 'd' && !text[3]) || strcmp(text, "commands") == 0))
 			return complete_cmd_desc(text);
+
+		/* #### Z<TAB> #### */
+		if (alt_prompt == 0 && *text == 'z' && !text[1])
+			return complete_z_cmd_desc(text);
 
 		/* SEARCH PATTERNS COMPLETION */
 		if (alt_prompt == 0 && *text == '/' && text[1] == '*'

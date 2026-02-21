@@ -1495,34 +1495,20 @@ untrash_func(char **args, int *u_cont)
 static int
 toggle_full_dir_size(const char *arg)
 {
-	if (!arg || !*arg || IS_HELP(arg)) {
+	if (arg && *arg && IS_HELP(arg)) {
 		puts(_(FZ_USAGE));
 		return FUNC_SUCCESS;
 	}
 
-	if (*arg != 'o') {
-		xerror(_("%s: '%s': Invalid argument. Try 'fz -h'\n"), PROGRAM_NAME, arg);
-		return FUNC_FAILURE;
-	}
+	conf.full_dir_size = !conf.full_dir_size;
+	update_autocmd_opts(AC_FULL_DIR_SIZE);
 
-	if (arg[1] == 'n' && !arg[2]) {
-		conf.full_dir_size = 1;
-		update_autocmd_opts(AC_FULL_DIR_SIZE);
-		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Full directory size: on\n"));
-		return FUNC_SUCCESS;
-	}
+	if (conf.autols == 1)
+		reload_dirlist();
+	print_reload_msg(NULL, NULL, _("Recursive directory size: %s\n"),
+		conf.full_dir_size == 1 ? "on" : "off");
 
-	if (arg[1] == 'f' && arg[2] == 'f' && !arg[3]) {
-		conf.full_dir_size = 0;
-		update_autocmd_opts(AC_FULL_DIR_SIZE);
-		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Full directory size: off\n"));
-		return FUNC_SUCCESS;
-	}
-
-	xerror(_("%s: '%s': Invalid argument. Try 'fz -h'\n"), PROGRAM_NAME, arg);
-	return FUNC_FAILURE;
+	return FUNC_SUCCESS;
 }
 
 static void
@@ -2343,6 +2329,17 @@ exec_cmd(char **args)
 	else if ((*args[0] == 'f' && args[0][1] == 'f' && !args[0][2])
 	|| (*args[0] == 'd' && strcmp(args[0], "dirs-first") == 0))
 		return (exit_code = dirs_first_function(args[1]));
+
+	/* #### ONLY DIRECTORIES #### */
+	else if (*args[0] == 'o' && args[0][1] == 'd' && !args[0][2])
+		return (exit_code = rl_toggle_only_dirs(0, 0));
+
+	/* #### CASE-SENSITIVE SORT #### */
+	else if (*args[0] == 'c' && args[0][1] == 'i' && !args[0][2])
+		return (exit_code = rl_toggle_case_sensitive_sort(0, 0));
+
+	else if (*args[0] == 'f' && args[0][1] == 's' && !args[0][2])
+		return (exit_code = rl_toggle_follow_symlinks(0, 0));
 
 	/* #### LOG #### */
 	else if (*args[0] == 'l' && strcmp(args[0], "log") == 0)

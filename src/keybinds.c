@@ -2569,7 +2569,7 @@ rl_launch_view(int count, int key)
 	return run_kb_cmd("view", 0);
 }
 
-static int
+int
 rl_toggle_only_dirs(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
@@ -2589,6 +2589,29 @@ rl_toggle_only_dirs(int count, int key)
 
 	print_reload_msg(NULL, NULL, _("Only directories: %s\n"),
 		conf.only_dirs > 0 ? _("on") : _("off"));
+	xrl_reset_line_state();
+	return exit_status;
+}
+
+int
+rl_toggle_case_sensitive_sort(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+
+	if (kbind_busy == 1)
+		return FUNC_SUCCESS;
+
+	conf.case_sens_list = !conf.case_sens_list;
+
+	const int exit_status = exit_code;
+	if (conf.autols == 1) {
+		if (conf.clear_screen == 0)
+			putchar('\n');
+		reload_dirlist();
+	}
+
+	print_reload_msg(NULL, NULL, _("Case-sensitive sort: %s\n"),
+		conf.case_sens_list > 0 ? _("on") : _("off"));
 	xrl_reset_line_state();
 	return exit_status;
 }
@@ -3039,6 +3062,7 @@ set_keybinds_from_file(void)
 		{"toggle-long", rl_toggle_long_view},
 		{"toggle-follow-symlinks", rl_toggle_follow_symlinks},
 		{"toggle-light", rl_toggle_light_mode},
+		{"toggle-case-sensitive-sort", rl_toggle_case_sensitive_sort},
 		{"invert-selection", rl_invert_selection},
 		{"dirs-first", rl_toggle_dirs_first},
 		{"sort-previous", rl_sort_previous}, {"sort-next", rl_sort_next},

@@ -2625,6 +2625,38 @@ do_path_normalization(char **s, const size_t i, const int is_int_cmd)
 	return 0;
 }
 
+static void
+expand_cmd_aliases(char **cmd_name)
+{
+	char *cmd = *cmd_name;
+
+	if (!cmd || *cmd != 'z' || !cmd[1] || cmd[2])
+		return;
+
+	switch (cmd[1]) {
+	case 'c': *cmd = 'f'; cmd[1] = 'c'; break;  // zc -> fc (file-counter)
+	case 'd': *cmd = 'f'; cmd[1] = 'f'; break;  // zd -> ff (dirs-first)
+	case 'f': *cmd = 'k'; cmd[1] = '\0'; break; // zf -> k (follow-links)
+	case 'h': *cmd = 'h'; cmd[1] = 'f'; break;  // zh -> hf (show-hidden)
+	case 'i':                                   // zi -> icons
+		*cmd_name = xnrealloc(*cmd_name, 6, sizeof(char));
+		xstrsncpy(*cmd_name, "icons", 6);
+		break;
+	case 'l': *cmd = 'f'; cmd[1] = 's'; break;  // zl -> fs (follow-symlinks)
+	case 'n': *cmd = 'k'; cmd[1] = 'k'; break;  // zn -> kk (max-name-len)
+	case 'o': *cmd = 'o'; cmd[1] = 'd'; break;  // zo -> od (only-dirs)
+	case 'p':                                   // zp -> view
+		*cmd_name = xnrealloc(*cmd_name, 5, sizeof(char));
+		xstrsncpy(*cmd_name, "view", 5);
+		break;
+	case 'r': *cmd = 'f'; cmd[1] = 'z'; break;  // zr -> fz (recursive-dir-size)
+	case 's': *cmd = 'c'; cmd[1] = 'i'; break;  // zs -> ci (case-sens-list)
+	case 'x': *cmd = 'l'; cmd[1] = 'l'; break;  // zx -> ll (long-view)
+	case 'z': *cmd = 'q'; cmd[1] = '\0'; break; // zz -> q
+	default: break;
+	}
+}
+
 /*
  * This function is one of the keys of clifm. It will perform a series of
  * actions:
@@ -2949,6 +2981,8 @@ parse_input_str(char *str)
 
 	expand_bookmarks(&substr);
 
+	// Replace vi-like 'z' commands by the corresponding internal command
+	expand_cmd_aliases(&substr[0]);
 
 	/* #### NULL TERMINATE THE INPUT STRING ARRAY #### */
 	substr = xnrealloc(substr, args_n + 2, sizeof(char *));

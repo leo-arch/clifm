@@ -516,9 +516,9 @@ files in the current directory:\n\n\
 - Use the 'b' command to change to the previously visited directory\n\
     b (also Alt+j or Shift+Left)"
 
-#define FZ_USAGE "Toggle recursive directory sizes (long view only)\n\n\
+#define FZ_USAGE "Toggle recursive-directory-size (long view only)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  fz [on, off]"
+  fz"
 
 #define HELP_USAGE "Get help\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
@@ -1592,7 +1592,7 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  fc                 Toggle file-counter\n\
  ff, dirs-first     Toggle list-directories-first\n\
  ft, filter         Set a file filter\n\
- fz                 Display recursive directory sizes (long-view only)\n\
+ fz                 Toggle recursive directory sizes (long view only)\n\
  hh, hidden         Toggle show-hidden-files\n\
  history            Manage the commands history\n\
  icons              Toggle icons\n\
@@ -1855,6 +1855,7 @@ q | F12         I'm tired, quit"
 #define BR_DESC      " (rename files in bulk)"
 #define C_DESC       " (copy files)"
 #define CD_DESC      " (change directory)"
+#define CI_DESC      " (toggle case-sensitive-sort)"
 #define CL_DESC      " (toggle columns)"
 #define CMD_DESC     " (jump to the COMMANDS section in the manpage)"
 #define COLORS_DESC  " (preview the current color scheme)"
@@ -1869,8 +1870,9 @@ q | F12         I'm tired, quit"
 #define F_DESC       " (change to the next visited directory)"
 #define FC_DESC      " (toggle the file counter)"
 #define FF_DESC      " (toggle list-directories-first)"
+#define FS_DESC      " (toggle follow-symlinks)"
 #define FT_DESC      " (set a file filter)"
-#define FZ_DESC      " (display recursive directory sizes - long view only)"
+#define FZ_DESC      " (toggle recursive-directory-size: long view only)"
 #define HF_DESC      " (toggle hidden files)"
 #define HIST_DESC    " (manage the command history)"
 #define ICONS_DESC   " (toggle icons)"
@@ -1894,6 +1896,7 @@ q | F12         I'm tired, quit"
 #define NET_DESC     " (manage remote resources)"
 #define O_DESC       " (open file)"
 #define OC_DESC      " (change file ownership)"
+#define OD_DESC      " (toggle list-only-directories)"
 #define OPENER_DESC  " (set a custom file opener)"
 #define OW_DESC      " (open file with...)"
 #define P_DESC       " (print file properties)"
@@ -1901,7 +1904,7 @@ q | F12         I'm tired, quit"
 #define PF_DESC      " (manage user profiles)"
 #define PG_DESC      " (toggle/run the file pager)"
 #define PIN_DESC     " (pin a directory)"
-#define PP_DESC      " (print file properties - follow links/total dir size)"
+#define PP_DESC      " (print file properties: follow-links/total-dir-size)"
 #define PROMPT_DESC  " (switch/edit the command prompt)"
 #define Q_DESC       " (quit)"
 #define R_DESC       " (remove files)"

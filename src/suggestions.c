@@ -116,6 +116,25 @@ check_int_cmd_desc(const char *s, const size_t l)
 	}
 
 	else if (l == 2) {
+		if (*s == 'z') { // Vi-like 'z' aliases
+			switch (s[1]) {
+			case 'c': return FC_DESC;
+			case 'd': return FF_DESC;
+			case 'f': return K_DESC;
+			case 'h': return HF_DESC;
+			case 'i': return ICONS_DESC;
+			case 'l': return FS_DESC;
+			case 'n': return KK_DESC;
+			case 'o': return OD_DESC;
+			case 'p': return VIEW_DESC;
+			case 'r': return FZ_DESC;
+			case 's': return CI_DESC;
+			case 'x': return LL_DESC;
+			case 'z': return Q_DESC;
+			default: return NULL;
+			}
+		}
+
 		if (*s == 'a') {
 			if (s[1] == 'c') return AC_DESC;
 			if (s[1] == 'd') return AD_DESC;
@@ -132,6 +151,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 
 		else if (*s == 'c') {
 			if (s[1] == 'd') return CD_DESC;
+			if (s[1] == 'i') return CI_DESC;
 			if (s[1] == 'l') return CL_DESC;
 			if (s[1] == 's') return CS_DESC;
 		}
@@ -144,6 +164,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 		else if (*s == 'f') {
 			if (s[1] == 'c') return FC_DESC;
 			if (s[1] == 'f') return FF_DESC;
+			if (s[1] == 's') return FS_DESC;
 			if (s[1] == 't') return FT_DESC;
 			if (s[1] == 'z') return FZ_DESC;
 		}
@@ -171,6 +192,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 
 		else if (*s == 'o') {
 			if (s[1] == 'c') return OC_DESC;
+			if (s[1] == 'd') return OD_DESC;
 			if (s[1] == 'w') return OW_DESC;
 		}
 
