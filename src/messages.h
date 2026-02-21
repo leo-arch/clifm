@@ -494,7 +494,7 @@ Other ways of filtering files in the current directory:\n\n\
 * @query<TAB>  MIME type filter: e.g., @pdf<TAB> to list all PDF files\n\
 * /query       Quick search function: consult the 'search' help topic\n\
 * Alt+.        Toggle show-hidden-files\n\
-* Alt+,        Toggle list-only-dirs\n\
+* Alt+,        Toggle list-directories-only\n\
 * Just press TAB (fzf/fnf mode) and perform a fuzzy search\n\n\
 You can also operate on files filtered by file type and/or MIME type as\n\
 follows:\n\n\
@@ -1655,7 +1655,7 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  Alt+l              Toggle long-view\n\
  Alt+Plus           Toggle follow-symlinks\n\
  Alt+.              Toggle show-hidden-files\n\
- Alt+,              Toggle list-only-directories\n\
+ Alt+,              Toggle list-directories-only\n\
  Alt+-              Preview files in the current directory (requires fzf)\n\
  Alt+m              List mountpoints\n\
  Alt+h              Show directory history\n\
@@ -1895,7 +1895,7 @@ q | F12         I'm tired, quit"
 #define NET_DESC     " (manage remote resources)"
 #define O_DESC       " (open file)"
 #define OC_DESC      " (change file ownership)"
-#define OD_DESC      " (toggle list-only-directories)"
+#define OD_DESC      " (toggle list-directories-only)"
 #define OPENER_DESC  " (set a custom file opener)"
 #define OW_DESC      " (open file with...)"
 #define P_DESC       " (print file properties)"

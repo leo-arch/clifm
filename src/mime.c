@@ -72,6 +72,28 @@ check_user_mimetypes(const char *file)
 #define MIME_FALLBACK_XDG_MIME 2
 
 static int
+is_xdg_desktop_session(void)
+{
+	if (!(flags & GUI))
+		return 0;
+
+	char *runtime_dir = getenv("XDG_RUNTIME_DIR");
+	if (!runtime_dir || !*runtime_dir)
+		return 0;
+
+	struct stat a;
+	if (lstat(runtime_dir, &a) == -1 || a.st_uid == 0 || a.st_uid != user.uid
+	|| !S_ISDIR(a.st_mode))
+		return 0;
+
+	char *session_type = getenv("XDG_SESSION_TYPE");
+	if (!session_type || !*session_type)
+		return 0;
+
+	return 1;
+}
+
+static int
 check_mimetype_fallback_program(void)
 {
 	static int mime_fallback = -1;
@@ -80,7 +102,11 @@ check_mimetype_fallback_program(void)
 
 	if (is_cmd_in_path("mimetype", NULL))
 		mime_fallback = MIME_FALLBACK_MIMETYPE;
-	else if (is_cmd_in_path("xdg-mime", NULL))
+
+	/* The xdg-mime(1) manpage explicitly warns against using this tool
+	 * as root or outside a desktop session. */
+	else if (user.uid != 0 && is_xdg_desktop_session() == 1
+	&& is_cmd_in_path("xdg-mime", NULL))
 		mime_fallback = MIME_FALLBACK_XDG_MIME;
 	else
 		mime_fallback = MIME_FALLBACK_NONE;
