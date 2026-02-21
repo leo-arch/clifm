@@ -882,6 +882,7 @@ const struct nameslist_t kb_cmds[] = {
 	{"show-manpage", 12},
 	{"show-cmds", 9},
 	{"show-kbinds", 11},
+	{"toggle-case-sensitive-sort", 26},
 	{"toggle-disk-usage", 17},
 	{"toggle-follow-symlinks", 22},
 	{"toggle-hidden", 13},
