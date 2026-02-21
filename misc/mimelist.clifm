@@ -246,5 +246,5 @@ X:^application/x-doom-wad$=gzdoom %x;
 # Fallback
 #-----------------------------
 # Let's fallback to an external opener as the last resource
-X:.*=handlr open;mimeopen -n;rifle;mimeo;xdg-open;open;
-!X:.*=mimeopen -n;rifle;
+X:.*=handlr open;mimeopen -n;rifle;mimeo;gio open;xdg-open;open;run-mailcap -n %m;
+!X:.*=mimeopen -n;rifle;mimeo;run-mailcap -n %m;
