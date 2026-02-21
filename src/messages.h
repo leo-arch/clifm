@@ -1666,7 +1666,6 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  Alt+a              Select all files in the current directory\n\
  Shift+Tab          Invert selection\n\
  Alt+d              Deselect all files\n\
- Alt+r              Change to the root directory\n\
  Alt+e, Home        Change to the home directory\n\
  Alt+u, Shift+Up    Change to the parent directory\n\
  Alt+j, Shift+Left  Change to previously visited directory\n\
@@ -1688,6 +1687,7 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  Alt+y              Toggle light-mode\n\
  Alt+z              Switch to the previous sort method\n\
  Alt+x              Switch to the next sort method\n\
+ Alt+r              Sort in reverse order\n\
  Ctrl+Alt+x         Launch a new instance\n\
  F1                 Manual page\n\
  F2                 Commands help\n\
