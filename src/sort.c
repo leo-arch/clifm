@@ -338,7 +338,7 @@ print_sort_method(void)
 	const char *name = num_to_sort_name(conf.sort, 0);
 
 	printf("%s%s%s%s", BOLD, name, NC,
-		(conf.sort_reverse == 1) ? " [rev]" : "");
+		(conf.sort_reverse == 1) ? " (reverse)" : "");
 
 	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(conf.sort))
 		printf(_(" (not available in light mode: using %sname%s)\n"), BOLD, NC);
