@@ -2345,9 +2345,6 @@ exec_cmd(char **args)
 	else if (*args[0] == 'c' && args[0][1] == 'i' && !args[0][2])
 		return (exit_code = rl_toggle_case_sensitive_sort(0, 0));
 
-	else if (*args[0] == 'f' && args[0][1] == 's' && !args[0][2])
-		return (exit_code = rl_toggle_follow_symlinks(0, 0));
-
 	else if (*args[0] == 's' && args[0][1] == 'r' && !args[0][2])
 		return (exit_code = sort_reverse());
 

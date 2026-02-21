@@ -1587,11 +1587,11 @@ rl_toggle_long_view(int count, int key)
 	return FUNC_SUCCESS;
 }
 
-int
+static int
 rl_toggle_follow_symlinks(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy == 1 || (conf.light_mode == 1 && conf.long_view == 0))
+	if (kbind_busy == 1 || conf.light_mode == 1)
 		return FUNC_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS

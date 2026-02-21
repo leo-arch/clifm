@@ -2634,26 +2634,26 @@ expand_cmd_aliases(char **cmd_name)
 		return;
 
 	switch (cmd[1]) {
-	case 'c': *cmd = 'f'; cmd[1] = 'c'; break;  // zc -> fc (file-counter)
-	case 'd': *cmd = 'f'; cmd[1] = 'f'; break;  // zd -> ff (dirs-first)
-	case 'f': *cmd = 'k'; cmd[1] = '\0'; break; // zf -> k (follow-links)
-	case 'h': *cmd = 'h'; cmd[1] = 'f'; break;  // zh -> hf (show-hidden)
-	case 'i':                                   // zi -> icons
+	case 'c': *cmd = 'f'; cmd[1] = 'c'; break;  /* zc -> fc (file-counter) */
+	case 'd': *cmd = 'f'; cmd[1] = 'f'; break;  /* zd -> ff (dirs-first) */
+	case 'f': *cmd = 'k'; cmd[1] = '\0'; break; /* zf -> k (follow-links) */
+	case 'h': *cmd = 'h'; cmd[1] = 'f'; break;  /* zh -> hf (show-hidden) */
+	case 'i':                                   /* zi -> icons */
 		*cmd_name = xnrealloc(*cmd_name, 6, sizeof(char));
 		xstrsncpy(*cmd_name, "icons", 6);
 		break;
-	case 'l': *cmd = 'f'; cmd[1] = 's'; break;  // zl -> fs (follow-symlinks)
-	case 'n': *cmd = 'k'; cmd[1] = 'k'; break;  // zn -> kk (max-name-len)
-	case 'o': *cmd = 'o'; cmd[1] = 'd'; break;  // zo -> od (only-dirs)
-	case 'p':                                   // zp -> view
+	case 'n': *cmd = 'k'; cmd[1] = 'k'; break;  /* zn -> kk (max-name-len) */
+	case 'o': *cmd = 'o'; cmd[1] = 'd'; break;  /* zo -> od (only-dirs) */
+	case 'p':                                   /* zp -> view */
 		*cmd_name = xnrealloc(*cmd_name, 5, sizeof(char));
 		xstrsncpy(*cmd_name, "view", 5);
 		break;
-	case 'r': *cmd = 'f'; cmd[1] = 'z'; break;  // zr -> fz (recursive-dir-size)
-	case 's': *cmd = 'c'; cmd[1] = 'i'; break;  // zs -> ci (case-sens-list)
-	case 'v': *cmd = 's'; cmd[1] = 'r'; break;  // zv -> sr (sort-reverse)
-	case 'x': *cmd = 'l'; cmd[1] = 'l'; break;  // zx -> ll (long-view)
-	case 'z': *cmd = 'q'; cmd[1] = '\0'; break; // zz -> q
+	case 'r': *cmd = 'f'; cmd[1] = 'z'; break;  /* zr -> fz (recursive-dir-size) */
+	case 's': *cmd = 'c'; cmd[1] = 'i'; break;  /* zs -> ci (case-sens-list) */
+	case 'v': *cmd = 's'; cmd[1] = 'r'; break;  /* zv -> sr (sort-reverse) */
+	case 'x': *cmd = 'l'; cmd[1] = 'l'; break;  /* zx -> ll (long-view) */
+	case 'y': *cmd = 'l'; cmd[1] = 'm'; break;  /* zy -> lm (light-mode) */
+	case 'z': *cmd = 'q'; cmd[1] = '\0'; break; /* zz -> q */
 	default: break;
 	}
 }

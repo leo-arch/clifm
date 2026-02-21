@@ -1653,7 +1653,7 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  Alt+q              Delete the last entered word\n\
  Alt+g              Toggle list-directories-first\n\
  Alt+l              Toggle long-view\n\
- Alt+Plus           Toggle follow-symbolic-links\n\
+ Alt+Plus           Toggle follow-symlinks\n\
  Alt+.              Toggle show-hidden-files\n\
  Alt+,              Toggle list-only-directories\n\
  Alt+-              Preview files in the current directory (requires fzf)\n\
@@ -1868,22 +1868,21 @@ q | F12         I'm tired, quit"
 #define EXP_DESC     " (export filenames to a temporary file)"
 #define EXT_DESC     " (turn external/shell commands on/off)"
 #define F_DESC       " (change to the next visited directory)"
-#define FC_DESC      " (toggle the file counter)"
+#define FC_DESC      " (toggle file-counter)"
 #define FF_DESC      " (toggle list-directories-first)"
-#define FS_DESC      " (toggle follow-symlinks)"
 #define FT_DESC      " (set a file filter)"
 #define FZ_DESC      " (toggle recursive-directory-size: long view only)"
 #define HF_DESC      " (toggle hidden files)"
 #define HIST_DESC    " (manage the command history)"
 #define ICONS_DESC   " (toggle icons)"
 #define J_DESC       " (jump to a visited directory)"
-#define K_DESC       " (toggle follow-symbolic-links)"
+#define K_DESC       " (toggle follow-symblinks)"
 #define KK_DESC      " (toggle max-filename-len)"
 #define KB_DESC      " (manage keybindings)"
 #define L_DESC       " (create a symbolic link)"
 #define LE_DESC      " (edit a symbolic link)"
-#define LL_DESC      " (toggle the long-view)"
-#define LM_DESC      " (toggle the light-mode)"
+#define LL_DESC      " (toggle long-view)"
+#define LM_DESC      " (toggle light-mode)"
 #define LOG_DESC     " (manage logs)"
 #define M_DESC       " (move/rename files)"
 #define MD_DESC      " (create directories)"

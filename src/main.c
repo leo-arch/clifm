@@ -475,7 +475,6 @@ const struct cmdslist_t internal_cmds[] = {
 	{"dirs-first", 10, PARAM_STR, 0},
 	{"ft", 2, PARAM_STR, 0},
 	{"filter", 6, PARAM_STR, 0},
-	{"fs", 2, NO_PARAM, 0},
 	{"fz", 2, NO_PARAM, 0},
 	{"hh", 2, PARAM_STR, 0},
 	{"hf", 2, PARAM_STR, 0},

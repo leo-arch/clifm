@@ -123,7 +123,6 @@ check_int_cmd_desc(const char *s, const size_t l)
 			case 'f': return K_DESC;
 			case 'h': return HF_DESC;
 			case 'i': return ICONS_DESC;
-			case 'l': return FS_DESC;
 			case 'n': return KK_DESC;
 			case 'o': return OD_DESC;
 			case 'p': return VIEW_DESC;
@@ -131,6 +130,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 			case 's': return CI_DESC;
 			case 'v': return SR_DESC;
 			case 'x': return LL_DESC;
+			case 'y': return LM_DESC;
 			case 'z': return Q_DESC;
 			default: return NULL;
 			}
@@ -165,7 +165,6 @@ check_int_cmd_desc(const char *s, const size_t l)
 		else if (*s == 'f') {
 			if (s[1] == 'c') return FC_DESC;
 			if (s[1] == 'f') return FF_DESC;
-			if (s[1] == 's') return FS_DESC;
 			if (s[1] == 't') return FT_DESC;
 			if (s[1] == 'z') return FZ_DESC;
 		}
