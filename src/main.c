@@ -464,6 +464,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"ds", 2, PARAM_FNAME, 0}, // diff (old 0110, new 1110)
 	{"desel", 5, PARAM_FNAME, 0}, // diff (old 0110, new 1110)
 	{"config", 6, PARAM_STR, 0},
+	{"ci", 2, NO_PARAM, 0},
 	{"exp", 3, PARAM_FNAME, 0},
 	{"export", 6, PARAM_FNAME | PARAM_STR, 0}, // diff (old 1101, new 1111)
 	{"ext", 3, PARAM_STR, 0},
@@ -474,7 +475,8 @@ const struct cmdslist_t internal_cmds[] = {
 	{"dirs-first", 10, PARAM_STR, 0},
 	{"ft", 2, PARAM_STR, 0},
 	{"filter", 6, PARAM_STR, 0},
-	{"fz", 2, PARAM_STR, 0},
+	{"fs", 2, NO_PARAM, 0},
+	{"fz", 2, NO_PARAM, 0},
 	{"hh", 2, PARAM_STR, 0},
 	{"hf", 2, PARAM_STR, 0},
 	{"hidden", 6, PARAM_STR, 0},
@@ -511,6 +513,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"net", 3, PARAM_STR, 0},
 	{"o", 1, PARAM_FNAME, 0},
 	{"oc", 2, PARAM_FNAME, 0},
+	{"od", 2, NO_PARAM, 0},
 	{"open", 4, PARAM_FNAME, 0},
 	{"ow", 2, PARAM_FNAME, 0}, // diff (old 0110, new 1110)
 	{"opener", 6, PARAM_STR, 0},
