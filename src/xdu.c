@@ -236,17 +236,17 @@ dir_size(const char *dir, const int size_in_bytes, int *status)
 				block_size = "--block-size=K";
 		}
 
-		char *bin = (bin_flags & GNU_DU_BIN_DU) ? "du" : "gdu";
+		const char *bin = (bin_flags & GNU_DU_BIN_DU) ? "du" : "gdu";
 		if (conf.apparent_size != 1) {
-			char *cmd[] = {bin, "-s", block_size, "--", (char *)dir, NULL};
+			const char *cmd[] = {bin, "-s", block_size, "--", dir, NULL};
 			*status = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 		} else {
-			char *cmd[] = {bin, "-s", "--apparent-size", block_size,
-				"--", (char *)dir, NULL};
+			const char *cmd[] = {bin, "-s", "--apparent-size", block_size,
+				"--", dir, NULL};
 			*status = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 		}
 	} else {
-		char *cmd[] = {"du", "-ks", "--", (char *)dir, NULL};
+		const char *cmd[] = {"du", "-ks", "--", dir, NULL};
 		*status = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	}
 
