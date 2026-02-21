@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 18, 2026" "clifm 1.27.10" "Clifm Manual"
+.TH "CLIFM" "1" "Feb 21, 2026" "clifm 1.27.11" "Clifm Manual"
 .SH NAME
 clifm - The Command-Line File Manager
 .SH SYNOPSIS
@@ -1438,7 +1438,7 @@ Alt+c : Clear the current command-line buffer
 Alt+q : Delete last word (up to last slash or space)
 Alt+i, Alt+. : Toggle hidden-files
 Alt+l : Toggle long-view
-Alt++ : Toggle follow-links (long view only)
+Alt++ : Toggle follow-symlinks
 Alt+g : Toggle list-directories-first
 Alt+, : Toggle list-only-directories
 Ctrl+Alt+l : Toggle max-filename-length
@@ -1463,7 +1463,7 @@ allbox tab(:);
 lb lb
 lb l.
 Key : Description
-Alt+r : Change to the root directory
+Alt+/ : Change to the root directory
 Alt+e, Home : Change to the home directory
 Alt+u, Shift+Up : Change to the parent directory
 Alt+j, Shift+Left : Change to the previously visited directory
@@ -1479,6 +1479,7 @@ Ctrl+Alt+v : Copy selected files to the current directory
 Alt+y : Toggle light-mode
 Alt+z : Switch to previous sort method
 Alt+x : Switch to next sort method
+Alt+r : Sort in reverse order
 Ctrl+Alt+x : Launch a new instance of \fBclifm\fR
 Ctrl+y : Copy the contents of the line buffer to the clipboard \fB(1)\fR
 F1 : Go to the manpage
@@ -2994,7 +2995,7 @@ The number of terminal columns.
 The number of terminal lines.
 .TP
 .B CLIFM_MIMETYPES_FILE
-Set a custom mime.types file (instead of the default, \fI~/.mime.types\fR). Consult the \fBFILE OPENER\fR section form more information.
+Set a custom mime.types file (instead of the default, \fI~/.config/clifm/mime.types\fR or \fI~/.mime.types\fR). Consult the \fBFILE OPENER\fR section form more information.
 .TP
 Except when running in \fBstealth mode\fR, \fBclifm\fR sets the following environment variables:
 .TP
