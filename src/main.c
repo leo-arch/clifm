@@ -882,6 +882,7 @@ const struct nameslist_t kb_cmds[] = {
 	{"show-dirhist", 12},
 	{"sort-previous", 13},
 	{"sort-next", 9},
+	{"sort-reverse", 12},
 	{"show-manpage", 12},
 	{"show-cmds", 9},
 	{"show-kbinds", 11},

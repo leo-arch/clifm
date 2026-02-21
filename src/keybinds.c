@@ -1934,6 +1934,13 @@ rl_sort_previous(int count, int key)
 }
 
 static int
+rl_sort_reverse(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_kb_cmd("st rev", 0);
+}
+
+static int
 rl_lock(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
@@ -3066,6 +3073,7 @@ set_keybinds_from_file(void)
 		{"invert-selection", rl_invert_selection},
 		{"dirs-first", rl_toggle_dirs_first},
 		{"sort-previous", rl_sort_previous}, {"sort-next", rl_sort_next},
+		{"sort-reverse", rl_sort_reverse},
 		{"only-dirs", rl_toggle_only_dirs},
 		{"run-pager", rl_run_pager},
 
