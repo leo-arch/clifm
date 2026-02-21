@@ -1900,6 +1900,13 @@ handle_copy_move_cmds(char ***cmd)
 	return 0;
 }
 
+static int
+sort_reverse(void)
+{
+	char *cmd[] = {"st", "rev", NULL};
+	return sort_func(cmd);
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error.
@@ -2340,6 +2347,9 @@ exec_cmd(char **args)
 
 	else if (*args[0] == 'f' && args[0][1] == 's' && !args[0][2])
 		return (exit_code = rl_toggle_follow_symlinks(0, 0));
+
+	else if (*args[0] == 's' && args[0][1] == 'r' && !args[0][2])
+		return (exit_code = sort_reverse());
 
 	/* #### LOG #### */
 	else if (*args[0] == 'l' && strcmp(args[0], "log") == 0)

@@ -116,7 +116,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 	}
 
 	else if (l == 2) {
-		if (*s == 'z') { // Vi-like 'z' aliases
+		if (*s == 'z') { /* Vi-like 'z' command aliases */
 			switch (s[1]) {
 			case 'c': return FC_DESC;
 			case 'd': return FF_DESC;
@@ -129,6 +129,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 			case 'p': return VIEW_DESC;
 			case 'r': return FZ_DESC;
 			case 's': return CI_DESC;
+			case 'v': return SR_DESC;
 			case 'x': return LL_DESC;
 			case 'z': return Q_DESC;
 			default: return NULL;

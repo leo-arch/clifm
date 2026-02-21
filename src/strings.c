@@ -2651,6 +2651,7 @@ expand_cmd_aliases(char **cmd_name)
 		break;
 	case 'r': *cmd = 'f'; cmd[1] = 'z'; break;  // zr -> fz (recursive-dir-size)
 	case 's': *cmd = 'c'; cmd[1] = 'i'; break;  // zs -> ci (case-sens-list)
+	case 'v': *cmd = 's'; cmd[1] = 'r'; break;  // zv -> sr (sort-reverse)
 	case 'x': *cmd = 'l'; cmd[1] = 'l'; break;  // zx -> ll (long-view)
 	case 'z': *cmd = 'q'; cmd[1] = '\0'; break; // zz -> q
 	default: break;

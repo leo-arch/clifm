@@ -546,6 +546,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"sel", 3, PARAM_FNAME, 0},
 	{"sb", 2, NO_PARAM, 0},
 	{"selbox", 6, NO_PARAM, 0},
+	{"sr", 2, NO_PARAM, 0}, // alias for 'sort rev'
 	{"st", 2, PARAM_NUM, 0},
 	{"sort", 4, PARAM_NUM, 0},
 	{"stats", 5, NO_PARAM, 0},

@@ -1395,8 +1395,9 @@ int_z_cmds_generator(const char *text, int state)
 		"zo (toggle list-only-directories)",
 		"zp (preview files in the current directory)",
 		"zr (toggle recursive-directory-size)",
-		"zx (toggle long-view)",
 		"zs (toggle case-sensitive-sort)",
+		"zv (toggle sort-reverse)",
+		"zx (toggle long-view)",
 		"zz (quit)",
 		NULL
 	};
