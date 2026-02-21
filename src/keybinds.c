@@ -3125,8 +3125,7 @@ set_default_keybinds(void)
 		{"\\e[2C", rl_dir_next}, {"\\e[1;2C", rl_dir_next},
 		{"\\M-e", rl_dir_home}, {"\\e[1~", rl_dir_home},
 		{"\\e[7~", rl_dir_home}, {"\\e[H", rl_dir_home},
-		{"\\M-r", rl_dir_root}, {"\\e/", rl_dir_root},
-		{"\\M-p", rl_dir_pinned},
+		{"\\e/", rl_dir_root}, {"\\M-p", rl_dir_pinned},
 		{"\\M-1", rl_ws1}, {"\\M-2", rl_ws2},
 		{"\\M-3", rl_ws3}, {"\\M-4", rl_ws4},
 		{"\\M-5", rl_ws5}, {"\\M-6", rl_ws6},
@@ -3150,6 +3149,7 @@ set_default_keybinds(void)
 		{"\\M-l", rl_toggle_long_view}, {"\\M-+", rl_toggle_follow_symlinks},
 		{"\\M-y", rl_toggle_light_mode}, {"\\M-g", rl_toggle_dirs_first},
 		{"\\M-z", rl_sort_previous}, {"\\M-x", rl_sort_next},
+		{"\\M-r", rl_sort_reverse},
 		{"\\M-,", rl_toggle_only_dirs}, {"\\M-0", rl_run_pager},
 		/* Misc */
 		{"\\M--", rl_launch_view}, {"\\C-\\M-x", rl_new_instance},

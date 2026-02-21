@@ -62,8 +62,6 @@ home-dir:\ee
 # Home key (Emacs term)
 #home-dir:\e[1~
 
-# Alt+r
-root-dir:\er
 # Alt+/
 root-dir:\e/
 
@@ -109,7 +107,7 @@ dirs-first:\eg
 only-dirs:\e,
 sort-next:\ex
 sort-previous:\ez
-#sort-reverse:
+sort-reverse:\er
 toggle-hidden:\ei
 toggle-hidden:\e.
 toggle-light:\ey
