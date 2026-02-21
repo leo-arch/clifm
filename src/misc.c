@@ -564,7 +564,7 @@ get_cmd(const char *dir, const char *_sudo, const char *self, const int sudo)
 /* Print the command CMD and ask the user for confirmation.
  * Returns 1 if yes or 0 if no. */
 int
-confirm_sudo_cmd(char **cmd)
+confirm_sudo_cmd(const char **cmd)
 {
 	if (!cmd)
 		return 0;
@@ -592,20 +592,21 @@ launch_new_instance_cmd(char ***cmd, char **self, char **sudo_prog,
 #endif /* __HAIKU__ */
 
 	if (*cmd) {
-		ret = (sudo == 0 || confirm_sudo_cmd(*cmd) == 1)
-			? launch_execv(*cmd, BACKGROUND, E_SETSID)
+		const char **tcmd = (const char **)*cmd;
+		ret = (sudo == 0 || confirm_sudo_cmd(tcmd) == 1)
+			? launch_execv(tcmd, BACKGROUND, E_SETSID)
 			: FUNC_SUCCESS;
 		for (size_t i = 0; (*cmd)[i]; i++)
 			free((*cmd)[i]);
 		free(*cmd);
 	} else {
 		if (sudo == 1) {
-			char *tcmd[] = {conf.term, *sudo_prog, *self, *dir, NULL};
+			const char *tcmd[] = {conf.term, *sudo_prog, *self, *dir, NULL};
 			ret = (confirm_sudo_cmd(tcmd) == 1)
 				? launch_execv(tcmd, BACKGROUND, E_SETSID)
 				: FUNC_SUCCESS;
 		} else {
-			char *tcmd[] = {conf.term, *self, *dir, NULL};
+			const char *tcmd[] = {conf.term, *self, *dir, NULL};
 			ret = launch_execv(tcmd, BACKGROUND, E_SETSID);
 		}
 	}
@@ -1035,7 +1036,7 @@ remove_virtual_dir(void)
 	if (stdin_tmp_dir && stat(stdin_tmp_dir, &a) != -1) {
 		xchmod(stdin_tmp_dir, "0700", 1);
 
-		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
+		const char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
 		const int ret = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
 		if (ret != FUNC_SUCCESS)
 			exit_code = ret;
@@ -1533,7 +1534,7 @@ create_virtual_dir(const int user_provided)
 		return FUNC_FAILURE;
 	}
 
-	char *cmd[] = {"mkdir", "-p", "--", stdin_tmp_dir, NULL};
+	const char *cmd[] = {"mkdir", "-p", "--", stdin_tmp_dir, NULL};
 	int ret = 0;
 	if ((ret = launch_execv(cmd, FOREGROUND, E_MUTE)) != FUNC_SUCCESS) {
 		char *errmsg = (ret == E_NOTFOUND ? NOTFOUND_MSG
@@ -1776,7 +1777,7 @@ handle_stdin(void)
 
 		xchmod(stdin_tmp_dir, "0700", 1);
 
-		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
+		const char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
 		const int ret = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
 		if (ret != FUNC_SUCCESS)
 			exit_status = ret;

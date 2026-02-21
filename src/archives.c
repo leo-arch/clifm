@@ -157,7 +157,7 @@ extract_iso(char *file)
 		file, DEF_EXTRACTION_DIR_SUFFIX);
 
 	/* Construct and execute cmd */
-	char *cmd[] = {"7z", "x", o_option, file, NULL};
+	const char *cmd[] = {"7z", "x", o_option, file, NULL};
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 		exit_status = FUNC_FAILURE;
 
@@ -181,7 +181,7 @@ extract_iso_to_dir(char *file)
 	free(ext_path);
 
 	/* Construct and execute cmd */
-	char *cmd[] = {"7z", "x", o_option, file, NULL};
+	const char *cmd[] = {"7z", "x", o_option, file, NULL};
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 		exit_status = FUNC_FAILURE;
 
@@ -196,7 +196,7 @@ list_iso_contents(char *file)
 	int exit_status = FUNC_SUCCESS;
 
 	/* 7z l FILE */
-	char *cmd[] = {"7z", "l", file, NULL};
+	const char *cmd[] = {"7z", "l", file, NULL};
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 		exit_status = FUNC_FAILURE;
 
@@ -209,7 +209,7 @@ test_iso(char *file)
 	int exit_status = FUNC_SUCCESS;
 
 	/* 7z t FILE */
-	char *cmd[] = {"7z", "t", file, NULL};
+	const char *cmd[] = {"7z", "t", file, NULL};
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 		exit_status = FUNC_FAILURE;
 
@@ -235,7 +235,7 @@ create_mountpoint(char *file)
 		snprintf(mountpoint, len, "%s/mounts/%s", config_dir, tfile);
 	}
 
-	char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
+	const char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
 	if (launch_execv(dir_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 		free(mountpoint);
 		mountpoint = NULL;
@@ -288,7 +288,7 @@ mount_iso(char *file)
 		return FUNC_FAILURE;
 	}
 
-	char *cmd[] = {sudo, "mount", "-o", "loop", file, mountpoint, NULL};
+	const char *cmd[] = {sudo, "mount", "-o", "loop", file, mountpoint, NULL};
 	if (confirm_sudo_cmd(cmd) == 0) {
 		free(mountpoint);
 		free(sudo);
@@ -351,7 +351,7 @@ create_iso_from_block_dev(const char *in_file, const char *out_file)
 	}
 
 	int exit_status = FUNC_SUCCESS;
-	char *cmd[] = {sudo, "dd", if_option, of_option, "bs=64k",
+	const char *cmd[] = {sudo, "dd", if_option, of_option, "bs=64k",
 	    "conv=noerror,sync", "status=progress", NULL};
 
 	if (confirm_sudo_cmd(cmd) == 1) {
@@ -377,7 +377,7 @@ create_iso(char *in_file, char *out_file)
 
 	/* If IN_FILE is a directory */
 	if (S_ISDIR(attr.st_mode)) {
-		char *cmd[] = {"mkisofs", "-R", "-o", out_file, in_file, NULL};
+		const char *cmd[] = {"mkisofs", "-R", "-o", out_file, in_file, NULL};
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 			return FUNC_FAILURE;
 		return FUNC_SUCCESS;
@@ -518,12 +518,11 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 
 	if (mode == 'c') {
 		if (out_file) {
-			char *cmd[] = {"zstd", "-zo", out_file, in_file, NULL};
+			const char *cmd[] = {"zstd", "-zo", out_file, in_file, NULL};
 			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		} else {
-			char *cmd[] = {"zstd", "-z", in_file, NULL};
-
+			const char *cmd[] = {"zstd", "-z", in_file, NULL};
 			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		}
@@ -545,7 +544,7 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 		default: break;
 		}
 
-		char *cmd[] = {"zstd", option, in_file, NULL};
+		const char *cmd[] = {"zstd", option, in_file, NULL};
 		exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 		if (exit_status != FUNC_SUCCESS)
@@ -570,19 +569,19 @@ zstandard(char *in_file, char *out_file, const char mode, const char op)
 
 		switch (*operation) {
 		case 'e': {
-			char *cmd[] = {"zstd", "-d", in_file, NULL};
+			const char *cmd[] = {"zstd", "-d", in_file, NULL};
 			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		} break;
 
 		case 't': {
-			char *cmd[] = {"zstd", "-t", in_file, NULL};
+			const char *cmd[] = {"zstd", "-t", in_file, NULL};
 			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		} break;
 
 		case 'i': {
-			char *cmd[] = {"zstd", "-l", in_file, NULL};
+			const char *cmd[] = {"zstd", "-l", in_file, NULL};
 			if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		} break;
@@ -635,7 +634,7 @@ compress_zstandard(char *name, char **args)
 		cmd[j++] = args[n];
 	cmd[j] = NULL;
 
-	int exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+	int exit_status = launch_execv((const char **)cmd, FOREGROUND, E_NOFLAG);
 
 	/* 3. If tar suceeded, compress the archive with zstandard. */
 	if (exit_status == 0)
@@ -664,7 +663,7 @@ compress_others(char **args, char *archive_name)
 		tcmd[n++] = args[i];
 	tcmd[n] = NULL;
 
-	const int ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
+	const int ret = launch_execv((const char **)tcmd, FOREGROUND, E_NOFLAG);
 
 	free(tcmd);
 
@@ -812,7 +811,7 @@ list_others(char **args)
 	for (size_t i = 1; args[i]; i++) {
 		printf(_("%s%sFile%s: %s\n"), (i > 1) ? "\n" : "", BOLD, df_c, args[i]);
 
-		char *cmd[] = {"atool", "-l", args[i], NULL};
+		const char *cmd[] = {"atool", "-l", args[i], NULL};
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 			exit_status = FUNC_FAILURE;
 	}
@@ -834,7 +833,7 @@ extract_to_dir_others(char **args)
 			break;
 
 		/* Construct and execute cmd */
-		char *cmd[] = {"atool", "-X", ext_path, args[i], NULL};
+		const char *cmd[] = {"atool", "-X", ext_path, args[i], NULL};
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 			exit_status = FUNC_FAILURE;
 
@@ -862,7 +861,7 @@ extract_others(char **args)
 
 	/* Launch it */
 	int exit_status = FUNC_SUCCESS;
-	if (launch_execv(tcmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+	if (launch_execv((const char **)tcmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 		exit_status = FUNC_FAILURE;
 
 	free(tcmd);
@@ -915,7 +914,7 @@ repack_others(char **args)
 	tcmd[n] = NULL;
 
 	int exit_status = FUNC_SUCCESS;
-	if (launch_execv(tcmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
+	if (launch_execv((const char **)tcmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 		exit_status = FUNC_FAILURE;
 
 	free(tcmd);
@@ -959,7 +958,7 @@ mount_others(char **args)
 			continue;
 
 		/* Construct and execute cmd */
-		char *cmd[] = {"archivemount", args[i], mountpoint, NULL};
+		const char *cmd[] = {"archivemount", args[i], mountpoint, NULL};
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 			free(mountpoint);
 			continue;
@@ -1081,13 +1080,13 @@ extract_with_bsdtar(char *file, const char *suffix, size_t *increment)
 		return FUNC_FAILURE;
 	}
 
-	char *cmd[] = {"bsdtar", "-xvf", file, "-C", out_dir, NULL};
+	const char *cmd[] = {"bsdtar", "-xvf", file, "-C", out_dir, NULL};
 	const int retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	if (retval != 0) {
 		/* Let's use rm(1) in case bsdtar somehow populated the directory
 		 * before failing. */
-		char *rm_cmd[] = {"rm", "-rf", "--", out_dir, NULL};
+		const char *rm_cmd[] = {"rm", "-rf", "--", out_dir, NULL};
 		launch_execv(rm_cmd, FOREGROUND, E_MUTE);
 		free(out_dir);
 		return FUNC_FAILURE;
@@ -1141,11 +1140,11 @@ handle_zip(char **args)
 			retval = extract_with_bsdtar(args[i], suffix, &increment);
 		} else if (zip_app == ZIP_APP_UNZIP) {
 			snprintf(dest_dir, sizeof(dest_dir), "%s-%s", args[i], suffix);
-			char *cmd[] = {"unzip", args[i], "-d", dest_dir, NULL};
+			const char *cmd[] = {"unzip", args[i], "-d", dest_dir, NULL};
 			retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		} else {
 			snprintf(dest_dir, sizeof(dest_dir), "-o%s-%s", args[i], suffix);
-			char *cmd[] = {"7z", "x", args[i], dest_dir, NULL};
+			const char *cmd[] = {"7z", "x", args[i], dest_dir, NULL};
 			retval = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		}
 

@@ -863,7 +863,7 @@ check_alt_dir(char *dir)
 
 	struct stat a;
 	if (stat(dir, &a) == -1) {
-		char *tmp_cmd[] = {"mkdir", "-p", "--", dir, NULL};
+		const char *tmp_cmd[] = {"mkdir", "-p", "--", dir, NULL};
 		const int ret = launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR);
 		if (ret != FUNC_SUCCESS) {
 			fprintf(stderr, _("%s: Cannot create directory '%s' (error %d)\n"),

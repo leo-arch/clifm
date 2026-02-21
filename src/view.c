@@ -56,7 +56,7 @@ preview_edit(char *app)
 
 	int ret = FUNC_SUCCESS;
 	if (app) {
-		char *cmd[] = {app, file, NULL};
+		const char *cmd[] = {app, file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		ret = open_file(file);

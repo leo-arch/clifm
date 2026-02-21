@@ -118,7 +118,7 @@ get_remote(char *name)
 static int
 create_mountpoint(const int i)
 {
-	char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
+	const char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 		xerror("net: '%s': %s\n", remotes[i].mountpoint, strerror(errno));
@@ -345,7 +345,7 @@ automount_remotes(void)
 
 			struct stat attr;
 			if (stat(remotes[i].mountpoint, &attr) == -1) {
-				char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
+				const char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 				if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 					continue;
 			} else {

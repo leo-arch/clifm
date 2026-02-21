@@ -150,11 +150,11 @@ get_mimetype_fallback(const char *file)
 
 	int ret = FUNC_FAILURE;
 	if (mime_fallback == MIME_FALLBACK_XDG_MIME) {
-		char *cmd[] = {"xdg-mime", "query", "filetype", (char *)file, NULL};
+		const char *cmd[] = {"xdg-mime", "query", "filetype", file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
 		if (mime_fallback == MIME_FALLBACK_MIMETYPE) {
-			char *cmd[] = {"mimetype", "-b", (char *)file, NULL};
+			const char *cmd[] = {"mimetype", "-b", file, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 		}
 	}
@@ -320,9 +320,9 @@ xmagic(const char *file, const int query_mime)
  * NOTE: the -i flag in the POSIX file(1) specification is a completely
  * different thing. */
 #ifdef __APPLE__
-	char *cmd[] = {"file", query_mime ? "-bI" : "-b", (char *)file, NULL};
+	const char *cmd[] = {"file", query_mime ? "-bI" : "-b", file, NULL};
 #else
-	char *cmd[] = {"file", query_mime ? "-bi" : "-b", (char *)file, NULL};
+	const char *cmd[] = {"file", query_mime ? "-bi" : "-b", file, NULL};
 #endif /* __APPLE__ */
 	int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 
@@ -825,7 +825,7 @@ mime_edit(char **args)
 		open_in_foreground = 0;
 
 	} else {
-		char *cmd[] = {args[2], mime_file, NULL};
+		const char *cmd[] = {args[2], mime_file, NULL};
 		exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		if (exit_status != FUNC_SUCCESS)
 			return exit_status;
@@ -1010,8 +1010,8 @@ run_mime_app(char *app, const char *file)
 		cmd[i + 1] = NULL;
 	}
 
-	const int ret = launch_execv(cmd, (bg_proc && !open_in_foreground)
-		? BACKGROUND : FOREGROUND, exec_flags);
+	const int ret = launch_execv((const char **)cmd,
+		(bg_proc && !open_in_foreground) ? BACKGROUND : FOREGROUND, exec_flags);
 
 	for (i = 0; cmd[i]; i++)
 		free(cmd[i]);
@@ -1038,7 +1038,7 @@ run_cmd(char *app, char *file)
 	if (*app == '$' && app[1] >= 'A' && app[1] <= 'Z')
 		env = expand_env(app);
 
-	char *cmd[] = {env ? env : app, file, NULL};
+	const char *cmd[] = {env ? env : app, file, NULL};
 	const int ret = launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND,
 		bg_proc ? E_NOSTDERR : E_NOFLAG);
 
@@ -1346,14 +1346,16 @@ static int
 run_cmd_noargs(char *arg, char *name)
 {
 	errno = 0;
-	char *cmd[] = {arg, name, NULL};
+	const char *cmd[] = {arg, name, NULL};
 	int ret = FUNC_SUCCESS;
 
 #ifndef _NO_ARCHIVING
-	if (*arg == 'a' && arg[1] == 'd' && !arg[2])
-		ret = archiver(cmd, 'd');
-	else
+	if (*arg == 'a' && arg[1] == 'd' && !arg[2]) {
+		char *tcmd[] = {arg, name, NULL};
+		ret = archiver(tcmd, 'd');
+	} else {
 		ret = launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	}
 #else
 	ret = launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 #endif /* !_NO_ARCHIVING */
@@ -1592,7 +1594,8 @@ mime_open_multiple_files(char **files)
 	const int answer = rl_get_y_or_n(msg, 0);
 
 	const int ret = answer == 0 ? FUNC_SUCCESS :
-		launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
+		launch_execv((const char **)cmd,
+			bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
 
 	for (i = 0; cmd[i]; i++)
 		free(cmd[i]);
@@ -1617,7 +1620,8 @@ run_cmd_plus_args(char **args, char *file)
 		return FUNC_FAILURE;
 
 	const int ret =
-		launch_execv(cmd, bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
+		launch_execv((const char **)cmd,
+			bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
 
 	for (i = 0; cmd[i]; i++)
 		free(cmd[i]);
@@ -1735,7 +1739,7 @@ FAIL:
  * the mimelist file. Returns zero on success and >0 on error.
  * For the time being, this function is only executed via --open or --preview. */
 int
-mime_open_url(char *url)
+mime_open_url(const char *url)
 {
 	if (!url || !*url)
 		return FUNC_FAILURE;
@@ -1750,7 +1754,7 @@ mime_open_url(char *url)
 	if (p)
 		*p = '\0';
 
-	char *cmd[] = {app, url, NULL};
+	const char *cmd[] = {app, url, NULL};
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	free(app);
 

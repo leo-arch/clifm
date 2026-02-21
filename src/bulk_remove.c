@@ -216,7 +216,7 @@ open_tmp_file(struct dirent ***a, const filesn_t n, char *tmpfile, char *app)
 		goto END;
 	}
 
-	char *cmd[] = {app, tmpfile, NULL};
+	const char *cmd[] = {app, tmpfile, NULL};
 	exit_status = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	if (exit_status == FUNC_SUCCESS)

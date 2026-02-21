@@ -148,8 +148,8 @@ unmount_dev(const size_t n)
 	if (strncmp(mnt, workspaces[cur_ws].path, mlen) == 0)
 		(void)cd_out_of_mountpoint(mnt);
 
-	char *cmd[] = {xargs.mount_cmd == MNT_UDISKS2 ? "udisksctl" : "udevil",
-			"unmount", "-b", media[n].dev, NULL};
+	const char *cmd[] = {xargs.mount_cmd == MNT_UDISKS2 ? "udisksctl"
+			: "udevil", "unmount", "-b", media[n].dev, NULL};
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 		exit_status = FUNC_FAILURE;
 
@@ -324,10 +324,10 @@ mount_dev(const size_t n)
 	close(fd);
 
 	if (xargs.mount_cmd == MNT_UDISKS2) {
-		char *cmd[] = {"udisksctl", "mount", "-b", media[n].dev, NULL};
+		const char *cmd[] = {"udisksctl", "mount", "-b", media[n].dev, NULL};
 		launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
-		char *cmd[] = {"udevil", "mount", media[n].dev, NULL};
+		const char *cmd[] = {"udevil", "mount", media[n].dev, NULL};
 		launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	}
 
@@ -393,11 +393,11 @@ print_dev_info(const size_t n)
 
 	int exit_status = FUNC_SUCCESS;
 	if (xargs.mount_cmd == MNT_UDEVIL) {
-		char *cmd[] = {"udevil", "info", media[n].dev, NULL};
+		const char *cmd[] = {"udevil", "info", media[n].dev, NULL};
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 			exit_status = FUNC_FAILURE;
 	} else {
-		char *cmd[] = {"udisksctl", "info", "-b", media[n].dev, NULL};
+		const char *cmd[] = {"udisksctl", "info", "-b", media[n].dev, NULL};
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 			exit_status = FUNC_FAILURE;
 	}

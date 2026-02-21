@@ -810,7 +810,7 @@ import_color_scheme(const char *name)
 	if (stat(dfile, &a) == -1 || !S_ISREG(a.st_mode))
 		return FUNC_FAILURE;
 
-	char *cmd[] = {"cp", "--", dfile, colors_dir, NULL};
+	const char *cmd[] = {"cp", "--", dfile, colors_dir, NULL};
 	const mode_t old_mask = umask(0077); /* flawfinder: ignore */
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	umask(old_mask); /* flawfinder: ignore */

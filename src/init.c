@@ -1482,7 +1482,7 @@ set_prompts_file(void)
 	if (stat(t, &a) == -1 || !S_ISREG(a.st_mode))
 		goto ERROR;
 
-	char *cmd[] = {"cp", "--", t, f, NULL};
+	const char *cmd[] = {"cp", "--", t, f, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	if (ret == FUNC_SUCCESS)
 		return f;

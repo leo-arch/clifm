@@ -273,7 +273,7 @@ profile_add(const char *prof)
 	snprintf(nconfig_dir, tmp_len, "%s/profiles/%s", config_dir_gral, prof);
 
 	/* #### CREATE THE CONFIG DIR #### */
-	char *tmp_cmd[] = {"mkdir", "-p", nconfig_dir, NULL};
+	const char *tmp_cmd[] = {"mkdir", "-p", nconfig_dir, NULL};
 	if (launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 		xerror(_("pf: mkdir: '%s': Error creating "
 			"configuration directory\n"), nconfig_dir);
@@ -368,7 +368,7 @@ profile_del(const char *prof)
 	char *tmp = xnmalloc(len, sizeof(char));
 	snprintf(tmp, len, "%s/profiles/%s", config_dir_gral, prof);
 
-	char *cmd[] = {"rm", "-r", "--", tmp, NULL};
+	const char *cmd[] = {"rm", "-r", "--", tmp, NULL};
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	free(tmp);
 

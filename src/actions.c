@@ -233,7 +233,7 @@ run_action(char *action, char **args)
 		if (wfd == -1)
 			_exit(EXIT_FAILURE);
 
-		const int ret = launch_execv(args, FOREGROUND, E_NOFLAG);
+		const int ret = launch_execv((const char **)args, FOREGROUND, E_NOFLAG);
 		/* RET will be read later by waitpid(3) to get plugin exit status */
 		close(wfd);
 		_exit(ret);

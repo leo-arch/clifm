@@ -102,10 +102,10 @@ open_file(char *file)
 
 	if (conf.opener && *conf.opener) {
 		if (*conf.opener == 'g' && strcmp(conf.opener, "gio") == 0) {
-			char *cmd[] = {"gio", "open", file, NULL};
+			const char *cmd[] = {"gio", "open", file, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		} else {
-			char *cmd[] = {conf.opener, file, NULL};
+			const char *cmd[] = {conf.opener, file, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 		}
 	} else {
@@ -115,13 +115,13 @@ open_file(char *file)
 #else
 		/* Fallback to OS-specific openers */
 # if defined(__HAIKU__)
-		char *cmd[] = {"open", file, NULL};
+		const char *cmd[] = {"open", file, NULL};
 # elif defined(__APPLE__)
-		char *cmd[] = {"/usr/bin/open", file, NULL};
+		const char *cmd[] = {"/usr/bin/open", file, NULL};
 # elif defined(__CYGWIN__)
-		char *cmd[] = {"cygstart", file, NULL};
+		const char *cmd[] = {"cygstart", file, NULL};
 # else
-		char *cmd[] = {"xdg-open", file, NULL};
+		const char *cmd[] = {"xdg-open", file, NULL};
 # endif /* __HAIKU__ */
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 #endif /* !_NO_LIRA */
@@ -318,21 +318,21 @@ dup_file(char **cmd)
 
 		/* Run command. */
 		if (rsync_ok == 1) {
-			char *dup_cmd[] = {"rsync", "-aczvAXHS", "--progress", "--",
+			const char *dup_cmd[] = {"rsync", "-aczvAXHS", "--progress", "--",
 				source, dest, NULL};
 			if (launch_execv(dup_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
 		} else {
 #ifdef _BE_POSIX
-			char *dup_cmd[] = {"cp", "--", source, dest, NULL};
+			const char *dup_cmd[] = {"cp", "--", source, dest, NULL};
 #elif defined(__sun)
 			int g = (bin_flags & BSD_HAVE_COREUTILS);
-			char *name = g ? "gcp" : "cp";
-			char *opt = g ? "-a" : "--";
-			char *dup_cmd[] = {name, opt, g ? "--" : source,
+			const char *name = g ? "gcp" : "cp";
+			const char *opt = g ? "-a" : "--";
+			const char *dup_cmd[] = {name, opt, g ? "--" : source,
 				g ? source : dest, g ? dest : NULL, NULL};
 #else
-			char *dup_cmd[] = {"cp", "-a", "--", source, dest, NULL};
+			const char *dup_cmd[] = {"cp", "-a", "--", source, dest, NULL};
 #endif /* _BE_POSIX */
 			if (launch_execv(dup_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS)
 				exit_status = FUNC_FAILURE;
@@ -444,7 +444,7 @@ create_from_template(char *abs_path, char *basename)
 		return (-1);
 	}
 
-	char *cmd[] = {"cp", "--", template_file, abs_path, NULL};
+	const char *cmd[] = {"cp", "--", template_file, abs_path, NULL};
 	/* Let's copy the template file. STDERR and STDOUT are silenced: in case
 	 * of error, we'll try to create a plain empty regular file via open(2)
 	 * and print the error message in case of failure. */
@@ -870,7 +870,7 @@ open_function(char **cmd)
 	}
 
 	/* A single file plus an opening application. */
-	char *tmp_cmd[] = {cmd[2], file, NULL};
+	const char *tmp_cmd[] = {cmd[2], file, NULL};
 	const int ret =
 		launch_execv(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
@@ -1672,7 +1672,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	if (!tcmd)
 		return FUNC_FAILURE;
 
-	ret = launch_execv(tcmd, FOREGROUND, E_NOFLAG);
+	ret = launch_execv((const char **)tcmd, FOREGROUND, E_NOFLAG);
 
 	for (size_t i = 0; tcmd[i]; i++)
 		free(tcmd[i]);
@@ -1893,7 +1893,7 @@ remove_files(char **args)
 	rm_cmd[1] = have_dirs >= 1 ? "-rf" : "-f";
 	rm_cmd[2] = "--";
 
-	exit_status = launch_execv(rm_cmd, FOREGROUND, E_NOFLAG);
+	exit_status = launch_execv((const char **)rm_cmd, FOREGROUND, E_NOFLAG);
 	if (exit_status != FUNC_SUCCESS) {
 #ifndef BSD_KQUEUE
 		if (num > 1 && conf.autols == 1) /* Only if we have multiple files */

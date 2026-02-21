@@ -97,7 +97,7 @@ remove_file_from_trash(const char *name)
 	char *file2 = xnmalloc(len, sizeof(char));
 	snprintf(file2, len, "%s/%s", trash_info_dir, info_file);
 
-	char *cmd[] = {"rm", "-rf", "--", file1, file2, NULL};
+	const char *cmd[] = {"rm", "-rf", "--", file1, file2, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	free(file1);
@@ -311,7 +311,7 @@ trash_file(char *file)
 	if (ret != FUNC_SUCCESS && errno == EXDEV) {
 		/* Destination file is on a different filesystem, which is why
 		 * renameat(2) fails: let's try with mv(1). */
-		char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
+		const char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
 		ret = launch_execv(tmp_cmd, FOREGROUND, E_NOFLAG);
 		mvcmd = 1;
 	}
@@ -649,10 +649,10 @@ read_original_path(const char *file, const char *src, int *status)
 }
 
 static int
-create_untrash_parent(char *dir)
+create_untrash_parent(const char *dir)
 {
 	/* NOTE: We should be using our own create_dirs() here, but it fails! */
-	char *cmd[] = {"mkdir", "-p", "--", dir, NULL};
+	const char *cmd[] = {"mkdir", "-p", "--", dir, NULL};
 	return launch_execv(cmd, FOREGROUND, E_NOFLAG);
 }
 
@@ -727,7 +727,7 @@ untrash_file(const char *file)
 		if (errno == EXDEV) {
 			/* Destination file is on a different filesystem, which is why
 			 * rename(3) doesn't work: let's try with mv(1). */
-			char *cmd[] = {"mv", "--", utrash_file, orig_path, NULL};
+			const char *cmd[] = {"mv", "--", utrash_file, orig_path, NULL};
 			ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 			if (ret != FUNC_SUCCESS) {
 				free(orig_path);

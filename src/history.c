@@ -247,7 +247,8 @@ send_desktop_notification(char *msg)
 	}
 
 #if defined(__HAIKU__)
-	char *cmd[] = {"notify", "--type", type, "--title", PROGRAM_NAME, p, NULL};
+	const char *cmd[] =
+		{"notify", "--type", type, "--title", PROGRAM_NAME, p, NULL};
 	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
 #elif defined(__APPLE__)
 	size_t msg_len = strlen(msg) + strlen(type)
@@ -256,11 +257,11 @@ send_desktop_notification(char *msg)
 	snprintf(tmp_msg, msg_len,
 		"'display notification \"%s\" subtitle \"%s\" with title \"%s\"'",
 		msg, type, PROGRAM_NAME);
-	char *cmd[] = {"osascript", "-e", tmp_msg, NULL};
+	const char *cmd[] = {"osascript", "-e", tmp_msg, NULL};
 	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
 	free(tmp_msg);
 #else
-	char *cmd[] = {"notify-send", "-u", type, PROGRAM_NAME, p, NULL};
+	const char *cmd[] = {"notify-send", "-u", type, PROGRAM_NAME, p, NULL};
 	ret = launch_execv(cmd, FOREGROUND, E_MUTE);
 #endif /* __HAIKU__ */
 

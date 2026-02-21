@@ -1423,7 +1423,7 @@ gen_shell_cmd_comp(char *cmd)
 	snprintf(manpage_parser_file, sizeof(manpage_parser_file),
 		"%s/%s/tools/manpages_comp_gen.py", data_dir, PROGRAM_NAME);
 
-	char *c[] = {manpage_parser_file, "-k", cmd, NULL};
+	const char *c[] = {manpage_parser_file, "-k", cmd, NULL};
 	return launch_execv(c, FOREGROUND, E_MUTE);
 }
 

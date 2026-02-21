@@ -915,7 +915,7 @@ import_from_data_dir(const char *src_filename, char *dest, const int exec)
 		return FUNC_FAILURE;
 
 	const mode_t old_umask = umask(exec == 1 ? 0077 : 0177); /* flawfinder: ignore */
-	char *cmd[] = {"cp", "--", sys_file, dest, NULL};
+	const char *cmd[] = {"cp", "--", sys_file, dest, NULL};
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	umask(old_umask); /* flawfinder: ignore */
 
@@ -1327,7 +1327,7 @@ create_tmp_rootdir(void)
 		return tmp_root_dir;
 
 	int ret = FUNC_SUCCESS;
-	char *cmd[] = {"mkdir", "-p", "--", tmp_root_dir, NULL};
+	const char *cmd[] = {"mkdir", "-p", "--", tmp_root_dir, NULL};
 	if ((ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR)) == FUNC_SUCCESS)
 		return tmp_root_dir;
 
@@ -1344,7 +1344,7 @@ create_tmp_rootdir(void)
 	if (stat(tmp_root_dir, &a) != -1)
 		return tmp_root_dir;
 
-	char *cmd2[] = {"mkdir", "-p", "--", tmp_root_dir, NULL};
+	const char *cmd2[] = {"mkdir", "-p", "--", tmp_root_dir, NULL};
 	if (launch_execv(cmd2, FOREGROUND, E_NOSTDERR) == FUNC_SUCCESS)
 		return tmp_root_dir;
 
@@ -2296,7 +2296,7 @@ static int
 create_main_config_dir(void)
 {
 	/* Use mkdir(1) to let it handle parent directories. */
-	char *tmp_cmd[] = {"mkdir", "-p", "--", config_dir, NULL};
+	const char *tmp_cmd[] = {"mkdir", "-p", "--", config_dir, NULL};
 	if (launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR) != FUNC_SUCCESS) {
 		config_ok = 0;
 		err('e', PRINT_PROMPT, _("%s: Cannot create configuration "
@@ -4263,7 +4263,8 @@ create_trash_dirs(void)
 		return;
 	}
 
-	char *cmd[] = {"mkdir", "-p", "--", trash_files_dir, trash_info_dir, NULL};
+	const char *cmd[] =
+		{"mkdir", "-p", "--", trash_files_dir, trash_info_dir, NULL};
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 
 	if (ret != FUNC_SUCCESS) {

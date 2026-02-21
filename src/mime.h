@@ -13,7 +13,7 @@
 __BEGIN_DECLS
 
 int  mime_open(char **args);
-int  mime_open_url(char *url);
+int  mime_open_url(const char *url);
 int  mime_open_with(const char *filename, char **args);
 char **mime_open_with_tab(const char *filename, const char *prefix,
 	const int only_names);

@@ -407,7 +407,7 @@ remove_tags(char **args)
 		if (stat(dir, &a) == -1 || !S_ISDIR(a.st_mode))
 			return print_no_such_tag(args[i]);
 
-		char *cmd[] = {"rm", "-r", "--", dir, NULL};
+		const char *cmd[] = {"rm", "-r", "--", dir, NULL};
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == FUNC_SUCCESS) {
 			printf(_("'%s': Successfully removed tag\n"), args[i]);
 			reload_tags();
@@ -676,7 +676,7 @@ recursive_mv_tags(const char *src, const char *dst)
 		}
 		char src_file[PATH_MAX + NAME_MAX + 2];
 		snprintf(src_file, sizeof(src_file), "%s/%s", src_dir, a[i]->d_name);
-		char *cmd[] = {"mv", "--", src_file, dst_dir, NULL};
+		const char *cmd[] = {"mv", "--", src_file, dst_dir, NULL};
 		if ((ret = launch_execv(cmd, FOREGROUND, E_NOFLAG)) != FUNC_SUCCESS)
 			exit_status = ret;
 		free(a[i]);

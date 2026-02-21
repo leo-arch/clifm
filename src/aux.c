@@ -44,7 +44,7 @@ open_config_file(char *app, char *file)
 		return FUNC_FAILURE;
 
 	if (app && *app) {
-		char *cmd[] = {app, file, NULL};
+		const char *cmd[] = {app, file, NULL};
 		return launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	}
 

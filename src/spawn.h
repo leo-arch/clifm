@@ -14,7 +14,7 @@ __BEGIN_DECLS
 
 int get_exit_code(const int status, const int exec_flag);
 int launch_execl(const char *cmd);
-int launch_execv(char **cmd, const int bg, const int xflags);
+int launch_execv(const char **cmd, const int bg, const int xflags);
 
 __END_DECLS
 

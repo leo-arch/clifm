@@ -1952,14 +1952,14 @@ rl_lock(int count, int key)
 	rl_deprep_terminal();
 
 #if defined(__APPLE__)
-	char *cmd[] = {"bashlock", NULL}; /* See https://github.com/acornejo/bashlock */
+	const char *cmd[] = {"bashlock", NULL}; /* See https://github.com/acornejo/bashlock */
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__)
-	char *cmd[] = {"lock", "-p", NULL};
+	const char *cmd[] = {"lock", "-p", NULL};
 #elif defined(__HAIKU__)
-	char *cmd[] = {"peaclock", NULL};
+	const char *cmd[] = {"peaclock", NULL};
 #else
-	char *cmd[] = {"vlock", NULL};
+	const char *cmd[] = {"vlock", NULL};
 #endif /* __APPLE__ */
 	ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
@@ -2331,7 +2331,7 @@ rl_manpage(int count, int key)
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
-	char *cmd[] = {"man", PROGRAM_NAME, NULL};
+	const char *cmd[] = {"man", PROGRAM_NAME, NULL};
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 		rl_reset_line_state();
 		return FUNC_FAILURE;

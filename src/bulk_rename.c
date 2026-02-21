@@ -95,7 +95,7 @@ rename_file(char *oldpath, char *newpath)
 		return errno;
 	}
 
-	char *cmd[] = {"mv", "--", oldpath, npath, NULL};
+	const char *cmd[] = {"mv", "--", oldpath, npath, NULL};
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	free(npath);
 	return ret;
@@ -209,7 +209,7 @@ open_tmpfile(char *app, char *file)
 		application = app + 1;
 
 	if (application) {
-		char *cmd[] = {application, file, NULL};
+		const char *cmd[] = {application, file, NULL};
 		const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 		if (ret != FUNC_SUCCESS)

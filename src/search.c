@@ -46,14 +46,14 @@ struct search_t {
 };
 
 static int
-exec_find(char *name, char *_path, char *method, char *pattern)
+exec_find(const char *name, const char *_path, const char *method, const char *pattern)
 {
 	if (conf.follow_symlinks == 1) {
-		char *cmd[] = {name, "-L", _path, method, pattern, NULL};
+		const char *cmd[] = {name, "-L", _path, method, pattern, NULL};
 		return launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 	}
 
-	char *cmd[] = {name, _path, method, pattern, NULL};
+	const char *cmd[] = {name, _path, method, pattern, NULL};
 	return launch_execv(cmd, FOREGROUND, E_NOSTDERR);
 }
 

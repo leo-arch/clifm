@@ -17,7 +17,7 @@ __BEGIN_DECLS
 int  err(const int msg_type, const int prompt_flag, const char *format, ...);
 int  alias_import(char *file);
 void bonus_function(void);
-int  confirm_sudo_cmd(char **cmd);
+int  confirm_sudo_cmd(const char **cmd);
 int  create_usr_var(char *str);
 int  expand_prompt_name(char *name);
 int  filter_function(char *arg);

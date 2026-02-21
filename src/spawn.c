@@ -156,7 +156,7 @@ launch_execl(const char *cmd)
  * (cmd), an integer (bg) specifying if the command should be
  * backgrounded (1) or not (0), and a flag to control file descriptors. */
 int
-launch_execv(char **cmd, const int bg, const int xflags)
+launch_execv(const char **cmd, const int bg, const int xflags)
 {
 	if (!cmd)
 		return EINVAL;
@@ -199,7 +199,7 @@ launch_execv(char **cmd, const int bg, const int xflags)
 			close(fd);
 		}
 
-		execvp(cmd[0], cmd);
+		execvp(cmd[0], (char *const *)cmd);
 		/* These error messages will be printed only if E_NOSTDERR is unset.
 		 * Otherwise, the caller should print the error messages itself. */
 		if (errno == ENOENT) {

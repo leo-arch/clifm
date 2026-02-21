@@ -1123,7 +1123,7 @@ launch_shell(const char *arg)
 {
 	if (!arg[1]) {
 		/* If just ":" or ";", launch the default shell */
-		char *cmd[] = {user.shell, NULL};
+		const char *cmd[] = {user.shell, NULL};
 		return launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	}
 

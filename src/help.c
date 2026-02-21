@@ -510,10 +510,11 @@ quick_help(const char *topic)
 	const char *p = (s && *(++s)) ? s : pager_app;
 
 	if (*p == 'l' && strcmp(p, "less") == 0) {
-		char *cmd[] = {pager_app, "-FIRXP?e\\(END\\):CLIFM", tmp_file, NULL};
+		const char *cmd[] =
+			{pager_app, "-FIRXP?e\\(END\\):CLIFM", tmp_file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	} else {
-		char *cmd[] = {pager_app, tmp_file, NULL};
+		const char *cmd[] = {pager_app, tmp_file, NULL};
 		ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	}
 
