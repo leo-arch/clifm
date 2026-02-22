@@ -564,7 +564,7 @@ set_file_perms(char **args)
 	size_t n = 0;
 	const mode_t mode = (mode_t)strtol(octal_str, 0, 8);
 	for (size_t i = 1; args[i]; i++) {
-		if (fchmodat(XAT_FDCWD, args[i], mode, 0) == FUNC_SUCCESS) {
+		if (fchmodat(XAT_FDCWD, args[i], mode, 0) == 0) {
 			n++;
 		} else {
 			xerror(_("pc: Changing permissions of '%s': %s\n"),
@@ -788,7 +788,7 @@ get_color_size(const off_t s, char *str, const size_t len)
 	int n = 0;
 
 	/* Keep compatibility with old-style config, which only accepted 3 shades
-	 * for 8 color shades type. This check should be removed in the future. */
+	 * for 8-color-shade type. This check should be removed in the future. */
 	if (size_shades_old_style == 1) {
 		if      (s <      base*base) n = 1; /* Byte and Kb */
 		else if (s < base*base*base) n = 2; /* Mb */
@@ -834,7 +834,7 @@ get_color_age(const time_t t, char *str, const size_t len)
 	int n;
 
 	/* Keep compatibility with old-style config, which only accepted 3 shades
-	 * for 8 color shades type. This check should be removed in the future. */
+	 * for 8-color-shade type. This check should be removed in the future. */
 	if (date_shades_old_style == 1) {
 		if      (age <         0LL) n = 0;
 		else if (age <=    60LL*60) n = 1; /* One hour or less */
@@ -878,9 +878,13 @@ get_color_age(const time_t t, char *str, const size_t len)
 static int
 xattr_val_is_printable(const char *val, const size_t len)
 {
-	for (size_t i = 0; i < len; i++)
-		if (val[len] < ' ') /* Control char (== non-printable) */
+	const unsigned char *v = (const unsigned char *)val;
+
+	for (size_t i = 0; i < len; i++) {
+		/* Reject control chars, DEL, and non-ASCII. */
+		if (v[i] < ' ' || v[i] == 0x7f || v[i] >= 0x80)
 			return 0;
+	}
 
 	return 1;
 }
