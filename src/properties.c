@@ -880,7 +880,7 @@ xattr_val_is_printable(const char *val, const size_t len)
 {
 	const unsigned char *v = (const unsigned char *)val;
 
-	for (size_t i = 0; i < len; i++) {
+	for (size_t i = 0; i < len && v[i] != '\0'; i++) {
 		/* Reject control chars, DEL, and non-ASCII. */
 		if (v[i] < ' ' || v[i] == 0x7f || v[i] >= 0x80)
 			return 0;
