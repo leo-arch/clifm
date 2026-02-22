@@ -3094,6 +3094,8 @@ get_birth_time(const filesn_t n, const struct stat *a)
 # else
 	birth_time = a->ST_BTIME.tv_sec;
 # endif /* LINUX_STATX */
+#else
+	UNUSED(n); UNUSED(a);
 #endif /* ST_BTIME */
 
 	return birth_time;
