@@ -1892,18 +1892,22 @@ print_error_no_mime(char **fpath)
 static void
 print_info_name_mime(const char *filename, const char *mime)
 {
-	printf(_("Name: %s\n"), filename ? filename : _("None"));
+	printf(_("Name:      %s\n"), filename ? filename : _("None"));
 	printf(_("MIME type: %s\n"), mime ? mime : _("unknown"));
 }
 
 static int
 print_mime_info(char **app, char **fpath, char **mime)
 {
+	char *uri = url_encode(*fpath, 1);
+	printf(_("URI:       %s\n"), uri ? uri : _("unknown"));
+	free(uri);
+
 	if (*(*app) == 'a' && (*app)[1] == 'd' && !(*app)[2]) {
-		printf(_("Opening application: ad [builtin] (match: %s)\n"),
+		printf(_("Open:      ad [builtin] (match: %s)\n"),
 			g_mime_match ? "MIME type" : "name");
 	} else {
-		printf(_("Opening application: '%s' (match: %s)\n"), *app,
+		printf(_("Open:      '%s' (match: %s)\n"), *app,
 			g_mime_match ? "MIME type" : "name");
 	}
 
@@ -1923,7 +1927,7 @@ print_mime_info(char **app, char **fpath, char **mime)
 	}
 
 	char *preview_app = get_app(*mime, *fpath);
-	printf(_("Preview application: '%s' %s\n"),
+	printf(_("Preview:   '%s' %s\n"),
 		(preview_app && *preview_app) ? preview_app : "None",
 		(preview_app && *preview_app)
 		? (g_mime_match ? "(match: MIME type)" : "(match: name)") : "");
