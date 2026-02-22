@@ -191,6 +191,7 @@ _clifm ()
 	    COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "--opener" ]]; then
+		# shellcheck disable=SC2086
 	    local apps=$(ls -AG $(echo $PATH | awk -F':' '{ for (i=1; i<NF; i++) print $i}') | grep -v "/\|^$")
         COMPREPLY=( $(compgen -W "$apps" -- "$cur") )
 
