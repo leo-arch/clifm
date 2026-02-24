@@ -2389,12 +2389,6 @@ exec_cmd(char **args)
 	|| strcmp(args[0], "commands") == 0))
 		return (exit_code = list_commands());
 
-	/* #### PATH, CWD #### */
-	else if ((*args[0] == 'p' && (strcmp(args[0], "pwd") == 0
-	|| strcmp(args[0], "path") == 0)) || strcmp(args[0], "cwd") == 0) {
-		return (exit_code = pwd_function(args[1]));
-	}
-
 	/* #### HELP #### */
 	else if ((*args[0] == '?' && !args[0][1]) || strcmp(args[0], "help") == 0) {
 		return (exit_code = quick_help(args[1]));

@@ -458,7 +458,6 @@ const struct cmdslist_t internal_cmds[] = {
 	{"commands", 8, NO_PARAM, 0},
 	{"cs", 2, PARAM_STR, 0},
 	{"colorschemes", 12, PARAM_STR, 0},
-	{"cwd", 3, NO_PARAM, 0}, // deprecate this one, just as 'path'
 	{"d", 1, PARAM_FNAME, 0},
 	{"dup", 3, PARAM_FNAME, 0},
 	{"ds", 2, PARAM_FNAME, 0}, // diff (old 0110, new 1110)
@@ -521,7 +520,6 @@ const struct cmdslist_t internal_cmds[] = {
 	{"pp", 2, PARAM_FNAME, 0},
 	{"pr", 2, PARAM_FNAME, 0},
 	{"prop", 4, PARAM_FNAME, 0},
-	{"path", 4, NO_PARAM, 0}, // deprecate this one, just as 'cwd'
 	{"paste", 5, PARAM_FNAME, 0},
 	{"pf", 2, PARAM_STR, 0},
 	{"prof", 4, PARAM_STR, 0},

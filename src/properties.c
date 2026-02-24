@@ -953,7 +953,7 @@ print_extended_attributes(const char *s, const mode_t mode, const int xattr)
 				if (xattr_val_is_printable(val, (size_t)vallen) == 1)
 					printf("%s\n", val);
 				else
-					putchar('\n');
+					printf(_("<binary data, %zd bytes>\n"), vallen);
 			}
 
 			free(val);
