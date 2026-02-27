@@ -724,12 +724,13 @@ list_kbinds(void)
 			continue;
 
 		const char *translation = xtranslate_key(kbinds[i].key);
-		xstrsncpy(prev_key, translation, sizeof(prev_key));
 
 		if (i > 0 && kbinds[i - 1].function
 		&& strcmp(kbinds[i].function, kbinds[i - 1].function) == 0
 		&& strcmp(prev_key, translation) == 0)
 			continue;
+
+		xstrsncpy(prev_key, translation, sizeof(prev_key));
 
 		printf("%-*s (%s)\n", i_flen, kbinds[i].function,
 			translation ? translation : kbinds[i].key);
