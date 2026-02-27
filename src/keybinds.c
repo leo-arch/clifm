@@ -716,11 +716,20 @@ list_kbinds(void)
 			flen = l;
 	}
 
+	char prev_key[NAME_MAX + 1] = "";
+
 	for (size_t i = 0; i < kbinds_n; i++) {
 		if (!kbinds[i].key || !kbinds[i].function)
 			continue;
 
 		const char *translation = xtranslate_key(kbinds[i].key);
+		xstrsncpy(prev_key, translation, sizeof(prev_key));
+
+		if (i > 0 && kbinds[i - 1].function
+		&& strcmp(kbinds[i].function, kbinds[i - 1].function) == 0
+		&& strcmp(prev_key, translation) == 0)
+			continue;
+
 		printf("%-*s (%s)\n", (int)flen, kbinds[i].function,
 			translation ? translation : kbinds[i].key);
 	}
