@@ -716,6 +716,7 @@ list_kbinds(void)
 			flen = l;
 	}
 
+	const int i_flen = flen > INT_MAX ? INT_MAX : (int)flen;
 	char prev_key[NAME_MAX + 1] = "";
 
 	for (size_t i = 0; i < kbinds_n; i++) {
@@ -730,7 +731,7 @@ list_kbinds(void)
 		&& strcmp(prev_key, translation) == 0)
 			continue;
 
-		printf("%-*s (%s)\n", (int)flen, kbinds[i].function,
+		printf("%-*s (%s)\n", i_flen, kbinds[i].function,
 			translation ? translation : kbinds[i].key);
 	}
 
