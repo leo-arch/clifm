@@ -199,6 +199,7 @@ print_tips(const int all)
 		"Set a custom shell to run external commands: e.g., 'CLIFM_SHELL=/bin/dash clifm'",
 		"Print all tips: 'tips'",
 		"Create files from a template. Run 'n --help' for details.",
+		"Press 'z<TAB>' to get the list of built-in command aliases",
 		NULL};
 
 	const size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
