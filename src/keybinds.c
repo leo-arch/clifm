@@ -94,7 +94,7 @@ append_str(char *buf, const int buf_size, size_t *len, const char *str)
 	return 0;
 }
 
-#define KBUF_SIZE 256 /* This should be enough to handle most keybindings. */
+#define KEY_BUF_SIZE 256 /* This should be enough to handle most keybindings. */
 #define END_KEYSEQ_CHAR ','
 
 static const char *
@@ -106,13 +106,13 @@ translate_emacs_style_keyseq(const char *key)
 	if (key[1] == 'e' && (key[2] == CSI_INTRODUCER || key[2] == SS3_INTRODUCER))
 		return NULL;
 
-	static char buf[KBUF_SIZE] = {0};
+	static char buf[KEY_BUF_SIZE] = {0};
 	size_t buf_len = 0;
 
 	while (*key) {
 		if (*key == '\\') {
 			if (key[1] == 'e' || (key[1] == 'M' && key[2] ==  '-')) {
-				if (append_str(buf, KBUF_SIZE, &buf_len, "Alt+") == -1)
+				if (append_str(buf, sizeof(buf), &buf_len, "Alt+") == -1)
 					return NULL;
 				/* If "\M-" we want to advance 3 bytes, not 2. */
 				key += 2 + (key[1] ==  'M');
@@ -122,7 +122,7 @@ translate_emacs_style_keyseq(const char *key)
 			}
 
 			if (key[1] == 'C' && key[2] == '-') {
-				if (append_str(buf, KBUF_SIZE, &buf_len, "Ctrl+") == -1)
+				if (append_str(buf, sizeof(buf), &buf_len, "Ctrl+") == -1)
 					return NULL;
 				key += 3;
 				if (!*key) /* Incomplete sequence: Ctrl without modified key. */
@@ -188,7 +188,7 @@ xtranslate_key(const char *key)
 
 	const char *key_ptr = key;
 
-	static char buf[KBUF_SIZE] = "";
+	static char buf[KEY_BUF_SIZE] = "";
 	int c = 0;
 	while (*key_ptr) {
 		if (*key_ptr == '\\' && key_ptr[1] == 'e') {
@@ -717,7 +717,7 @@ list_kbinds(void)
 	}
 
 	const int i_flen = flen > INT_MAX ? INT_MAX : (int)flen;
-	char prev_key[NAME_MAX + 1] = "";
+	char prev_key[KEY_BUF_SIZE] = "";
 
 	for (size_t i = 0; i < kbinds_n; i++) {
 		if (!kbinds[i].key || !kbinds[i].function)
@@ -765,7 +765,7 @@ list_rl_kbinds(void)
 			flen = l;
 	}
 
-	char prev[KBUF_SIZE] = "";
+	char prev[KEY_BUF_SIZE] = "";
 
 	for (size_t i = 0; (name = names[i]); i++) {
 		if ((*name == 's' && strcmp(name, "self-insert") == 0)
@@ -808,7 +808,7 @@ list_rl_kbinds(void)
 
 	return FUNC_SUCCESS;
 }
-#undef KBUF_SIZE
+#undef KEY_BUF_SIZE
 
 int
 kbinds_function(char **args)
