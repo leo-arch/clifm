@@ -483,7 +483,7 @@ The archiver function brings two modes: \fBac\fR, to generate archives or compre
 .sp
 Example: `\fBac sel\fR`, `\fBac 4-25 myfile\fR`, or `\fBad *.tar.gz\fR`.
 .sp
-Notice that, in the case of ZIP-based files, such as \fI.odt\fR, \fI.docx\fR, \fI.apk\fR, and so on, \fBclifm\fR will attempt to dearchive them using either \fBunzip\fR(1) or \fB7z\fR (in this order). If none is found, the operation is skipped. Files are extracted into a directoy named like the archive followed by \fI.extracted\fR in the current curectory. For example, the contents of the file named \fIdocument.odt\fR will be extracted into the directory \fIdocument.odt.extracted\fR.
+Notice that, in the case of ZIP-based files, such as \fI.odt\fR, \fI.docx\fR, \fI.apk\fR, and so on, \fBclifm\fR will attempt to dearchive them using either \fBunzip\fR(1) or \fB7z\fR (in this order). If none is found, the operation is skipped. Files are extracted into a directory named like the archive followed by \fI.extracted\fR in the current directory. For example, the contents of the file named \fIdocument.odt\fR will be extracted into the directory \fIdocument.odt.extracted\fR.
 .sp
 Multiple archive/compression formats are supported, including Zstandard. Note that when it comes to ISO 9660 files only a single file is supported.
 .sp
