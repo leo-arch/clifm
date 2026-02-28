@@ -2453,10 +2453,8 @@ int
 exec_cmd_tm(char **cmd)
 {
 	struct timespec begin, end;
-	int reta = -1;
-
-	if (conf.prompt_b_is_set == 1)
-		reta = clock_gettime(CLOCK_MONOTONIC, &begin);
+	const int reta = conf.prompt_b_is_set == 1
+		? clock_gettime(CLOCK_MONOTONIC, &begin) : -1;
 
 	const int ret = exec_cmd(cmd);
 

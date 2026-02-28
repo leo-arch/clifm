@@ -880,7 +880,7 @@ load_keybinds(void)
 
 		char *tmp = NULL;
 		tmp = strchr(line, ':');
-		if (!tmp || !*(tmp + 1))
+		if (!tmp || !tmp[1])
 			continue;
 
 		/* Now copy left and right values of each keybinding to the
