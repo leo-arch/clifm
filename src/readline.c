@@ -20,6 +20,7 @@
 #include <string.h>
 #include <strings.h> /* str(n)casecmp() */
 #include <unistd.h>
+#include <poll.h>
 #include <errno.h>
 #include <pwd.h>
 #include <grp.h> /* Needed by groups_generator(): getgrent(3) */
@@ -545,6 +546,343 @@ fix_rl_point(const unsigned char c)
 	rl_point += mlen > 0 ? mlen - 1 : 0;
 }
 
+/* Mouse support (SGR mode: ESC [ < b ; x ; y M/m) */
+/* Keep these short to avoid noticeable delays for non-mouse ESC sequences. */
+#define MOUSE_PARSE_TIMEOUT_FIRST_MS 8
+#define MOUSE_PARSE_TIMEOUT_NEXT_MS  4
+#define MOUSE_DBLCLICK_MAX_MS 350
+#define MOUSE_PENDING_BUF_SIZE 64
+
+static unsigned char mouse_pending_buf[MOUSE_PENDING_BUF_SIZE];
+static size_t mouse_pending_len = 0;
+static size_t mouse_pending_pos = 0;
+
+static filesn_t mouse_last_index = (filesn_t)-1;
+static struct timespec mouse_last_click = {0};
+
+enum mouse_seq_ret {
+	MOUSE_SEQ_NOT_MOUSE = 0,
+	MOUSE_SEQ_CONSUMED,
+	MOUSE_SEQ_ACCEPT_LINE
+};
+
+void
+enable_mouse_if_interactive(void)
+{
+	if (mouse_enabled == 0 && xargs.list_and_quit != 1
+	&& xargs.open != 1 && xargs.preview != 1
+	&& isatty(STDIN_FILENO) == 1 && isatty(STDOUT_FILENO) == 1) {
+		SET_MOUSE_TRACKING;
+		fflush(stdout);
+		mouse_enabled = 1;
+	}
+}
+
+static inline int
+is_blank_char(const char c)
+{
+	return c == ' ' || c == '\t';
+}
+
+static int
+has_command_prefix(const char *line)
+{
+	if (!line || !*line)
+		return 0;
+
+	while (*line && is_blank_char(*line))
+		line++;
+
+	return *line ? 1 : 0;
+}
+
+static void
+queue_pending_byte(const unsigned char c)
+{
+	if (mouse_pending_len >= MOUSE_PENDING_BUF_SIZE)
+		return;
+	mouse_pending_buf[mouse_pending_len++] = c;
+}
+
+static void
+queue_pending_bytes(const unsigned char *buf, const size_t len)
+{
+	for (size_t i = 0; i < len; i++)
+		queue_pending_byte(buf[i]);
+}
+
+static int
+pop_pending_byte(unsigned char *c)
+{
+	if (!c || mouse_pending_pos >= mouse_pending_len)
+		return 0;
+
+	*c = mouse_pending_buf[mouse_pending_pos++];
+	if (mouse_pending_pos >= mouse_pending_len)
+		mouse_pending_pos = mouse_pending_len = 0;
+
+	return 1;
+}
+
+static int
+read_byte_with_timeout(const int fd, unsigned char *c, const int timeout_ms)
+{
+	if (!c)
+		return 0;
+
+	struct pollfd pfd = {.fd = fd, .events = POLLIN, .revents = 0};
+	int pret;
+	do {
+		pret = poll(&pfd, 1, timeout_ms);
+	} while (pret < 0 && errno == EINTR);
+
+	if (pret <= 0 || (pfd.revents & POLLIN) == 0)
+		return 0;
+
+	return read(fd, c, 1) == 1; // flawfinder: ignore
+}
+
+static inline long
+get_elapsed_ms(const struct timespec *from, const struct timespec *to)
+{
+	return (to->tv_sec - from->tv_sec) * 1000L
+		+ (to->tv_nsec - from->tv_nsec) / 1000000L;
+}
+
+static filesn_t
+get_clicked_file_by_coord(const int x, const int y)
+{
+	if (!file_info || g_files_num == 0 || x <= 0 || y <= 0)
+		return (filesn_t)-1;
+
+	filesn_t i = g_files_num;
+	while (--i >= 0) {
+		if (!file_info[i].name || file_info[i].mouse_row != y
+		|| file_info[i].mouse_col_start <= 0
+		|| file_info[i].mouse_col_end < file_info[i].mouse_col_start)
+			continue;
+
+		if (x >= file_info[i].mouse_col_start
+		&& x <= file_info[i].mouse_col_end)
+			return i;
+	}
+
+	return (filesn_t)-1;
+}
+
+static char *
+escape_clicked_name(const filesn_t index)
+{
+	if (index < 0 || !file_info || !file_info[index].name)
+		return NULL;
+
+	const char *name = file_info[index].name;
+	if (file_info[index].type == DT_REG
+	&& conf.quoting_style != QUOTING_STYLE_BACKSLASH) {
+		const char quote_char = conf.quoting_style
+			== QUOTING_STYLE_DOUBLE_QUOTES ? '"' : '\'';
+		/* Do not wrap with quotes if this would produce a broken token. */
+		if (strchr(name, quote_char) == NULL && strchr(name, '\\') == NULL) {
+			char *quoted = quote_str(name);
+			if (quoted)
+				return quoted;
+		}
+	}
+
+	return escape_str(name);
+}
+
+static int
+handle_mouse_left_click(const int x, const int y)
+{
+	const filesn_t index = get_clicked_file_by_coord(x, y);
+	if (index == (filesn_t)-1)
+		return MOUSE_SEQ_CONSUMED;
+
+	char *arg = escape_clicked_name(index);
+	if (!arg || !*arg) {
+		free(arg);
+		return MOUSE_SEQ_CONSUMED;
+	}
+
+	struct timespec now = {0};
+	const int clock_ok = (clock_gettime(CLOCK_MONOTONIC, &now) == 0);
+	const int is_double_click = (clock_ok == 1
+		&& mouse_last_index == index
+		&& mouse_last_click.tv_sec > 0
+		&& get_elapsed_ms(&mouse_last_click, &now) <= MOUSE_DBLCLICK_MAX_MS);
+
+	mouse_last_index = index;
+	mouse_last_click = (clock_ok == 1) ? now : (struct timespec){0};
+
+#ifndef _NO_SUGGESTIONS
+	if (suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
+#endif /* !_NO_SUGGESTIONS */
+
+	if (is_double_click == 0) {
+		if (has_command_prefix(rl_line_buffer) == 1) {
+			const char *line = rl_line_buffer;
+			const size_t line_len = strlen(line);
+			const int need_space = (line_len == 0
+				|| is_blank_char(line[line_len - 1])) ? 0 : 1;
+			const size_t new_len = line_len + (size_t)need_space
+				+ strlen(arg) + 1;
+			char *new_line = xnmalloc(new_len, sizeof(char));
+			snprintf(new_line, new_len, "%s%s%s", line,
+				need_space == 1 ? " " : "", arg);
+			rl_replace_line(new_line, 1);
+			free(new_line);
+		} else {
+			rl_replace_line(arg, 1);
+		}
+		rl_point = rl_end;
+		rl_redisplay();
+		cmdhist_flag = 1;
+		free(arg);
+		return MOUSE_SEQ_CONSUMED;
+	}
+
+	size_t cmd_len = strlen(arg) + 6;
+	char *cmd = xnmalloc(cmd_len, sizeof(char));
+	if (file_info[index].dir == 1)
+		snprintf(cmd, cmd_len, "cd %s", arg);
+	else
+		snprintf(cmd, cmd_len, "open %s", arg);
+
+	rl_replace_line(cmd, 1);
+	rl_point = rl_end;
+	rl_redisplay();
+	cmdhist_flag = 1;
+
+	free(cmd);
+	free(arg);
+	mouse_last_index = (filesn_t)-1;
+	mouse_last_click = (struct timespec){0};
+	return MOUSE_SEQ_ACCEPT_LINE;
+}
+
+static int
+handle_mouse_scroll(const int x, const int y, const int dir)
+{
+	UNUSED(x); UNUSED(y);
+	if ((dir != -1 && dir != 1) || !history || current_hist_n == 0)
+		return MOUSE_SEQ_CONSUMED;
+
+#ifndef _NO_SUGGESTIONS
+	if (suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
+#endif /* !_NO_SUGGESTIONS */
+
+	cmdhist_flag = 1;
+	size_t p = curhistindex;
+	if (p > current_hist_n)
+		p = current_hist_n;
+
+	if (dir < 0) { /* Wheel up: previous (older) history entry. */
+		if (p == 0)
+			return MOUSE_SEQ_CONSUMED;
+		p--;
+	} else { /* Wheel down: next (newer) history entry. */
+		if (p >= current_hist_n) {
+			curhistindex = current_hist_n;
+			return MOUSE_SEQ_CONSUMED;
+		}
+		p++;
+		if (p >= current_hist_n) {
+			rl_replace_line("", 1);
+			rl_point = rl_end;
+			rl_redisplay();
+			curhistindex = current_hist_n;
+			return MOUSE_SEQ_CONSUMED;
+		}
+	}
+
+	if (!history[p].cmd)
+		return MOUSE_SEQ_CONSUMED;
+
+	rl_replace_line(history[p].cmd, 1);
+	rl_point = rl_end;
+	rl_redisplay();
+	curhistindex = p;
+	return MOUSE_SEQ_CONSUMED;
+}
+
+static int
+handle_mouse_sequence(FILE *stream)
+{
+	if (mouse_enabled == 0)
+		return MOUSE_SEQ_NOT_MOUSE;
+
+	const int fd = fileno(stream);
+	unsigned char seq[64];
+	size_t len = 0;
+	unsigned char c = 0;
+
+	if (!read_byte_with_timeout(fd, &c, MOUSE_PARSE_TIMEOUT_FIRST_MS))
+		return MOUSE_SEQ_NOT_MOUSE;
+
+	if (c != '[') {
+		queue_pending_byte(c);
+		return MOUSE_SEQ_NOT_MOUSE;
+	}
+	seq[len++] = c;
+
+	if (!read_byte_with_timeout(fd, &c, MOUSE_PARSE_TIMEOUT_NEXT_MS)) {
+		queue_pending_bytes(seq, len);
+		return MOUSE_SEQ_NOT_MOUSE;
+	}
+
+	if (c != '<') {
+		queue_pending_bytes(seq, len);
+		queue_pending_byte(c);
+		return MOUSE_SEQ_NOT_MOUSE;
+	}
+	seq[len++] = c;
+
+	while (len < sizeof(seq) - 1) {
+		if (!read_byte_with_timeout(fd, &c, MOUSE_PARSE_TIMEOUT_NEXT_MS)) {
+			queue_pending_bytes(seq, len);
+			return MOUSE_SEQ_NOT_MOUSE;
+		}
+		seq[len++] = c;
+		if (c == 'M' || c == 'm')
+			break;
+	}
+
+	if (len == sizeof(seq) - 1
+	&& seq[len - 1] != 'M' && seq[len - 1] != 'm') {
+		queue_pending_bytes(seq, len);
+		return MOUSE_SEQ_NOT_MOUSE;
+	}
+
+	if (len < 5 || (seq[len - 1] != 'M' && seq[len - 1] != 'm'))
+		return MOUSE_SEQ_CONSUMED;
+
+	seq[len] = '\0';
+
+	int button = 0;
+	int x = 0;
+	int y = 0;
+	char suffix = '\0';
+
+	if (sscanf((const char *)seq, "[<%d;%d;%d%c", &button, &x, &y, &suffix) != 4)
+		return MOUSE_SEQ_CONSUMED;
+
+	/* Mouse wheel: button 64 (up), 65 (down). */
+	if (suffix == 'M' && (button & 64) != 0 && (button & 32) == 0) {
+		const int dir = (button & 1) ? 1 : -1;
+		return handle_mouse_scroll(x, y, dir);
+	}
+
+	/* Plain left-button press only (ignore release/motion/other buttons). */
+	if (suffix != 'M' || (button & 3) != 0 || (button & 32) != 0
+	|| (button & 64) != 0)
+		return MOUSE_SEQ_CONSUMED;
+
+	return handle_mouse_left_click(x, y);
+}
+
 /* Custom implementation of readline's rl_getc() hacked to introduce
  * suggestions, alternative tab completion, and syntax highlighting.
  * This function is automatically called by readline() to handle input. */
@@ -559,8 +897,25 @@ my_rl_getc(FILE *stream)
 		prompt_offset = get_prompt_offset(rl_prompt);
 
 	while (1) {
-		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
+		if (pop_pending_byte(&c) == 1)
+			result = (int)sizeof(unsigned char);
+		else
+			result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
+
 		if (result == sizeof(unsigned char)) {
+			if (c == KEY_ESC) {
+				const int mouse_ret = handle_mouse_sequence(stream);
+				if (mouse_ret == MOUSE_SEQ_CONSUMED) {
+					prev = 0;
+					continue;
+				}
+
+				if (mouse_ret == MOUSE_SEQ_ACCEPT_LINE) {
+					prev = 0;
+					return KEY_ENTER;
+				}
+			}
+
 			/* Ctrl+d (empty command line only). Let's check that the previous
 			 * char wasn't ESC to prevent Ctrl+Alt+d to be taken as Ctrl+d */
 			if (c == CTRL('D') && prev != KEY_ESC && rl_nohist == 0
@@ -4565,6 +4920,8 @@ initialize_readline(void)
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote(). */
 	quote_chars = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
+
+	enable_mouse_if_interactive();
 
 	return FUNC_SUCCESS;
 }

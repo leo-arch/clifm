@@ -26,6 +26,56 @@
 #include "listing.h"  /* reload_dirlist */
 #include "misc.h"     /* xerror */
 
+struct term_modes_backup {
+	int mouse;
+	int kitty;
+};
+
+/* Temporarily restore terminal input modes before launching a foreground
+ * child process so external apps don't inherit clifm-specific protocols. */
+static struct term_modes_backup
+disable_term_modes_for_child(const int bg)
+{
+	struct term_modes_backup bk = {0};
+
+	if (bg != 0 || isatty(STDIN_FILENO) == 0 || isatty(STDOUT_FILENO) == 0)
+		return bk;
+
+	if (mouse_enabled == 1) {
+		UNSET_MOUSE_TRACKING;
+		mouse_enabled = 0;
+		bk.mouse = 1;
+	}
+
+	if (xargs.kitty_keys == 1) {
+		UNSET_KITTY_KEYS;
+		bk.kitty = 1;
+	}
+
+	if (bk.mouse == 1 || bk.kitty == 1)
+		fflush(stdout);
+
+	return bk;
+}
+
+static void
+restore_term_modes_after_child(const struct term_modes_backup *bk)
+{
+	if (!bk || isatty(STDIN_FILENO) == 0 || isatty(STDOUT_FILENO) == 0)
+		return;
+
+	if (bk->kitty == 1)
+		SET_KITTY_KEYS;
+
+	if (bk->mouse == 1) {
+		SET_MOUSE_TRACKING;
+		mouse_enabled = 1;
+	}
+
+	if (bk->mouse == 1 || bk->kitty == 1)
+		fflush(stdout);
+}
+
 int
 get_exit_code(const int status, const int exec_flag)
 {
@@ -137,7 +187,9 @@ launch_execl(const char *cmd)
 	if (!cmd || !*cmd)
 		return EINVAL;
 
+	const struct term_modes_backup bk = disable_term_modes_for_child(FOREGROUND);
 	const int status = xsystem(cmd);
+	restore_term_modes_after_child(&bk);
 
 	const int exit_status = get_exit_code(status, EXEC_FG_PROC);
 
@@ -162,10 +214,12 @@ launch_execv(const char **cmd, const int bg, const int xflags)
 		return EINVAL;
 
 	int status = 0;
+	const struct term_modes_backup bk = disable_term_modes_for_child(bg);
 	pid_t pid = fork();
 
 	if (pid < 0) {
 		xerror("%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
+		restore_term_modes_after_child(&bk);
 		return errno;
 	}
 
@@ -230,5 +284,6 @@ launch_execv(const char **cmd, const int bg, const int xflags)
 	if (bg == 1 && status == FUNC_SUCCESS && xargs.open != 1)
 		reload_dirlist();
 
+	restore_term_modes_after_child(&bk);
 	return status;
 }

@@ -145,6 +145,38 @@ static int dir_out = 0;
 static int pager_quit = 0;
 static int pager_help = 0;
 static int long_view_bk = UNSET;
+static int mouse_row_origin = 1;
+
+static inline void
+set_mouse_hitbox(const filesn_t i, const int row, const int col_start,
+	const int col_end)
+{
+	int start, end;
+
+	if (!file_info || !file_info[i].name)
+		return;
+
+	start = col_start > 0 ? col_start : 1;
+	end = (col_end >= start) ? col_end : start;
+
+	file_info[i].mouse_row = mouse_row_origin + row;
+	file_info[i].mouse_col_start = start;
+	file_info[i].mouse_col_end = end;
+}
+
+static void
+set_mouse_row_origin(void)
+{
+	mouse_row_origin = 1;
+
+	if (isatty(STDIN_FILENO) == 0 || isatty(STDOUT_FILENO) == 0
+	|| term_caps.req_cur_pos == 0)
+		return;
+
+	int col = 0, row = 0;
+	if (get_cursor_position(&col, &row) == FUNC_SUCCESS && row > 0)
+		mouse_row_origin = row;
+}
 
 /* A version of the loop-unswitching optimization: move loop-invariant
  * conditions out of the loop to reduce the number of conditions in each
@@ -1292,6 +1324,7 @@ print_long_mode(int *reset_pager, const int eln_len)
 	const filesn_t f = g_files_num; /* Cache global variable. */
 	const size_t s_term_lines = term_lines > 2 ? (size_t)(term_lines - 2) : 0;
 	size_t pager_counter = 0;
+	int row = 0;
 
 	for (i = 0; i < f; i++) {
 		if (conf_max_files != UNSET && i == conf_max_files)
@@ -1319,6 +1352,7 @@ print_long_mode(int *reset_pager, const int eln_len)
 
 		char *ind_chr = NULL;
 		const char *ind_chr_color = get_ind_char(i, &ind_chr);
+		set_mouse_hitbox(i, row, 1, (int)term_cols > 0 ? (int)term_cols : 1);
 
 		if (conf_no_eln == 0) {
 			printf("%s%*zd%s%s%s%s", el_c, eln_len, i + 1, df_c,
@@ -1329,6 +1363,7 @@ print_long_mode(int *reset_pager, const int eln_len)
 
 		/* Print the remaining part of the entry. */
 		print_entry_props(&file_info[i], &maxes, have_xattr);
+		row++;
 	}
 
 	if (pager_quit == 1)
@@ -2075,11 +2110,17 @@ list_files_horizontal(int *reset_pager, const int eln_len, size_t columns_n)
 	filesn_t i;
 	int last_column = 0;
 	int backup_last_column = last_column;
+	int mouse_row = 0;
+	int mouse_col = 1;
+	const int cell_width = (int)longest.name_len + 1;
 
 	pager_quit = pager_help = 0;
 	size_t pager_counter = 0;
 
 	for (i = 0; i < nn; i++) {
+		const int mouse_row_bk = mouse_row;
+		const int mouse_col_bk = mouse_col;
+
 		/* If current entry is in the last column, we need to print a
 		 * new line char. */
 		size_t bcur_cols = cur_cols;
@@ -2115,6 +2156,8 @@ list_files_horizontal(int *reset_pager, const int eln_len, size_t columns_n)
 				i = backup_i ? backup_i - 1 : backup_i;
 				cur_cols = bcur_cols;
 				last_column = backup_last_column;
+				mouse_row = mouse_row_bk;
+				mouse_col = mouse_col_bk;
 				continue;
 			}
 			pager_counter++;
@@ -2131,6 +2174,7 @@ list_files_horizontal(int *reset_pager, const int eln_len, size_t columns_n)
 		const int max_namelen = conf.max_name_len + fc;
 
 		file_info[i].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(i + 1);
+		set_mouse_hitbox(i, mouse_row, mouse_col, mouse_col + cell_width - 1);
 
 		print_entry_function(&ind_char, i, eln_len, max_namelen);
 
@@ -2138,9 +2182,12 @@ list_files_horizontal(int *reset_pager, const int eln_len, size_t columns_n)
 /*			pad_filename_new(i, termcap_move_right, longest_per_col[cur_col]);
 			cur_col++; */
 			pad_filename(ind_char, i, eln_len, termcap_move_right);
+			mouse_col += cell_width;
 		} else {
 			putchar('\n');
 //			cur_col = 0;
+			mouse_col = 1;
+			mouse_row++;
 		}
 	}
 
@@ -2229,6 +2276,19 @@ list_files_vertical(int *reset_pager, const int eln_len, size_t num_columns)
 
 		int ind_char = (conf_classify != 0);
 
+		const int mouse_row = (row_index > 0) ? (int)(row_index - 1) : 0;
+		int mouse_col = 1;
+#ifdef TIGHT_COLUMNS
+		for (size_t c = 0; c + 1 < column_count; c++)
+			mouse_col += (int)longest_per_col[c] + COLUMNS_GAP;
+		const int cell_width = (int)longest_per_col[column_count - 1]
+			+ (last_column == 0 ? COLUMNS_GAP : 0);
+#else
+		mouse_col += (int)((column_count - 1) * (longest.name_len + 1));
+		const int cell_width = (int)longest.name_len
+			+ (last_column == 0 ? 1 : 0);
+#endif
+
 		if (file_index >= total_files || !file_info[file_index].name) {
 			if (last_column == 1) {
 				/* Last column is empty. E.g.:
@@ -2294,6 +2354,8 @@ list_files_vertical(int *reset_pager, const int eln_len, size_t num_columns)
 
 		file_info[file_index].eln_n = conf_no_eln == 1
 			? -1 : DIGINUM(file_index + 1);
+		set_mouse_hitbox(file_index, mouse_row, mouse_col,
+			mouse_col + (cell_width > 0 ? cell_width - 1 : 0));
 
 		print_entry_function(&ind_char, file_index, eln_len, max_namelen);
 
@@ -2926,6 +2988,7 @@ list_dir_light(const int autocmd_ret)
 		&& (conf.columned == 0 || conf.long_view == 1)) ? 1 : get_columns();
 
 	set_pager_view((filesn_t)columns_n);
+	set_mouse_row_origin();
 
 				/* ########################
 				 * #    LONG VIEW MODE    #
@@ -3743,6 +3806,7 @@ list_dir(void)
 		&& (conf.columned == 0 || conf.long_view == 1)) ? 1 : get_columns();
 
 	set_pager_view((filesn_t)columns_n);
+	set_mouse_row_origin();
 
 				/* ########################
 				 * #    LONG VIEW MODE    #

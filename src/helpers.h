@@ -1353,6 +1353,9 @@ struct fileinfo {
 	mode_t type;   /* Store d_type value */
 	int dir;
 	int eln_n;     /* Number of digits in ELN */
+	int mouse_row; /* Absolute terminal row used by mouse hit-testing */
+	int mouse_col_start;
+	int mouse_col_end;
 	int exec;
 	int user_access; /* Read-exec for dirs and read for files */
 	int symlink;
@@ -1917,6 +1920,7 @@ extern int
 	kbind_busy,
 	nesting_level, /* Is this a nested instance? */
 	no_log,
+	mouse_enabled,
 	open_in_foreground, /* Overrides mimelist file value: used by mime_open */
 	prev_ws,
 	print_msg,

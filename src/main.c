@@ -165,6 +165,7 @@ int
 	kbind_busy = 0,
 	nesting_level = 0,
 	no_log = 0,
+	mouse_enabled = 0,
 	open_in_foreground = 0,
 	prev_ws = UNSET,
 	print_msg = 0,

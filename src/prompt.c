@@ -32,6 +32,7 @@
 #include "navigation.h"
 #include "prompt.h"
 #include "properties.h" /* get_file_perms() */
+#include "readline.h"
 #include "sanitize.h"
 #include "sort.h" /* num_to_sort_name() */
 #include "spawn.h"
@@ -1709,6 +1710,7 @@ prompt(const int prompt_flag, const int screen_refresh)
 	prompt_offset = UNSET;
 
 	UNHIDE_CURSOR;
+	enable_mouse_if_interactive();
 
 	/* Print the prompt and get user input */
 	char *input = readline(the_prompt);

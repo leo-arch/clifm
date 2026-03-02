@@ -1467,6 +1467,11 @@ free_stuff(void)
 
 	if (xargs.kitty_keys == 1)
 		UNSET_KITTY_KEYS;
+
+	if (mouse_enabled == 1) {
+		UNSET_MOUSE_TRACKING;
+		mouse_enabled = 0;
+	}
 }
 
 /* Dynamically set MaxFilenameLen based on the current number of terminal

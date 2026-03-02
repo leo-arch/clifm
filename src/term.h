@@ -59,6 +59,10 @@
 #define SET_KITTY_KEYS   fputs("\x1b[>1u", stdout)
 #define UNSET_KITTY_KEYS fputs("\x1b[<u", stdout)
 
+/* X10 mouse tracking + SGR extended mode (xterm-compatible). */
+#define SET_MOUSE_TRACKING   fputs("\x1b[?1000h\x1b[?1006h", stdout)
+#define UNSET_MOUSE_TRACKING fputs("\x1b[?1000l\x1b[?1006l", stdout)
+
 /* Time in millisenconds to wait for terminal responses. */
 #define DEF_READ_TIMEOUT_MS_LOCAL  100
 #define DEF_READ_TIMEOUT_MS_REMOTE 500

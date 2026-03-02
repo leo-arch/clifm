@@ -19,6 +19,7 @@
 __BEGIN_DECLS
 
 int  initialize_readline(void);
+void enable_mouse_if_interactive(void);
 int  is_quote_char(const char c);
 char **my_rl_completion(const char *text, int start, int end);
 char *my_rl_path_completion(const char *text, int state);
