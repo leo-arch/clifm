@@ -62,6 +62,19 @@ is_blank_char(const char c)
 }
 
 static int
+is_escaped_at(const char *s, size_t pos)
+{
+	if (!s || pos == 0)
+		return 0;
+
+	size_t n = 0;
+	while (pos > 0 && s[--pos] == '\\')
+		n++;
+
+	return (n % 2) != 0;
+}
+
+static int
 has_command_prefix(const char *line)
 {
 	if (!line || !*line)
@@ -725,7 +738,7 @@ get_current_arg_str(const char *line, const size_t cmd_end, size_t *start_out)
 	if (!line || !line[cmd_end] || !start_out)
 		return NULL;
 
-	size_t p = cmd_end, first = cmd_end;
+	size_t first = cmd_end;
 	while (line[first] && is_blank_char(line[first]))
 		first++;
 
@@ -736,14 +749,36 @@ get_current_arg_str(const char *line, const size_t cmd_end, size_t *start_out)
 	if (end <= first)
 		return NULL;
 
-	p = end;
-	while (p > first && !is_blank_char(line[p - 1]))
-		p--;
+	int in_single = 0;
+	int in_double = 0;
+	size_t start = first;
+	size_t i = first;
+	while (i < end) {
+		const char c = line[i];
+		if (c == '\'' && in_double == 0 && is_escaped_at(line, i) == 0) {
+			in_single = !in_single;
+			i++;
+			continue;
+		}
+		if (c == '"' && in_single == 0 && is_escaped_at(line, i) == 0) {
+			in_double = !in_double;
+			i++;
+			continue;
+		}
+		if (in_single == 0 && in_double == 0
+		&& is_blank_char(c) && is_escaped_at(line, i) == 0) {
+			while (i < end && is_blank_char(line[i]))
+				i++;
+			start = i;
+			continue;
+		}
+		i++;
+	}
 
-	if (p >= end)
+	if (start >= end)
 		return NULL;
 
-	*start_out = p;
+	*start_out = start;
 	const size_t len = end - *start_out;
 	char *arg = xnmalloc(len + 1, sizeof(char));
 	memcpy(arg, line + *start_out, len);
