@@ -34,8 +34,31 @@ list_commands(void)
 	return FUNC_SUCCESS;
 }
 
-/* Print either all tips (if ALL == 1) or just a random one (ALL == 0) */
-void
+static int
+count_wrapped_tip_line(const char *prefix, const char *tip)
+{
+	if (!tip || !*tip)
+		return 0;
+
+	const int cols = term_cols > 0 ? (int)term_cols : 80;
+	if (cols <= 0)
+		return 1;
+
+	size_t width = 0;
+	if (prefix && *prefix)
+		width += wc_xstrlen(prefix);
+	width += wc_xstrlen(tip);
+
+	/* Fallback in case wc_xstrlen() fails on invalid multibyte input. */
+	if (width == 0)
+		width = (prefix ? strlen(prefix) : 0) + strlen(tip);
+
+	const size_t scol = (size_t)cols;
+	return (int)(width / scol + (width % scol ? 1 : 0));
+}
+
+/* Print either all tips (if ALL == 1) or just a random one (ALL == 0). */
+int
 print_tips(const int all)
 {
 	const char *TIPS[] = {
@@ -206,12 +229,16 @@ print_tips(const int all)
 
 	if (all == 1) {
 		const int l = DIGINUM(tipsn);
+		int lines = 0;
+		char prefix[64];
 		for (size_t i = 0; i < tipsn; i++) {
 			printf("%s%sTIP %*zu%s: %s\n",
 				conf.colorize == 1 ? df_c : "", conf.colorize == 1 ? BOLD : "",
 				l, i, conf.colorize == 1 ? df_c : "", TIPS[i]);
+			snprintf(prefix, sizeof(prefix), "TIP %*zu: ", l, i);
+			lines += count_wrapped_tip_line(prefix, TIPS[i]);
 		}
-		return;
+		return lines;
 	}
 
 #ifndef HAVE_ARC4RANDOM
@@ -224,6 +251,7 @@ print_tips(const int all)
 	printf("%s%sTIP%s: %s\n", conf.colorize == 1 ? df_c : "",
 		conf.colorize == 1 ? BOLD : "", conf.colorize == 1
 		? df_c : "", TIPS[tip_num]);
+	return count_wrapped_tip_line("TIP: ", TIPS[tip_num]);
 }
 
 /* Retrieve pager path, first from PAGER, then try less(1), and finally

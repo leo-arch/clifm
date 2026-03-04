@@ -1168,7 +1168,9 @@ While paging, the following keys are available:
  \fBq\fR: Stop paging (without printing remaining files)
  \fBc\fR: Stop paging (printing remaining files)
 .sp
-Note: To scroll lines up, use whatever your terminal emulator has to offer (e.g., mouse scrolling or some keybinding).
+Note: To scroll lines up in the pager, use whatever your terminal emulator has to offer (e.g., mouse scrolling or some keybinding).
+.sp
+Mouse actions in the prompt/file list are configured separately via the main configuration file (see \fBMouseSupport\fR, \fBInsertOnSingleClick\fR, \fBOpenOnDoubleClick\fR, \fBMouseDirTrailingSlash\fR, and \fBMouseScroll\fR).
 .sp
 By default, the pager lists files using the current listing mode (long or short). Use \fBPagerView\fR in the configuration file (or \fB--pager-view\fR in the command line) to force the use of a specific mode. Possibles values:
 .sp
@@ -3230,6 +3232,18 @@ PROFILE is by default \fBdefault\fR (unless set via \fB-P/--profile\fR).
 You can access the configuration file either via the \fBconfig\fR command or pressing F10.
 .sp
 A description for each option in the configuration file can be found in the configuration file itself.
+.sp
+Mouse-related options in the main configuration file:
+.sp
+ \fBMouseSupport\fR (true/false): Enable or disable mouse handling.
+ \fBInsertOnSingleClick\fR (true/false): Insert clicked entries into the command line.
+ \fBOpenOnDoubleClick\fR (true/false): Open entries on double click (\fBcd\fR for directories, \fBopen\fR for files).
+ \fBMouseDirTrailingSlash\fR (true/false): Append a trailing slash to inserted directory names.
+ \fBMouseScroll\fR (\fBhistory\fR|\fBcommands\fR|\fBdirs\fR|\fBfiles\fR|\fBall\fR|\fBauto\fR):
+   set wheel behavior. \fBauto\fR uses command context:
+   empty line -> history, \fBcd\fR/\fBls\fR -> dirs,
+   \fBcat\fR/\fBless\fR/\fBmore\fR/\fBhead\fR/\fBtail\fR/\fBbat\fR/\fBvim\fR/\fBvi\fR/\fBnvim\fR/\fBnano\fR/\fBemacs\fR/\fBview\fR -> files,
+   otherwise -> all.
 .TP
 .B PROFILE FILE
 The profile file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/profile.clifm\fR.

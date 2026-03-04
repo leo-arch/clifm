@@ -9,6 +9,7 @@
 
 #include "helpers.h"
 
+#include <ctype.h>    /* isspace */
 #include <errno.h>    /* errno */
 #ifndef _BE_POSIX
 # include <paths.h>
@@ -30,6 +31,103 @@ struct term_modes_backup {
 	int mouse;
 	int kitty;
 };
+
+static const char *
+skip_blank_chars(const char *s)
+{
+	if (!s)
+		return NULL;
+
+	while (*s && isspace((unsigned char)*s))
+		s++;
+
+	return s;
+}
+
+static int
+get_next_word(const char **s, char *buf, const size_t buf_len)
+{
+	if (!s || !*s || !buf || buf_len == 0)
+		return 0;
+
+	const char *p = skip_blank_chars(*s);
+	if (!p || !*p)
+		return 0;
+
+	size_t i = 0;
+	while (*p && !isspace((unsigned char)*p)) {
+		if (i + 1 < buf_len)
+			buf[i++] = *p;
+		p++;
+	}
+	buf[i] = '\0';
+	*s = p;
+	return i > 0;
+}
+
+static int
+is_fullscreen_cmd_name(const char *cmd)
+{
+	if (!cmd || !*cmd)
+		return 0;
+
+	const char *base = strrchr(cmd, '/');
+	base = base ? base + 1 : cmd;
+
+	return (strcmp(base, "vi") == 0
+		|| strcmp(base, "vim") == 0
+		|| strcmp(base, "nvim") == 0
+		|| strcmp(base, "nano") == 0
+		|| strcmp(base, "emacs") == 0
+		|| strcmp(base, "less") == 0
+		|| strcmp(base, "more") == 0
+		|| strcmp(base, "man") == 0
+		|| strcmp(base, "view") == 0);
+}
+
+static int
+cmdline_needs_screen_refresh(const char *cmdline)
+{
+	if (!cmdline || !*cmdline)
+		return 0;
+
+	char word[NAME_MAX];
+	const char *p = cmdline;
+	if (get_next_word(&p, word, sizeof(word)) == 0)
+		return 0;
+
+	if (is_fullscreen_cmd_name(word) == 1)
+		return 1;
+
+	if (strcmp(word, "sudo") == 0 || strcmp(word, "doas") == 0) {
+		if (get_next_word(&p, word, sizeof(word)) == 0)
+			return 0;
+		return is_fullscreen_cmd_name(word);
+	}
+
+	return 0;
+}
+
+static int
+argv_needs_screen_refresh(const char **cmd)
+{
+	if (!cmd || !cmd[0] || !*cmd[0])
+		return 0;
+
+	return is_fullscreen_cmd_name(cmd[0]);
+}
+
+static void
+reload_after_fullscreen_cmd(const int already_reloaded, const char *cmdline,
+	const char **cmdv)
+{
+	if (conf.mouse_support != 1 || already_reloaded == 1)
+		return;
+
+	if ((cmdline && cmdline_needs_screen_refresh(cmdline) == 1)
+	|| (cmdv && argv_needs_screen_refresh(cmdv) == 1))
+		reload_dirlist();
+}
 
 /* Temporarily restore terminal input modes before launching a foreground
  * child process so external apps don't inherit clifm-specific protocols. */
@@ -192,11 +290,15 @@ launch_execl(const char *cmd)
 	restore_term_modes_after_child(&bk);
 
 	const int exit_status = get_exit_code(status, EXEC_FG_PROC);
+	int reloaded = 0;
 
 	if (flags & DELAYED_REFRESH) {
 		flags &= ~DELAYED_REFRESH;
 		reload_dirlist();
+		reloaded = 1;
 	}
+
+	reload_after_fullscreen_cmd(reloaded, cmd, NULL);
 
 	return exit_status;
 }
@@ -216,6 +318,7 @@ launch_execv(const char **cmd, const int bg, const int xflags)
 	int status = 0;
 	const struct term_modes_backup bk = disable_term_modes_for_child(bg);
 	pid_t pid = fork();
+	int reloaded = 0;
 
 	if (pid < 0) {
 		xerror("%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
@@ -277,12 +380,18 @@ launch_execv(const char **cmd, const int bg, const int xflags)
 			if ((flags & DELAYED_REFRESH) && xargs.open != 1) {
 				flags &= ~DELAYED_REFRESH;
 				reload_dirlist();
+				reloaded = 1;
 			}
 		}
 	}
 
-	if (bg == 1 && status == FUNC_SUCCESS && xargs.open != 1)
+	if (bg == 1 && status == FUNC_SUCCESS && xargs.open != 1) {
 		reload_dirlist();
+		reloaded = 1;
+	}
+
+	if (bg == 0)
+		reload_after_fullscreen_cmd(reloaded, NULL, cmd);
 
 	restore_term_modes_after_child(&bk);
 	return status;

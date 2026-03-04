@@ -4,6 +4,8 @@
 		###########################################
 
 # This is Clifm's main configuration file.
+# Default location: ~/.config/clifm/profiles/default/clifmrc
+# Apply changes from inside Clifm with the 'rl' command.
 
 # Lines starting with either '#' or ';' are commented out (ignored).
 # Options starting with ';' show default values and are commented out.
@@ -82,6 +84,36 @@
 # long  = List files in long view
 # short = List files in short view
 ;PagerView=auto
+
+# Enable mouse support in the prompt/file list.
+;MouseSupport=true
+
+# Insert the clicked entry into the command line on single click.
+# When OpenOnDoubleClick is also true, insertion is delayed briefly so
+# double click can open directly without an intermediate insert.
+;InsertOnSingleClick=true
+
+# Open entries on double click (directory: cd, file: open).
+;OpenOnDoubleClick=true
+
+# Add a trailing slash when inserting directory names.
+;MouseDirTrailingSlash=true
+
+# Mouse wheel behavior:
+# auto     = empty line -> history; cd/ls -> dirs;
+#            cat/less/more/head/tail/bat/vim/vi/nvim/nano/emacs/view -> files;
+#            otherwise -> all
+# history  = command history (alias: commands)
+# dirs     = always directory names
+# files    = always filenames
+# all      = files + directories
+# Examples:
+#   MouseScroll=all       # Default: cycle files and directories
+#   MouseScroll=history   # Always scroll command history
+#   MouseScroll=dirs      # Always cycle directories (includes '..')
+#   MouseScroll=files     # Always cycle filenames
+#   MouseScroll=auto      # Smart mode by command context
+;MouseScroll=all
 
 # File listing layout: 0 = vertical (like ls), 1 = horizontal.
 ;ListingMode=0

@@ -72,6 +72,7 @@
 #endif /* !_NO_ICONS */
 #include "messages.h"
 #include "misc.h"
+#include "mouse.h"
 #include "properties.h" /* print_analysis_stats() */
 #include "long_view.h"  /* print_entry_props() */
 #include "sanitize.h"
@@ -145,7 +146,6 @@ static int dir_out = 0;
 static int pager_quit = 0;
 static int pager_help = 0;
 static int long_view_bk = UNSET;
-static int mouse_row_origin = 1;
 
 static inline void
 set_mouse_hitbox(const filesn_t i, const int row, const int col_start,
@@ -159,23 +159,30 @@ set_mouse_hitbox(const filesn_t i, const int row, const int col_start,
 	start = col_start > 0 ? col_start : 1;
 	end = (col_end >= start) ? col_end : start;
 
-	file_info[i].mouse_row = mouse_row_origin + row;
+	file_info[i].mouse_row = row;
 	file_info[i].mouse_col_start = start;
 	file_info[i].mouse_col_end = end;
 }
 
-static void
-set_mouse_row_origin(void)
+static inline int
+get_entry_mouse_width(const filesn_t i, const int ind_char, const int eln_len,
+	const int max_namelen)
 {
-	mouse_row_origin = 1;
+	int name_len = (int)file_info[i].len;
+	if (max_namelen != UNSET && max_namelen >= 0 && name_len > max_namelen)
+		name_len = max_namelen;
 
-	if (isatty(STDIN_FILENO) == 0 || isatty(STDOUT_FILENO) == 0
-	|| term_caps.req_cur_pos == 0)
-		return;
+	int width = eln_len + 1 + (conf.icons == 1 ? ICON_LEN : 0)
+		+ name_len + (ind_char ? 1 : 0);
 
-	int col = 0, row = 0;
-	if (get_cursor_position(&col, &row) == FUNC_SUCCESS && row > 0)
-		mouse_row_origin = row;
+	if (file_info[i].dir == 1 && conf.classify == 1) {
+		width++;
+		if (file_info[i].filesn > 0 && conf.file_counter == 1
+		&& file_info[i].user_access == 1)
+			width += DIGINUM((int)file_info[i].filesn);
+	}
+
+	return width > 0 ? width : 1;
 }
 
 /* A version of the loop-unswitching optimization: move loop-invariant
@@ -679,16 +686,16 @@ get_devname(const char *file)
 
 /* Print free/total space for the filesystem where the current directory
  * resides, plus device name and filesystem type name if available. */
-static void
+static int
 print_disk_usage(void)
 {
 	if (!workspaces || !workspaces[cur_ws].path || !*workspaces[cur_ws].path)
-		return;
+		return 0;
 
 	struct statvfs a;
 	if (statvfs(workspaces[cur_ws].path, &a) != FUNC_SUCCESS) {
 		err('w', PRINT_PROMPT, "statvfs: %s\n", strerror(errno));
-		return;
+		return 0;
 	}
 
 	const off_t free_s = (off_t)a.f_bavail * (off_t)a.f_frsize;
@@ -733,9 +740,10 @@ print_disk_usage(void)
  * virtual (for example, /proc, /sys, or /dev/pts). */
 
 	free(free_space);
+	return 1;
 }
 
-static void
+static int
 print_sel_files(const unsigned short t_rows)
 {
 	int limit = conf.max_printselfiles;
@@ -753,49 +761,63 @@ print_sel_files(const unsigned short t_rows)
 		limit = int_sel_n;
 
 	int i;
+	int lines = 0;
 	for (i = 0; i < (conf.max_printselfiles != UNSET ? limit : int_sel_n)
 	&& sel_elements[i].name; i++) {
 		char *p = abbreviate_file_name(sel_elements[i].name);
 		if (!p)
 			continue;
 		colors_list(p, 0, NO_PAD, PRINT_NEWLINE);
+		lines++;
 		if (p != sel_elements[i].name)
 			free(p);
 	}
 
-	if (conf.max_printselfiles != UNSET && limit < int_sel_n)
+	if (conf.max_printselfiles != UNSET && limit < int_sel_n) {
 		printf("... (%d/%zu)\n", i, sel_n);
+		lines++;
+	}
 
 	print_div_line();
+	lines++;
+	return lines;
 }
 
-static void
+static int
 print_dirhist_map(void)
 {
 	const int i = dirhist_cur_index;
 	if (i < 0 || i >= dirhist_total_index)
-		return;
+		return 0;
 
 	const int pad = DIGINUM(1 + (dirhist_cur_index + 1 < dirhist_total_index
 		? dirhist_cur_index + 1 : dirhist_cur_index));
+	int lines = 0;
 
 	if (i > 0 && old_pwd[i - 1])
-		printf("%s%*d%s %s\n", el_c, pad, i, df_c, old_pwd[i - 1]);
+		{ printf("%s%*d%s %s\n", el_c, pad, i, df_c, old_pwd[i - 1]); lines++; }
 
 	printf("%s%*d%s %s%s%s\n", el_c, pad, i + 1,
 		df_c, mi_c, old_pwd[i], df_c);
+	lines++;
 
 	if (i + 1 < dirhist_total_index && old_pwd[i + 1])
-		printf("%s%*d%s %s\n", el_c, pad, i + 2, df_c, old_pwd[i + 1]);
+		{ printf("%s%*d%s %s\n", el_c, pad, i + 2, df_c, old_pwd[i + 1]); lines++; }
+
+	return lines;
 }
 
-static void
+static int
 print_cdpath(void)
 {
-	if (workspaces && workspaces[cur_ws].path && *workspaces[cur_ws].path)
+	if (workspaces && workspaces[cur_ws].path && *workspaces[cur_ws].path) {
 		print_reload_msg(NULL, NULL, "cdpath: %s\n", workspaces[cur_ws].path);
+		is_cdpath = 0;
+		return 1;
+	}
 
 	is_cdpath = 0;
+	return 0;
 }
 
 /* Restore the original value of long-view (taken from LONG_VIEW_BK)
@@ -835,16 +857,19 @@ set_pager_view(const filesn_t columns_n)
 	}
 }
 
-static void
+static int
 print_dir_cmds(void)
 {
 	if (!history || dir_cmds.first_cmd_in_dir > (int)current_hist_n)
-		return;
+		return 0;
 
 	const char *ptr = term_caps.unicode ? DIR_CMD_PTR_U : DIR_CMD_PTR;
 	int i = dir_cmds.first_cmd_in_dir - (dir_cmds.first_cmd_in_dir > 0 ? 1 : 0);
+	int lines = 0;
 	for (; history[i].cmd; i++)
-		printf("%s%s%s %s\n", dn_c, ptr, df_c, history[i].cmd);
+		{ printf("%s%s%s %s\n", dn_c, ptr, df_c, history[i].cmd); lines++; }
+
+	return lines;
 }
 
 static int
@@ -868,50 +893,66 @@ post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 	}
 
 	const size_t s_files = (size_t)g_files_num;
+	int post_lines = 0;
 
 	if (pager_quit == 0 && conf.max_files != UNSET
-	&& g_files_num > (filesn_t)conf.max_files)
+	&& g_files_num > (filesn_t)conf.max_files) {
 		printf("... (%d/%zu)\n", conf.max_files, s_files);
+		post_lines++;
+	}
 
 	print_div_line();
+	post_lines++;
 
 	if (conf.dirhist_map == 1) { /* Print current, previous, and next entries */
-		print_dirhist_map();
+		post_lines += print_dirhist_map();
 		print_div_line();
+		post_lines++;
 	}
 
 	if (sel_n > 0 && conf.print_selfiles == 1)
-		print_sel_files(term_lines);
+		post_lines += print_sel_files(term_lines);
 
 	if (is_cdpath == 1)
-		print_cdpath();
+		post_lines += print_cdpath();
 
 	if (conf.disk_usage == 1)
-		print_disk_usage();
+		post_lines += print_disk_usage();
 
 	if (sort_switch == 1) {
 		print_reload_msg(NULL, NULL, _("Sorted by "));
 		print_sort_method();
+		post_lines++;
 	}
 
-	if (switch_cscheme == 1)
+	if (switch_cscheme == 1) {
 		print_reload_msg(NULL, NULL, _("Color scheme: %s%s%s\n"),
 			BOLD, cur_cscheme, df_c);
+		post_lines++;
+	}
 
-	if (virtual_dir == 1)
+	if (virtual_dir == 1) {
 		print_reload_msg(NULL, NULL, _("Virtual directory\n"));
+		post_lines++;
+	}
 
-	if (stats.excluded > 0)
+	if (stats.excluded > 0) {
 		print_reload_msg(NULL, NULL, _("Showing %zu/%zu files\n"),
 			s_files, s_files + stats.excluded);
+		post_lines++;
+	}
 
-	if (filter.str && *filter.str)
+	if (filter.str && *filter.str) {
 		print_reload_msg(NULL, NULL, _("Active filter: %s%s%s%s\n"),
 			BOLD, filter.rev == 1 ? "!" : "", filter.str, df_c);
+		post_lines++;
+	}
 
 	if (autocmd_ret == 1 && conf.autocmd_msg != AUTOCMD_MSG_NONE
-	&& conf.autocmd_msg != AUTOCMD_MSG_PROMPT)
+	&& conf.autocmd_msg != AUTOCMD_MSG_PROMPT) {
 		print_autocmd_msg();
+		post_lines++;
+	}
 
 	if (dir_changed == 1) {
 		dir_cmds.first_cmd_in_dir = UNSET;
@@ -919,7 +960,9 @@ post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 	}
 
 	if (conf.print_dir_cmds == 1 && dir_cmds.first_cmd_in_dir != UNSET)
-		print_dir_cmds();
+		post_lines += print_dir_cmds();
+
+	mouse_set_post_listing_lines(post_lines);
 
 	return FUNC_SUCCESS;
 }
@@ -1352,7 +1395,9 @@ print_long_mode(int *reset_pager, const int eln_len)
 
 		char *ind_chr = NULL;
 		const char *ind_chr_color = get_ind_char(i, &ind_chr);
-		set_mouse_hitbox(i, row, 1, (int)term_cols > 0 ? (int)term_cols : 1);
+		const int entry_width = get_entry_mouse_width(i, 1,
+			conf_no_eln == 1 ? 0 : eln_len, maxes.name);
+		set_mouse_hitbox(i, row, 1, entry_width);
 
 		if (conf_no_eln == 0) {
 			printf("%s%*zd%s%s%s%s", el_c, eln_len, i + 1, df_c,
@@ -2172,9 +2217,12 @@ list_files_horizontal(int *reset_pager, const int eln_len, size_t columns_n)
 		const int fc = file_info[i].dir != 1 ? int_longest_fc_len : 0;
 		/* Displayed filename will be truncated to MAX_NAME_LEN. */
 		const int max_namelen = conf.max_name_len + fc;
+		const int entry_width = get_entry_mouse_width(i, ind_char,
+			eln_len, max_namelen);
 
 		file_info[i].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(i + 1);
-		set_mouse_hitbox(i, mouse_row, mouse_col, mouse_col + cell_width - 1);
+		set_mouse_hitbox(i, mouse_row, mouse_col,
+			mouse_col + entry_width - 1);
 
 		print_entry_function(&ind_char, i, eln_len, max_namelen);
 
@@ -2281,12 +2329,8 @@ list_files_vertical(int *reset_pager, const int eln_len, size_t num_columns)
 #ifdef TIGHT_COLUMNS
 		for (size_t c = 0; c + 1 < column_count; c++)
 			mouse_col += (int)longest_per_col[c] + COLUMNS_GAP;
-		const int cell_width = (int)longest_per_col[column_count - 1]
-			+ (last_column == 0 ? COLUMNS_GAP : 0);
 #else
 		mouse_col += (int)((column_count - 1) * (longest.name_len + 1));
-		const int cell_width = (int)longest.name_len
-			+ (last_column == 0 ? 1 : 0);
 #endif
 
 		if (file_index >= total_files || !file_info[file_index].name) {
@@ -2351,11 +2395,13 @@ list_files_vertical(int *reset_pager, const int eln_len, size_t num_columns)
 		const int fc = file_info[file_index].dir != 1 ? int_longest_fc_len : 0;
 		/* Displayed filename will be truncated to MAX_NAMELEN. */
 		const int max_namelen = conf_max_name_len + fc;
+		const int entry_width = get_entry_mouse_width(file_index, ind_char,
+			eln_len, max_namelen);
 
 		file_info[file_index].eln_n = conf_no_eln == 1
 			? -1 : DIGINUM(file_index + 1);
 		set_mouse_hitbox(file_index, mouse_row, mouse_col,
-			mouse_col + (cell_width > 0 ? cell_width - 1 : 0));
+			mouse_col + entry_width - 1);
 
 		print_entry_function(&ind_char, file_index, eln_len, max_namelen);
 
@@ -2711,6 +2757,8 @@ list_dir_light(const int autocmd_ret)
 	clock_gettime(CLOCK_MONOTONIC, &t1);
 #endif /* LIST_SPEED_TEST */
 
+	mouse_reset_layout_state();
+
 	struct dothidden_t *hidden_list =
 		(conf.read_dothidden == 1 && conf.show_hidden == 0)
 		? load_dothidden() : NULL;
@@ -2988,7 +3036,6 @@ list_dir_light(const int autocmd_ret)
 		&& (conf.columned == 0 || conf.long_view == 1)) ? 1 : get_columns();
 
 	set_pager_view((filesn_t)columns_n);
-	set_mouse_row_origin();
 
 				/* ########################
 				 * #    LONG VIEW MODE    #
@@ -3530,6 +3577,7 @@ list_dir(void)
 	}
 
 	get_term_size();
+	mouse_reset_layout_state();
 
 	virtual_dir =
 		(stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0);
@@ -3806,7 +3854,6 @@ list_dir(void)
 		&& (conf.columned == 0 || conf.long_view == 1)) ? 1 : get_columns();
 
 	set_pager_view((filesn_t)columns_n);
-	set_mouse_row_origin();
 
 				/* ########################
 				 * #    LONG VIEW MODE    #

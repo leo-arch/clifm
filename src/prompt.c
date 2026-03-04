@@ -30,6 +30,7 @@
 #include "messages.h"
 #include "misc.h"
 #include "navigation.h"
+#include "mouse.h"
 #include "prompt.h"
 #include "properties.h" /* get_file_perms() */
 #include "readline.h"
@@ -1225,17 +1226,67 @@ remove_trailing_slashes(char *dir)
 	}
 }
 
-static void
+/* Count how many terminal lines would be consumed by S, including soft wraps. */
+static int
+count_printed_lines(const char *s)
+{
+	if (!s || !*s)
+		return 0;
+
+	const int cols = term_cols > 0 ? (int)term_cols : 80;
+	int lines = 0;
+	int col = 0;
+
+	for (const unsigned char *p = (const unsigned char *)s; *p; p++) {
+		if (*p == KEY_ESC) {
+			/* Skip ANSI escape sequences (best-effort). */
+			if (*(p + 1) == '[') {
+				p += 2;
+				while (*p && !(*p >= '@' && *p <= '~'))
+					p++;
+			} else if (*(p + 1)) {
+				p++;
+			}
+			continue;
+		}
+
+		if (*p == '\n') {
+			lines++;
+			col = 0;
+			continue;
+		}
+
+		if (*p == '\r') {
+			col = 0;
+			continue;
+		}
+
+		if (col + 1 > cols) {
+			lines++;
+			col = 1;
+		} else {
+			col++;
+		}
+	}
+
+	if (col > 0)
+		lines++;
+
+	return lines;
+}
+
+static int
 print_user_message(void)
 {
 	if (!conf.welcome_message_str || !*conf.welcome_message_str)
-		return;
+		return 0;
 
 	char *s = conf.welcome_message_str;
+	int lines = 0;
 
 	if (!strchr(s, '\\')) {
 		printf("%s%s%s\n", wc_c, s, df_c);
-		return;
+		return count_printed_lines(s);
 	}
 
 	char *tmp = NULL;
@@ -1257,6 +1308,7 @@ print_user_message(void)
 				s++;
 			} else if (*s == 'n') {
 				putchar('\n');
+				lines++;
 				s++;
 			} else {
 				putchar(*s);
@@ -1269,38 +1321,49 @@ print_user_message(void)
 	}
 
 	putchar('\n');
+	lines++;
 	fputs(df_c, stdout);
+	return lines;
 }
 
-static void
+static int
 print_welcome_msg(void)
 {
 	static int message_shown = 0;
 
 	if (message_shown == 1 || conf.welcome_message == 0)
-		return;
+		return 0;
+
+	int lines = 0;
 
 	if (conf.welcome_message_str != NULL)
-		print_user_message();
+		lines += print_user_message();
 	else
 		printf("%s%s\n%s", wc_c, DEF_WELCOME_MESSAGE_STR, df_c);
+	if (conf.welcome_message_str == NULL)
+		lines += count_printed_lines(DEF_WELCOME_MESSAGE_STR);
 
 	printf("%s\n", _(HELP_MESSAGE));
+	lines += count_printed_lines(_(HELP_MESSAGE));
 
 	message_shown = 1;
+	return lines;
 }
 
-static void
+static int
 print_tips_func(void)
 {
 	if (conf.tips == 0)
-		return;
+		return 0;
 
 	static int first_run = 1;
 	if (first_run == 1) {
-		print_tips(0);
+		const int lines = print_tips(0);
 		first_run = 0;
+		return lines > 0 ? lines : 1;
 	}
+
+	return 0;
 }
 
 static void
@@ -1446,27 +1509,32 @@ construct_prompt(const char *decoded_prompt, const size_t ac_matches)
 	return the_prompt;
 }
 
-static void
+static int
 print_prompt_messages(void)
 {
+	int lines = 0;
 	for (size_t i = 0; i < msgs_n; i++) {
 		if (messages[i].read == 1)
 			continue;
 
 		fputs(messages[i].text, stderr);
+		lines += count_printed_lines(messages[i].text);
 		messages[i].read = 1;
 	}
 
 	print_msg = 0;
+	return lines;
 }
 
 static void
 initialize_prompt_data(const int prompt_flag, size_t *ac_matches)
 {
+	int pre_prompt_lines = 0;
+
 	check_cwd();
 	remove_trailing_slashes(workspaces[cur_ws].path);
-	print_welcome_msg();
-	print_tips_func();
+	pre_prompt_lines += print_welcome_msg();
+	pre_prompt_lines += print_tips_func();
 
 	/* If autols is disabled, and since terminal dimensions are gathered
 	 * in list_dir() via get_term_size(), let's get terminal dimensions
@@ -1502,7 +1570,10 @@ initialize_prompt_data(const int prompt_flag, size_t *ac_matches)
 #endif /* !_NO_SUGGESTIONS */
 
 	if (print_msg == 1 && msgs_n > 0)
-		print_prompt_messages();
+		pre_prompt_lines += print_prompt_messages();
+
+	if (pre_prompt_lines > 0)
+		mouse_add_post_listing_lines(pre_prompt_lines);
 }
 
 static void

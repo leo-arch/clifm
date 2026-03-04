@@ -294,6 +294,19 @@ gen_term_title_str(const int value)
 	}
 }
 
+static const char *
+gen_mouse_scroll_mode_str(const int value)
+{
+	switch (value) {
+	case MOUSE_SCROLL_AUTO: return "auto";
+	case MOUSE_SCROLL_HISTORY: return "history";
+	case MOUSE_SCROLL_DIRS: return "dirs";
+	case MOUSE_SCROLL_FILES: return "files";
+	case MOUSE_SCROLL_ALL: return "all";
+	default: return "history";
+	}
+}
+
 /* Dump current value of config options (as defined in the config file),
  * highlighting those that differ from default values.
  * Note that values displayed here represent the CURRENT status of the
@@ -452,6 +465,26 @@ dump_config(void)
 
 	n = DEF_LONG_VIEW;
 	print_config_value("LongViewMode", &conf.long_view, &n, DUMP_CONFIG_BOOL);
+
+	n = DEF_MOUSE_SUPPORT;
+	print_config_value("MouseSupport", &conf.mouse_support, &n, DUMP_CONFIG_BOOL);
+
+	n = DEF_MOUSE_OPEN_ON_DOUBLE_CLICK;
+	print_config_value("OpenOnDoubleClick", &conf.mouse_open_on_double_click,
+		&n, DUMP_CONFIG_BOOL);
+
+	n = DEF_MOUSE_INSERT_ON_SINGLE_CLICK;
+	print_config_value("InsertOnSingleClick", &conf.mouse_insert_on_single_click,
+		&n, DUMP_CONFIG_BOOL);
+
+	print_config_value("MouseScroll",
+		gen_mouse_scroll_mode_str(conf.mouse_scroll_mode),
+		gen_mouse_scroll_mode_str(DEF_MOUSE_SCROLL_MODE),
+		DUMP_CONFIG_STR_NO_QUOTE);
+
+	n = DEF_MOUSE_DIR_TRAILING_SLASH;
+	print_config_value("MouseDirTrailingSlash", &conf.mouse_dir_trailing_slash,
+		&n, DUMP_CONFIG_BOOL);
 
 	n = DEF_MAX_DIRHIST;
 	print_config_value("MaxDirhist", &conf.max_dirhist, &n, DUMP_CONFIG_INT);
@@ -1724,7 +1757,9 @@ create_main_config_file(char *file)
 \t\t#      The Command Line File Manager      #\n\
 \t\t###########################################\n\n"
 
-	    "# This is the configuration file for Clifm\n\n"
+	    "# This is the configuration file for Clifm\n\
+# Default location: ~/.config/clifm/profiles/default/clifmrc\n\
+# Apply changes from inside Clifm with the 'rl' command.\n\n"
 
 		"# Lines starting with '#' or ';' are commented out (ignored).\n\
 # Uncomment an option to override the default value.\n\n"
@@ -2031,7 +2066,28 @@ create_main_config_file(char *file)
 # greater than or equal to this value (e.g., 1000)\n\
 ;Pager=%s\n\
 # Define how to list files in the pager: auto (default), short, long\n\
-;PagerView=%s\n\n"
+;PagerView=%s\n\n\
+# Enable mouse support for file list interactions.\n\
+;MouseSupport=%s\n\
+# Action triggered by single-clicking a file entry.\n\
+# If OpenOnDoubleClick is also true, insertion is delayed briefly so\n\
+# double click can open directly without an intermediate insert.\n\
+;InsertOnSingleClick=%s\n\
+# Action triggered by double-clicking a file entry.\n\
+;OpenOnDoubleClick=%s\n\
+# Add a trailing slash when inserting directory names.\n\
+;MouseDirTrailingSlash=%s\n\
+# Mouse wheel behavior: auto, history (alias: commands), dirs, files, all.\n\
+# auto: empty line -> history; cd/ls -> dirs;\n\
+# cat/less/more/head/tail/bat/vim/vi/nvim/nano/emacs/view -> files;\n\
+# otherwise -> all.\n\
+# Examples:\n\
+#   MouseScroll=all       # Default: cycle files and directories\n\
+#   MouseScroll=history   # Always scroll command history\n\
+#   MouseScroll=dirs      # Always cycle directories (includes '..')\n\
+#   MouseScroll=files     # Always cycle filenames\n\
+#   MouseScroll=auto      # Smart mode by command context\n\
+;MouseScroll=%s\n\n"
 
 	"# Maximum filename length for displayed files (number or percentage).\n\
 # Set to -1, 'unset' (or leave empty) to disable the limit.\n\
@@ -2057,6 +2113,11 @@ create_main_config_file(char *file)
 		DEF_PAGER == 1 ? "true" : "false",
 		DEF_PAGER_VIEW == PAGER_AUTO ? "auto"
 			: (DEF_PAGER_VIEW == PAGER_LONG ? "long" : "short"),
+		DEF_MOUSE_SUPPORT == 1 ? "true" : "false",
+		DEF_MOUSE_INSERT_ON_SINGLE_CLICK == 1 ? "true" : "false",
+		DEF_MOUSE_OPEN_ON_DOUBLE_CLICK == 1 ? "true" : "false",
+		DEF_MOUSE_DIR_TRAILING_SLASH == 1 ? "true" : "false",
+		gen_mouse_scroll_mode_str(DEF_MOUSE_SCROLL_MODE),
 		gen_max_namelen_value_str(0),
 		DEF_TRUNC_NAMES == 1 ? "true" : "false"
 		);
@@ -3491,6 +3552,46 @@ set_term_title_value(const char *line)
 	set_config_bool_value(line, &conf.term_title);
 }
 
+static void
+set_mouse_scroll_mode_value(char *line)
+{
+	conf.mouse_scroll_mode = DEF_MOUSE_SCROLL_MODE;
+	if (!line || !*line)
+		return;
+
+	const char *val = get_line_value(line);
+	if (!val || !*val)
+		return;
+
+	if ((*val == 'a' && strcmp(val, "auto") == 0)
+	|| (*val == 'd' && strcmp(val, "default") == 0)) {
+		conf.mouse_scroll_mode = MOUSE_SCROLL_AUTO;
+		return;
+	}
+
+	if ((*val == 'h' && strcmp(val, "history") == 0)
+	|| (*val == 'c' && strcmp(val, "commands") == 0)) {
+		conf.mouse_scroll_mode = MOUSE_SCROLL_HISTORY;
+		return;
+	}
+
+	if ((*val == 'd' && strcmp(val, "dirs") == 0)
+	|| (*val == 'd' && strcmp(val, "directories") == 0)) {
+		conf.mouse_scroll_mode = MOUSE_SCROLL_DIRS;
+		return;
+	}
+
+	if (*val == 'f' && strcmp(val, "files") == 0) {
+		conf.mouse_scroll_mode = MOUSE_SCROLL_FILES;
+		return;
+	}
+
+	if (*val == 'a' && strcmp(val, "all") == 0) {
+		conf.mouse_scroll_mode = MOUSE_SCROLL_ALL;
+		return;
+	}
+}
+
 /* The buffer to store read lines is PATH_MAX + 16. But for some reason
  * cppcheck does not expand PATH_MAX, so that it only sees 16 bytes, and
  * thereby a lot of out-of-bounds read. */
@@ -3699,6 +3800,10 @@ read_config(void)
 			set_autocmd_msg_value(line + 14);
 		}
 
+		else if (*line == 'I' && strncmp(line, "InsertOnSingleClick=", 20) == 0) {
+			set_config_bool_value(line + 20, &conf.mouse_insert_on_single_click);
+		}
+
 		else if (xargs.light_mode == UNSET && *line == 'L'
 		&& strncmp(line, "LightMode=", 10) == 0) {
 			set_config_bool_value(line + 10, &conf.light_mode);
@@ -3742,6 +3847,18 @@ read_config(void)
 
 		else if (*line == 'M' && strncmp(line, "MaxHistory=", 11) == 0) {
 			set_config_int_value(line + 11, &conf.max_hist, 1, INT_MAX);
+		}
+
+		else if (*line == 'M' && strncmp(line, "MouseDirTrailingSlash=", 22) == 0) {
+			set_config_bool_value(line + 22, &conf.mouse_dir_trailing_slash);
+		}
+
+		else if (*line == 'M' && strncmp(line, "MouseScroll=", 12) == 0) {
+			set_mouse_scroll_mode_value(line + 12);
+		}
+
+		else if (*line == 'M' && strncmp(line, "MouseSupport=", 13) == 0) {
+			set_config_bool_value(line + 13, &conf.mouse_support);
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxJumpTotalRank=", 17) == 0) {
@@ -3788,6 +3905,10 @@ read_config(void)
 		else if (!conf.opener && *line == 'O'
 		&& strncmp(line, "Opener=", 7) == 0) {
 			set_file_opener(line + 7);
+		}
+
+		else if (*line == 'O' && strncmp(line, "OpenOnDoubleClick=", 18) == 0) {
+			set_config_bool_value(line + 18, &conf.mouse_open_on_double_click);
 		}
 
 		else if (xargs.pager == UNSET && *line == 'P'

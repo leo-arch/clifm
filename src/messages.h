@@ -914,8 +914,10 @@ Down arrow, Enter, Space: Advance one line\n\
 Page down: Advance one page\n\
 q: Stop paging (without printing remaining files)\n\
 c: Stop paging (printing remaining files)\n\n\
-Note: For upward scrolling, use the scrolling options available in your\n\
-terminal emulator (e.g., mouse scrolling or specific keybindings)\n\n\
+Note: For upward scrolling in the pager, use the scrolling options available\n\
+in your terminal emulator (e.g., mouse scrolling or specific keybindings).\n\
+Mouse behavior in the prompt/file list is configured separately via\n\
+MouseSupport/MouseScroll and related options in the main configuration file.\n\n\
 By default, the pager lists files using the current listing mode (long\n\
 or short). You can specify a particular mode using the PagerView option in the\n\
 configuration file or the --pager-view command line option. Possibles values:\n\n\

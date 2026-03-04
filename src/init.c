@@ -200,6 +200,11 @@ init_conf_struct(void)
 	conf.log_cmds = DEF_LOG_CMDS;
 	conf.log_msgs = DEF_LOG_MSGS;
 	conf.long_view = UNSET;
+	conf.mouse_support = UNSET;
+	conf.mouse_open_on_double_click = UNSET;
+	conf.mouse_insert_on_single_click = UNSET;
+	conf.mouse_scroll_mode = UNSET;
+	conf.mouse_dir_trailing_slash = UNSET;
 	conf.max_dirhist = UNSET;
 	conf.max_files = DEF_MAX_FILES;
 	conf.max_hist = DEF_MAX_HIST;
@@ -2751,6 +2756,21 @@ check_options(void)
 
 	if (conf.long_view == UNSET)
 		conf.long_view = SETOPT(xargs.long_view, DEF_LONG_VIEW);
+
+	if (conf.mouse_support == UNSET)
+		conf.mouse_support = DEF_MOUSE_SUPPORT;
+
+	if (conf.mouse_open_on_double_click == UNSET)
+		conf.mouse_open_on_double_click = DEF_MOUSE_OPEN_ON_DOUBLE_CLICK;
+
+	if (conf.mouse_insert_on_single_click == UNSET)
+		conf.mouse_insert_on_single_click = DEF_MOUSE_INSERT_ON_SINGLE_CLICK;
+
+	if (conf.mouse_scroll_mode == UNSET)
+		conf.mouse_scroll_mode = DEF_MOUSE_SCROLL_MODE;
+
+	if (conf.mouse_dir_trailing_slash == UNSET)
+		conf.mouse_dir_trailing_slash = DEF_MOUSE_DIR_TRAILING_SLASH;
 
 	if (conf.ext_cmd_ok == UNSET)
 		conf.ext_cmd_ok = SETOPT(xargs.ext_cmd_ok, DEF_EXT_CMD_OK);

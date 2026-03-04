@@ -590,6 +590,13 @@ extern time_t curdir_mtime;
 #define PAGER_LONG  1
 #define PAGER_SHORT 2
 
+/* Possible values for MouseScroll (conf.mouse_scroll_mode). */
+#define MOUSE_SCROLL_AUTO    0
+#define MOUSE_SCROLL_HISTORY 1
+#define MOUSE_SCROLL_DIRS    2
+#define MOUSE_SCROLL_FILES   3
+#define MOUSE_SCROLL_ALL     4
+
 /* Values for SafeFilenames (conf.safe_filenames) */
 #define SAFENAMES_NOCHECK 0 /* The check is disabled */
 #define SAFENAMES_BASIC   1 /* Only basic checks are performed */
@@ -1147,6 +1154,11 @@ struct config_t {
 	int log_cmds;
 	int log_msgs;
 	int long_view;
+	int mouse_support;
+	int mouse_open_on_double_click;
+	int mouse_insert_on_single_click;
+	int mouse_scroll_mode;
+	int mouse_dir_trailing_slash;
 	int max_dirhist;
 	int max_hist;
 	int max_jump_total_rank;
@@ -1353,7 +1365,7 @@ struct fileinfo {
 	mode_t type;   /* Store d_type value */
 	int dir;
 	int eln_n;     /* Number of digits in ELN */
-	int mouse_row; /* Absolute terminal row used by mouse hit-testing */
+	int mouse_row; /* Logical listing row used by mouse hit-testing */
 	int mouse_col_start;
 	int mouse_col_end;
 	int exec;
