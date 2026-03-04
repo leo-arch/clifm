@@ -4517,6 +4517,9 @@ initialize_readline(void)
 	/* Set the name of the program using readline. Mostly used for
 	 * conditional constructs in the inputrc file. */
 	rl_readline_name = PROGRAM_NAME;
+	/* Keep signal/control-char handling consistent with CliFM's custom
+	 * Ctrl+c clear-line implementation. */
+	rl_catch_signals = 0;
 
 	disable_rl_conflicting_kbinds();
 	set_rl_init_file();
