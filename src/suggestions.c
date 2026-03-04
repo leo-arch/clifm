@@ -378,7 +378,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 int
 recover_from_wrong_cmd(void)
 {
-	/* Check rl_dispathing to know whether we are called from a keybind,
+	/* Check rl_dispatching to know whether we are called from a keybind,
 	 * in which case we should skip this check. */
 	if (rl_line_buffer && (rl_dispatching == 0
 	|| (words_num > 1 && point_is_first_word == 0))) {

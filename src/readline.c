@@ -82,8 +82,10 @@ static void
 clear_current_line_on_interrupt(void)
 {
 #ifndef _NO_SUGGESTIONS
+	words_num = 0; rl_dispatching = 1;
 	if (wrong_cmd == 1)
 		recover_from_wrong_cmd();
+	rl_dispatching = 0;
 
 	if (suggestion.printed && suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
