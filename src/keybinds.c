@@ -1047,12 +1047,14 @@ rl_toggle_max_filename_len(int count, int key)
 
 	if (conf.max_name_len == UNSET) {
 		print_reload_msg(NULL, NULL, _("Max name length unset\n"));
+		mouse_add_post_listing_lines(1);
 	} else {
 		char auto_perc[MAX_INT_STR + 5] = "";
 		if (conf.max_name_len_auto != UNSET)
 			snprintf(auto_perc, sizeof(auto_perc), " (%d%%)", conf.max_name_len_auto);
 		print_reload_msg(NULL, NULL, _("Max name length set to %d%s\n"),
 			conf.max_name_len, auto_perc);
+		mouse_add_post_listing_lines(1);
 	}
 
 	xrl_reset_line_state();
@@ -1595,6 +1597,7 @@ rl_toggle_long_view(int count, int key)
 
 	print_reload_msg(NULL, NULL, _("Long view: %s\n"),
 		conf.long_view == 1 ? _("on") : _("off"));
+	mouse_add_post_listing_lines(1);
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
 }
@@ -1623,6 +1626,7 @@ rl_toggle_follow_symlinks(int count, int key)
 
 	print_reload_msg(NULL, NULL, _("Follow symbolic links: %s\n"),
 		conf.follow_symlinks == 1 ? _("on") : _("off"));
+	mouse_add_post_listing_lines(1);
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
 }
@@ -1649,6 +1653,7 @@ rl_toggle_dirs_first(int count, int key)
 
 	print_reload_msg(NULL, NULL, _("Directories first: %s\n"),
 		conf.list_dirs_first ? _("on") : _("off"));
+	mouse_add_post_listing_lines(1);
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
 }
@@ -1676,6 +1681,7 @@ rl_toggle_light_mode(int count, int key)
 
 	print_reload_msg(NULL, NULL, _("Light mode: %s\n"),
 		conf.light_mode == 1 ? _("on") : _("off"));
+	mouse_add_post_listing_lines(1);
 	xrl_reset_line_state();
 
 	/* RL_DISPATCHING is zero when called from lightmode_function(),
@@ -1697,6 +1703,7 @@ rl_toggle_mouse_support(int count, int key)
 
 	print_reload_msg(NULL, NULL, _("Mouse support: %s\n"),
 		conf.mouse_support == 1 ? _("on") : _("off"));
+	mouse_add_post_listing_lines(1);
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
 }
@@ -1732,6 +1739,7 @@ rl_toggle_hidden_files(int count, int key)
 
 	print_reload_msg(NULL, NULL, _("Hidden files: %s\n"),
 		(conf.show_hidden > 0) ? _("on") : _("off"));
+	mouse_add_post_listing_lines(1);
 
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
@@ -2622,6 +2630,7 @@ rl_toggle_only_dirs(int count, int key)
 
 	print_reload_msg(NULL, NULL, _("Only directories: %s\n"),
 		conf.only_dirs > 0 ? _("on") : _("off"));
+	mouse_add_post_listing_lines(1);
 	xrl_reset_line_state();
 	return exit_status;
 }
@@ -2645,6 +2654,7 @@ rl_toggle_case_sensitive_sort(int count, int key)
 
 	print_reload_msg(NULL, NULL, _("Case-sensitive sort: %s\n"),
 		conf.case_sens_list > 0 ? _("on") : _("off"));
+	mouse_add_post_listing_lines(1);
 	xrl_reset_line_state();
 	return exit_status;
 }
@@ -2851,6 +2861,7 @@ rl_toggle_disk_usage(int count, int key)
 
 	print_reload_msg(NULL, NULL, _("Disk usage analyzer: %s\n"),
 		xargs.disk_usage_analyzer == 1 ? _("on") : _("off"));
+	mouse_add_post_listing_lines(1);
 	xrl_reset_line_state();
 	return exit_status;
 }
@@ -2965,6 +2976,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 	reload_dirlist();
 	print_reload_msg(NULL, NULL, _("Switched to %s names\n"),
 		xargs.virtual_dir_full_paths == 1 ? _("long") : _("short"));
+	mouse_add_post_listing_lines(1);
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
 }
