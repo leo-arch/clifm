@@ -211,10 +211,11 @@ count_rendered_lines(const char *s, int *lines, int *col, const int cols,
 			continue;
 		}
 
-		(*col)++;
-		if (*col >= cols) {
+		if (*col + 1 > cols) {
 			(*lines)++;
-			*col = 0;
+			*col = 1;
+		} else {
+			(*col)++;
 		}
 	}
 }
@@ -223,12 +224,40 @@ static int
 get_prompt_lines(void)
 {
 	const int cols = (int)term_cols > 0 ? (int)term_cols : 80;
+	int explicit_lines = 1;
+	if (rl_prompt && *rl_prompt) {
+		int in_ignore = 0;
+		for (const unsigned char *p = (const unsigned char *)rl_prompt; *p; p++) {
+			if (*p == RL_PROMPT_START_IGNORE) {
+				in_ignore = 1;
+				continue;
+			}
+			if (in_ignore == 1) {
+				if (*p == RL_PROMPT_END_IGNORE)
+					in_ignore = 0;
+				continue;
+			}
+			if (*p == '\n')
+				explicit_lines++;
+		}
+	}
+
+	/* prompt_offset (from readline.c) reflects readline's real cursor behavior,
+	 * including the "wrapped to empty next line" case when prompt hits the edge. */
+	if (prompt_offset != UNSET && prompt_offset > 0) {
+		const int input_w = rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) : 0;
+		int curcol = prompt_offset + input_w;
+		if (curcol < 1)
+			curcol = 1;
+		const int wraps = (cols > 0) ? ((curcol - 1) / cols) : 0;
+		const int lines = explicit_lines + wraps;
+		return lines > 0 ? lines : 1;
+	}
+
 	int lines = 1;
 	int col = 0;
-
 	count_rendered_lines(rl_prompt, &lines, &col, cols, 1);
 	count_rendered_lines(rl_line_buffer, &lines, &col, cols, 0);
-
 	return lines > 0 ? lines : 1;
 }
 
@@ -295,8 +324,14 @@ get_clicked_file_by_coord(const int x, const int y)
 		return (filesn_t)-1;
 
 	const int prompt_lines = get_prompt_lines();
+	int viewport_bottom_row = (int)term_lines;
+	int cursor_col = 0, cursor_row = 0;
+	if (get_cursor_position(&cursor_col, &cursor_row) == FUNC_SUCCESS
+	&& cursor_row > 0 && cursor_row <= (int)term_lines)
+		viewport_bottom_row = cursor_row;
+
 	int first_visible = rows_total + mouse_post_listing_lines + prompt_lines
-		- (int)term_lines;
+		- viewport_bottom_row;
 	if (first_visible < 0)
 		first_visible = 0;
 
