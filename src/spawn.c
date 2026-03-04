@@ -44,8 +44,14 @@ run_in_foreground(const pid_t pid)
 	int status = 0;
 
 	/* The parent process calls waitpid() on the child */
-	if (waitpid(pid, &status, 0) > 0)
-		return get_exit_code(status, EXEC_FG_PROC);
+	while (1) {
+		if (waitpid(pid, &status, 0) > 0)
+			return get_exit_code(status, EXEC_FG_PROC);
+
+		if (errno == EINTR)
+			continue;
+		break;
+	}
 
 	/* waitpid() failed */
 	const int ret = errno;
@@ -58,7 +64,13 @@ run_in_background(const pid_t pid)
 {
 	int status = 0;
 
-	if (waitpid(pid, &status, WNOHANG) == -1) {
+	while (1) {
+		if (waitpid(pid, &status, WNOHANG) != -1)
+			break;
+
+		if (errno == EINTR)
+			continue;
+
 		const int ret = errno;
 		xerror("%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		return ret;
@@ -114,8 +126,13 @@ xsystem(const char *cmd)
 		execl(shell_path, shell_name, "-c", cmd, NULL);
 		_exit(errno);
 	} else {
-		if (waitpid(pid, &status, 0) == pid)
-			return status;
+		while (1) {
+			if (waitpid(pid, &status, 0) == pid)
+				return status;
+
+			if (errno != EINTR)
+				break;
+		}
 
 		return (-1);
 	}

@@ -23,7 +23,7 @@
 #include <errno.h>
 
 #include "aux.h" /* xatoi */
-#include "misc.h" /* set_signals_to_ignore, handle_stdin */
+#include "misc.h" /* handle_stdin */
 #include "term_info.h"
 
 static struct termios bk_term_attrs;
@@ -97,8 +97,15 @@ sigwinch_handler(int sig)
 }
 #endif /* !_BE_POSIX */
 
+/* Trigger EINTR on blocking reads so the caller can handle Ctrl+c explicitly. */
 static void
-set_signals_to_ignore(void)
+sigint_handler(int sig)
+{
+	UNUSED(sig);
+}
+
+static void
+set_shell_signal_handlers(void)
 {
 	struct sigaction sa;
 
@@ -107,14 +114,20 @@ set_signals_to_ignore(void)
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = SIG_IGN;
 
-	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGQUIT, &sa, NULL);
 	sigaction(SIGTSTP, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
 	sigaction(SIGTTIN, &sa, NULL);
 	sigaction(SIGTTOU, &sa, NULL);
 
+	memset(&sa, 0, sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = sigint_handler;
+	sigaction(SIGINT, &sa, NULL);
+
 #ifndef _BE_POSIX
+	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = sigwinch_handler;
 	sigaction(SIGWINCH, &sa, NULL);
 #endif /* !_BE_POSIX */
@@ -134,7 +147,7 @@ init_shell(void)
 	}
 
 	own_pid = get_own_pid();
-	set_signals_to_ignore();
+	set_shell_signal_handlers();
 }
 
 /* Set the terminal into raw mode. Return 0 on success and -1 on error */
