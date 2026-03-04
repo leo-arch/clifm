@@ -214,19 +214,7 @@ xbackspace(void)
 static void
 leftmost_bell(void)
 {
-	if (conf.bell_style == BELL_VISIBLE) {
-		rl_extend_line_buffer(2);
-		*rl_line_buffer = ' ';
-		*(rl_line_buffer + 1) = '\0';
-		rl_end = rl_point = 1;
-	}
-
 	rl_ring_bell();
-
-	if (conf.bell_style == BELL_VISIBLE) {
-		rl_delete_text(0, rl_end);
-		rl_end = rl_point = 0;
-	}
 }
 #endif /* !_NO_SUGGESTIONS */
 
@@ -361,9 +349,12 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 	switch (c) {
 		case KEY_DELETE: /* fallthrough */
 		case KEY_BACKSPACE:
-			del_key = (rl_point == 0 && rl_end == 0)
-				? DEL_EMPTY_LINE : DEL_NON_EMPTY_LINE;
-			xbackspace();
+			if (rl_point == 0 && rl_end == 0) {
+				del_key = DEL_EMPTY_LINE;
+			} else {
+				del_key = DEL_NON_EMPTY_LINE;
+				xbackspace();
+			}
 			if (rl_end == 0 && cur_color != tx_c) {
 				cur_color = tx_c;
 				fputs(tx_c, stdout);
