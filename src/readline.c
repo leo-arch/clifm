@@ -78,6 +78,31 @@ static int tagged_files_n = 0;
 static int cb_running = 0;
 static char rl_default_answer = 0;
 
+static void
+clear_current_line_on_interrupt(void)
+{
+#ifndef _NO_SUGGESTIONS
+	if (wrong_cmd == 1)
+		recover_from_wrong_cmd();
+
+	if (suggestion.printed && suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
+#endif /* !_NO_SUGGESTIONS */
+
+#ifndef _NO_HIGHLIGHT
+	if (cur_color != tx_c) {
+		cur_color = tx_c;
+		fputs(cur_color, stdout);
+	}
+#endif /* !_NO_HIGHLIGHT */
+
+	if (rl_end > 0)
+		rl_delete_text(0, rl_end);
+
+	rl_point = rl_end = 0;
+	rl_redisplay();
+}
+
 static const char *
 gen_yes_no_str(char def_answer, int allow_all)
 {
@@ -343,6 +368,11 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 			recover_from_wrong_cmd();
 #endif /* !_NO_SUGGESTIONS */
 		return RL_INSERT_CHAR;
+	}
+
+	if (c == CTRL('C')) {
+		clear_current_line_on_interrupt();
+		return SKIP_CHAR_NO_REDISPLAY;
 	}
 
 	/* Skip control characters (0 - 31) except backspace (8), tab(9),
@@ -630,8 +660,8 @@ my_rl_getc(FILE *stream)
 			return (EOF);
 
 		  /* If the error that we received was SIGINT, then try again,
-		 this is simply an interrupted system call to read().
-		 Otherwise, some error ocurred, also signifying EOF. */
+		 this is simply an interrupted system call to read(). */
+		clear_current_line_on_interrupt();
 	}
 }
 
@@ -696,8 +726,8 @@ alt_rl_getc(FILE *stream)
 			return (EOF);
 
 		  /* If the error that we received was SIGINT, then try again,
-		 this is simply an interrupted system call to read().
-		 Otherwise, some error occurred, also signifying EOF. */
+		 this is simply an interrupted system call to read(). */
+		clear_current_line_on_interrupt();
 	}
 }
 

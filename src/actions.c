@@ -269,11 +269,18 @@ run_action(char *action, char **args)
 	/* Wait for the child to finish. Otherwise, the child is left as a
 	 * zombie process. Store plugin exit status in EXIT_STATUS. */
 	int status = 0;
-	if (waitpid(pid, &status, 0) > 0) {
-		exit_status = get_exit_code(status, EXEC_FG_PROC);
-	} else {
+	while (1) {
+		if (waitpid(pid, &status, 0) > 0) {
+			exit_status = get_exit_code(status, EXEC_FG_PROC);
+			break;
+		}
+
+		if (errno == EINTR)
+			continue;
+
 		exit_status = errno;
 		xerror("actions: waitpid: %s\n", strerror(errno));
+		break;
 	}
 
 	/* If the pipe is empty */
