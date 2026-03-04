@@ -1366,22 +1366,40 @@ print_tips_func(void)
 	return 0;
 }
 
-static void
+static int
 run_prompt_cmds(void)
 {
 	if (conf.ext_cmd_ok == 0 || prompt_cmds_n == 0)
-		return;
+		return 0;
 
 	const int tflags = flags;
+	int lines = 0;
 	flags &= ~DELAYED_REFRESH;
 
 	for (size_t i = 0; i < prompt_cmds_n; i++) {
+		int col_before = 0, row_before = 0;
+		const int track_lines = (conf.mouse_support == 1
+			&& mouse_enabled == 1 && term_lines > 0
+			&& get_cursor_position(&col_before, &row_before) == FUNC_SUCCESS);
+
 		if (xargs.secure_cmds == 0
 		|| sanitize_cmd(prompt_cmds[i], SNT_PROMPT) == FUNC_SUCCESS)
 			launch_execl(prompt_cmds[i]);
+
+		if (track_lines == 1) {
+			int col_after = 0, row_after = 0;
+			if (get_cursor_position(&col_after, &row_after) == FUNC_SUCCESS
+			&& row_before > 0 && row_after > 0) {
+				int diff = row_after - row_before;
+				if (diff < 0)
+					diff += (int)term_lines;
+				lines += diff;
+			}
+		}
 	}
 
 	flags = tflags;
+	return lines;
 }
 
 #ifndef _NO_TRASH
@@ -1548,7 +1566,7 @@ initialize_prompt_data(const int prompt_flag, size_t *ac_matches)
 
 	/* If just updating the prompt, there's no need to run prompt commands. */
 	if (prompt_flag != PROMPT_UPDATE)
-		run_prompt_cmds();
+		pre_prompt_lines += run_prompt_cmds();
 
 #ifndef _NO_TRASH
 	update_trash_indicator();

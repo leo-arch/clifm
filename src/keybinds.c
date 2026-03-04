@@ -43,6 +43,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #include "listing.h"
 #include "messages.h"
 #include "misc.h"
+#include "mouse.h"
 #include "profiles.h"
 #include "prompt.h"
 #include "readline.h"
@@ -1686,6 +1687,20 @@ rl_toggle_light_mode(int count, int key)
 	return FUNC_SUCCESS;
 }
 
+static int
+rl_toggle_mouse_support(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+
+	conf.mouse_support = !conf.mouse_support;
+	enable_mouse_if_interactive();
+
+	print_reload_msg(NULL, NULL, _("Mouse support: %s\n"),
+		conf.mouse_support == 1 ? _("on") : _("off"));
+	xrl_reset_line_state();
+	return FUNC_SUCCESS;
+}
+
 int
 rl_toggle_hidden_files(int count, int key)
 {
@@ -3080,6 +3095,7 @@ set_keybinds_from_file(void)
 		{"toggle-long", rl_toggle_long_view},
 		{"toggle-follow-symlinks", rl_toggle_follow_symlinks},
 		{"toggle-light", rl_toggle_light_mode},
+		{"toggle-mouse-support", rl_toggle_mouse_support},
 		{"toggle-case-sensitive-sort", rl_toggle_case_sensitive_sort},
 		{"invert-selection", rl_invert_selection},
 		{"dirs-first", rl_toggle_dirs_first},
@@ -3158,7 +3174,8 @@ set_default_keybinds(void)
 		{"\\C-r", rl_refresh}, {"\\M-c", rl_clear_line},
 		{"\\M-i", rl_toggle_hidden_files}, {"\\M-.", rl_toggle_hidden_files},
 		{"\\M-l", rl_toggle_long_view}, {"\\M-+", rl_toggle_follow_symlinks},
-		{"\\M-y", rl_toggle_light_mode}, {"\\M-g", rl_toggle_dirs_first},
+		{"\\M-y", rl_toggle_light_mode}, {"\\M-;", rl_toggle_mouse_support},
+		{"\\M-g", rl_toggle_dirs_first},
 		{"\\M-z", rl_sort_previous}, {"\\M-x", rl_sort_next},
 		{"\\M-r", rl_sort_reverse},
 		{"\\M-,", rl_toggle_only_dirs}, {"\\M-0", rl_run_pager},

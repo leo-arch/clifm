@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <poll.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #ifdef __OpenBSD__
@@ -49,10 +50,7 @@ static size_t mouse_pending_pos = 0;
 static filesn_t mouse_armed_index = (filesn_t)-1;
 static struct timespec mouse_armed_click = {0};
 static char *mouse_armed_arg = NULL;
-
-static int mouse_press_active = 0;
-static int mouse_press_x = 0;
-static int mouse_press_y = 0;
+static int mouse_scroll_history_active = 0;
 
 /* Number of non-list lines printed after the file list and before the prompt. */
 static int mouse_post_listing_lines = 0;
@@ -375,6 +373,7 @@ apply_single_click_insert(char *arg)
 	if (!arg || !*arg)
 		return MOUSE_SEQ_CONSUMED;
 
+	mouse_scroll_history_active = 0;
 	clear_suggestions_if_any();
 
 	if (has_command_prefix(rl_line_buffer) == 1) {
@@ -404,6 +403,7 @@ apply_double_click_open(const filesn_t index, char *arg)
 {
 	size_t cmd_len = strlen(arg) + 6;
 	char *cmd = xnmalloc(cmd_len, sizeof(char));
+	mouse_scroll_history_active = 0;
 	if (file_info[index].dir == 1)
 		snprintf(cmd, cmd_len, "cd %s", arg);
 	else
@@ -505,6 +505,7 @@ handle_mouse_scroll_history(const int dir)
 			rl_point = rl_end;
 			rl_redisplay();
 			curhistindex = current_hist_n;
+			mouse_scroll_history_active = 1;
 			return MOUSE_SEQ_CONSUMED;
 		}
 	}
@@ -516,6 +517,7 @@ handle_mouse_scroll_history(const int dir)
 	rl_point = rl_end;
 	rl_redisplay();
 	curhistindex = p;
+	mouse_scroll_history_active = 1;
 	return MOUSE_SEQ_CONSUMED;
 }
 
@@ -548,10 +550,29 @@ cmd_eq(const char *cmd, const size_t len, const char *name)
 }
 
 static int
+line_matches_history_state(const char *line)
+{
+	if (!line)
+		line = "";
+
+	if (!*line)
+		return curhistindex >= current_hist_n;
+
+	if (!history || curhistindex >= current_hist_n
+	|| !history[curhistindex].cmd)
+		return 0;
+
+	return strcmp(line, history[curhistindex].cmd) == 0;
+}
+
+static int
 get_scroll_target(const char *line)
 {
 	if (conf.mouse_scroll_mode != MOUSE_SCROLL_AUTO)
 		return conf.mouse_scroll_mode;
+
+	if (mouse_scroll_history_active == 1)
+		return MOUSE_SCROLL_HISTORY;
 
 	if (has_command_prefix(line) == 0)
 		return MOUSE_SCROLL_HISTORY;
@@ -664,40 +685,53 @@ free_scroll_items(struct scroll_item *items, const size_t nitems)
 }
 
 static char *
-get_current_arg_str(const char *line, const size_t cmd_end)
+get_current_arg_str(const char *line, const size_t cmd_end, size_t *start_out)
 {
-	if (!line || !line[cmd_end])
+	if (!line || !line[cmd_end] || !start_out)
 		return NULL;
 
-	size_t p = cmd_end;
-	while (line[p] && is_blank_char(line[p]))
-		p++;
-	if (!line[p])
-		return NULL;
+	size_t p = cmd_end, first = cmd_end;
+	while (line[first] && is_blank_char(line[first]))
+		first++;
 
 	size_t end = strlen(line);
-	while (end > p && is_blank_char(line[end - 1]))
+	while (end > first && is_blank_char(line[end - 1]))
 		end--;
 
-	if (end <= p)
+	if (end <= first)
 		return NULL;
 
-	const size_t len = end - p;
+	p = end;
+	while (p > first && !is_blank_char(line[p - 1]))
+		p--;
+
+	if (p >= end)
+		return NULL;
+
+	*start_out = p;
+	const size_t len = end - *start_out;
 	char *arg = xnmalloc(len + 1, sizeof(char));
-	memcpy(arg, line + p, len);
+	memcpy(arg, line + *start_out, len);
 	arg[len] = '\0';
 	return arg;
 }
 
 static int
-replace_scrolled_arg(const char *line, const size_t cmd_end, const char *token)
+replace_scrolled_arg(const char *line, const size_t cmd_end, const size_t arg_start,
+	const char *token)
 {
 	if (!line || !token || cmd_end == 0)
 		return MOUSE_SEQ_CONSUMED;
 
-	const size_t new_len = cmd_end + 1 + strlen(token) + 1;
+	const size_t new_len = arg_start > cmd_end
+		? arg_start + strlen(token) + 1
+		: cmd_end + 1 + strlen(token) + 1;
 	char *new_line = xnmalloc(new_len, sizeof(char));
-	snprintf(new_line, new_len, "%.*s %s", (int)cmd_end, line, token);
+	if (arg_start > cmd_end)
+		snprintf(new_line, new_len, "%.*s%s", (int)arg_start, line, token);
+	else
+		snprintf(new_line, new_len, "%.*s %s", (int)cmd_end, line, token);
+
 	rl_replace_line(new_line, 1);
 	rl_point = rl_end;
 	rl_redisplay();
@@ -726,7 +760,8 @@ handle_mouse_scroll_entries(const int dir, const int mode)
 
 	clear_suggestions_if_any();
 
-	char *cur_arg = get_current_arg_str(line, cmd_end);
+	size_t arg_start = 0;
+	char *cur_arg = get_current_arg_str(line, cmd_end, &arg_start);
 	ssize_t pos = -1;
 	if (cur_arg && *cur_arg) {
 		for (size_t i = 0; i < nitems; i++) {
@@ -747,7 +782,9 @@ handle_mouse_scroll_entries(const int dir, const int mode)
 	else if (dir > 0 && (size_t)pos + 1 < nitems)
 		pos++;
 
-	const int ret = replace_scrolled_arg(line, cmd_end, items[(size_t)pos].token);
+	mouse_scroll_history_active = 0;
+	const int ret = replace_scrolled_arg(line, cmd_end, arg_start,
+		items[(size_t)pos].token);
 	free(cur_arg);
 	free_scroll_items(items, nitems);
 	return ret;
@@ -763,7 +800,13 @@ handle_mouse_scroll(const int x, const int y, const int dir)
 	else if (mouse_armed_index != (filesn_t)-1)
 		clear_armed_click();
 
+	if (mouse_scroll_history_active == 1
+	&& line_matches_history_state(rl_line_buffer) == 0)
+		mouse_scroll_history_active = 0;
+
 	const int target = get_scroll_target(rl_line_buffer);
+	if (target != MOUSE_SCROLL_HISTORY)
+		mouse_scroll_history_active = 0;
 
 	switch (target) {
 	case MOUSE_SCROLL_HISTORY:
@@ -852,23 +895,11 @@ mouse_handle_escape(FILE *stream)
 		return MOUSE_SEQ_CONSUMED;
 
 	if (suffix == 'M') { /* Press */
-		mouse_press_active = 1;
-		mouse_press_x = x;
-		mouse_press_y = y;
-		return MOUSE_SEQ_CONSUMED;
-	}
-
-	if (suffix == 'm') { /* Release */
-		if (mouse_press_active == 0)
-			return MOUSE_SEQ_CONSUMED;
-
-		const int click = (mouse_press_x == x && mouse_press_y == y);
-		mouse_press_active = 0;
-		if (click == 0)
-			return MOUSE_SEQ_CONSUMED;
-
 		return handle_mouse_left_click(x, y);
 	}
+
+	if (suffix == 'm') /* Release */
+		return MOUSE_SEQ_CONSUMED;
 
 	return MOUSE_SEQ_CONSUMED;
 }

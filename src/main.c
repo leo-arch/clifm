@@ -891,6 +891,7 @@ const struct nameslist_t kb_cmds[] = {
 	{"toggle-hidden", 13},
 	{"toggle-light", 12},
 	{"toggle-long", 11},
+	{"toggle-mouse-support", 20},
 	{"toggle-max-name-len", 19},
 	{"toggle-virtualdir-full-paths", 28},
 	{"trash-sel", 9},

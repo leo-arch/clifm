@@ -111,6 +111,7 @@ sort-reverse:\er
 toggle-hidden:\ei
 toggle-hidden:\e.
 toggle-light:\ey
+toggle-mouse-support:\e;
 toggle-long:\el
 toggle-follow-symlinks:\e+
 toggle-max-name-len:\e\C-l

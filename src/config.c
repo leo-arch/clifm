@@ -1086,6 +1086,7 @@ sort-next:\\ex\n\
 toggle-hidden:\\ei\n\
 toggle-hidden:\\e.\n\
 toggle-light:\\ey\n\
+toggle-mouse-support:\\e;\n\
 toggle-long:\\el\n\
 toggle-follow-symlinks:\\e+\n\
 toggle-max-name-len:\\e\\C-l\n\

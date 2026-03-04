@@ -55,6 +55,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #include "listing.h"
 #include "messages.h"
 #include "navigation.h"
+#include "mouse.h"
 #include "readline.h"
 #include "remotes.h"
 #include "spawn.h"
@@ -298,6 +299,74 @@ print_reload_msg(const char *ptr, const char *color, const char *msg, ...)
 	va_end(arglist);
 
 	fputs(buf, stdout);
+
+	if (conf.mouse_support == 1) {
+		int lines = 0;
+		const int cols = term_cols > 0 ? (int)term_cols : 80;
+		int col = 0;
+		const char *prefix = (conf.autols == 1) ? (ptr ? ptr : SET_MSG_PTR) : NULL;
+
+		if (prefix && *prefix) {
+			for (const unsigned char *p = (const unsigned char *)prefix; *p; p++) {
+				if (*p == '\n') {
+					lines++;
+					col = 0;
+					continue;
+				}
+				if (*p == '\r') {
+					col = 0;
+					continue;
+				}
+				col++;
+				if (col >= cols) {
+					lines++;
+					col = 0;
+				}
+			}
+
+			col++;
+			if (col >= cols) {
+				lines++;
+				col = 0;
+			}
+		}
+
+		for (const unsigned char *p = (const unsigned char *)buf; *p; p++) {
+			if (*p == KEY_ESC) {
+				if (*(p + 1) == '[') {
+					p += 2;
+					while (*p && !(*p >= '@' && *p <= '~'))
+						p++;
+				} else if (*(p + 1)) {
+					p++;
+				}
+				continue;
+			}
+
+			if (*p == '\n') {
+				lines++;
+				col = 0;
+				continue;
+			}
+
+			if (*p == '\r') {
+				col = 0;
+				continue;
+			}
+
+			col++;
+			if (col >= cols) {
+				lines++;
+				col = 0;
+			}
+		}
+
+		if (col > 0)
+			lines++;
+		if (lines > 0)
+			mouse_add_post_listing_lines(lines);
+	}
+
 	free(buf);
 
 	return FUNC_SUCCESS;
