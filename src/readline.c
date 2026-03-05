@@ -216,8 +216,8 @@ leftmost_bell(void)
 {
 	/* Empty-line backspace feedback: briefly hide/show cursor.
 	 * Avoids cursor-shape transitions that may look like a backward pop. */
-	if (isatty(STDIN_FILENO) == 1 && isatty(STDOUT_FILENO) == 1
-	&& term_caps.hide_cursor == 1) {
+	if (conf.bell_style == BELL_VISIBLE && isatty(STDIN_FILENO) == 1
+	&& isatty(STDOUT_FILENO) == 1 && term_caps.hide_cursor == 1) {
 		HIDE_CURSOR;
 		fflush(stdout);
 		usleep((useconds_t)VISIBLE_BELL_DELAY * 1000U);
