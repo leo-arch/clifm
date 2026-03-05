@@ -214,6 +214,20 @@ xbackspace(void)
 static void
 leftmost_bell(void)
 {
+	/* Empty-line backspace feedback: briefly hide/show cursor.
+	 * Avoids cursor-shape transitions that may look like a backward pop. */
+	if (isatty(STDIN_FILENO) == 1 && isatty(STDOUT_FILENO) == 1
+	&& term_caps.hide_cursor == 1) {
+		HIDE_CURSOR;
+		fflush(stdout);
+		usleep((useconds_t)VISIBLE_BELL_DELAY * 1000U);
+		UNHIDE_CURSOR;
+		SET_STEADY_BLOCK_CURSOR;
+		fflush(stdout);
+		return;
+	}
+
+	/* Fallback for non-interactive contexts. */
 	rl_ring_bell();
 }
 #endif /* !_NO_SUGGESTIONS */
@@ -4556,6 +4570,9 @@ initialize_readline(void)
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote(). */
 	quote_chars = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
+
+	if (isatty(STDIN_FILENO) == 1 && isatty(STDOUT_FILENO) == 1)
+		SET_STEADY_BLOCK_CURSOR;
 
 	return FUNC_SUCCESS;
 }
