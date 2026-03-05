@@ -2079,9 +2079,12 @@ create_main_config_file(char *file)
 # Add a trailing slash when inserting directory names.\n\
 ;MouseDirTrailingSlash=%s\n\
 # Mouse wheel behavior: auto, history (alias: commands), dirs, files, all.\n\
-# auto: empty line -> history; cd/ls -> dirs;\n\
-# cat/less/more/head/tail/bat/vim/vi/nvim/nano/emacs/view -> files;\n\
-# otherwise -> all.\n\
+# auto: empty line -> history; cd/ls -> dirs; otherwise -> all.\n\
+# In history mode, entries are filtered by the current prefix.\n\
+# File-entry scrolling applies to the current argument token (after command\n\
+# name). It does not cycle command names or command options.\n\
+# With suggestions enabled and cursor at EOL, wheel shows a preview suggestion\n\
+# (accept with Right/Ctrl-f); otherwise it replaces text.\n\
 # Examples:\n\
 #   MouseScroll=all       # Default: cycle files and directories\n\
 #   MouseScroll=history   # Always scroll command history\n\

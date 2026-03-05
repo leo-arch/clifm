@@ -1353,14 +1353,17 @@ rl_accept_suggestion(int count, int key)
 	case ELN_SUG:        /* fallthrough */
 	case FASTBACK_SUG:   /* fallthrough */
 	case FUZZY_FILENAME: /* fallthrough */
-	case FILE_SUG: {
-		char *tmp = NULL;
-		size_t isquote = 0, backslash = 0;
-		for (size_t i = 0; suggestion_buf[i]; i++) {
-			if (is_quote_char(suggestion_buf[i]))
-				isquote = 1;
+		case FILE_SUG: {
+			char *tmp = NULL;
+			size_t isquote = 0, backslash = 0;
+			size_t i = 0;
+			while (suggestion_buf[i] == ' ')
+				i++;
+			for (; suggestion_buf[i]; i++) {
+				if (is_quote_char(suggestion_buf[i]))
+					isquote = 1;
 
-			if (suggestion_buf[i] == '\\') {
+				if (suggestion_buf[i] == '\\') {
 				backslash = 1;
 				break;
 			}

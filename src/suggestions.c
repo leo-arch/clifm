@@ -571,7 +571,8 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	if (words_num == 1 && rl_end > 0 && rl_line_buffer
 	&& rl_line_buffer[rl_end - 1] == ' ' && (rl_end == 1
-	|| rl_line_buffer[rl_end - 2] != '\\') && suggestion.type != HIST_SUG) {
+	|| rl_line_buffer[rl_end - 2] != '\\') && suggestion.type != HIST_SUG
+	&& suggestion.offset == 0) {
 		/* We have "cmd     " (with one or more trailing spaces). */
 		suggestion.printed = 0;
 		if (suggestion_buf)

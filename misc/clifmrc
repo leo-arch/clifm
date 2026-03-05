@@ -100,13 +100,15 @@
 ;MouseDirTrailingSlash=true
 
 # Mouse wheel behavior:
-# auto     = empty line -> history; cd/ls -> dirs;
-#            cat/less/more/head/tail/bat/vim/vi/nvim/nano/emacs/view -> files;
-#            otherwise -> all
-# history  = command history (alias: commands)
-# dirs     = always directory names
+# auto     = empty line -> history; cd/ls -> dirs; otherwise -> all.
+# history  = command history (alias: commands), filtered by typed prefix
+# dirs     = always directory names (includes '..')
 # files    = always filenames
 # all      = files + directories
+# File-entry scrolling applies to the current argument token (after command
+# name). It does not cycle command names or command options.
+# Note: With suggestions enabled and cursor at end of line, wheel shows a
+# preview suggestion (accept with Right/Ctrl-f). Otherwise it replaces text.
 # Examples:
 #   MouseScroll=all       # Default: cycle files and directories
 #   MouseScroll=history   # Always scroll command history

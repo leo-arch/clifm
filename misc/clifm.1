@@ -3241,9 +3241,12 @@ Mouse-related options in the main configuration file:
  \fBMouseDirTrailingSlash\fR (true/false): Append a trailing slash to inserted directory names.
  \fBMouseScroll\fR (\fBhistory\fR|\fBcommands\fR|\fBdirs\fR|\fBfiles\fR|\fBall\fR|\fBauto\fR):
    set wheel behavior. \fBauto\fR uses command context:
-   empty line -> history, \fBcd\fR/\fBls\fR -> dirs,
-   \fBcat\fR/\fBless\fR/\fBmore\fR/\fBhead\fR/\fBtail\fR/\fBbat\fR/\fBvim\fR/\fBvi\fR/\fBnvim\fR/\fBnano\fR/\fBemacs\fR/\fBview\fR -> files,
-   otherwise -> all.
+   empty line -> history, \fBcd\fR/\fBls\fR -> dirs, otherwise -> all.
+   In \fBhistory\fR mode, wheel cycles history entries matching the typed prefix.
+   File-entry scrolling applies to the current argument token (after command
+   name). It does not cycle command names or command options.
+   If suggestions are enabled and cursor is at end-of-line, wheel displays a
+   preview suggestion (accept with Right or Ctrl-f); otherwise text is replaced.
 .TP
 .B PROFILE FILE
 The profile file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/profile.clifm\fR.
