@@ -1237,14 +1237,19 @@ count_printed_lines(const char *s)
 	int lines = 0;
 	int col = 0;
 
-	for (const unsigned char *p = (const unsigned char *)s; *p; p++) {
+	const unsigned char *p = (const unsigned char *)s;
+	while (*p) {
 		if (*p == KEY_ESC) {
 			/* Skip ANSI escape sequences (best-effort). */
-			if (*(p + 1) == '[') {
+			if (p[1] == '[') {
 				p += 2;
 				while (*p && !(*p >= '@' && *p <= '~'))
 					p++;
-			} else if (*(p + 1)) {
+				if (*p)
+					p++;
+			} else if (p[1]) {
+				p += 2;
+			} else {
 				p++;
 			}
 			continue;
@@ -1267,6 +1272,8 @@ count_printed_lines(const char *s)
 		} else {
 			col++;
 		}
+
+		p++;
 	}
 
 	if (col > 0)
