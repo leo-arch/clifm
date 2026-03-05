@@ -80,6 +80,33 @@ static int tagged_files_n = 0;
 static int cb_running = 0;
 static char rl_default_answer = 0;
 
+static void
+clear_current_line_on_interrupt(void)
+{
+#ifndef _NO_SUGGESTIONS
+	words_num = 0; rl_dispatching = 1;
+	if (wrong_cmd == 1)
+		recover_from_wrong_cmd();
+	rl_dispatching = 0;
+
+	if (suggestion.printed && suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
+#endif /* !_NO_SUGGESTIONS */
+
+#ifndef _NO_HIGHLIGHT
+	if (cur_color != tx_c) {
+		cur_color = tx_c;
+		fputs(cur_color, stdout);
+	}
+#endif /* !_NO_HIGHLIGHT */
+
+	if (rl_end > 0)
+		rl_delete_text(0, rl_end);
+
+	rl_point = rl_end = 0;
+	rl_redisplay();
+}
+
 static const char *
 gen_yes_no_str(char def_answer, int allow_all)
 {
@@ -216,19 +243,21 @@ xbackspace(void)
 static void
 leftmost_bell(void)
 {
-	if (conf.bell_style == BELL_VISIBLE) {
-		rl_extend_line_buffer(2);
-		*rl_line_buffer = ' ';
-		*(rl_line_buffer + 1) = '\0';
-		rl_end = rl_point = 1;
+	/* Empty-line backspace feedback: briefly hide/show cursor.
+	 * Avoids cursor-shape transitions that may look like a backward pop. */
+	if (conf.bell_style == BELL_VISIBLE && isatty(STDIN_FILENO) == 1
+	&& isatty(STDOUT_FILENO) == 1 && term_caps.hide_cursor == 1) {
+		HIDE_CURSOR;
+		fflush(stdout);
+		usleep((useconds_t)VISIBLE_BELL_DELAY * 1000U);
+		UNHIDE_CURSOR;
+		SET_STEADY_BLOCK_CURSOR;
+		fflush(stdout);
+		return;
 	}
 
+	/* Fallback for non-interactive contexts. */
 	rl_ring_bell();
-
-	if (conf.bell_style == BELL_VISIBLE) {
-		rl_delete_text(0, rl_end);
-		rl_end = rl_point = 0;
-	}
 }
 #endif /* !_NO_SUGGESTIONS */
 
@@ -347,6 +376,11 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 		return RL_INSERT_CHAR;
 	}
 
+	if (c == CTRL('C')) {
+		clear_current_line_on_interrupt();
+		return SKIP_CHAR_NO_REDISPLAY;
+	}
+
 	/* Skip control characters (0 - 31) except backspace (8), tab(9),
 	 * enter (13), and escape (27). */
 	if (c < ' ' && c != KEY_BACKSPACE && c != KEY_TAB
@@ -363,9 +397,12 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 	switch (c) {
 		case KEY_DELETE: /* fallthrough */
 		case KEY_BACKSPACE:
-			del_key = (rl_point == 0 && rl_end == 0)
-				? DEL_EMPTY_LINE : DEL_NON_EMPTY_LINE;
-			xbackspace();
+			if (rl_point == 0 && rl_end == 0) {
+				del_key = DEL_EMPTY_LINE;
+			} else {
+				del_key = DEL_NON_EMPTY_LINE;
+				xbackspace();
+			}
 			if (rl_end == 0 && cur_color != tx_c) {
 				cur_color = tx_c;
 				fputs(tx_c, stdout);
@@ -674,8 +711,8 @@ my_rl_getc(FILE *stream)
 			return (EOF);
 
 		  /* If the error that we received was SIGINT, then try again,
-		 this is simply an interrupted system call to read().
-		 Otherwise, some error ocurred, also signifying EOF. */
+		 this is simply an interrupted system call to read(). */
+		clear_current_line_on_interrupt();
 	}
 }
 
@@ -740,8 +777,8 @@ alt_rl_getc(FILE *stream)
 			return (EOF);
 
 		  /* If the error that we received was SIGINT, then try again,
-		 this is simply an interrupted system call to read().
-		 Otherwise, some error occurred, also signifying EOF. */
+		 this is simply an interrupted system call to read(). */
+		clear_current_line_on_interrupt();
 	}
 }
 
@@ -4531,6 +4568,9 @@ initialize_readline(void)
 	/* Set the name of the program using readline. Mostly used for
 	 * conditional constructs in the inputrc file. */
 	rl_readline_name = PROGRAM_NAME;
+	/* Keep signal/control-char handling consistent with CliFM's custom
+	 * Ctrl+c clear-line implementation. */
+	rl_catch_signals = 0;
 
 	disable_rl_conflicting_kbinds();
 	set_rl_init_file();
@@ -4609,6 +4649,9 @@ initialize_readline(void)
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote(). */
 	quote_chars = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
+
+	if (isatty(STDIN_FILENO) == 1 && isatty(STDOUT_FILENO) == 1)
+		SET_STEADY_BLOCK_CURSOR;
 
 	enable_mouse_if_interactive();
 

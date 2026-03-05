@@ -1465,6 +1465,9 @@ free_stuff(void)
 	if (conf.colorize == 1 && xargs.list_and_quit != 1)
 		RESTORE_COLOR;
 
+	if (isatty(STDIN_FILENO) == 1 && isatty(STDOUT_FILENO) == 1)
+		RESET_CURSOR_STYLE;
+
 	if (xargs.kitty_keys == 1)
 		UNSET_KITTY_KEYS;
 
