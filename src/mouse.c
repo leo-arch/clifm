@@ -10,8 +10,10 @@
 #include "helpers.h"
 
 #include <errno.h>
+#include <ctype.h>
 #include <poll.h>
 #include <string.h>
+#include <strings.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -24,10 +26,12 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #endif /* __OpenBSD__ */
 
 #include "mouse.h"
+#include "checks.h"
 #include "mem.h"
 #ifndef _NO_SUGGESTIONS
 # include "suggestions.h"
 #endif /* !_NO_SUGGESTIONS */
+#include "spawn.h"
 #include "term.h"
 
 /* Keep these short to avoid noticeable delays for non-mouse ESC sequences. */
@@ -42,6 +46,7 @@ struct scroll_item {
 };
 
 static int apply_single_click_insert(char *arg);
+static int history_entry_matches_prefix(size_t idx, const char *prefix, size_t plen);
 
 static unsigned char mouse_pending_buf[MOUSE_PENDING_BUF_SIZE];
 static size_t mouse_pending_len = 0;
@@ -51,6 +56,12 @@ static filesn_t mouse_armed_index = (filesn_t)-1;
 static struct timespec mouse_armed_click = {0};
 static char *mouse_armed_arg = NULL;
 static int mouse_scroll_history_active = 0;
+static char *mouse_scroll_history_prefix = NULL;
+
+static int mouse_scroll_entries_active = 0;
+static int mouse_scroll_entries_mode = MOUSE_SCROLL_AUTO;
+static char *mouse_scroll_entries_prefix = NULL;
+static char *mouse_scroll_entries_last_token = NULL;
 
 /* Number of non-list lines printed after the file list and before the prompt. */
 static int mouse_post_listing_lines = 0;
@@ -116,11 +127,113 @@ clear_armed_click(void)
 	mouse_armed_arg = NULL;
 }
 
+static void
+reset_history_scroll_state(void)
+{
+	mouse_scroll_history_active = 0;
+	free(mouse_scroll_history_prefix);
+	mouse_scroll_history_prefix = NULL;
+}
+
+static void
+set_history_scroll_prefix(const char *line)
+{
+	free(mouse_scroll_history_prefix);
+	mouse_scroll_history_prefix = NULL;
+	const char *p = line ? line : "";
+	mouse_scroll_history_prefix = savestring(p, strlen(p));
+}
+
+static void
+reset_entries_scroll_state(void)
+{
+	mouse_scroll_entries_active = 0;
+	mouse_scroll_entries_mode = MOUSE_SCROLL_AUTO;
+	free(mouse_scroll_entries_prefix);
+	mouse_scroll_entries_prefix = NULL;
+	free(mouse_scroll_entries_last_token);
+	mouse_scroll_entries_last_token = NULL;
+}
+
+static void
+update_entries_scroll_state(const int mode, const char *prefix,
+	const char *last_token)
+{
+	const char *safe_prefix = prefix ? prefix : "";
+	const char *safe_last_token = last_token ? last_token : "";
+	char *new_prefix = savestring(safe_prefix, strlen(safe_prefix));
+	char *new_last_token = savestring(safe_last_token, strlen(safe_last_token));
+
+	mouse_scroll_entries_active = 1;
+	mouse_scroll_entries_mode = mode;
+
+	free(mouse_scroll_entries_prefix);
+	mouse_scroll_entries_prefix = new_prefix;
+
+	free(mouse_scroll_entries_last_token);
+	mouse_scroll_entries_last_token = new_last_token;
+}
+
+static inline int
+token_matches_prefix(const char *token, const char *prefix, const size_t prefix_len)
+{
+	if (!token)
+		return 0;
+
+	if (!prefix || prefix_len == 0)
+		return 1;
+
+	if (conf.case_sens_path_comp == 1)
+		return strncmp(token, prefix, prefix_len) == 0;
+
+	return strncasecmp(token, prefix, prefix_len) == 0;
+}
+
+#ifndef _NO_SUGGESTIONS
+static int
+can_preview_scroll_suggestion(void)
+{
+	return conf.suggestions == 1 && rl_point == rl_end;
+}
+
+static int
+preview_entry_suggestion(const struct scroll_item *item, const char *display_token,
+	const size_t prefix_len, const size_t insert_offset)
+{
+	if (!item || !display_token || !*display_token
+	|| can_preview_scroll_suggestion() == 0)
+		return 0;
+
+	suggestion.type = FILE_SUG;
+	suggestion.filetype = (item->index >= 0 && file_info && item->index < g_files_num
+		&& file_info[item->index].dir == 1) ? DT_DIR : DT_REG;
+	suggestion.offset = (int)insert_offset;
+	print_suggestion((char *)display_token, prefix_len, sf_c);
+	return 1;
+}
+
+static int
+preview_history_suggestion(const char *entry, const size_t prefix_len)
+{
+	if (!entry || !*entry || can_preview_scroll_suggestion() == 0)
+		return 0;
+
+	suggestion.type = HIST_SUG;
+	suggestion.filetype = DT_REG;
+	suggestion.offset = 0;
+	print_suggestion((char *)entry, prefix_len, sf_c);
+	return 1;
+}
+
+#endif /* !_NO_SUGGESTIONS */
+
 void
 enable_mouse_if_interactive(void)
 {
 	if (conf.mouse_support == 0) {
 		clear_armed_click();
+		reset_history_scroll_state();
+		reset_entries_scroll_state();
 
 		if (mouse_enabled == 1) {
 			UNSET_MOUSE_TRACKING;
@@ -421,7 +534,8 @@ apply_single_click_insert(char *arg)
 	if (!arg || !*arg)
 		return MOUSE_SEQ_CONSUMED;
 
-	mouse_scroll_history_active = 0;
+	reset_history_scroll_state();
+	reset_entries_scroll_state();
 	clear_suggestions_if_any();
 
 	if (has_command_prefix(rl_line_buffer) == 1) {
@@ -451,7 +565,8 @@ apply_double_click_open(const filesn_t index, char *arg)
 {
 	size_t cmd_len = strlen(arg) + 6;
 	char *cmd = xnmalloc(cmd_len, sizeof(char));
-	mouse_scroll_history_active = 0;
+	reset_history_scroll_state();
+	reset_entries_scroll_state();
 	if (file_info[index].dir == 1)
 		snprintf(cmd, cmd_len, "cd %s", arg);
 	else
@@ -528,42 +643,84 @@ handle_mouse_left_click(const int x, const int y)
 static int
 handle_mouse_scroll_history(const int dir)
 {
-	if ((dir != -1 && dir != 1) || !history || current_hist_n == 0)
+	if (dir != -1 && dir != 1)
 		return MOUSE_SEQ_CONSUMED;
 
+	if (!history || current_hist_n == 0) {
+		reset_history_scroll_state();
+		return MOUSE_SEQ_CONSUMED;
+	}
+
 	clear_suggestions_if_any();
+	reset_entries_scroll_state();
 
 	cmdhist_flag = 1;
+	const char *line = rl_line_buffer ? rl_line_buffer : "";
+	if (mouse_scroll_history_active == 0)
+		set_history_scroll_prefix(line);
+
+	const char *prefix = mouse_scroll_history_prefix ? mouse_scroll_history_prefix : "";
+	const size_t plen = strlen(prefix);
+#ifndef _NO_SUGGESTIONS
+	const int preview_mode = can_preview_scroll_suggestion();
+#else
+	const int preview_mode = 0;
+#endif /* !_NO_SUGGESTIONS */
 	size_t p = curhistindex;
 	if (p > current_hist_n)
 		p = current_hist_n;
 
 	if (dir < 0) { /* Wheel up: previous (older) history entry. */
-		if (p == 0)
+		size_t i = p;
+		int found = 0;
+		while (i > 0) {
+			i--;
+			if (history_entry_matches_prefix(i, prefix, plen) == 1) {
+				p = i;
+				found = 1;
+				break;
+			}
+		}
+		if (found == 0)
 			return MOUSE_SEQ_CONSUMED;
-		p--;
 	} else { /* Wheel down: next (newer) history entry. */
-		if (p >= current_hist_n) {
-			curhistindex = current_hist_n;
-			return MOUSE_SEQ_CONSUMED;
+		size_t i = p;
+		int found = 0;
+		while (i < current_hist_n) {
+			i++;
+			if (i >= current_hist_n)
+				break;
+			if (history_entry_matches_prefix(i, prefix, plen) == 1) {
+				p = i;
+				found = 1;
+				break;
+			}
 		}
-		p++;
-		if (p >= current_hist_n) {
-			rl_replace_line("", 1);
-			rl_point = rl_end;
-			rl_redisplay();
-			curhistindex = current_hist_n;
-			mouse_scroll_history_active = 1;
-			return MOUSE_SEQ_CONSUMED;
+			if (found == 0) {
+				if (preview_mode == 0) {
+					rl_replace_line(prefix, 1);
+					rl_point = rl_end;
+					rl_redisplay();
+				}
+				curhistindex = current_hist_n;
+				mouse_scroll_history_active = 1;
+				return MOUSE_SEQ_CONSUMED;
+			}
 		}
-	}
 
 	if (!history[p].cmd)
 		return MOUSE_SEQ_CONSUMED;
 
-	rl_replace_line(history[p].cmd, 1);
-	rl_point = rl_end;
-	rl_redisplay();
+#ifndef _NO_SUGGESTIONS
+	if (preview_mode == 1) {
+		preview_history_suggestion(history[p].cmd, plen);
+	} else
+#endif /* !_NO_SUGGESTIONS */
+	{
+		rl_replace_line(history[p].cmd, 1);
+		rl_point = rl_end;
+		rl_redisplay();
+	}
 	curhistindex = p;
 	mouse_scroll_history_active = 1;
 	return MOUSE_SEQ_CONSUMED;
@@ -603,14 +760,33 @@ line_matches_history_state(const char *line)
 	if (!line)
 		line = "";
 
-	if (!*line)
+	if (!*line && (!mouse_scroll_history_prefix || !*mouse_scroll_history_prefix))
 		return curhistindex >= current_hist_n;
+
+	if (mouse_scroll_history_prefix
+	&& strcmp(line, mouse_scroll_history_prefix) == 0)
+		return 1;
 
 	if (!history || curhistindex >= current_hist_n
 	|| !history[curhistindex].cmd)
 		return 0;
 
 	return strcmp(line, history[curhistindex].cmd) == 0;
+}
+
+static int
+history_entry_matches_prefix(const size_t idx, const char *prefix, const size_t plen)
+{
+	if (!history || idx >= current_hist_n || !history[idx].cmd)
+		return 0;
+
+	if (!prefix || plen == 0)
+		return 1;
+
+	if (conf.case_sens_path_comp == 1)
+		return strncmp(history[idx].cmd, prefix, plen) == 0;
+
+	return strncasecmp(history[idx].cmd, prefix, plen) == 0;
 }
 
 static int
@@ -637,22 +813,7 @@ get_scroll_target(const char *line)
 	|| cmd_eq(cmd, len, "ls"))
 		return MOUSE_SCROLL_DIRS;
 
-	/* File-centric commands. */
-	if (cmd_eq(cmd, len, "cat")
-	|| cmd_eq(cmd, len, "less")
-	|| cmd_eq(cmd, len, "more")
-	|| cmd_eq(cmd, len, "head")
-	|| cmd_eq(cmd, len, "tail")
-	|| cmd_eq(cmd, len, "bat")
-	|| cmd_eq(cmd, len, "vim")
-	|| cmd_eq(cmd, len, "vi")
-	|| cmd_eq(cmd, len, "nvim")
-	|| cmd_eq(cmd, len, "nano")
-	|| cmd_eq(cmd, len, "emacs")
-	|| cmd_eq(cmd, len, "view"))
-		return MOUSE_SCROLL_FILES;
-
-	/* Everything else: cycle all visible entries. */
+	/* For all non-directory commands, cycle all visible entries. */
 	return MOUSE_SCROLL_ALL;
 }
 
@@ -733,77 +894,82 @@ free_scroll_items(struct scroll_item *items, const size_t nitems)
 }
 
 static char *
-get_current_arg_str(const char *line, const size_t cmd_end, size_t *start_out)
+get_current_arg_str(const char *line, const size_t cmd_end, const int point,
+	size_t *start_out, size_t *end_out)
 {
-	if (!line || !line[cmd_end] || !start_out)
+	if (!line || !start_out || !end_out)
 		return NULL;
 
-	size_t first = cmd_end;
-	while (line[first] && is_blank_char(line[first]))
-		first++;
+	const size_t len = strlen(line);
+	size_t p = point >= 0 ? (size_t)point : 0;
+	if (p > len)
+		p = len;
 
-	size_t end = strlen(line);
-	while (end > first && is_blank_char(line[end - 1]))
-		end--;
+	if (p < cmd_end)
+		p = cmd_end;
 
-	if (end <= first)
-		return NULL;
-
-	int in_single = 0;
-	int in_double = 0;
-	size_t start = first;
-	size_t i = first;
-	while (i < end) {
-		const char c = line[i];
-		if (c == '\'' && in_double == 0 && is_escaped_at(line, i) == 0) {
-			in_single = !in_single;
-			i++;
-			continue;
+	if (p == len) {
+		if (len == 0 || (is_blank_char(line[len - 1]) && is_escaped_at(line, len - 1) == 0)) {
+			*start_out = len;
+			*end_out = len;
+			return savestring("", 0);
 		}
-		if (c == '"' && in_single == 0 && is_escaped_at(line, i) == 0) {
-			in_double = !in_double;
-			i++;
-			continue;
-		}
-		if (in_single == 0 && in_double == 0
-		&& is_blank_char(c) && is_escaped_at(line, i) == 0) {
-			while (i < end && is_blank_char(line[i]))
-				i++;
-			start = i;
-			continue;
-		}
-		i++;
+		/* Cursor at end of a non-empty token: treat that last token as current. */
+		p = len - 1;
 	}
 
-	if (start >= end)
-		return NULL;
+	if (is_blank_char(line[p]) && is_escaped_at(line, p) == 0) {
+		size_t s = p;
+		while (s < len && is_blank_char(line[s]) && is_escaped_at(line, s) == 0)
+			s++;
+		*start_out = s;
+		*end_out = s;
+		return savestring("", 0);
+	}
 
-	*start_out = start;
-	const size_t len = end - *start_out;
-	char *arg = xnmalloc(len + 1, sizeof(char));
-	memcpy(arg, line + *start_out, len);
-	arg[len] = '\0';
+	size_t s = p;
+	while (s > cmd_end) {
+		if (is_blank_char(line[s - 1]) && is_escaped_at(line, s - 1) == 0)
+			break;
+		s--;
+	}
+
+	size_t e = p;
+	while (e < len) {
+		if (is_blank_char(line[e]) && is_escaped_at(line, e) == 0)
+			break;
+		e++;
+	}
+
+	*start_out = s;
+	*end_out = e;
+	const size_t alen = e > s ? e - s : 0;
+	char *arg = xnmalloc(alen + 1, sizeof(char));
+	if (alen > 0)
+		memcpy(arg, line + s, alen);
+	arg[alen] = '\0';
 	return arg;
 }
 
 static int
 replace_scrolled_arg(const char *line, const size_t cmd_end, const size_t arg_start,
-	const char *token)
+	const size_t arg_end, const char *token)
 {
 	if (!line || !token || cmd_end == 0)
 		return MOUSE_SEQ_CONSUMED;
 
 	const size_t new_len = arg_start > cmd_end
-		? arg_start + strlen(token) + 1
-		: cmd_end + 1 + strlen(token) + 1;
+		? arg_start + strlen(token) + (strlen(line + arg_end)) + 1
+		: cmd_end + 1 + strlen(token) + (strlen(line + arg_end)) + 1;
 	char *new_line = xnmalloc(new_len, sizeof(char));
 	if (arg_start > cmd_end)
-		snprintf(new_line, new_len, "%.*s%s", (int)arg_start, line, token);
+		snprintf(new_line, new_len, "%.*s%s%s", (int)arg_start, line, token, line + arg_end);
 	else
-		snprintf(new_line, new_len, "%.*s %s", (int)cmd_end, line, token);
+		snprintf(new_line, new_len, "%.*s %s%s", (int)cmd_end, line, token, line + arg_end);
 
 	rl_replace_line(new_line, 1);
-	rl_point = rl_end;
+	rl_point = (int)(arg_start > cmd_end ? arg_start + strlen(token)
+		: cmd_end + 1 + strlen(token));
 	rl_redisplay();
 	cmdhist_flag = 1;
 	free(new_line);
@@ -818,43 +984,178 @@ handle_mouse_scroll_entries(const int dir, const int mode)
 
 	const char *line = rl_line_buffer ? rl_line_buffer : "";
 	size_t cmd_start = 0, cmd_end = 0;
-	if (parse_command_bounds(line, &cmd_start, &cmd_end) == 0)
+	if (parse_command_bounds(line, &cmd_start, &cmd_end) == 0) {
+		reset_entries_scroll_state();
 		return MOUSE_SEQ_CONSUMED;
+	}
+	UNUSED(cmd_start);
 
 	size_t nitems = 0;
 	struct scroll_item *items = build_scroll_items(mode, &nitems);
 	if (!items || nitems == 0) {
 		free_scroll_items(items, nitems);
+		reset_entries_scroll_state();
 		return MOUSE_SEQ_CONSUMED;
 	}
 
 	clear_suggestions_if_any();
 
-	size_t arg_start = 0;
-	char *cur_arg = get_current_arg_str(line, cmd_end, &arg_start);
-	ssize_t pos = -1;
+	size_t arg_start = 0, arg_end = 0;
+	char *cur_arg = get_current_arg_str(line, cmd_end, rl_point, &arg_start, &arg_end);
+
+	/* Safety net: if current token was parsed as empty but cursor is right after
+	 * a non-blank char, recover that token boundaries to avoid accidental
+	 * token appending (e.g. "c" + "cmake" -> "ccmake"). */
+	if (cur_arg && !*cur_arg && arg_start == arg_end
+	&& arg_start > cmd_end && arg_start > 0
+	&& is_blank_char(line[arg_start - 1]) == 0) {
+		size_t s = arg_start, e = arg_end;
+		while (s > cmd_end && is_blank_char(line[s - 1]) == 0)
+			s--;
+		while (line[e] && is_blank_char(line[e]) == 0)
+			e++;
+
+		free(cur_arg);
+		cur_arg = xnmalloc((e - s) + 1, sizeof(char));
+		memcpy(cur_arg, line + s, e - s);
+		cur_arg[e - s] = '\0';
+		arg_start = s;
+		arg_end = e;
+	}
+	const int no_arg_separator = (arg_start <= cmd_end && arg_end <= cmd_end);
+	if (no_arg_separator == 1) {
+		reset_entries_scroll_state();
+		free(cur_arg);
+		free_scroll_items(items, nitems);
+		return MOUSE_SEQ_CONSUMED;
+	}
+
+	const size_t eff_arg_start = arg_start > cmd_end ? arg_start : cmd_end + 1;
+	const char *typed_token = cur_arg ? cur_arg : "";
+	ssize_t cur_pos = -1;
 	if (cur_arg && *cur_arg) {
 		for (size_t i = 0; i < nitems; i++) {
 			if (!items[i].token)
 				continue;
 			if (*cur_arg == *items[i].token
 			&& strcmp(cur_arg, items[i].token) == 0) {
-				pos = (ssize_t)i;
+				cur_pos = (ssize_t)i;
 				break;
 			}
 		}
 	}
 
-	if (pos == -1)
-		pos = (dir < 0) ? (ssize_t)nitems - 1 : 0;
-	else if (dir < 0 && pos > 0)
-		pos--;
-	else if (dir > 0 && (size_t)pos + 1 < nitems)
-		pos++;
+	const int keep_entries_prefix_state = mouse_scroll_entries_active == 1
+		&& mouse_scroll_entries_mode == mode
+		&& mouse_scroll_entries_prefix
+		&& (strcmp(typed_token, mouse_scroll_entries_prefix) == 0
+			|| (mouse_scroll_entries_last_token
+				&& strcmp(typed_token, mouse_scroll_entries_last_token) == 0));
 
-	mouse_scroll_history_active = 0;
-	const int ret = replace_scrolled_arg(line, cmd_end, arg_start,
-		items[(size_t)pos].token);
+	if (keep_entries_prefix_state == 1
+	&& mouse_scroll_entries_last_token) {
+		for (size_t i = 0; i < nitems; i++) {
+			if (!items[i].token)
+				continue;
+			if (*mouse_scroll_entries_last_token == *items[i].token
+			&& strcmp(mouse_scroll_entries_last_token, items[i].token) == 0) {
+				cur_pos = (ssize_t)i;
+				break;
+			}
+		}
+	}
+
+	const char *prefix = keep_entries_prefix_state == 1 && mouse_scroll_entries_prefix
+		? mouse_scroll_entries_prefix : typed_token;
+	size_t prefix_len = strlen(prefix);
+	if (cur_arg && *cur_arg && prefix_len == 0)
+		prefix_len = strlen(cur_arg);
+
+	ssize_t first_match = -1, last_match = -1;
+	ssize_t pos = -1;
+	for (size_t i = 0; i < nitems; i++) {
+		if (!items[i].token
+		|| token_matches_prefix(items[i].token, prefix, prefix_len) == 0)
+			continue;
+
+		if (first_match == -1)
+			first_match = (ssize_t)i;
+		last_match = (ssize_t)i;
+
+		if (cur_pos == (ssize_t)i)
+			pos = (ssize_t)i;
+	}
+
+	if (first_match == -1) {
+		reset_entries_scroll_state();
+		free(cur_arg);
+		free_scroll_items(items, nitems);
+		return MOUSE_SEQ_CONSUMED;
+	}
+
+	if (pos == -1) {
+		pos = (dir < 0) ? last_match : first_match;
+	} else if (dir < 0) {
+		ssize_t next = -1;
+		for (ssize_t i = pos - 1; i >= first_match; i--) {
+			if (token_matches_prefix(items[(size_t)i].token,
+			prefix, prefix_len) == 1) {
+				next = i;
+				break;
+			}
+		}
+		if (next == -1) {
+			for (ssize_t i = last_match; i > pos; i--) {
+				if (token_matches_prefix(items[(size_t)i].token,
+				prefix, prefix_len) == 1) {
+					next = i;
+					break;
+				}
+			}
+		}
+		if (next != -1)
+			pos = next;
+	} else {
+		ssize_t next = -1;
+		for (ssize_t i = pos + 1; i <= last_match; i++) {
+			if (token_matches_prefix(items[(size_t)i].token,
+			prefix, prefix_len) == 1) {
+				next = i;
+				break;
+			}
+		}
+		if (next == -1) {
+			for (ssize_t i = first_match; i < pos; i++) {
+				if (token_matches_prefix(items[(size_t)i].token,
+				prefix, prefix_len) == 1) {
+					next = i;
+					break;
+				}
+			}
+		}
+		if (next != -1)
+			pos = next;
+	}
+
+	reset_history_scroll_state();
+#ifndef _NO_SUGGESTIONS
+	const int preview_mode = can_preview_scroll_suggestion();
+#else
+	const int preview_mode = 0;
+#endif /* !_NO_SUGGESTIONS */
+	int ret = MOUSE_SEQ_CONSUMED;
+#ifndef _NO_SUGGESTIONS
+	if (preview_mode == 1) {
+		preview_entry_suggestion(&items[(size_t)pos], items[(size_t)pos].token,
+			prefix_len, arg_start);
+	} else
+#endif /* !_NO_SUGGESTIONS */
+	{
+		ret = replace_scrolled_arg(line, cmd_end, arg_start, arg_end,
+			items[(size_t)pos].token);
+	}
+
+	update_entries_scroll_state(mode, prefix, items[(size_t)pos].token);
 	free(cur_arg);
 	free_scroll_items(items, nitems);
 	return ret;
@@ -872,11 +1173,13 @@ handle_mouse_scroll(const int x, const int y, const int dir)
 
 	if (mouse_scroll_history_active == 1
 	&& line_matches_history_state(rl_line_buffer) == 0)
-		mouse_scroll_history_active = 0;
+		reset_history_scroll_state();
 
 	const int target = get_scroll_target(rl_line_buffer);
 	if (target != MOUSE_SCROLL_HISTORY)
-		mouse_scroll_history_active = 0;
+		reset_history_scroll_state();
+	if (target == MOUSE_SCROLL_HISTORY)
+		reset_entries_scroll_state();
 
 	switch (target) {
 	case MOUSE_SCROLL_HISTORY:
