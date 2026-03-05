@@ -241,19 +241,21 @@ xbackspace(void)
 static void
 leftmost_bell(void)
 {
-	if (conf.bell_style == BELL_VISIBLE) {
-		rl_extend_line_buffer(2);
-		*rl_line_buffer = ' ';
-		*(rl_line_buffer + 1) = '\0';
-		rl_end = rl_point = 1;
+	/* Empty-line backspace feedback: briefly hide/show cursor.
+	 * Avoids cursor-shape transitions that may look like a backward pop. */
+	if (conf.bell_style == BELL_VISIBLE && isatty(STDIN_FILENO) == 1
+	&& isatty(STDOUT_FILENO) == 1 && term_caps.hide_cursor == 1) {
+		HIDE_CURSOR;
+		fflush(stdout);
+		usleep((useconds_t)VISIBLE_BELL_DELAY * 1000U);
+		UNHIDE_CURSOR;
+		SET_STEADY_BLOCK_CURSOR;
+		fflush(stdout);
+		return;
 	}
 
+	/* Fallback for non-interactive contexts. */
 	rl_ring_bell();
-
-	if (conf.bell_style == BELL_VISIBLE) {
-		rl_delete_text(0, rl_end);
-		rl_end = rl_point = 0;
-	}
 }
 #endif /* !_NO_SUGGESTIONS */
 
@@ -393,9 +395,12 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 	switch (c) {
 		case KEY_DELETE: /* fallthrough */
 		case KEY_BACKSPACE:
-			del_key = (rl_point == 0 && rl_end == 0)
-				? DEL_EMPTY_LINE : DEL_NON_EMPTY_LINE;
-			xbackspace();
+			if (rl_point == 0 && rl_end == 0) {
+				del_key = DEL_EMPTY_LINE;
+			} else {
+				del_key = DEL_NON_EMPTY_LINE;
+				xbackspace();
+			}
 			if (rl_end == 0 && cur_color != tx_c) {
 				cur_color = tx_c;
 				fputs(tx_c, stdout);
@@ -4600,6 +4605,9 @@ initialize_readline(void)
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote(). */
 	quote_chars = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
+
+	if (isatty(STDIN_FILENO) == 1 && isatty(STDOUT_FILENO) == 1)
+		SET_STEADY_BLOCK_CURSOR;
 
 	return FUNC_SUCCESS;
 }
