@@ -19,6 +19,7 @@
 #include <readline/readline.h>
 #include <readline/history.h> /* history_expand() */
 #include <errno.h>
+#include <wchar.h>
 
 #include "aux.h"
 #include "checks.h" /* is_number() */
@@ -1236,6 +1237,7 @@ count_printed_lines(const char *s)
 	const int cols = term_cols > 0 ? (int)term_cols : 80;
 	int lines = 0;
 	int col = 0;
+	mbstate_t mbs = {0};
 
 	const unsigned char *p = (const unsigned char *)s;
 	while (*p) {
@@ -1258,28 +1260,87 @@ count_printed_lines(const char *s)
 		if (*p == '\n') {
 			lines++;
 			col = 0;
+			mbs = (mbstate_t){0};
+			p++;
 			continue;
 		}
 
 		if (*p == '\r') {
 			col = 0;
+			mbs = (mbstate_t){0};
+			p++;
 			continue;
 		}
 
-		if (col + 1 > cols) {
-			lines++;
-			col = 1;
+		wchar_t wc = L'\0';
+		size_t n = mbrtowc(&wc, (const char *)p, MB_CUR_MAX, &mbs);
+		int w = 1;
+		if (n == (size_t)-1) {
+			/* Invalid multibyte sequence: consume one byte and reset state. */
+			mbs = (mbstate_t){0};
+			n = 1;
+		} else if (n == (size_t)-2) {
+			/* Incomplete sequence: consume one byte conservatively. */
+			mbs = (mbstate_t){0};
+			n = 1;
+		} else if (n == 0) {
+			n = 1;
 		} else {
-			col++;
+			const int cw = wcwidth(wc);
+			w = cw >= 0 ? cw : 1;
 		}
 
-		p++;
+		if (w > 0) {
+			const int total = col + w;
+			if (total > cols) {
+				const int wraps = (total - 1) / cols;
+				lines += wraps;
+				col = total - (wraps * cols);
+			} else {
+				col = total;
+			}
+		}
+
+		p += n;
 	}
 
 	if (col > 0)
 		lines++;
 
 	return lines;
+}
+
+/* Estimate advanced screen lines from two cursor snapshots.
+ * Coordinates are terminal-relative, so this is best-effort. */
+static int
+cursor_delta_lines(const int row_before, const int col_before,
+	const int row_after, const int col_after)
+{
+	if (term_lines == 0 || term_cols == 0
+	|| row_before <= 0 || col_before <= 0
+	|| row_after <= 0 || col_after <= 0)
+		return 0;
+
+	const int rows = (int)term_lines;
+	const int cols = (int)term_cols;
+	const int total_cells = rows * cols;
+	if (rows <= 0 || cols <= 0 || total_cells <= 0)
+		return 0;
+
+	int bcol = col_before > cols ? cols : col_before;
+	int acol = col_after > cols ? cols : col_after;
+	if (bcol < 1)
+		bcol = 1;
+	if (acol < 1)
+		acol = 1;
+
+	const int before = (row_before - 1) * cols + (bcol - 1);
+	const int after = (row_after - 1) * cols + (acol - 1);
+	int delta_cells = after - before;
+	if (delta_cells < 0)
+		delta_cells += total_cells;
+
+	return delta_cells / cols;
 }
 
 static int
@@ -1397,10 +1458,8 @@ run_prompt_cmds(void)
 			int col_after = 0, row_after = 0;
 			if (get_cursor_position(&col_after, &row_after) == FUNC_SUCCESS
 			&& row_before > 0 && row_after > 0) {
-				int diff = row_after - row_before;
-				if (diff < 0)
-					diff += (int)term_lines;
-				lines += diff;
+				lines += cursor_delta_lines(row_before, col_before,
+					row_after, col_after);
 			}
 		}
 	}
