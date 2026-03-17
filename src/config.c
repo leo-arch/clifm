@@ -389,6 +389,9 @@ dump_config(void)
 	print_config_value("ExternalCommands", &conf.ext_cmd_ok, &n,
 		DUMP_CONFIG_BOOL);
 
+	n = DEF_FAST_MAGIC;
+	print_config_value("FastMagic", &conf.fast_magic, &n, DUMP_CONFIG_BOOL);
+
 	n = DEF_FILE_COUNTER;
 	print_config_value("FileCounter", &conf.file_counter, &n,
 		DUMP_CONFIG_BOOL);
@@ -3638,6 +3641,10 @@ read_config(void)
 		else if (xargs.ext_cmd_ok == UNSET && *line == 'E'
 		&& strncmp(line, "ExternalCommands=", 17) == 0) {
 			set_config_bool_value(line + 17, &conf.ext_cmd_ok);
+		}
+
+		else if (*line == 'F' && strncmp(line, "FastMagic=", 10) == 0) {
+			set_config_bool_value(line + 10, &conf.fast_magic);
 		}
 
 		else if (xargs.file_counter == UNSET && *line == 'F'

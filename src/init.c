@@ -175,6 +175,7 @@ init_conf_struct(void)
 	conf.dirhist_map = UNSET;
 	conf.disk_usage = UNSET;
 	conf.ext_cmd_ok = UNSET;
+	conf.fast_magic = DEF_FAST_MAGIC;
 	conf.file_counter = UNSET;
 	conf.follow_symlinks = UNSET;
 	conf.full_dir_size = UNSET;

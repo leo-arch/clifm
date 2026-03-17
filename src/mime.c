@@ -21,6 +21,9 @@
 # include "aux.h"
 # include "checks.h"
 # include "config.h"
+# ifndef NO_FAST_MAGIC
+#  include "fast_magic.h"
+# endif /* !NO_FAST_MAGIC */
 # include "fs_events.h" /* check_fs_events */
 # include "listing.h"
 # include "messages.h"
@@ -205,6 +208,7 @@ get_mimetype_fallback(const char *file)
 #undef MIME_FALLBACK_XDG_MIME
 
 #ifndef _NO_MAGIC
+
 /* Get FILE's type using the libmagic library.
  * Return the MIME type if QUERY_MIME is set to 1, or a text description
  * otherwise.
@@ -228,6 +232,14 @@ xmagic(const char *file, const int query_mime)
 		if (mime)
 			return strdup(mime);
 	}
+
+#ifndef NO_FAST_MAGIC
+	if (query_mime == 1 && conf.fast_magic == 1) {
+		const char *mime = fast_magic(file);
+		if (mime)
+			return strdup(mime);
+	}
+#endif /* NO_FAST_MAGIC */
 
 	if (query_mime == 1 && !g_magic_mime_type_cookie) {
 		g_magic_mime_type_cookie = magic_open(MAGIC_MIME_TYPE | MAGIC_ERROR);
@@ -295,6 +307,14 @@ xmagic(const char *file, const int query_mime)
 		if (mime)
 			return strdup(mime);
 	}
+
+#ifndef NO_FAST_MAGIC
+	if (query_mime == 1 && conf.fast_magic == 1) {
+		const char *mime = fast_magic(file);
+		if (mime)
+			return strdup(mime);
+	}
+#endif /* !NO_FAST_MAGIC */
 
 	char *mime_type = NULL;
 

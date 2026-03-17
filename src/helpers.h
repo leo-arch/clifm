@@ -1130,6 +1130,7 @@ struct config_t {
 	int dirhist_map;
 	int disk_usage;
 	int ext_cmd_ok;
+	int fast_magic;
 	int file_counter;
 	int follow_symlinks;
 	int full_dir_size;

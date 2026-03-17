@@ -668,14 +668,14 @@ struct icons_t const icon_ext[] = {
 	{"cr2", ICON_IMG, B_GREEN}, // Canon
 	{"cr3", ICON_IMG, B_GREEN}, // Canon
 	{"dcs", ICON_IMG, GREEN}, // Kodak
-	{"dcr", ICON_IMG, GREEN}, // Kodak
+	{"dcr", ICON_IMG, B_GREEN}, // Kodak
 	{"dng", ICON_IMG, B_GREEN}, // Adobe Digital Negative (several brands)
 	{"drf", ICON_IMG, GREEN}, // Kodak
 	{"erf", ICON_IMG, GREEN}, // Epson
 	{"iiq", ICON_IMG, B_GREEN}, // Phase One/Capture One
-	{"k25", ICON_IMG, GREEN}, // Kodac
-	{"kdc", ICON_IMG, GREEN}, // Kodak
-	{"mef", ICON_IMG, GREEN}, // Mamiya
+	{"k25", ICON_IMG, B_GREEN}, // Kodac
+	{"kdc", ICON_IMG, B_GREEN}, // Kodak
+	{"mef", ICON_IMG, B_GREEN}, // Mamiya
 	{"nef", ICON_IMG, B_GREEN}, // Nikon
 	{"nrw", ICON_IMG, B_GREEN}, // Nikon
 	{"orf", ICON_IMG, B_GREEN}, // Olympus
@@ -699,7 +699,7 @@ struct icons_t const icon_ext[] = {
 	{"gpr", ICON_IMG, GREEN}, // GoPro
 	{"mdc", ICON_IMG, GREEN}, // Minolta/Agfa
 	{"mos", ICON_IMG, GREEN}, // Leaf/Mamiya
-	{"mrw", ICON_IMG, GREEN}, // Minolta
+	{"mrw", ICON_IMG, B_GREEN}, // Minolta
 	{"obm", ICON_IMG, GREEN}, // Olympus
 	{"ptx", ICON_IMG, GREEN}, // Pentax
 	{"pxn", ICON_IMG, GREEN}, // Logitech

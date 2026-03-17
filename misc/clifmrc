@@ -511,6 +511,12 @@
 # Enable case-sensitive search.
 ;CaseSensitiveSearch=false
 
+# Use the faster built-in magic check; fall back to libmagic if no result
+# is found.
+# Note: The built-in magic is significantly faster but less accurate than
+# libmagic.
+;FastMagic=false
+
 # When sorting files by 'version' or 'name', skip non-alphanumeric characters.
 # For example, '__file' is sorted as 'file'.
 # This also affects hidden files: if set to false, '.hidden' will appear
