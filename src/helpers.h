@@ -92,12 +92,20 @@
 # ifndef _NO_MAGIC
 #  define _NO_MAGIC
 # endif /* !_NO_MAGIC */
+# ifndef NO_FAST_MAGIC
+#  define NO_FAST_MAGIC
+# endif /* !NO_FAST_MAGIC */
 #endif /* _BE_POSIX */
 
-/* _NO_LIRA implies _NO_MAGIC */
-#if defined(_NO_LIRA) && !defined(_NO_MAGIC)
-# define _NO_MAGIC
-#endif /* _NO_LIRA && !_NO_MAGIC */
+/* _NO_LIRA implies _NO_MAGIC and NO_FAST_MAGIC */
+#if defined(_NO_LIRA)
+# ifndef _NO_MAGIC
+#  define _NO_MAGIC
+# endif
+# ifndef NO_FAST_MAGIC
+#  define NO_FAST_MAGIC
+# endif
+#endif /* _NO_LIRA*/
 
 #if defined(USE_DU1)
 # if (defined(__linux__) || defined(__CYGWIN__) || defined(__HAIKU__)) \

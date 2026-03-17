@@ -865,9 +865,11 @@ open_function(char **cmd)
 		return open_file(file);
 
 	/* Multiple files */
+#ifndef _NO_LIRA
 	if (!is_cmd_in_path(cmd[2], NULL)) {
 		return mime_open_multiple_files(cmd + 1);
 	}
+#endif /* !_NO_LIRA */
 
 	/* A single file plus an opening application. */
 	const char *tmp_cmd[] = {cmd[2], file, NULL};

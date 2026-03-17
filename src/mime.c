@@ -43,14 +43,16 @@
 static char *err_name = NULL;
 static int g_mime_match = 0;
 static char *g_mime_type = NULL;
-static char g_mime_source = 0;
+#endif /* !_NO_LIRA */
 
 #define XMAGIC_SRC_NONE          0
 #define XMAGIC_SRC_LIBMAGIC      1
-#define XMAGIC_SRC_FAST_MAGIC    2
+#ifndef NO_FAST_MAGIC
+# define XMAGIC_SRC_FAST_MAGIC   2
+#endif
 #define XMAGIC_SRC_MIME_FILE     3
 #define XMAGIC_SRC_XDG_MIME_INFO 4
-#endif /* !_NO_LIRA */
+static char g_mime_source = XMAGIC_SRC_NONE;
 
 /* Return the MIME type associated to the current file based on its extension.
  * Associations are taken from ~/.mime.types (or $CLIFM_MIMETYPES_FILE) and
@@ -1936,7 +1938,9 @@ get_mime_source_string(void)
 {
 	switch (g_mime_source) {
 	case XMAGIC_SRC_LIBMAGIC: return "libmagic";
+#ifndef NO_FAST_MAGIC
 	case XMAGIC_SRC_FAST_MAGIC: return "fast magic";
+#endif /* !NO_FAST_MAGIC */
 	case XMAGIC_SRC_MIME_FILE: return "mime.types file";
 	case XMAGIC_SRC_XDG_MIME_INFO: return "XDG MIME-info";
 	default: return "unknown";

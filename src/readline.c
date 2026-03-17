@@ -241,6 +241,9 @@ xbackspace(void)
 static void
 leftmost_bell(void)
 {
+#ifdef _BE_POSIX
+	return;
+#else
 	/* Empty-line backspace feedback: briefly hide/show cursor.
 	 * Avoids cursor-shape transitions that may look like a backward pop. */
 	if (conf.bell_style == BELL_VISIBLE && isatty(STDIN_FILENO) == 1
@@ -256,6 +259,7 @@ leftmost_bell(void)
 
 	/* Fallback for non-interactive contexts. */
 	rl_ring_bell();
+#endif /* _BE_POSIX */
 }
 #endif /* !_NO_SUGGESTIONS */
 
