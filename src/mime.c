@@ -43,6 +43,13 @@
 static char *err_name = NULL;
 static int g_mime_match = 0;
 static char *g_mime_type = NULL;
+static char g_mime_source = 0;
+
+#define XMAGIC_SRC_NONE          0
+#define XMAGIC_SRC_LIBMAGIC      1
+#define XMAGIC_SRC_FAST_MAGIC    2
+#define XMAGIC_SRC_MIME_FILE     3
+#define XMAGIC_SRC_XDG_MIME_INFO 4
 #endif /* !_NO_LIRA */
 
 /* Return the MIME type associated to the current file based on its extension.
@@ -227,17 +234,22 @@ xmagic(const char *file, const int query_mime)
 	if (!file || !*file)
 		return NULL;
 
+	g_mime_source = XMAGIC_SRC_NONE;
 	if (query_mime == 1 && user_mimetypes) {
 		const char *mime = check_user_mimetypes(file);
-		if (mime)
+		if (mime) {
+			g_mime_source = XMAGIC_SRC_MIME_FILE;
 			return strdup(mime);
+		}
 	}
 
 #ifndef NO_FAST_MAGIC
 	if (query_mime == 1 && conf.fast_magic == 1) {
 		const char *mime = fast_magic(file);
-		if (mime)
+		if (mime) {
+			g_mime_source = XMAGIC_SRC_FAST_MAGIC;
 			return strdup(mime);
+		}
 	}
 #endif /* NO_FAST_MAGIC */
 
@@ -274,6 +286,8 @@ xmagic(const char *file, const int query_mime)
 			g_magic_mime_type_cookie = NULL;
 		else
 			g_magic_text_desc_cookie = NULL;
+	} else {
+		g_mime_source = XMAGIC_SRC_LIBMAGIC;
 	}
 
 	const size_t mime_len = mime ? strlen(mime) : 0;
@@ -283,6 +297,7 @@ xmagic(const char *file, const int query_mime)
 	&& strcmp(str, "application/octet-stream") == 0))) {
 		char *tmp = get_mimetype_fallback(file);
 		if (tmp) {
+			g_mime_source = XMAGIC_SRC_XDG_MIME_INFO;
 			free(str);
 			str = tmp;
 		}
@@ -302,17 +317,22 @@ xmagic(const char *file, const int query_mime)
 	if (!file || !*file)
 		return NULL;
 
+	g_mime_source = XMAGIC_SRC_NONE;
 	if (query_mime == 1 && user_mimetypes) {
 		const char *mime = check_user_mimetypes(file);
-		if (mime)
+		if (mime) {
+			g_mime_source = XMAGIC_SRC_MIME_FILE;
 			return strdup(mime);
+		}
 	}
 
 #ifndef NO_FAST_MAGIC
 	if (query_mime == 1 && conf.fast_magic == 1) {
 		const char *mime = fast_magic(file);
-		if (mime)
+		if (mime) {
+			g_mime_source = XMAGIC_SRC_FAST_MAGIC;
 			return strdup(mime);
+		}
 	}
 #endif /* !NO_FAST_MAGIC */
 
@@ -374,11 +394,13 @@ xmagic(const char *file, const int query_mime)
 		line[--len] = '\0';
 
 	mime_type = len > 0 ? savestring(line, len) : NULL;
+	g_mime_source = XMAGIC_SRC_LIBMAGIC;
 
 	if (query_mime == 1 && (!mime_type || (*mime_type == 'a'
 	&& strcmp(mime_type, "application/octet-stream") == 0))) {
 		char *tmp = get_mimetype_fallback(file);
 		if (tmp) {
+			g_mime_source = XMAGIC_SRC_XDG_MIME_INFO;
 			free(mime_type);
 			mime_type = tmp;
 		}
@@ -1909,11 +1931,24 @@ print_error_no_mime(char **fpath)
 	return FUNC_FAILURE;
 }
 
+static const char *
+get_mime_source_string(void)
+{
+	switch (g_mime_source) {
+	case XMAGIC_SRC_LIBMAGIC: return "libmagic";
+	case XMAGIC_SRC_FAST_MAGIC: return "fast magic";
+	case XMAGIC_SRC_MIME_FILE: return "mime.types file";
+	case XMAGIC_SRC_XDG_MIME_INFO: return "XDG MIME-info";
+	default: return "unknown";
+	}
+}
+
 static void
 print_info_name_mime(const char *filename, const char *mime)
 {
 	printf(_("Name:      %s\n"), filename ? filename : _("None"));
-	printf(_("MIME type: %s\n"), mime ? mime : _("unknown"));
+	printf(_("MIME type: %s (source: %s)\n"), mime ? mime : _("unknown"),
+		get_mime_source_string());
 }
 
 static int
