@@ -1939,7 +1939,7 @@ get_mime_source_string(void)
 	switch (g_mime_source) {
 	case XMAGIC_SRC_LIBMAGIC: return "libmagic";
 #ifndef NO_FAST_MAGIC
-	case XMAGIC_SRC_FAST_MAGIC: return "fast magic";
+	case XMAGIC_SRC_FAST_MAGIC: return "fast-magic";
 #endif /* !NO_FAST_MAGIC */
 	case XMAGIC_SRC_MIME_FILE: return "mime.types file";
 	case XMAGIC_SRC_XDG_MIME_INFO: return "XDG MIME-info";

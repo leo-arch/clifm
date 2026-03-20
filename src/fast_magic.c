@@ -51,6 +51,7 @@ id3v2_tag_size(const uint8_t *buf, size_t buflen)
 	return (size_t)size + 10;
 }
 
+/* Return the MIME-type recorded in a ZIP file or NULL if none is found. */
 static const char *
 get_mime_from_zip(const uint8_t *str, const size_t str_len)
 {
@@ -517,11 +518,10 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 	}
 
 	/* See http://justsolve.archiveteam.org/wiki/CorelDRAW */
+	if (buf[8] == 'C' && buf[9] == 'M' && buf[10] == 'X' && buf[11] == '1')
+		return "application/vnd.corel-draw";
 	if (buf_len > 15 && buf[8] == 'C' && buf[9] == 'D' && buf[10] == 'R'
 	&& buf[12] == 'v' && buf[13] == 'r' && buf[14] == 's' && buf[15] == 'n')
-		return "application/vnd.corel-draw";
-	if (buf_len > 11 && buf[8] == 'C' && buf[9] == 'M' && buf[10] == 'X'
-	&& buf[11] == '1')
 		return "application/vnd.corel-draw";
 
 	return NULL;
@@ -735,7 +735,7 @@ validate_dwg_version(const uint8_t *s, const size_t slen)
 		return 0;
 
 	if (s[2] == '2') /* AC2.10 */
-		return (slen >= 6 && s[3] == '.' && s[4] == '1' && s[5] == '0');
+		return (s[3] == '.' && s[4] == '1' && s[5] == '0');
 
 	if (s[3] == '.') /* AC1.2 AC1.40 AC1.50 */
 		return ((s[4] == '2' || ((s[4] == '4' || s[4] == '5') && s[5] == '0')));
@@ -1378,8 +1378,11 @@ fast_magic(const char *file)
 		return "audio/mpeg";
 
 	if (nread > 4 && sig[0] == '#' && sig[1] == '!' && sig[2] == 'A'
-	&& sig[3] == 'M' && sig[4] == 'R')
+	&& sig[3] == 'M' && sig[4] == 'R') {
+		if (nread > 7 && sig[5] == '-' && sig[6] == 'W' && sig[7] == 'B')
+			return "audio/AMR-WB";
 		return "audio/AMR";
+	}
 
 	if (nread > 80 && sig[0] == 'D' && sig[1] == 'S' && sig[2] == 'D'
 	&& sig[3] == ' ' && sig[28] == 'f' /* fmt */ && sig[80] == 'd' /* data */)
@@ -1392,6 +1395,13 @@ fast_magic(const char *file)
 	if (nread > 3 && sig[0] == 'X' && sig[1] == 'M' && sig[2] == 'F'
 	&& sig[3] == '_')
 		return "audio/x-xmf";
+
+	if (nread > 3 && sig[0] == 't' && sig[1] == 'B' && sig[2] == 'a'
+	&& sig[3] == 'K')
+		return "audio/x-tak";
+
+	if (nread > 2 && sig[0] == 'M' && sig[1] == 'O' && sig[2] == '3')
+		return "audio/x-mo3";
 
 	if (nread > 12 && sig[0] == 0x00 && sig[1] == 0x01 && sig[2] == 0x00
 	&& sig[3] == 0x00 && sig[4] < 48)
@@ -1439,6 +1449,10 @@ fast_magic(const char *file)
 	&& sig[3] == 't')
 		return "application/x-zpaq";
 
+	if (nread > 3 && sig[0] == 'x' && sig[1] == 'a' && sig[2] == 'r'
+	&& sig[3] == '!') /* MacOS eXtensible ARchiver */
+		return "application/x-xar";
+
 	/* See http://fileformats.archiveteam.org/wiki/JXL */
 	if ((nread > 1 && sig[0] == 0xFF && sig[1] == 0x0A)
 	|| (nread >= 12 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x00
@@ -1458,6 +1472,11 @@ fast_magic(const char *file)
 	&& sig[3] == 'N' && sig[4] == 'D' && sig[5] == 'E' && sig[6] == 'R')
 		return "application/x-blender";
 
+	if (nread > 3 && sig[0] == 0xCA && sig[1] == 0xFE) {
+		if (sig[2] == 0xBA && sig[3] == 0xBE) return "application/x-java-applet";
+		if (sig[2] == 0xD0 && sig[3] == 0x0D) return "application/x-java-pack200";
+	}
+
 	if (nread >= 518 && sig[514] == 'H' && sig[515] == 'd' && sig[516] == 'r'
 	&& sig[517] == 'S')
 		return "application/x-linux-kernel";
@@ -1465,6 +1484,10 @@ fast_magic(const char *file)
 	if (nread > 18 && sig[0] == 0x7f && sig[1] == 'E' && sig[2] == 'L'
 	&& sig[3] == 'F')
 		return check_elf_magic(sig, nread);
+
+	if (nread > 105 && sig[102] == 'm' && sig[103] == 'B' && sig[104] == 'I'
+	&& sig[105] == 'N')
+		return "application/x-macbinary";
 
 	if (nread > 5 && sig[0] == 'M' && sig[1] == 'A' && sig[2] == 'T'
 	&& sig[3] == 'L' && sig[4] == 'A' && sig[5] == 'B')
@@ -1627,8 +1650,8 @@ fast_magic(const char *file)
 	&& memcmp(sig, "\x30\x26\xB2\x75\x8E\x66\xCF\x11\xA6\xD9\x00\xAA\x00\x62\xCE\x6C", 16) == 0)
 		return "video/x-ms-asf"; /* asf, wma, wmv */
 
-	if (nread > 3 && sig[0] == 0x0A && (sig[1] >= 0x00 && sig[1] <= 0x05)
-	&& sig[2] == 0x01 && (sig[3] >= 0x01 && sig[3] <= 0x08))
+	if (nread > 3 && sig[0] == 0x0A && sig[1] <= 0x05 && sig[2] == 0x01
+	&& sig[3] >= 0x01 && sig[3] <= 0x08)
 		return "image/vnd.zbrush.pcx";
 
 	if (nread > 4 && sig[0] == '{' && sig[1] == '\\' && sig[2] == 'r'
@@ -1665,11 +1688,6 @@ fast_magic(const char *file)
 	&& sig[6] == 0x3a && sig[7] == 0x00)
 		return "application/x-ms-hlp";
 
-/*	if (nread > 3 && sig[0] == 0x00 && sig[1] == 0x00 && sig[3] == 0x00) {
-		if (sig[2] == 0x01) return "image/vnd.microsoft.icon";
-		if (sig[2] == 0x02) return "image/x-win-bitmap";
-	} */ // False positives
-
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'D' && sig[2] == ';'
 	&& sig[3] == 'P' && sig[4] > 0 && sig[5] > 0 && sig[6] > 0
 	&& sig[7] > 0)
@@ -1703,6 +1721,10 @@ fast_magic(const char *file)
 
 	if (nread > 1 && sig[0] == 0x0B && sig[1] == 0x77)
 		return "audio/ac3";
+
+	if (nread > 3 && sig[0] == 'I' && sig[1] == 'M' && sig[2] == 'P'
+	&& sig[3] == 'M')
+		return "audio/x-it";
 
 	if (nread > 3 && (sig[0] == 'I' || sig[0] == 'P') && sig[1] == 'W'
 	&& sig[2] == 'A' && sig[3] == 'D')
