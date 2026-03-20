@@ -241,16 +241,14 @@ xbackspace(void)
 static void
 leftmost_bell(void)
 {
-#ifdef _BE_POSIX
-	return;
-#else
+#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE >= 199309L
 	/* Empty-line backspace feedback: briefly hide/show cursor.
 	 * Avoids cursor-shape transitions that may look like a backward pop. */
 	if (conf.bell_style == BELL_VISIBLE && isatty(STDIN_FILENO) == 1
 	&& isatty(STDOUT_FILENO) == 1 && term_caps.hide_cursor == 1) {
 		HIDE_CURSOR;
 		fflush(stdout);
-		usleep((useconds_t)VISIBLE_BELL_DELAY * 1000U);
+		msleep(VISIBLE_BELL_DELAY);
 		UNHIDE_CURSOR;
 		SET_STEADY_BLOCK_CURSOR;
 		fflush(stdout);
@@ -259,6 +257,8 @@ leftmost_bell(void)
 
 	/* Fallback for non-interactive contexts. */
 	rl_ring_bell();
+#else
+	return;
 #endif /* _BE_POSIX */
 }
 #endif /* !_NO_SUGGESTIONS */

@@ -737,7 +737,7 @@ validate_dwg_version(const uint8_t *s, const size_t slen)
 	if (s[2] == '2') /* AC2.10 */
 		return (s[3] == '.' && s[4] == '1' && s[5] == '0');
 
-	if (s[3] == '.') /* AC1.2 AC1.40 AC1.50 */
+	if (s[3] == '.') /* AC1.20 AC1.40 AC1.50 */
 		return ((s[4] == '2' || ((s[4] == '4' || s[4] == '5') && s[5] == '0')));
 
 	if (s[3] != '0')

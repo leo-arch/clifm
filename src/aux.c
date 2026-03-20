@@ -356,7 +356,7 @@ should_expand_eln(const char *text, char *cmd_name)
 #if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE >= 199309L
 /* Sleep for MSEC milliseconds. */
 /* Taken from https://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds */
-static int
+int
 msleep(const long msec)
 {
 	struct timespec ts;

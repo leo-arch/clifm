@@ -40,6 +40,9 @@ size_t hashme(const char *str, const int case_sensitive);
 char *hex2rgb(const char *hex);
 int  is_cmd_in_path(const char *cmd, char **cmd_path);
 char *make_filename_unique(const char *file);
+#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE >= 199309L
+int  msleep(const long msec);
+#endif
 char *normalize_path(char *src, const size_t src_len);
 int  octal2int(const char *restrict str);
 int  open_config_file(char *app, char *file);
