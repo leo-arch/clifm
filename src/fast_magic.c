@@ -169,29 +169,39 @@ check_zip_magic(const uint8_t *str, const size_t str_len)
 	const uint8_t *s = str + 4;
 	const size_t l = str_len - 4;
 
-	/* MS-Office */
-//	if (l >= 17 && xmemmem(s, l, "word/document.xml", 17))
-	if (l >= 5 && xmemmem(s, l, "word/", 5))
-		return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-	if (l >= 15 && xmemmem(s, l, "xl/workbook.xml", 15))
-		return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-	if (l >= 20 && xmemmem(s, l, "ppt/presentation.xml", 20))
-		return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+	for (size_t i = 0; i < l - 1; i++) {
+		const size_t rem = l - i;
 
-/*	if (l >= 6 && xmemmem(s, l, "visio/", 6)) // taken from file magic
-		return "application/vnd.ms-visio.drawing.main+xml"
-	if (l >= 16 && xmemmem(s, l, "AppManifest.xaml", 16))
-		return "application/x-silverlight-app" */
+		/* MS-Office */
+		if (rem >= 5 && s[i] == 'w' && s[i + 1] == 'o' && s[i + 4] == '/'
+		&& memcmp(s + i, "word/", 5) == 0)
+			return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-	/* Android APK */
-	if (l >= 11 && xmemmem(s, l, "classes.dex", 11))
-		return "application/vnd.android.package-archive";
-	if (l >= 19 && xmemmem(s, l, "AndroidManifest.xml", 19))
-		return "application/vnd.android.package-archive";
+		if (rem >= 15 && s[i] == 'x' && s[i + 1] == 'l' && s[i + 2] == '/'
+		&& memcmp(s + i, "xl/workbook.xml", 15) == 0)
+			return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-	/* Java archives */
-	if (l >= 20 && xmemmem(s, l, "META-INF/MANIFEST.MF", 20))
-		return "application/java-archive";
+		if (rem >= 20 && s[i] == 'p' && s[i + 1] == 'p' && s[i + 3] == '/'
+		&& memcmp(s + i, "ppt/presentation.xml", 20) == 0)
+			return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+
+		/* Android APK */
+		if (rem >= 11 && s[i] == 'c' && s[i + 1] == 'l' && s[i + 7] == '.'
+		&& memcmp(s + i, "classes.dex", 11) == 0)
+			return "application/vnd.android.package-archive";
+		if (rem >= 19 && s[i] == 'A' && s[i + 7] == 'M' && s[i + 15] == '.'
+		&& memcmp(s + i, "AndroidManifest.xml", 19) == 0)
+			return "application/vnd.android.package-archive";
+
+		/* Java archives */
+		if (rem >= 20 && s[i] == 'M' && s[i + 8] == '/' && s[i + 17] == '.'
+		&& memcmp(s + i, "META-INF/MANIFEST.MF", 20) == 0)
+			return "application/java-archive";
+
+		if (rem >= 16 && s[i] == '3' && s[i + 1] == 'D' && s[i + 2] == '/'
+		&& memcmp(s + i, "3D/3dmodel.model", 16) == 0)
+			return "model/3mf";
+	}
 
 	return NULL;
 }
@@ -603,6 +613,10 @@ check_xml_magic(const uint8_t *s, const size_t slen)
 
 	if (n + 2 <= rem && p[n] == 'X' && p[n + 1] == '3' && p[n + 2] == 'D')
 		return "model/x3d+xml";
+
+	if (n + 6 <= rem && p[n] == 'C' && p[n + 1] == 'O' && p[n + 2] == 'L'
+	&& p[n + 3] == 'L' && p[n + 4] == 'A' && p[n + 5] == 'D' && p[n + 6] == 'A')
+		return "model/vnd.collada+xml";
 
 	if (n + 2 <= rem && p[n] == 'a' && p[n + 1] == 'm' && p[n + 2] == 'f')
 		return "application/x-amf";
@@ -1408,7 +1422,7 @@ fast_magic(const char *file)
 		return "font/ttf";
 	if (nread > 3 && sig[0] == 'O' && sig[1] == 'T' && sig[2] == 'T'
 	&& sig[3] == 'O')
-		return "application/vnd.ms-opentype"; /* Or font/otf */
+		return "font/otf";
 	if (nread > 3 && sig[0] == 'w' && sig[1] == 'O' && sig[2] == 'F') {
 		if (sig[3] == 'F') return "font/woff";
 		if (sig[3] == '2') return "font/woff2";
@@ -1609,6 +1623,26 @@ fast_magic(const char *file)
 	if (nread > 3 && sig[0] == 0x3D && sig[1] == 0xF3 && sig[2] == 0x13
 	&& sig[3] == 0x14) /* SYSLINUX boot logo files */
 		return "image/x-lss16";
+
+	if (nread >= 12 && sig[0] == 0xAB && sig[1] == 'K' && sig[2] == 'T'
+	&& sig[3] == 'X') {
+		if (sig[5] == '1' && memcmp(sig, "\xabKTX 11\xbb\x0d\x0a\x1a\x0a", 12) == 0)
+			return "image/ktx";
+		if (sig[5] == '2' && memcmp(sig, "\xabKTX 20\xbb\x0d\x0a\x1a\x0a", 12) == 0)
+			return "image/ktx2";
+	}
+
+	if (nread > 24 && sig[4] == 0xE0 && sig[5] == 0xA5 && !sig[20] && !sig[24])
+		return "image/x-aseprite";
+
+	if (nread > 4 && sig[0] == 0x13 && sig[1] == 0xAB && sig[2] == 0xA1
+	&& sig[3] == 0x5C && sig[4] == 0x06)
+		return "image/astc";
+
+	if (nread > 3 && sig[0] == 'S' && ((sig[1] == 'I' && sig[2] == 'T'
+	&& sig[3] == '!') || (nread > 6 && sig[1] == 't' && sig[2] == 'u'
+	&& sig[3] == 'f' && sig[4] == 'f' && sig[5] == 'I' && sig[6] == 't')))
+		return "application/x-stuffit";
 
 	if (nread >= 14) {
 		uint16_t v12 = (uint16_t)sig[12] | (uint16_t)((uint16_t)sig[13] << 8);
