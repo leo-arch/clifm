@@ -1868,8 +1868,11 @@ create_main_config_file(char *file)
 		"# Automatically purge the jump database from non-existing directories.\n\
 ;PurgeJumpDB=%s\n\n"
 
-	    "# Should Clifm be allowed to run external, shell commands?\n\
+	    "# Allow external, shell commands.\n\
 ;ExternalCommands=%s\n\n"
+
+"# Run the built-in magic check to determine file types before libmagic.\n\
+;FastMagic=%s\n\n"
 
 	    "# Write the last visited directory to ~/.config/clifm/.last to be\n\
 # later accessed by the corresponding shell function at program exit.\n\
@@ -1901,31 +1904,30 @@ create_main_config_file(char *file)
 		DEF_MAX_JUMP_TOTAL_RANK,
 		DEF_PURGE_JUMPDB == 1 ? "true" : "false",
 		DEF_EXT_CMD_OK == 1 ? "true" : "false",
+		DEF_FAST_MAGIC == 1 ? "true" : "false",
 		DEF_CD_ON_QUIT == 1 ? "true" : "false"
 		);
 
 	fprintf(config_fp,
-	    "# If set to true, a command name that is the name of a directory or a\n\
-# file is executed as if it were the argument to the the 'cd' or the \n\
-# 'open' commands respectively: 'cd DIR' works the same as just 'DIR'\n\
-# and 'open FILE' works the same as just 'FILE'.\n\
+	"# Make 'cd DIR' work the same as just 'DIR', and 'open FILE' the\n\
+# same as just 'FILE'.\n\
 ;Autocd=%s\n\
 ;AutoOpen=%s\n\n"
 
-		"# Enable autocommand files (.cfm.in and .cfm.out).\n\
+	"# Enable autocommand files (.cfm.in and .cfm.out).\n\
 ;ReadAutocmdFiles=%s\n\n"
 
-		"# How to display autocommand notifications (none, mini, short, long,\n\
+	"# How to display autocommand notifications (none, mini, short, long,\n\
 # full, prompt)\n\
 ;InformAutocmd=prompt\n\n"
 
-		"# Read .hidden files.\n\
+	"# Read .hidden files.\n\
 ;ReadDotHidden=%s\n\n"
 
-	    "# Enable auto-suggestions.\n\
+	"# Enable auto-suggestions.\n\
 ;AutoSuggestions=%s\n\n"
 
-	    "# The following checks will be performed in the order specified\n\
+	"# The following checks will be performed in the order specified\n\
 # by SuggestionStrategy. Available checks:\n\
 # a = Aliases names\n\
 # c = Path completion\n\
@@ -1935,19 +1937,19 @@ create_main_config_file(char *file)
 # j = Jump database\n\
 ;SuggestionStrategy=%s\n\n"
 
-	    "# Suggest filenames using the corresponding file type color\n\
-# (set via the color scheme file).\n\
+	"# Suggest filenames using the corresponding file type color.\n\
 ;SuggestFiletypeColor=%s\n\n"
 
-		"# Suggest a brief decription for internal commands.\n\
+	"# Suggest a brief decription for internal commands.\n\
 ;SuggestCmdDesc=%s\n\n"
 
-";SyntaxHighlighting=%s\n\n"
+	"# Enable syntax highlighting.\n\
+;SyntaxHighlighting=%s\n\n"
 
 	"# How to quote expanded ELN's (regular files only): backslash, single, double.\n\
 ;QuotingStyle=%s\n\n"
 
-		"# We have three search strategies: 0 = glob-only, 1 = regex-only,\n\
+	"# We have three search strategies: 0 = glob-only, 1 = regex-only,\n\
 # and 2 = glob-regex.\n\
 ;SearchStrategy=%d\n\n",
 
@@ -1967,35 +1969,29 @@ create_main_config_file(char *file)
 		);
 
 	fprintf(config_fp,
-	    "# In light mode, extra file type checks (except those provided by\n\
-# the d_type field of the dirent structure (see readdir(3))\n\
-# are disabled to speed up the listing process. Because of this, we cannot\n\
-# know in advance if a file is readable by the current user, if it is executable,\n\
-# SUID, SGID, if a symlink is broken, and so on. The file extension check is\n\
-# ignored as well, so that the color per extension feature is disabled.\n\
+	    "# Run in light mode (expensive file type checks are omitted).\n\
 ;LightMode=%s\n\n"
 
 	    "# If running with colors, append directory indicator\n\
 # to directories. If running without colors (via the --no-color option),\n\
-# append file type indicator at the end of filenames.\n\
+# append file type indicator to filenames.\n\
 ;Classify=%s\n\n"
 
-		"# Color links as target filename.\n\
+		"# Colorize symbolic links according to their target filename.\n\
 ;ColorLinksAsTarget=%s\n\n"
 
-	    "# Should the Selection Box be shared among different profiles?\n\
+	    "# Share the Selection Box among different profiles.\n\
 ;ShareSelbox=%s\n\n"
 
 	    "# Choose the file opener for opening files with their default associated\n\
-# application. If not set, Lira (Clifm's builtin opener) is used.\n\
+# application (defaults to Lira, Clifm's built-in opener).\n\
 ;Opener=\n\n"
 
-	    "# Only used when opening a directory via a new Clifm instance (with the 'x'\n\
-# command), this option specifies the command to be used to launch a\n\
-# terminal emulator to run Clifm on it.\n\
+	    "# Specify the command to be used to launch a terminal emulator to\n\
+# run Clifm on it (via the 'x' or 'X' commands).\n\
 ;TerminalCmd='%s'\n\n"
 
-	    "# How to sort files: none, name, size, atime, btime, ctime, mtime,\n\
+	    "# File sort mode: none, name, size, atime, btime, ctime, mtime,\n\
 # version, extension, inode, owner, group, blocks, links, type.\n\
 ;Sort=version\n\
 # Sort in reverse order\n\
@@ -2077,7 +2073,7 @@ create_main_config_file(char *file)
 
 		"# Print the list of selected files. You can limit the number of printed \n\
 # entries using the MaxPrintSelfiles option (-1 = no limit, 0 = auto (never\n\
-# print more than half terminal height), or any custom value).\n\
+# print more than half terminal height), or any positive value).\n\
 ;PrintSelfiles=%s\n\
 ;MaxPrintSelfiles=%d\n\n"
 
