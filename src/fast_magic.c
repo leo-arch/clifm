@@ -6,6 +6,7 @@
 */
 
 /* fast_magic.c -- fast MIME-type detection using magic bytes */
+/* Note: For the time being, this module handles only binary files. */
 
 #ifndef NO_FAST_MAGIC
 
@@ -134,16 +135,24 @@ get_mime_from_zip(const uint8_t *str, const size_t str_len)
 		return "application/vnd.oasis.opendocument.image";
 
 	/* Old OpenOffice format */
-	if (l >= 30 && memcmp(s, "application/vnd.sun.xml.writer", 30) == 0)
+	if (l >= 30 && s[24] == 'w'
+	&& memcmp(s, "application/vnd.sun.xml.writer", 30) == 0)
 		return "application/vnd.sun.xml.writer";
-	if (l >= 28 && memcmp(s, "application/vnd.sun.xml.calc", 28) == 0)
+	if (l >= 28 && s[24] == 'c'
+	&& memcmp(s, "application/vnd.sun.xml.calc", 28) == 0)
 		return "application/vnd.sun.xml.calc";
-	if (l >= 31 && memcmp(s, "application/vnd.sun.xml.impress", 31) == 0)
+	if (l >= 31 && s[24] == 'i'
+	&& memcmp(s, "application/vnd.sun.xml.impress", 31) == 0)
 		return "application/vnd.sun.xml.impress";
-	if (l >= 28 && memcmp(s, "application/vnd.sun.xml.draw", 28) == 0)
+	if (l >= 28 && s[24] == 'd'
+	&& memcmp(s, "application/vnd.sun.xml.draw", 28) == 0)
 		return "application/vnd.sun.xml.draw";
-	if (l >= 28 && memcmp(s, "application/vnd.sun.xml.math", 28) == 0)
+	if (l >= 28 && s[24] == 'm'
+	&& memcmp(s, "application/vnd.sun.xml.math", 28) == 0)
 		return "application/vnd.sun.xml.math";
+	if (l >= 28 && s[24] == 'b'
+	&& memcmp(s, "application/vnd.sun.xml.base", 28) == 0)
+		return "application/vnd.sun.xml.base";
 
 	if (l >= 16 && s[6] == 'o' && memcmp(s, "image/openraster", 16) == 0)
 		return "image/openraster";
@@ -184,6 +193,10 @@ check_zip_magic(const uint8_t *str, const size_t str_len)
 		if (rem >= 20 && s[i] == 'p' && s[i + 1] == 'p' && s[i + 3] == '/'
 		&& memcmp(s + i, "ppt/presentation.xml", 20) == 0)
 			return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+
+		if (rem >= 5 && s[i] == 'v' && s[i + 1] == 'i' && s[i + 2] == 's'
+		&& s[i + 3] == 'i' && s[i + 4] == 'o' && s[i + 5] == '/')
+			return "application/vnd.ms-visio.drawing.main+xml";
 
 		/* Android APK */
 		if (rem >= 11 && s[i] == 'c' && s[i + 1] == 'l' && s[i + 7] == '.'
@@ -451,19 +464,19 @@ check_ogg_magic(const uint8_t *s, const size_t slen)
 	const uint8_t *name = s + 28;
 	const size_t l = slen - 28;
 	if (l >= 7 && *name == 0x01 && memcmp(name, "\x01vorbis", 7) == 0)
-		return "audio/x-vorbis+ogg";
+		return "audio/ogg"; /* audio/x-vorbis+ogg (MIME-info) */
 	if (l >= 8 && *name == 'O' && memcmp(name, "OpusHead", 8) == 0)
-		return "audio/x-opus+ogg";
+		return "audio/ogg"; /* audio/x-opus+ogg (MIME-info) */
 	if (l >= 5 && *name == 0177 && memcmp(name, "\177FLAC", 5) == 0)
-		return "audio/x-flac+ogg";
+		return "audio/ogg"; /* audio/x-flac+ogg (MIME-info) */
 	if (l >= 8 && *name == 'S' && memcmp(name, "Speex   ", 8) == 0)
-		return "audio/x-speex+ogg";
+		return "audio/ogg"; /* audio/x-speex+ogg (MIME-info) */
 	if (l >= 8 && *name == 'f' && memcmp(name, "fishead\0", 8) == 0)
 		return "video/ogg";
 	if (l >= 7 && *name == 0200 && memcmp(name, "\200theora", 7) == 0)
-		return "video/x-theora+ogg";
+		return "video/ogg"; /* video/x-theora+ogg (MIME-info) */
 	if (l >= 9 && *name == 0x01 && memcmp(name, "\x01video\0\0\0", 9) == 0)
-		return "video/x-ogm+ogg";
+		return "video/ogg"; /* video/x-ogm+ogg (MIME-info) */
 	if (l >= 9 && *name == 0200 && memcmp(name, "\200kate\0\0\0\0", 9) == 0)
 		return "application/ogg";
 
@@ -620,6 +633,10 @@ check_xml_magic(const uint8_t *s, const size_t slen)
 
 	if (n + 2 <= rem && p[n] == 'a' && p[n + 1] == 'm' && p[n + 2] == 'f')
 		return "application/x-amf";
+
+	if (n + 10 <= rem && p[n] == 'p' && p[n + 1] == 'l'
+	&& memcmp(p + n, "playlist version=", 17) == 0)
+		return "application/xspf+xml";
 
 	return "text/xml";
 }
@@ -1170,7 +1187,7 @@ fast_magic(const char *file)
 		if (sig[1] == '3' || sig[1] == '6') return "image/x-portable-pixmap";
 	}
 
-	if (nread > 1 && sig[0] == 'P' && sig[1] == '7' && sig[2] == '\n')
+	if (nread > 2 && sig[0] == 'P' && sig[1] == '7' && sig[2] == '\n')
 		return "image/x-portable-arbitrarymap";
 
 	if (nread > 8 && sig[0] == '/' && sig[1] == '*' && sig[2] == ' '
@@ -1264,9 +1281,10 @@ fast_magic(const char *file)
 		return "image/x-minolta-mrw";
 
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'I' && sig[2] == 'U'
-	&& sig[3] == 0x00 && sig[4] == 0x18 && sig[5] == 0x00 && sig[6] == 0x00
-	&& sig[7] == 0x00)
-		return "image/x-panasonic-rw2";
+	&& sig[3] == 0x00 && sig[5] == 0x00 && sig[6] == 0x00 && sig[7] == 0x00) {
+		if (sig[4] == 0x08) return "image/x-panasonic-rw";
+		if (sig[4] == 0x18) return "image/x-panasonic-rw2";
+	}
 
 	if (nread >= 2 && ((sig[0] == 'A' && sig[1] == 'C')
 	|| (sig[0] == 'M' && sig[1] == 'C'))
@@ -1417,8 +1435,10 @@ fast_magic(const char *file)
 	if (nread > 2 && sig[0] == 'M' && sig[1] == 'O' && sig[2] == '3')
 		return "audio/x-mo3";
 
-	if (nread > 12 && sig[0] == 0x00 && sig[1] == 0x01 && sig[2] == 0x00
+	if (nread > 12 && ((sig[0] == 0x00 && sig[1] == 0x01 && sig[2] == 0x00
 	&& sig[3] == 0x00 && sig[4] < 48)
+	|| (sig[0] == 't' && sig[1] == 't' && sig[2] == 'c' && sig[3] == 'f'
+	&& sig[4] == 0x00))) /* TrueType collection */
 		return "font/ttf";
 	if (nread > 3 && sig[0] == 'O' && sig[1] == 'T' && sig[2] == 'T'
 	&& sig[3] == 'O')
@@ -1690,7 +1710,7 @@ fast_magic(const char *file)
 
 	if (nread > 4 && sig[0] == '{' && sig[1] == '\\' && sig[2] == 'r'
 	&& sig[3] == 't' && sig[4] == 'f')
-		return "text/rtf";
+		return "text/rtf"; /* application/rtf (MIME-info) */
 
 	if (nread > 9 && sig[0] == 'M' && sig[1] == 'Z' && sig[7] == 0x00
 	&& sig[9] == 0x00)
@@ -1768,9 +1788,8 @@ fast_magic(const char *file)
 	&& sig[3] == 0x00)
 		return "application/x-amiga-disk-format";
 
-	if (nread > 7 && sig[0] == 'F' && sig[1] == 'L' && sig[2] == 'V'
-	&& sig[3] == 0x01 && sig[4] == 0x01 && sig[5] == 0x00 && sig[6] == 0x00
-	&& sig[7] == 0x00)
+	if (nread > 3 && sig[0] == 'F' && sig[1] == 'L' && sig[2] == 'V'
+	&& sig[3] == 0x01)
 		return "video/x-flv";
 
 	if (nread > 16 && sig[4] == 0x12 && sig[5] == 0xAF && sig[12] == 0x08)
@@ -1783,6 +1802,11 @@ fast_magic(const char *file)
 	if (nread > 3 && sig[0] == 'N' && sig[1] == 'S' && sig[2] == 'V'
 	&& sig[3] == 'f') /* Nullsoft video */
 		return "video/x-nsv";
+
+	if (nread > 13 && sig[5] == 0xAF && sig[12] == 0x08 && sig[13] == 0x00) {
+		if (sig[4] == 0x11) return "video/x-fli";
+		if (sig[4] == 0x12) return "video/x-flc";
+	}
 
 	if (nread > 2 && (sig[0] == 'C' || sig[0] == 'F') && sig[1] == 'W'
 	&& sig[2] == 'S')
@@ -1976,6 +2000,10 @@ fast_magic(const char *file)
 		if (sig[2] == 0x01)	return "image/vnd.microsoft.icon";
 		if (sig[2] == 0x02)	return "image/x-win-bitmap";
 	}
+
+	if (nread > 82 && sig[34] == 'L' && sig[35] == 'P' && sig[82] != 0x00
+	&& memcmp(sig + 64, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16) == 0)
+		return "application/vnd.ms-fontobject";
 
 	return NULL;
 }
