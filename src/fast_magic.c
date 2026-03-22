@@ -163,6 +163,28 @@ get_mime_from_zip(const uint8_t *str, const size_t str_len)
 	if (l >= 20 && s[17] == 'z' && memcmp(s, "application/epub+zip", 20) == 0)
 		return "application/epub+zip";
 
+	/* KDE Office suit (KOffice) */
+	if (l >= 26 && s[12] == 'x' && s[13] == '-' && s[14] == 'k') {
+		if (s[15] == 'a' && memcmp(s, "application/x-karbon", 20) == 0)
+			return "application/x-karbon";
+		if (s[15] == 'c' && memcmp(s, "application/x-kchart", 20) == 0)
+			return "application/x-kchart";
+		if (s[15] == 'f' && memcmp(s, "application/x-kformula", 22) == 0)
+			return "application/x-kformula";
+		if (s[15] == 'i' && memcmp(s, "application/x-killustrator", 26) == 0)
+			return "application/x-killustrator";
+		if (s[15] == 'i' && memcmp(s, "application/x-kivio", 19) == 0)
+			return "application/x-kivio";
+		if (s[15] == 'o' && memcmp(s, "application/x-kontour", 21) == 0)
+			return "application/x-kontour";
+		if (s[15] == 'p' && memcmp(s, "application/x-kpresenter", 24) == 0)
+			return "application/x-kpresenter";
+		if (s[15] == 's' && memcmp(s, "application/x-kspread", 21) == 0)
+			return "application/x-kspread";
+		if (s[15] == 'w' && memcmp(s, "application/x-kword", 19) == 0)
+			return "application/x-kword";
+	}
+
 	return NULL;
 }
 
@@ -1028,6 +1050,36 @@ check_pre_ole2_office_docs(const uint8_t *s, const size_t slen)
 	return NULL;
 }
 
+static const char *
+check_gzipped_koffice(const uint8_t *s, const size_t slen)
+{
+	if (slen < 44 || s[30] != 'x' || s[31] != '-' || s[32] != 'k'
+	|| memcmp(s + 10, "KOffice ", 8) != 0)
+		return "application/gzip";
+
+	const uint8_t *t = s + 18;
+	if (t[15] == 'a' && memcmp(t, "application/x-karbon", 20) == 0)
+		return "application/x-karbon";
+	if (t[15] == 'c' && memcmp(t, "application/x-kchart", 20) == 0)
+		return "application/x-kchart";
+	if (t[15] == 'f' && memcmp(t, "application/x-kformula", 22) == 0)
+		return "application/x-kformula";
+	if (t[15] == 'i' && memcmp(t, "application/x-killustrator", 26) == 0)
+		return "application/x-killustrator";
+	if (t[15] == 'i' && memcmp(t, "application/x-kivio", 19) == 0)
+		return "application/x-kivio";
+	if (t[15] == 'o' && memcmp(t, "application/x-kontour", 21) == 0)
+		return "application/x-kontour";
+	if (t[15] == 'p' && memcmp(t, "application/x-kpresenter", 24) == 0)
+		return "application/x-kpresenter";
+	if (t[15] == 's' && memcmp(t, "application/x-kspread", 21) == 0)
+		return "application/x-kspread";
+	if (t[15] == 'w' && memcmp(t, "application/x-kword", 19) == 0)
+		return "application/x-kword";
+
+	return "application/gzip";
+}
+
 /* Read a few kilo bytes from the file FILE and attempt to find out an
  * appropiate MIME type based on the file's content.
  * Returns the found MIME type (as a constant string) or NULL if none is found.
@@ -1109,21 +1161,24 @@ fast_magic(const char *file)
 	&& sig[3] == 'F' && sig[4] == '-')
 		return "application/pdf";
 
-	if (nread > 2 && sig[0] == 0x1F && sig[1] == 0x8B && sig[2] == 0x08) // gzip
+	if (nread > 2 && sig[0] == 0x1F && sig[1] == 0x8B && sig[2] == 0x08)
+		if (nread > 12 && sig[10] == 'K' && sig[11] == 'O' && sig[12] == 'f') {
+			return check_gzipped_koffice(sig, nread);
 		return "application/gzip";
+	}
 
-	if (nread > 2 && sig[0] == 'B' && sig[1] == 'Z' && sig[2] == 'h') // bzip2
+	if (nread > 2 && sig[0] == 'B' && sig[1] == 'Z' && sig[2] == 'h')
 		return "application/x-bzip2";
 
 ////////////
 
 	if (nread > 3 && sig[0] == 0x28 && sig[1] == 0xB5 && sig[2] == 0x2F
-	&& sig[3] == 0xFD) /* Conflicts with blender files (.blend) */
+	&& sig[3] == 0xFD)
 		return "application/zstd";
 
 	if (nread > 5 && sig[0] == 'G' && sig[1] == 'I' && sig[2] == 'F'
 	&& sig[3] == '8' && (sig[4] == '7' || sig[4] == '9') && sig[5] == 'a')
-		return "image/gif"; // Either "GIF87a" or "GIF89a"
+		return "image/gif"; /* Either "GIF87a" or "GIF89a" */
 
 	if (nread > 3 && sig[0] == 'f' && sig[1] == 'L' && sig[2] == 'a'
 	&& sig[3] == 'C') // flac
@@ -1149,7 +1204,7 @@ fast_magic(const char *file)
 		return check_zip_magic(sig, nread);
 
 	if (nread > 3 && sig[0] == 'R' && sig[1] == 'I' && sig[2] == 'F'
-	&& sig[3] == 'F') /* RIFF (mostly image/webp) */
+	&& (sig[3] == 'F' || sig[3] == 'X')) /* RIFF (mostly image/webp) */
 		return check_riff_magic(sig, nread);
 
 	if (nread > 7 && sig[4] == 'f' && sig[5] == 't' && sig[6] == 'y'
@@ -1989,6 +2044,14 @@ fast_magic(const char *file)
 	if (nread > 3 && sig[0] == 0x59 && sig[1] == 0xA6 && sig[2] == 0x6A
 	&& sig[3] == 0x95)
 		return "image/x-sun-raster";
+
+	if (nread > 3 && sig[0] == 'I' && sig[1] == 'I' && sig[2] == 'N'
+	&& sig[3] == '1') /* Navy Image File Format */
+		return "image/x-niff";
+
+	if (nread > 3 && sig[0] == 'N' && ((sig[1] == 'I' && sig[2] == 'T')
+	|| (sig[1] == 'S' && sig[2] == 'I')) && sig[3] == 'F')
+		return "image/vnd.nitf"; /* National Imagery Transmission Format */
 
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'T' && sig[2] == 'O'
 	&& sig[3] == 'L' && sig[4] == 'I' && sig[5] == 'T' && sig[6] == 'L'
