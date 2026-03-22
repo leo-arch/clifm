@@ -174,7 +174,7 @@ X:^text/html$=$BROWSER;surf %x;vimprobable %x;vimprobable2 %x;qutebrowser %x;dwb
 # Text
 #-----------------------------
 
-X:^text/rtf$=libreoffice %x;soffice %x;ooffice %x
+X:^(text|application)/rtf$=libreoffice %x;soffice %x;ooffice %x
 X:(^text/.*|application/(json|javascript)|inode/x-empty|message/rfc822)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano;mili;leafpad %x;mousepad %x;featherpad %x;nedit %x;kate %x;gedit %x;pluma %x;io.elementary.code %x;liri-text %x;xed %x;atom %x;nota %x;gobby %x;kwrite %x;xedit %x
 !X:(^text/.*|application/(json|javascript)|inode/x-empty|message/rfc822)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;nano
 

@@ -850,6 +850,9 @@ RUN:
 		clear_term_img();
 
 	load_user_mimetypes();
+	const char *fm = getenv("CLIFM_FAST_MAGIC");
+	if (fm && fm[0] == '1' && !fm[1])
+		conf.fast_magic = 1;
 
 	open_reg_exit(fpath, url, preview); /* noreturn */
 }

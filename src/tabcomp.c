@@ -660,6 +660,9 @@ set_fzf_env_vars(const int height)
 	snprintf(p, sizeof(p), "%d", term_lines);
 	setenv("CLIFM_TERM_LINES", p, 1);
 
+	if (conf.fast_magic == 1)
+		setenv("CLIFM_FAST_MAGIC", "1", 1);
+
 	if (thumbnails_dir && *thumbnails_dir) {
 		setenv("CLIFM_THUMBNAILS_DIR", thumbnails_dir, 1);
 		setenv("CLIFM_THUMBINFO_FILE", THUMBNAILS_INFO_FILE, 1);
@@ -678,6 +681,7 @@ static void
 clear_fzf(void)
 {
 	clear_term_img();
+	unsetenv("CLIFM_FAST_MAGIC");
 	unsetenv("CLIFM_FZF_LINE");
 	unsetenv("CLIFM_TERM_COLUMNS");
 	unsetenv("CLIFM_TERM_LINES");
