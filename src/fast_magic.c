@@ -1681,6 +1681,11 @@ fast_magic(const char *file)
 	&& ((sig[3] == 'L' && sig[4] == 'M') || (sig[3] == 'M' && sig[4] == 'L')))
 		return "image/x-pgx";
 
+	if (nread > 7 && sig[0] == 'f' && sig[1] == 'a' && sig[2] == 'r'
+	&& sig[3] == 'b' && sig[4] == 'f' && sig[5] == 'e' && sig[6] == 'l'
+	&& sig[7] == 'd')
+		return "image/x-farbfeld";
+
 	if (nread >= 8 &&
 	((sig[0] == 'R' && sig[1] == 'a' && sig[2] == 'r'
 	&& sig[3] == '!' && sig[4] == 0x1A && sig[5] == 0x07
