@@ -34,11 +34,11 @@
 # previews for the specified file types.
 #
 # Consult the clifmimg script for information on how images are displayed
-# (supported methods: sixel, ueberzug, kitty, ansi).
+# (supported methods: sixel, iterm, ueberzug, kitty, ansi).
 # If this script is not found under ~/.config/clifm, you can copy it from
 # the data directory (usually /usr/share/clifm/plugins).
 #
-;^text/rtf$|^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc %f %u;
+;^(text|application)/rtf$|^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument|vnd\.(sun\.xml|ms-office|wordperfect)).*=~/.config/clifm/clifmimg doc %f %u;
 ;^application/pdf$=~/.config/clifm/clifmimg pdf %f %u;
 ;^application/epub\+zip$=~/.config/clifm/clifmimg epub %f %u;
 ;^application/x-mobipocket-ebook$=~/.config/clifm/clifmimg mobi %f %u;
@@ -46,7 +46,7 @@
 
 ;^image/svg\+xml$=~/.config/clifm/clifmimg svg %f %u;
 # The 'image' method displays images directly, without prior conversion.
-;^image/(jpeg|png|tiff|webp|x-xwindow-dump)$=~/.config/clifm/clifmimg image %f %u;
+;^image/(jpeg|png|tiff|webp)$=~/.config/clifm/clifmimg image %f %u;
 # The 'gif' method converts images first, and then displays them.
 ;^image/.*|^application/dicom$=~/.config/clifm/clifmimg gif %f %u;
 # OpenRaster images
@@ -54,7 +54,7 @@
 # Krita images
 ;N:.*\.(kra|krz)$=~/.config/clifm/clifmimg krita %f %u;
 
-;^video/.*|^application/(mxf|x-shockwave-flash|vnd.rn-realmedia)$=~/.config/clifm/clifmimg video %f %u;
+;^video/.*|^application/(mxf|x-shockwave-flash|vnd\.(rn-realmedia|adobe\.flash\.movie))$=~/.config/clifm/clifmimg video %f %u;
 ;^audio/.*=~/.config/clifm/clifmimg audio %f %u;
 ;^application/postscript$=~/.config/clifm/clifmimg postscript %f %u;
 ;^font/.*|^application/(font.*|.*opentype)=~/.config/clifm/clifmimg font %f %u;
