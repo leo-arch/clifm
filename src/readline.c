@@ -242,15 +242,13 @@ static void
 leftmost_bell(void)
 {
 #if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE >= 199309L
-	/* Empty-line backspace feedback: briefly hide/show cursor.
-	 * Avoids cursor-shape transitions that may look like a backward pop. */
+	/* Empty-line backspace feedback: briefly hide/show cursor. */
 	if (conf.bell_style == BELL_VISIBLE && isatty(STDIN_FILENO) == 1
 	&& isatty(STDOUT_FILENO) == 1 && term_caps.hide_cursor == 1) {
 		HIDE_CURSOR;
 		fflush(stdout);
 		msleep(VISIBLE_BELL_DELAY);
 		UNHIDE_CURSOR;
-		SET_STEADY_BLOCK_CURSOR;
 		fflush(stdout);
 		return;
 	}
@@ -670,7 +668,7 @@ my_rl_getc(FILE *stream)
 		if (errno != EINTR)
 			return (EOF);
 
-		  /* If the error that we received was SIGINT, then try again,
+		/* If the error that we received was SIGINT, then try again,
 		 this is simply an interrupted system call to read(). */
 		clear_current_line_on_interrupt();
 	}
@@ -4609,9 +4607,6 @@ initialize_readline(void)
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote(). */
 	quote_chars = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
-
-	if (isatty(STDIN_FILENO) == 1 && isatty(STDOUT_FILENO) == 1)
-		SET_STEADY_BLOCK_CURSOR;
 
 	return FUNC_SUCCESS;
 }

@@ -55,10 +55,6 @@
 
 #define CPR_CODE "\x1b[6n" /* Cursor position report */
 
-/* Cursor style (DECSCUSR). Unsupported terminals just ignore these. */
-#define SET_STEADY_BLOCK_CURSOR fputs("\x1b[2 q", stdout)
-#define RESET_CURSOR_STYLE      fputs("\x1b[0 q", stdout)
-
 /* Kitty keyboard protocol */
 #define SET_KITTY_KEYS   fputs("\x1b[>1u", stdout)
 #define UNSET_KITTY_KEYS fputs("\x1b[<u", stdout)
