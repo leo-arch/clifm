@@ -1863,6 +1863,10 @@ fast_magic(const char *file)
 	&& sig[3] == 'f') /* Nullsoft video */
 		return "video/x-nsv";
 
+	if (nread > 12 && sig[0] == 'N' && sig[1] == 'u' && sig[6] == 'V'
+	&& sig[11] == 0x00 && memcmp(sig, "NuppelVideo\0", 12) == 0)
+		return "video/x-nuv"; /* Neither libmagic nor MIME-info */
+
 	if (nread > 13 && sig[5] == 0xAF && sig[12] == 0x08 && sig[13] == 0x00) {
 		if (sig[4] == 0x11) return "video/x-fli";
 		if (sig[4] == 0x12) return "video/x-flc";
