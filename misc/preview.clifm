@@ -46,7 +46,7 @@
 
 ;^image/svg\+xml$=~/.config/clifm/clifmimg svg %f %u;
 # The 'image' method displays images directly, without prior conversion.
-;^image/(jpeg|png|tiff|webp)$=~/.config/clifm/clifmimg image %f %u;
+;^image/(jpeg|png)$=~/.config/clifm/clifmimg image %f %u;
 # The 'gif' method converts images first, and then displays them.
 ;^image/.*|^application/dicom$=~/.config/clifm/clifmimg gif %f %u;
 # OpenRaster images
