@@ -569,6 +569,11 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 	&& buf[12] == 'v' && buf[13] == 'r' && buf[14] == 's' && buf[15] == 'n')
 		return "application/vnd.corel-draw";
 
+	if (buf_len > 15 && buf[8] == 'c' && buf[9] == 'm' && buf[10] == 'o'
+	&& buf[11] == 'v' && buf[12] == 'D' && buf[13] == 'I' && buf[14] == 'S'
+	&& buf[15] == 'P')
+		return "application/x-corel-move"; /* Neither libmagic nor MIME-info */
+
 	return NULL;
 }
 
@@ -1657,6 +1662,14 @@ fast_magic(const char *file)
 	|| memcmp(sig + 3, "VIDEO-VTS", 9) == 0))
 		return "video/x-ifo";
 
+	if (nread > 12 && sig[0] == 'Y' && sig[3] == '4' && sig[4] == 'M'
+	&& memcmp(sig, "YUV4MPEG2 ", 10) == 0)
+		return "video/x-y4m";
+
+	if (nread > 15 && sig[0] == 0xB7 && sig[1] == 0xD8 && sig[8] == 0xA6
+	&& memcmp(sig, "\xB7\xd8\x00\x20\x37\x49\xda\x11\xa6\x4e\x00\x07\xe9\x5e\xad\x8d", 16) == 0)
+		return "video/vnd.ms-wtv"; /* Neither libmagic nor MIME-info */
+
 	if (nread >= 4 && sig[0] == 'P' && sig[1] == 'S' && sig[2] == 'F') {
 		if (sig[3] == 0x01 || sig[3] == 0x02 || sig[3] == 0x11
 		|| sig[3] == 0x12 || sig[3] == 0x13 || sig[3] == 0x21
@@ -1866,6 +1879,27 @@ fast_magic(const char *file)
 	if (nread > 12 && sig[0] == 'N' && sig[1] == 'u' && sig[6] == 'V'
 	&& sig[11] == 0x00 && memcmp(sig, "NuppelVideo\0", 12) == 0)
 		return "video/x-nuv"; /* Neither libmagic nor MIME-info */
+
+	if (nread > 12 && sig[0] == 'M' && sig[1] == 'L' && sig[2] == 'V'
+	&& sig[3] == 'I')
+		return "video/x-mlv"; /* Neither libmagic nor MIME-info */
+
+	if (nread > 7 && sig[0] == 'A' && sig[1] == 'R' && sig[2] == 'M'
+	&& sig[3] == 'o' && sig[4] == 'v' && sig[5] == 'i' && sig[6] == 'e'
+	&& sig[7] == 0x0A)
+		return "video/x-acorn-replay"; /* Neither libmagic nor MIME-info */
+
+	if (nread > 7 && sig[0] == 'W' && sig[1] == 'O' && sig[2] == 'T'
+	&& sig[3] == 'F')
+		return "video/x-webex-wrf"; /* Neither libmagic nor MIME-info */
+
+	if (nread > 7 && sig[0] == 'P' && sig[1] == 'S' && sig[2] == 'M'
+	&& sig[3] == 'F') /* Playstation Portable Movie Format */
+		return "video/x-sony-psmf"; /* Neither libmagic nor MIME-info */
+
+	if (nread > 7 && sig[0] == 'C' && sig[1] == 'I' && sig[2] == ','
+	&& sig[3] == 0x00 && sig[4] <= 0x02)
+		return "video/x-cine"; /* Neither libmagic nor MIME-info */
 
 	if (nread > 13 && sig[5] == 0xAF && sig[12] == 0x08 && sig[13] == 0x00) {
 		if (sig[4] == 0x11) return "video/x-fli";
