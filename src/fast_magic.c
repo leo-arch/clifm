@@ -15,6 +15,8 @@
 #include <unistd.h> /* close() */
 #include <string.h> /* memcmp() */
 
+#define ISDIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
+
 static void *
 xmemmem(const void *haystack, size_t haylen,
 	const void *needle, size_t needlelen)
@@ -1125,6 +1127,35 @@ is_hevc(const uint8_t *s, const size_t slen)
 	return 0;
 }
 
+/* Return 1 if the string S, whose length in SLEN, has this format: "NUM NUM\n",
+ * or 0 if not. */
+static int
+is_mtv_image(const uint8_t *s, const size_t slen)
+{
+	if (slen <= 7)
+		return 0;
+
+	size_t sp = 0;
+	size_t nl = 0;
+	for (size_t i = 0; i < 8; i++) {
+		if (s[i] == ' ') sp = i;
+		if (s[i] == 0x0A) nl = i;
+	}
+
+	if (sp == 0 || nl == 0 || nl < sp || !ISDIGIT(s[sp - 1])
+	|| !ISDIGIT(s[nl - 1]))
+		return 0;
+
+	for (size_t i = 0; i < nl; i++) {
+		if (i == sp)
+			continue;
+		if (!ISDIGIT(s[i]))
+			return 0;
+	}
+
+	return 1;
+}
+
 /* Read a few kilo bytes from the file FILE and attempt to find out an
  * appropiate MIME type based on the file's content.
  * Returns the found MIME type (as a constant string) or NULL if none is found.
@@ -2140,6 +2171,10 @@ fast_magic(const char *file)
 	|| (sig[1] == 'S' && sig[2] == 'I')) && sig[3] == 'F')
 		return "image/vnd.nitf"; /* National Imagery Transmission Format */
 
+	if (nread > 4 && sig[0] == 'S' && sig[1] == 'V' && sig[2] == 'F'
+	&& sig[3] == ' ' && sig[4] == 'v') /* Simple Vector Format */
+		return "image/vnd.svf";
+
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'T' && sig[2] == 'O'
 	&& sig[3] == 'L' && sig[4] == 'I' && sig[5] == 'T' && sig[6] == 'L'
 	&& sig[7] == 'S')
@@ -2150,6 +2185,12 @@ fast_magic(const char *file)
 		if (sig[2] == 0x01)	return "image/vnd.microsoft.icon";
 		if (sig[2] == 0x02)	return "image/x-win-bitmap";
 	}
+
+	if (nread > 7 && ISDIGIT(sig[0])
+	&& (sig[1] == ' ' || sig[2] == ' ' || sig[3] == ' ')
+	&& (sig[4] == 0x0A || sig[5] == 0x0A || sig[6] == 0x0A || sig[7] == 0x0A)
+	&& is_mtv_image(sig, nread) == 1)
+		return "image/x-mtv"; /* Neither libmagic nor MIME-info */
 
 	if (nread > 82 && sig[34] == 'L' && sig[35] == 'P' && sig[82] != 0x00
 	&& memcmp(sig + 64, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16) == 0)
