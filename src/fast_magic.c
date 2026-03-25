@@ -1085,6 +1085,46 @@ check_gzipped_koffice(const uint8_t *s, const size_t slen)
 	return "application/gzip";
 }
 
+static int
+is_hevc(const uint8_t *s, const size_t slen)
+{
+	const size_t l = slen < 128 ? slen : 128;
+	/* Checking the first 128 bytes of the file is usually enough. */
+
+	int found_vps_sps_pps = 0;
+	int found_slice = 0;
+	size_t i = 0;
+
+	while (i + 4 <= l) {
+		if (s[i] == 0x00 && s[i + 1] == 0x00 && ((s[i + 2] == 0x01)
+		|| (s[i + 2] == 0x00 && i + 3 < l && s[i + 3] == 0x01))) {
+			size_t sc_len = (s[i + 2] == 0x01) ? 3 : 4;
+			size_t nal_pos = i + sc_len;
+			if (nal_pos >= l)
+				break;
+
+			uint8_t unit_type = (s[nal_pos] >> 1) & 0x3F;
+			if (unit_type >= 0 && unit_type <= 31)
+				found_slice++;
+			else if (unit_type >= 32 && unit_type <= 34)
+				found_vps_sps_pps++;
+			i = nal_pos;
+
+			if (found_vps_sps_pps > 2
+			|| (found_vps_sps_pps > 0 && found_slice > 0))
+				break;
+		} else {
+			i++;
+		}
+	}
+
+	if (found_vps_sps_pps > 2
+	|| (found_vps_sps_pps > 0 && found_slice > 0))
+		return 1;
+
+	return 0;
+}
+
 /* Read a few kilo bytes from the file FILE and attempt to find out an
  * appropiate MIME type based on the file's content.
  * Returns the found MIME type (as a constant string) or NULL if none is found.
@@ -1656,6 +1696,10 @@ fast_magic(const char *file)
 	if (nread > 3 && sig[0] == 'P' && sig[1] == 'D' && sig[2] == 'N'
 	&& sig[3] == '3')
 		return "image/x-paintnet";
+
+	if (nread > 3 && sig[0] == 0x00 && sig[1] == 0x00 && (sig[2] == 0x01
+	|| (sig[2] == 0x00 && sig[3] == 0x01)) && is_hevc(sig, nread) == 1)
+		return "video/x-hevc"; /* Neither libmagic nor MIME-info */
 
 	if (nread >= 12 && sig[0] == 'D' && sig[1] == 'V' && sig[2] == 'D'
 	&& (memcmp(sig + 3, "VIDEO-VMG", 9) == 0
