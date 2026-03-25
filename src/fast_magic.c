@@ -362,7 +362,7 @@ check_ftyp_magic(const uint8_t *s, const size_t l)
 	/* mp41, mp42, avc1, MSNV, XACV, mobi, mmp4, NDSC, NDSH, NDSM,
 	 * NDSP, NDSS, NDXC, NDXM, NDXP, NDXS, niko, bbxm, dash, isml, ARRI */
 	if (l > 3 && ((s[0] == 'm' && s[1] == 'p' && s[2] == '4' &&
-		(s[3] == '1' || s[3] == '2'))
+	(s[3] == '1' || s[3] == '2'))
 	|| (s[0] == 'a' && s[1] == 'v' && s[2] == 'c' && s[3] == '1')
 	|| (s[0] == 'M' && s[1] == 'S' && s[2] == 'N' && s[3] == 'V')
 	|| (s[0] == 'X' && s[1] == 'A' && s[2] == 'V' && s[3] == 'C')
@@ -893,7 +893,7 @@ is_djvu(const uint8_t *s, const size_t slen)
 static int
 is_imagemagick_mvg(const uint8_t *s, const size_t slen)
 {
-	// S is "push "
+	/* S is "push " */
 	if (slen < 5)
 		return 0;
 	const size_t max = slen > 10 ? 10 : slen;
