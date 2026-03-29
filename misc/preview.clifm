@@ -48,7 +48,7 @@
 # The 'image' method displays images directly, without prior conversion.
 ;^image/(jpeg|png)$=~/.config/clifm/clifmimg image %f %u;
 # The 'gif' method converts images first, and then displays them.
-;^image/.*|^application/dicom$=~/.config/clifm/clifmimg gif %f %u;
+;^image/.*|^application/(dicom|x-matlab-data)$=~/.config/clifm/clifmimg gif %f %u;
 # OpenRaster images
 ;N:.*\.ora$=~/.config/clifm/clifmimg gif %f %u;
 # Krita images
