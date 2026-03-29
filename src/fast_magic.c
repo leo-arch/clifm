@@ -571,10 +571,19 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 	&& buf[12] == 'v' && buf[13] == 'r' && buf[14] == 's' && buf[15] == 'n')
 		return "application/vnd.corel-draw";
 
+	/* https://datatracker.ietf.org/doc/html/rfc3625 */
+	if (buf[8] == 'Q' && buf[9] == 'L' && buf[10] == 'C' && buf[11] == 'M')
+		return "audio/qcelp";
+
 	if (buf_len > 15 && buf[8] == 'c' && buf[9] == 'm' && buf[10] == 'o'
 	&& buf[11] == 'v' && buf[12] == 'D' && buf[13] == 'I' && buf[14] == 'S'
 	&& buf[15] == 'P')
 		return "application/x-corel-move"; /* Neither libmagic nor MIME-info */
+
+	/* https://mab.greyserv.net/f/sony_wave64.pdf */
+	if (buf_len > 40 && buf[24] == 'w' && buf[28] == 0xF3
+	&& memcmp(buf + 24, "wave\xF3\xAC\xD3\x11\x8C\xD1\x00\xC0\x4F\x8E\xDB\x8A", 16) == 0)
+		return "audio/x-w64";
 
 	return NULL;
 }
@@ -727,6 +736,9 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 
 	if (plen > 3 && p[0] == '8' && p[1] == 'S' && p[2] == 'V' && p[3] == 'X')
 		return "audio/x-aiff";
+
+	if (plen > 3 && p[0] == 'M' && p[1] == 'A' && p[2] == 'U' && p[3] == 'D')
+		return "audio/x-maud";
 
 	if (plen > 2 && p[0] == 'P' && p[1] == 'B' && p[2] == 'M')
 		return "image/x-ilbm";
@@ -1137,7 +1149,7 @@ is_mtv_image(const uint8_t *s, const size_t slen)
 
 	size_t sp = 0;
 	size_t nl = 0;
-	for (size_t i = 0; i < 8; i++) {
+	for (size_t i = 0; i < 12; i++) {
 		if (s[i] == ' ') sp = i;
 		if (s[i] == 0x0A) nl = i;
 	}
@@ -1152,6 +1164,46 @@ is_mtv_image(const uint8_t *s, const size_t slen)
 		if (!ISDIGIT(s[i]))
 			return 0;
 	}
+
+	return 1;
+}
+
+static int
+is_sixel_image(const uint8_t *s, const size_t slen)
+{
+	// Check for DCS in the first 32 bytes
+	const size_t max_dcs_offset = 32;
+	// 9 bytes for a complete sixel beginning sequence: "DCS n;n;n;q"
+	const size_t seq_max_len = 9;
+	if (slen < max_dcs_offset + seq_max_len)
+		return 0;
+
+	size_t i;
+	for (i = 0; i < max_dcs_offset; i++) {
+		if (s[i] == 0x1B && s[i + 1] == 'P')
+			break;
+	}
+
+	if (i == max_dcs_offset) // No DCS found
+		return 0;
+
+	const unsigned char *dcs = (const unsigned char *)s + i;
+
+	size_t num = 0;
+	size_t sc = 0;
+	for (i = 2; i < seq_max_len && dcs[i] != 'q'; i++) {
+		if (ISDIGIT(dcs[i])) {
+			if (dcs[i + 1] != 'q' && dcs[i + 1] != ';')
+				return 0;
+			num++;
+		} else {
+			if (dcs[i] == ';')
+				sc++;
+		}
+	}
+
+	if (dcs[i] != 'q' || sc > 3 || num > 3)
+		return 0;
 
 	return 1;
 }
@@ -1202,7 +1254,6 @@ fast_magic(const char *file)
 		fclose(f);
 		return NULL;
 	}
-#undef BYTES_TO_READ
 
 	fclose(f);
 
@@ -1213,7 +1264,7 @@ fast_magic(const char *file)
 	if (nread > 7 && sig[0] == 0x89 && sig[1] == 'P' && sig[2] == 'N'
 	&& sig[3] == 'G' && sig[4] == 0x0D && sig[5] == 0x0A && sig[6] == 0x1A
 	&& sig[7] == 0x0A) {
-		/* It at offset 12 we find "CgBI" instead of "IHDR", we have an
+		/* If at offset 12 we find "CgBI" instead of "IHDR", we have an
 		 * iOS optimized PNG. However, they both use the same MIME type, so
 		 * there's no need to check. */
 		if (nread > 40 && sig[37] == 'a' && sig[38] == 'c' && sig[39] == 'T'
@@ -1237,8 +1288,8 @@ fast_magic(const char *file)
 	&& sig[3] == 'F' && sig[4] == '-')
 		return "application/pdf";
 
-	if (nread > 2 && sig[0] == 0x1F && sig[1] == 0x8B && sig[2] == 0x08)
-		if (nread > 12 && sig[10] == 'K' && sig[11] == 'O' && sig[12] == 'f') {
+	if (nread > 2 && sig[0] == 0x1F && sig[1] == 0x8B && sig[2] == 0x08) {
+		if (nread > 12 && sig[10] == 'K' && sig[11] == 'O' && sig[12] == 'f')
 			return check_gzipped_koffice(sig, nread);
 		return "application/gzip";
 	}
@@ -1281,6 +1332,9 @@ fast_magic(const char *file)
 
 	if (nread > 3 && sig[0] == 'R' && sig[1] == 'I' && sig[2] == 'F'
 	&& (sig[3] == 'F' || sig[3] == 'X')) /* RIFF (mostly image/webp) */
+		return check_riff_magic(sig, nread);
+	if (nread > 3 && sig[0] == 'r' && sig[1] == 'i' && sig[2] == 'f'
+	&& (sig[3] == 'f' || sig[3] == 'x')) /* RIFF (mostly image/webp) */
 		return check_riff_magic(sig, nread);
 
 	if (nread > 7 && sig[4] == 'f' && sig[5] == 't' && sig[6] == 'y'
@@ -1385,9 +1439,13 @@ fast_magic(const char *file)
 	&& sig[7] == '\n')
 		return "video/x-mng";
 
-	if (nread >= 20 && sig[0] == 'i' && sig[1] == 'd' && sig[2] == '='
-	&& memcmp(sig + 3, "ImageMagick version=", 20) == 0)
+	if (nread >= 24 && sig[0] == 'i' && sig[1] == 'd' && sig[2] == '='
+	&& memcmp(sig + 3, "ImageMagick", 11) == 0)
 		return "image/x-miff";
+
+	if (nread >= 19 && sig[0] == 'i' && sig[1] == 'd' && sig[2] == '='
+	&& memcmp(sig + 3, "MagickPixelCache", 16) == 0)
+		return "image/x-mpc";
 
 	if (nread > 3 && ((sig[0] == 'I' && sig[1] == 'I' && sig[2] == 'R'
 	&& (sig[3] == 'O' || sig[3] == 'S'))
@@ -1522,6 +1580,10 @@ fast_magic(const char *file)
 	&& memcmp(sig, "SQLite format 3\0", 16) == 0)
 		return "application/vnd.sqlite3";
 
+	if (nread > 5 && sig[0] == 0x93 && sig[1] == 'N' && sig[2] == 'U'
+	&& sig[3] == 'M' && sig[4] == 'P' && sig[5] == 'Y')
+		return "application/x-numpy-data";
+
 	if (nread > 3 && sig[0] == 'A' && sig[1] == 'D' && sig[2] == 'I'
 	&& sig[3] == 'F')
 		return "audio/x-hx-aac-adif";
@@ -1566,6 +1628,10 @@ fast_magic(const char *file)
 	if (nread > 2 && sig[0] == 'M' && sig[1] == 'O' && sig[2] == '3')
 		return "audio/x-mo3";
 
+	if (nread > 5 && sig[0] == 'P' && sig[1] == 'V' && sig[2] == 'F'
+	&& sig[4] == 0x0A && ISDIGIT(sig[3]) && ISDIGIT(sig[5]))
+		return "audio/x-pvf";
+
 	if (nread > 12 && ((sig[0] == 0x00 && sig[1] == 0x01 && sig[2] == 0x00
 	&& sig[3] == 0x00 && sig[4] < 48)
 	|| (sig[0] == 't' && sig[1] == 't' && sig[2] == 'c' && sig[3] == 'f'
@@ -1588,6 +1654,9 @@ fast_magic(const char *file)
 	if (nread > 3 && sig[0] == 'w' && sig[1] == 'v' && sig[2] == 'p'
 	&& sig[3] == 'k')
 		return "audio/x-wavpack";
+
+	if (nread > 1 && (((uint16_t)sig[0] << 8 | (uint16_t)sig[1]) & 0xFFE0) == 0x56E0)
+		return "audio/x-mp4a-latm";
 
 	if (nread > 3 && sig[0] == 'i' && sig[1] == 'c' && sig[2] == 'n'
 	&& sig[3] == 's') /* Mac OS X icon */
@@ -1737,11 +1806,11 @@ fast_magic(const char *file)
 	|| memcmp(sig + 3, "VIDEO-VTS", 9) == 0))
 		return "video/x-ifo";
 
-	if (nread > 12 && sig[0] == 'Y' && sig[3] == '4' && sig[4] == 'M'
+	if (nread >= 10 && sig[0] == 'Y' && sig[3] == '4' && sig[4] == 'M'
 	&& memcmp(sig, "YUV4MPEG2 ", 10) == 0)
 		return "video/x-y4m";
 
-	if (nread > 15 && sig[0] == 0xB7 && sig[1] == 0xD8 && sig[8] == 0xA6
+	if (nread >= 16 && sig[0] == 0xB7 && sig[1] == 0xD8 && sig[8] == 0xA6
 	&& memcmp(sig, "\xB7\xd8\x00\x20\x37\x49\xda\x11\xa6\x4e\x00\x07\xe9\x5e\xad\x8d", 16) == 0)
 		return "video/vnd.ms-wtv"; /* Neither libmagic nor MIME-info */
 
@@ -1807,10 +1876,24 @@ fast_magic(const char *file)
 	&& sig[3] == 0x5C && sig[4] == 0x06)
 		return "image/astc";
 
+	if (nread > 3 && sig[0] == 'X' && sig[1] == 'c' && sig[2] == 'u'
+	&& sig[3] == 'r')
+		return "image/x-xcursor";
+
 	if (nread > 3 && sig[0] == 'S' && ((sig[1] == 'I' && sig[2] == 'T'
 	&& sig[3] == '!') || (nread > 6 && sig[1] == 't' && sig[2] == 'u'
 	&& sig[3] == 'f' && sig[4] == 'f' && sig[5] == 'I' && sig[6] == 't')))
 		return "application/x-stuffit";
+
+	if (nread > 3 && sig[0] == 0x6E && sig[1] == 0xC3 && sig[2] == 0xAF) {
+		if (sig[3] == 'E') return "image/x-nie";
+		if (sig[3] == 'I') return "image/x-nii";
+		if (sig[3] == 'A') return "image/x-nia";
+	}
+
+	if (nread > 3 && sig[0] == 'C' && sig[1] == 'r'  && sig[2] == '2'
+	&& sig[3] == '4')
+		return "application/x-chrome-extension";
 
 	if (nread >= 14) {
 		uint16_t v12 = (uint16_t)sig[12] | (uint16_t)((uint16_t)sig[13] << 8);
@@ -1821,6 +1904,32 @@ fast_magic(const char *file)
 				return "application/lzma";
 		}
 	}
+
+	if (nread > 9 && sig[0] == 'C' && sig[3] == 'Z' && sig[9] == ' '
+	&& memcmp(sig, "CntZImage ", 10) == 0)
+		return "image/x-lerc1";
+	if (nread > 5 && sig[0] == 'L' && sig[1] == 'e' && sig[2] == 'r'
+	&& sig[3] == 'c' && sig[4] == '2' && sig[5] == ' ')
+		return "image/x-lerc2";
+
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'R' && sig[2] == 'F'
+	&& sig[3] == '1')
+		return "image/x-mrf";
+
+	if (nread > 3 && sig[0] == 'P' && (sig[1] == 'H' || sig[1] == 'h')
+	&& sig[2] == 0x0A)
+		return "image/x-phm";
+
+	if (nread > 3 && sig[0] == 'F' && sig[1] == 'L' && sig[2] == '3'
+	&& sig[3] == '2')
+		return "image/x-fl32";
+
+	if (nread > 2 && ((sig[0] == '%' && sig[1] == '!')
+	|| (sig[0] == 0x04 && sig[1] == '%' && sig[2] == '!')))
+		return "application/postscript";
+
+	if (nread > 32 && is_sixel_image(sig, nread) == 1)
+		return "image/x-sixel";
 
 			/* #############################
 			 * #       LEGACY/OBSOLETE     #
@@ -2080,8 +2189,9 @@ fast_magic(const char *file)
 	&& sig[3] == '3')
 		return "application/x-stargallery-sdg";
 
-	if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x01
-	&& sig[3] == 0x00 && sig[4] == 0x00)
+	if (nread > 19 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x01
+	&& sig[3] == 0x00 && sig[4] == 0x00
+	&& sig[19] != 0x1C /* Avoid conflict with JBIG1 files*/)
 		return "application/x-dfont"; /* MacOS font */
 
 	if (nread >= 19 && sig[0] == 'C'
@@ -2104,6 +2214,54 @@ fast_magic(const char *file)
 	if (nread > 3 && sig[0] == 'c' && sig[1] == 'a' && sig[2] == 'f'
 	&& sig[3] == 'f')
 		return "audio/x-caf";
+
+	if (nread > 3 && sig[0] == 0x80 && sig[1] == 0x00) {
+		const uint16_t l = (uint16_t)(sig[2] << 8) | (uint16_t)(sig[3]);
+		const size_t v = (size_t)l - 2;
+		if (nread >= v + 6 && memcmp(sig + v, "(c)CRI", 6) == 0)
+			return "audio/x-adx";
+	}
+
+	/* https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/IRCAM/IRCAM.html */
+	if (nread > 3 && ((sig[0] == 'd' && sig[1] == 0xA3 && sig[2] <= 0x04
+	&& sig[3] == 0x00) || (sig[2] == 0xA3 && sig[3] == 'd' && sig[1] <= 0x03
+	&& sig[0] == 0x00)))
+		return "audio/x-ircam";
+
+	if (nread > 3 && ((sig[0] == 'f' && sig[1] == 'a' && sig[2] == 'p'
+	&& sig[3] == ' ') || (sig[0] == ' ' && sig[1] == 'p' && sig[2] == 'a'
+	&& sig[3] == 'f'))) /* Ensoniq Paris audio file format */
+		return "audio/x-paf";
+
+	/* http://fileformats.archiveteam.org/wiki/Avr */
+	if (nread > 15 && sig[0] == '2' && sig[1] == 'B' && sig[2] == 'I'
+	&& sig[3] == 'T' && sig[14] == 0x00 && (sig[15] == 0x08 || sig[15] == 0x10))
+		return "audio/x-avr";
+
+	/* http://svr-www.eng.cam.ac.uk/reports/ajr/TR192/node11.html */
+	if (nread > 6 && sig[0] == 'N' && sig[1] == 'I' && sig[2] == 'S'
+	&& sig[3] == 'T' && sig[4] == '_' && sig[5] == '1' && sig[6] == 'A')
+		return "audio/x-nist";
+
+	if (nread > 6 && sig[0] == 'L' && sig[1] == 'M' && sig[2] == '8'
+	&& sig[3] == '9' && sig[4] == '5' && sig[5] == '3')
+		return "audio/x-txw";
+
+	if (nread >= 13 && sig[0] == 'A' && sig[1] == 'L' && sig[2] == 'a'
+	&& memcmp(sig, "ALawSoundFile", 13) == 0)
+		return "audio/x-psion-wve";
+
+	if (nread >= 15 && sig[0] == 'S' && sig[1] == 'C' && sig[2] == '6'
+	&& sig[3] == '8' && memcmp(sig, "SC68 Music-file", 15) == 0)
+		return "audio/x-atari-sc68";
+
+	if (nread > 3 && sig[0] == 'B' && sig[1] == 'u' && sig[2] == 'z'
+	&& sig[3] == 'z')
+		return "audio/x-buzz";
+
+	if (nread > 3 && sig[0] == 'O' && sig[1] == 'F' && sig[2] == 'R'
+	&& sig[3] == ' ')
+		return "audio/x-optimfrog";
 
 	if (nread > 2 && sig[0] == 'R' && sig[1] == 'K' && sig[2] == 'A')
 		return "application/x-rka";
@@ -2132,10 +2290,18 @@ fast_magic(const char *file)
 		if (sig[0] == 0x14) return "image/x-deskmate-fig";
 	}
 
+/*	if (nread > 19 && sig[0] == 0x00 && sig[2] == 0x01 && sig[3] == 0x00
+	&& sig[4] == 0x00 && sig[5] == 0x00 && sig[6] != 0x00
+	&& (sig[16] == 0x08 || sig[16] == 0x7F)
+	&& sig[17] == 0x00 && sig[18] == 0x03 && sig[19] == 0x1C)
+		// Heuristic based only several samples: there doesn't seem to be
+		// any actual magic for this file type.
+		return "image/x-jbig"; */
+
 	if (nread > 7 && sig[0] == 0x97 && sig[1] == 'J' && sig[2] == 'B'
 	&& sig[3] == '2' && sig[4] == 0x0D && sig[5] == 0x0A && sig[6] == 0x1A
 	&& sig[7] == 0x0A)
-		return "image/jbig2";
+		return "image/x-jbig2";
 
 	if (nread > 12 && sig[0] == '(' && sig[1] == 0x00 && sig[2] == 0x00
 	&& sig[3] == 0x00 && sig[12] == 0x01)
@@ -2175,6 +2341,11 @@ fast_magic(const char *file)
 	&& sig[3] == ' ' && sig[4] == 'v') /* Simple Vector Format */
 		return "image/vnd.svf";
 
+	if (nread > 2054 && sig[2048] == 'P' && sig[2049] == 'C' && sig[2050] == 'D'
+	&& sig[2051] == '_' && sig[2052] == 'I' && sig[2053] == 'P'
+	&& sig[2054] == 'I')
+		return "image/x-photo-cd";
+
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'T' && sig[2] == 'O'
 	&& sig[3] == 'L' && sig[4] == 'I' && sig[5] == 'T' && sig[6] == 'L'
 	&& sig[7] == 'S')
@@ -2187,16 +2358,56 @@ fast_magic(const char *file)
 	}
 
 	if (nread > 7 && ISDIGIT(sig[0])
-	&& (sig[1] == ' ' || sig[2] == ' ' || sig[3] == ' ')
-	&& (sig[4] == 0x0A || sig[5] == 0x0A || sig[6] == 0x0A || sig[7] == 0x0A)
+	&& (sig[1] == ' ' || sig[2] == ' ' || sig[3] == ' ' || sig[4] == ' ')
+	&& (sig[4] == 0x0A || sig[5] == 0x0A || sig[6] == 0x0A || sig[7] == 0x0A
+	|| sig[8] == 0x0A || sig[9] == 0x0A)
 	&& is_mtv_image(sig, nread) == 1)
 		return "image/x-mtv"; /* Neither libmagic nor MIME-info */
+
+	if (nread > 3 && sig[0] == 'P' && (sig[1] == 'F' || sig[1] == 'f')
+	&& (sig[2] == 0x0a || (sig[2] == '4' && sig[3] == 0x0a)))
+		return "image/x-pfm"; /* PFM and Augmented PFM */
+
+	if (nread > 3 && sig[0] == 'C' && sig[1] == 'P' && sig[2] == 'C'
+	&& sig[3] == 0xB2) /* Cartesian Perceptual Compression image */
+		return "image/x-cpc";
+
+	if (nread > 3 && sig[0] == '_' && sig[1] == 'C' && sig[2] == 'D'
+	&& sig[3] == '5')
+		return "image/x-cd5";
+
+	if (nread == BYTES_TO_READ && st.st_size == 33795 && sig[0] == 0xFF
+	&& sig[1] == 0x3B && sig[2] == 0x62)
+		return "image/x-bfli";
+
+	if (nread == BYTES_TO_READ) {
+		if ((st.st_size == 32034 || st.st_size == 32066)
+		&& sig[0] == 0x00 && (sig[1] == 0x00 || sig[1] == 0x01 || sig[1] == 0x02))
+			return "image/x-atari-degas";
+		if (st.st_size == 153664 && sig[0] == 0x00 && sig[1] == 0x04)
+			return "image/x-atari-degas";
+		if (st.st_size == 154114 && sig[0] == 0x00 && sig[1] == 0x07)
+			return "image/x-atari-degas";
+	}
+
+	if (nread > 4 && sig[0] == 0x08 && sig[1] == 0xF2 && sig[2] == 0xA6
+	&& sig[3] == 0xB6)
+		return "image/x-vips";
+
+	if (nread > 6 && sig[0] == 'L' && sig[1] == 'B' && sig[2] == 'L'
+	&& sig[3] == 'S' && sig[4] == 'I' && sig[5] == 'Z' && sig[6] == 'E')
+		return "image/x-vicar";
+
+	if (nread > 83 && sig[80] == 'C' && sig[81] == 'T' && sig[82] == 0x00
+	&& sig[83] == 0x00)
+		return "image/x-scitex-ct";
 
 	if (nread > 82 && sig[34] == 'L' && sig[35] == 'P' && sig[82] != 0x00
 	&& memcmp(sig + 64, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16) == 0)
 		return "application/vnd.ms-fontobject";
 
 	return NULL;
+#undef BYTES_TO_READ
 }
 
 #else
