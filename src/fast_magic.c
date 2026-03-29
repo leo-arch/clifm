@@ -1118,7 +1118,7 @@ is_hevc(const uint8_t *s, const size_t slen)
 				break;
 
 			uint8_t unit_type = (s[nal_pos] >> 1) & 0x3F;
-			if (unit_type >= 0 && unit_type <= 31)
+			if (unit_type <= 31)
 				found_slice++;
 			else if (unit_type >= 32 && unit_type <= 34)
 				found_vps_sps_pps++;
