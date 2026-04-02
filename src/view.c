@@ -28,6 +28,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #endif /* MAC_OS_X_RENAMEAT_SYS_STDIO_H */
 
 #include "aux.h" /* open_f functions, is_cmd_in_path, construct_human_size */
+#include "checks.h" /* is_file_in_cwd */
 #include "file_operations.h" /* open_file */
 #include "init.h" /* get_sel_files */
 #include "listing.h" /* reload_dirlist */
@@ -36,6 +37,8 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #include "selection.h" /* save_sel */
 #include "spawn.h" /* launch_execve */
 #include "tabcomp.h" /* tab_complete */
+
+static char **g_args = NULL;
 
 static int
 preview_edit(char *app)
@@ -347,6 +350,49 @@ purge_thumbnails_cache(void)
 	return errors == 0 ? FUNC_SUCCESS : FUNC_FAILURE;
 }
 
+static char **
+build_matches_with_args(const char *text, const int start, const int end)
+{
+	UNUSED(text); UNUSED(start); UNUSED(end);
+
+	if (!g_args)
+		return NULL;
+
+	size_t n = 0;
+	for (n = 0; g_args[n]; n++);
+
+	if (n == 0)
+		return NULL;
+
+	char **matches = xnmalloc(n + 2, sizeof(char *));
+	matches[0] = strdup("");
+
+	size_t i;
+	for (i = 0; i < n; i++) {
+		char *abbrev_ptr = NULL;
+		char *name = g_args[i];
+
+		if (is_file_in_cwd(name)) {
+			char *p = strrchr(name, '/');
+			if (p && p[1])
+				name = p + 1;
+		} else {
+			abbrev_ptr = abbreviate_file_name(g_args[i]);
+			if (abbrev_ptr)
+				name = abbrev_ptr;
+		}
+
+		char *p = strchr(name, '\\') ? unescape_str(name) : NULL;
+		matches[i + 1] = p ? p : strdup(name);
+
+		if (abbrev_ptr && abbrev_ptr != g_args[i])
+			free(abbrev_ptr);
+	}
+
+	matches[i + 1] = NULL;
+	return matches;
+}
+
 int
 preview_function(char **args)
 {
@@ -387,9 +433,24 @@ preview_function(char **args)
 	rl_point = rl_end = 0;
 	rl_redisplay();
 
+	g_args = args;
+	rl_completion_func_t *comp_func_bk = rl_attempted_completion_function;
+	if (args && args[0]) {
+		rl_attempted_completion_function = build_matches_with_args;
+		cur_comp_type = TCMP_PATH;
+		flags |= COMP_KEEP_FULL_PATH;
+	}
+
 	flags |= PREVIEWER;
 	tab_complete('?');
 	flags &= ~PREVIEWER;
+
+	g_args = NULL;
+	if (args && args[0]) {
+		rl_attempted_completion_function = comp_func_bk;
+		cur_comp_type = TCMP_NONE;
+		flags &= ~COMP_KEEP_FULL_PATH;
+	}
 
 	tabmode = tabmode_bk;
 	conf.fzf_preview = fzf_preview_bk;

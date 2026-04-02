@@ -568,7 +568,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"vv", 2, PARAM_FNAME, 0},
 	{"ver", 3, NO_PARAM, 0},
 	{"version", 7, NO_PARAM, 0},
-	{"view", 4, PARAM_STR, 0},
+	{"view", 4, PARAM_FNAME, 0},
 	{"ws", 2, PARAM_NUM, 0},
 	{"x", 1, PARAM_FNAME, 0}, // diff (old 0110, new 1110)
 	{"X", 1, PARAM_FNAME, 0}, // diff (old 0110, new 1110)

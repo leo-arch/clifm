@@ -550,6 +550,7 @@ extern time_t curdir_mtime;
 #define FAILED_ALIAS        (1 << 12)
 #define ALT_PREVIEW_FILE    (1 << 13)
 #define UEBERZUG_IMG_PREV   (1 << 14)
+#define COMP_KEEP_FULL_PATH (1 << 15)
 
 /* Flags for third party binaries */
 #define FZF_BIN_OK     (1 << 0)

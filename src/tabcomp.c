@@ -1149,7 +1149,8 @@ store_completions(char **matches)
 
 			if (ct != TCMP_SEL && ct != TCMP_DESEL && ct != TCMP_BM_PATHS
 			&& ct != TCMP_DIRHIST && ct != TCMP_OPENWITH
-			&& ct != TCMP_JUMP && ct != TCMP_TAGS_F) {
+			&& ct != TCMP_JUMP && ct != TCMP_TAGS_F
+			&& !(flags & COMP_KEEP_FULL_PATH)) {
 				char *ptr = strrchr(entry, '/');
 				entry = (ptr && *(++ptr)) ? ptr : entry;
 			}
