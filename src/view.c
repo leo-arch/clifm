@@ -358,35 +358,35 @@ build_matches_with_args(const char *text, const int start, const int end)
 	if (!g_args)
 		return NULL;
 
-	size_t n = 0;
-	for (n = 0; g_args[n]; n++);
+	size_t total = 0;
+	for (total = 0; g_args[total]; total++);
 
-	if (n == 0)
+	if (total == 0)
 		return NULL;
 
-	char **matches = xnmalloc(n + 2, sizeof(char *));
+	char **matches = xnmalloc(total + 2, sizeof(char *));
 	matches[0] = strdup("");
 
 	size_t i;
-	for (i = 0; i < n; i++) {
-		char *abbrev_ptr = NULL;
+	for (i = 0; i < total; i++) {
+		char *abbrev_name = NULL;
 		char *name = g_args[i];
 
-		if (is_file_in_cwd(name)) {
+		if (is_file_in_cwd(name) == 1) {
 			char *p = strrchr(name, '/');
 			if (p && p[1])
 				name = p + 1;
 		} else {
-			abbrev_ptr = abbreviate_file_name(g_args[i]);
-			if (abbrev_ptr)
-				name = abbrev_ptr;
+			abbrev_name = abbreviate_file_name(g_args[i]);
+			if (abbrev_name)
+				name = abbrev_name;
 		}
 
 		char *p = strchr(name, '\\') ? unescape_str(name) : NULL;
 		matches[i + 1] = p ? p : strdup(name);
 
-		if (abbrev_ptr && abbrev_ptr != g_args[i])
-			free(abbrev_ptr);
+		if (abbrev_name && abbrev_name != g_args[i])
+			free(abbrev_name);
 	}
 
 	matches[i + 1] = NULL;
