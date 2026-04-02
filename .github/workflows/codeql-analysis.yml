@@ -42,6 +42,8 @@ jobs:
 
     steps:
     - name: Checkout repository
+      env:
+        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       uses: actions/checkout@v4
 
     # Initializes the CodeQL tools for scanning.
@@ -74,6 +76,6 @@ jobs:
     - name: Compile Clifm
       run: |
         make
-    
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
