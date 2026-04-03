@@ -16,6 +16,9 @@
 #include <string.h> /* memcmp() */
 
 #define ISDIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
+/* Convert S into a little-endian unsigned 32-bit value */
+#define LE_U32(s) ((uint32_t)(s)[0] | ((uint32_t)(s)[1] << 8) \
+	| ((uint32_t)(s)[2] << 16) | ((uint32_t)(s)[3] << 24))
 
 static void *
 xmemmem(const void *haystack, size_t haylen,
@@ -560,6 +563,10 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 		return "image/x-rdib";
 	if (buf[8] == 'A' && buf[9] == 'C' && buf[10] == 'I' && buf[11] == 'D')
 		return "application/x-acid";
+	if (buf[8] == '4' && buf[9] == 'X' && buf[10] == 'M' && buf[11] == 'V')
+		return "video/x-4xmv";
+	if (buf[8] == 'C' && buf[9] == 'D' && buf[10] == 'X' && buf[11] == 'A')
+		return "video/x-cdxa";
 
 	if (buf[8] == 's' && buf[9] == 'h') {
 		if (buf[10] == 'w' && (buf[11] == '4' || buf[11] == '5'))
@@ -786,12 +793,13 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 
 	if (plen > 3 && p[0] == 'T' && p[1] == 'D' && p[2] == 'D' && p[3] == 'D')
 		return "model/x-tddd";
-
 	if (plen > 3 && p[0] == 'F' && p[1] == 'A' && p[2] == 'N' && p[3] == 'T')
 		return "video/x-fantavision";
-
 	if (plen > 3 && p[0] == 'S' && p[1] == 'S' && p[2] == 'A' && p[3] == ' ')
 		return "video/x-ssa";
+	if (plen > 3 && p[0] == 'R' && p[1] == 'L' && p[2] == 'V'
+	&& (p[3] == '2' || p[3] == '3'))
+		return "video/x-rl2";
 
 	/* See http://fileformats.archiveteam.org/wiki/ILBM */
 	if (plen > 3 && ((p[0] == 'I' && p[1] == 'L' && p[2] == 'B' && p[3] == 'M')
@@ -812,6 +820,12 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 	if (plen > 3 && p[0] == 'V' && p[1] == 'D' && p[2] == 'E' && p[3] == 'O')
 		return "video/x-vdeo";
 
+	if (plen > 3 && p[0] == 'V' && p[1] == 'A' && p[2] == 'X' && p[3] == 'L')
+		return "video/x-vaxl";
+
+	if (plen > 3 && p[0] == 'Y' && p[1] == 'A' && p[2] == 'F' && p[3] == 'A')
+		return "video/x-yafa";
+
 	return NULL;
 }
 
@@ -824,7 +838,7 @@ check_movi_magic(const uint8_t *s, const size_t slen)
 		return "video/quicktime";
 
 	if (slen > 3 && s[0] == 'i' && s[1] == 'd' && s[2] == 's' && s[3] == 'c')
-		return "video/x-quicktime";
+		return "image/x-quicktime";
 
 	if (slen > 3 && s[0] == 'p' && s[1] == 'c' && s[2] == 'k' && s[3] == 'g')
 		return "application/x-quicktime-player";
@@ -2154,12 +2168,20 @@ fast_magic(const char *file)
 	&& sig[3] == '1')
 		return "audio/x-tta";
 
-	if (nread > 1 && sig[0] == 0x0B && sig[1] == 0x77)
-		return "audio/ac3";
+	if (nread > 5 && sig[0] == 0x0B && sig[1] == 0x77) {
+		/* See FFmpeg source: libavcodec/ac3_parser.c */
+		const uint8_t bsid = (sig[5] >> 3) & 0x1F;
+		if (bsid <= 8) return "audio/ac3";
+		if (bsid >= 11 && bsid <= 16) return "audio/eac3";
+	}
 
 	if (nread > 3 && sig[0] == 'I' && sig[1] == 'M' && sig[2] == 'P'
 	&& (sig[3] == 'M' || sig[3] == 'S'))
 		return "audio/x-it";
+
+	if (nread > 3 && sig[0] == 'R' && sig[1] == 'S' && sig[2] == 'T'
+	&& sig[3] == 'M') /* Nintendo Wii BRSTM audio file */
+		return "audio/x-brstm";
 
 	if (nread > 3 && (sig[0] == 'I' || sig[0] == 'P') && sig[1] == 'W'
 	&& sig[2] == 'A' && sig[3] == 'D')
@@ -2316,6 +2338,48 @@ fast_magic(const char *file)
 	&& sig[3] == 'M' && sig[8] == 'S' && sig[9] == 'H' && sig[10] == 'D'
 	&& sig[11] == 'R')
 		return "video/x-san2";
+
+	if (nread > 3 && sig[0] == 'D' && sig[1] == 'E' && sig[2] == 'X'
+	&& sig[3] == 'A')
+		return "video/x-dxa";
+	if (nread > 3 && sig[0] == 'D' && sig[1] == 'X' && sig[2] == 'P'
+	&& sig[3] == '1')
+		return "image/x-dxp";
+
+	if (nread > 3 && sig[0] == 0x94 && sig[1] == 0x19 && sig[2] == 0x11
+	&& sig[3] == 0x29)
+		return "video/x-gdv";
+
+	if (nread > 35 && sig[0] == 'C' && sig[1] == 'R' && sig[2] == 'I'
+	&& sig[3] == 'D' && sig[32] == '@' && sig[33] == 'U' && sig[34] == 'T'
+	&& sig[35] == 'F')
+		return "video/x-scaleform";
+
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'X' && sig[2] == 'R'
+	&& sig[3] == 'I' && sig[4] == 'F' && sig[5] == 'F' && sig[6] == '6'
+	&& sig[7] == '4')
+		return "video/x-magix";
+
+	/* http://justsolve.archiveteam.org/wiki/Video_Master_Film */
+	if (nread > 4 && sig[0] == 'V' && sig[1] == 'M' && sig[2] == 'A'
+	&& sig[3] == 'S' && sig[4] == '1')
+		return "video/x-video-master-film";
+
+	if (nread > 19 && sig[0] == 'F' && sig[1] == 'I' && sig[2] == 'L'
+	&& sig[3] == 'M' && sig[16] == 'F' && sig[17] == 'D' && sig[18] == 'S'
+	&& sig[19] == 'C')
+		return "video/x-sega-film";
+
+	/* https://multimedia.cx/mirror/idcin.html */
+	if (nread > 32 && LE_U32(sig) == 320 && LE_U32(sig + 4) == 240) {
+		const uint32_t sample_rate = LE_U32(sig + 8);
+		const uint32_t sample_width = LE_U32(sig + 12);
+		const uint32_t channels = LE_U32(sig + 16);
+		if ((sample_rate == 22050 || sample_rate == 11050)
+		&& (sample_width == 1 || sample_width == 2)
+		&& (channels == 1 || channels == 2))
+			return "video/x-id-cin";
+	}
 
 	if (nread > 13 && sig[7] == '*' && sig[8] == '*' && sig[9] == 'A'
 	&& sig[10] == 'C' && sig[11] == 'E' && sig[12] == '*' && sig[13] == '*')
@@ -2496,6 +2560,11 @@ fast_magic(const char *file)
 	&& memcmp(sig, "Extended Instrument:", 20) == 0)
 		return "audio/x-xi";
 
+	/* https://www.purose.net/befis/download/nezplug/kssspec.txt */
+	if (nread > 4 && sig[0] == 'K' && sig[1] == 'S' &&
+	((sig[2] == 'C' && sig[3] == 'C') || (sig[2] == 'S' && sig[3] == 'X')))
+		return "audio/x-kss";
+
 	/* http://fileformats.archiveteam.org/wiki/DiamondWare_Digitized */
 	if (nread > 12 && sig[0] == 'D' && sig[7] == 'W' && sig[11] == ' '
 	&& memcmp(sig, "DiamondWare ", 12) == 0) {
@@ -2516,6 +2585,57 @@ fast_magic(const char *file)
 	if (nread > 14 && sig[0] == 'T' && sig[1] == 'W' && sig[2] == 'I'
 	&& sig[3] == 'N' && memcmp(sig, "TWIN97012000", 12) == 0)
 		return "audio/x-vqf";
+
+	/* http://lclevy.free.fr/exotica/ahx/ahxformat.txt */
+	if (nread > 3 && sig[0] == 'T' && sig[1] == 'H' && sig[2] == 'X'
+	&& (sig[3] == 0x00 || sig[3] == 0x01))
+		return "audio/x-ahx";
+
+	/* https://wiki.amigaos.net/wiki/Bars_and_Pipes_Professional */
+	if (nread > 3 && sig[0] == 'B' && sig[1] == 'R' && sig[2] == 'P'
+	&& sig[3] == 'P')
+		return "audio/x-brpp";
+
+	/* https://wiki.multimedia.cx/index.php/Electronic_Arts_Formats */
+	if (nread > 3 && sig[0] == 'S' && sig[1] == 'C'
+	&& (sig[2] == 'H' || sig[2] == 'C' || sig[2] == 'D' || sig[2] == 'L'
+	|| sig[2] == 'E') && sig[3] == 'l')
+		return "audio/x-electronic-arts";
+	if (nread > 3 && sig[0] == '1' && sig[1] == 'S' && sig[2] == 'N'
+	&& (sig[3] == 'h' || sig[3] == 'd' || sig[3] == 'l' || sig[3] == 'e'))
+		return "audio/x-electronic-arts";
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'V' && sig[2] == 'I'
+	&& (sig[3] == 'h' || sig[3] == 'f' || sig[3] == 'e'))
+		return "video/x-electronic-arts";
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'A' && sig[2] == 'D'
+	&& (sig[3] == 'k' || sig[3] == 'm' || sig[3] == 'e'))
+		return "video/x-electronic-arts";
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'V' &&
+	((sig[2] == 'h' && sig[3] == 'd') || (sig[2] == '0' && sig[3] == 'K')
+	|| (sig[2] == '0' && sig[3] == 'F')))
+		return "video/x-electronic-arts";
+	if (nread > 3 && (sig[0] == 'k' || sig[0] == 'f') && sig[1] == 'V'
+	&& sig[2] == 'G' && sig[3] == 'T')
+		return "video/x-electronic-arts";
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'P' && sig[2] == 'C'
+	&& sig[3] == 'h')
+		return "video/x-electronic-arts";
+	if (nread > 3 && sig[0] == 'm' && sig[1] == 'T' && sig[2] == 'C'
+	&& sig[3] == 'D')
+		return "video/x-electronic-arts";
+	if (nread > 3 && sig[0] == 'p' && sig[1] == 'I' && sig[2] == 'Q'
+	&& sig[3] == 'T')
+		return "video/x-electronic-arts";
+	if (nread > 3 && sig[0] == 'p' && sig[1] == 'Q' && sig[2] == 'T'
+	&& sig[3] == 'G')
+		return "video/x-electronic-arts";
+	if (nread > 3 && sig[0] == 'T' && sig[1] == 'G' && sig[2] == 'Q'
+	&& sig[3] == 's')
+		return "video/x-electronic-arts";
+
+	if (nread >= 20 && sig[0] == 'I' && sig[10] == 'M' && sig[18] == 0x1A
+	&& memcmp(sig, "Interplay MVE File\x1A\0", 20) == 0)
+		return "video/x-interplay-mve";
 
 	if (nread > 2 && sig[0] == 'R' && sig[1] == 'K' && sig[2] == 'A')
 		return "application/x-rka";
