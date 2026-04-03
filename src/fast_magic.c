@@ -735,6 +735,9 @@ check_doctype_magic(const uint8_t *s, const size_t slen)
 	return NULL;
 }
 
+/* Return the MIME type of a recognized IFF file, or NULL if none is found.
+ * For more FOURCC types (i.e., 4-bytes ASCII ID strings) see
+ * https://wiki.multimedia.cx/index.php/IFF */
 static const char *
 check_iff_magic(const uint8_t *s, const size_t slen)
 {
@@ -754,19 +757,49 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 	}
 
 	if (plen > 3 && p[0] == '8' && p[1] == 'S' && p[2] == 'V' && p[3] == 'X')
+		/* Should be audio/x-8svx, but both file(1) and MIME-info use x-aiff */
 		return "audio/x-aiff";
 
 	if (plen > 3 && p[0] == 'M' && p[1] == 'A' && p[2] == 'U' && p[3] == 'D')
 		return "audio/x-maud";
 
-	if (plen > 2 && p[0] == 'P' && p[1] == 'B' && p[2] == 'M')
-		return "image/x-ilbm";
+	if (plen > 3 && p[0] == 'C' && p[1] == 'M' && p[2] == 'U' && p[3] == 'S')
+		return "audio/x-cmus";
+	if (plen > 3 && p[0] == 'S' && p[1] == 'M' && p[2] == 'U' && p[3] == 'S')
+		return "audio/x-smus";
+
+	if (plen > 3 && p[0] == 'I' && p[1] == 'F' && p[2] == 'Z' && p[3] == 'S')
+		return "application/x-quetzal";
+
+	if (plen > 3 && p[0] == 'I' && p[1] == 'F' && p[2] == 'R' && p[3] == 'S')
+		return "application/x-blorb";
+
+	if (plen > 3 && p[0] == 'R' && p[1] == 'G' && p[2] == 'F' && p[3] == 'X')
+		return "image/x-rgfx";
+
+	if (plen > 3 && p[0] == 'F' && p[1] == 'A' && p[2] == 'X' && p[3] == 'X')
+		return "image/x-faxx";
+
+	if (plen > 7 && p[0] == 'I' && p[1] == 'M' && p[2] == 'A' && p[3] == 'G'
+	&& p[4] == 'I' && p[5] == 'H' && p[6] == 'D' && p[7] == 'R')
+		return "image/x-cdi";
+
+	if (plen > 3 && p[0] == 'T' && p[1] == 'D' && p[2] == 'D' && p[3] == 'D')
+		return "model/x-tddd";
+
+	if (plen > 3 && p[0] == 'F' && p[1] == 'A' && p[2] == 'N' && p[3] == 'T')
+		return "video/x-fantavision";
+
+	if (plen > 3 && p[0] == 'S' && p[1] == 'S' && p[2] == 'A' && p[3] == ' ')
+		return "video/x-ssa";
 
 	/* See http://fileformats.archiveteam.org/wiki/ILBM */
 	if (plen > 3 && ((p[0] == 'I' && p[1] == 'L' && p[2] == 'B' && p[3] == 'M')
 	|| (p[0] == 'A' && p[1] == 'C' && p[2] == 'B' && p[3] == 'M')
 	|| (p[0] == 'R' && p[1] == 'G' && p[2] == 'B' && p[3] == 'N')
 	|| (p[0] == 'R' && p[1] == 'G' && p[2] == 'B' && p[3] == '8')))
+		return "image/x-ilbm";
+	if (plen > 2 && p[0] == 'P' && p[1] == 'B' && p[2] == 'M')
 		return "image/x-ilbm";
 
 	if (plen > 3 && p[0] == 'A' && p[1] == 'N' && p[2] == 'I' && p[3] == 'M')
@@ -2623,6 +2656,10 @@ fast_magic(const char *file)
 	if (nread > 83 && sig[80] == 'C' && sig[81] == 'T' && sig[82] == 0x00
 	&& sig[83] == 0x00)
 		return "image/x-scitex-ct";
+
+	if (nread > 4 && sig[0] == 'R' && sig[1] == 'I' && sig[2] == 'X'
+	&& sig[3] == '3')
+		return "image/x-colorix";
 
 	if (nread > 82 && sig[34] == 'L' && sig[35] == 'P' && sig[82] != 0x00
 	&& memcmp(sig + 64, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16) == 0)
