@@ -3092,6 +3092,7 @@ get_birth_time(const filesn_t n, const struct stat *a)
 	struct timespec birthtim = get_birthtime(file_info[n].name);
 	birth_time = birthtim.tv_sec;
 # else
+	UNUSED(n);
 	birth_time = a->ST_BTIME.tv_sec;
 # endif /* LINUX_STATX */
 #else
