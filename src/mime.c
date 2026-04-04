@@ -1882,7 +1882,7 @@ get_open_file_path(char **args, char **fpath)
 
 /* Handle mime when no opening app has been found */
 static int
-handle_no_app(const int info, char **fpath, char **mime, const char *arg)
+handle_no_app(char **fpath, char **mime, const char *arg)
 {
 	if (xargs.preview == 1) {
 		/* When running the previewer, MIME_FILE points to the path to
@@ -1896,28 +1896,24 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 		return FUNC_FAILURE;
 	}
 
-	if (info) {
-		fputs(_("Associated application: None\n"), stderr);
-	} else {
 #ifndef _NO_ARCHIVING
-		/* If an archive/compressed file, run the archiver function */
-		if (is_compressed(*fpath, 1) == 0) {
-			char *tmp_cmd[] = {"ad", *fpath, NULL};
-			const int ret = archiver(tmp_cmd, 'd');
+	/* If an archive/compressed file, run the archiver function */
+	if (is_compressed(*fpath, 1) == 0) {
+		char *tmp_cmd[] = {"ad", *fpath, NULL};
+		const int ret = archiver(tmp_cmd, 'd');
 
-			free(*fpath);
-			free(*mime);
+		free(*fpath);
+		free(*mime);
 
-			return ret;
-		} else {
-			xerror(_("%s: '%s': No associated application found\n"),
-				err_name, arg);
-		}
-#else
+		return ret;
+	} else {
 		xerror(_("%s: '%s': No associated application found\n"),
 			err_name, arg);
-#endif /* !_NO_ARCHIVING */
 	}
+#else
+	xerror(_("%s: '%s': No associated application found\n"),
+		err_name, arg);
+#endif /* !_NO_ARCHIVING */
 
 	free(*fpath);
 	free(*mime);
@@ -1962,7 +1958,9 @@ print_mime_info(char **app, char **fpath, char **mime)
 	printf(_("URI:       %s\n"), uri ? uri : _("unknown"));
 	free(uri);
 
-	if (*(*app) == 'a' && (*app)[1] == 'd' && !(*app)[2]) {
+	if (!*app) {
+		printf(_("Open:      None\n"));
+	} else if (*(*app) == 'a' && (*app)[1] == 'd' && !(*app)[2]) {
 		printf(_("Open:      ad [builtin] (match: %s)\n"),
 			g_mime_match ? "MIME type" : "name");
 	} else {
@@ -2080,8 +2078,8 @@ mime_open(char **args)
 
 	/* Get default application for MIME or filename */
 	char *app = get_app(mime, filename);
-	if (!app)
-		return handle_no_app(info, &file_path, &mime, args[1]);
+	if (!app && info == 0)
+		return handle_no_app(&file_path, &mime, args[1]);
 
 	if (info == 1)
 		return print_mime_info(&app, &file_path, &mime);
