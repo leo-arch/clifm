@@ -16,9 +16,17 @@
 #include <string.h> /* memcmp() */
 
 #define ISDIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
+
 /* Convert S into a little-endian unsigned 32-bit value */
-#define LE_U32(s) ((uint32_t)(s)[0] | ((uint32_t)(s)[1] << 8) \
-	| ((uint32_t)(s)[2] << 16) | ((uint32_t)(s)[3] << 24))
+#define LE_U32(s) ((uint32_t)((uint32_t)(s)[0] | ((uint32_t)(s)[1] << 8) \
+	| ((uint32_t)(s)[2] << 16) | ((uint32_t)(s)[3] << 24)))
+/* Convert S into a big-endian unsigned 32-bit value */
+#define BE_U32(s) ((uint32_t)((uint32_t)(s)[0] << 24 \
+	| (uint32_t)(s)[1] << 16 | (uint32_t)(s)[2] << 8 | (uint32_t)(s)[3]))
+/* Convert S into a little-endian unsigned 16-bit value */
+#define LE_U16(s) ((uint16_t)((uint16_t)(s)[0] | ((uint16_t)(s)[1] << 8)))
+/* Convert S into a big-endian unsigned 16-bit value */
+#define BE_U16(s) ((uint16_t)((uint16_t)(s)[0] << 8) | (uint16_t)(s)[1])
 
 static void *
 xmemmem(const void *haystack, size_t haylen,
@@ -297,20 +305,20 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 	const size_t l = str_len - 8;
 
 	for (size_t i = 0; i + 8 <= l; i++) {
-		if (s[i] == 0xEC && s[i + 1] == 0xA5) { // FibBase (Word)
-			const uint16_t nfib = (uint16_t)(s[i + 2] | (s[i + 3] << 8));
+		if (s[i] == 0xEC && s[i + 1] == 0xA5) { /* FibBase (Word) */
+			const uint16_t nfib = LE_U16(s + i + 2);
 			if (nfib == 0x00A0 || nfib == 0x00A1 || nfib == 0x00B0
 			|| nfib == 0x00C0 || nfib == 0x00C1 || nfib == 0x00D9)
 				return "application/msword";
 		}
 
-		if (s[i] == 0x09 && s[i + 1] == 0x08) { // BOF (Excel)
-			const uint16_t reclen = (uint16_t)(s[i + 2] | (s[i + 3] << 8));
+		if (s[i] == 0x09 && s[i + 1] == 0x08) { /* BOF (Excel) */
+			const uint16_t reclen = LE_U16(s + i + 2);
 			if (reclen < 4 || i + 4 + reclen > l)
 				continue;
 
-			const uint16_t version = (uint16_t)(s[i + 4] | (s[i + 5] << 8));
-			const uint16_t type = (uint16_t)(s[i + 6] | (s[i + 7] << 8));
+			const uint16_t version = LE_U16(s + i + 4);
+			const uint16_t type = LE_U16(s + i + 6);
 			if ((version == 0x0600 || version == 0x0500) &&
 			(type == 0x0005 || type == 0x0010 || type == 0x0020))
 				return "application/vnd.ms-excel";
@@ -852,11 +860,8 @@ get_ms_exec_type(const uint8_t *s, const size_t slen)
 	if (slen < 0x3C + 4) /* Need bytes 0x3C..0x3F */
 		return "application/x-dosexec";
 
-	/* Read little-endian dword at 0x3C (e_lfanew pointer) */
-	uint32_t n = (uint32_t)s[0x3C]
-		| ((uint32_t)s[0x3D] << 8)
-		| ((uint32_t)s[0x3E] << 16)
-		| ((uint32_t)s[0x3F] << 24);
+	/* Read little-endian dword (double word - 32bit) at 0x3C (e_lfanew pointer) */
+	const uint32_t n = LE_U32(s + 0x3C);
 
 	if (n + 4 > slen)
 		return "application/x-dosexec";
@@ -1108,7 +1113,7 @@ check_pre_ole2_office_docs(const uint8_t *s, const size_t slen)
 {
 	if (slen > 128 && s[0] == 0x31 && s[1] == 0xBE && s[2] == 0x00
 	&& s[3] == 0x00 && s[128] > 0) { /* Pre OLE2 Word (DOS Word 5) */
-		uint16_t b = (uint16_t)s[96] | (uint16_t)((uint16_t)s[97] << 8);
+		const uint16_t b = LE_U16(s + 96);
 		if (b != 0) return "application/mswrite";
 		return "application/msword";
 	}
@@ -1699,10 +1704,10 @@ fast_magic(const char *file)
 	&& sig[3] == 0xFE) || (sig[0] == 0xE8 && sig[1] == 0x00 && sig[2] == 0x1F
 	&& sig[3] == 0xFF)))
 		return "audio/vnd.dts";
-	uint16_t word = nread >= 2 ? (uint16_t)((sig[0] << 8) | sig[1]) : 0;
+	const uint16_t word = nread >= 2 ? BE_U16(sig) : 0;
 	if ((word & 0xFFF6) == 0xFFF0)
 		return "audio/x-hx-aac-adts";
-	uint16_t wmasked = word & 0xFFFE;
+	const uint16_t wmasked = word & 0xFFFE;
 	if (wmasked == 0xFFFA || wmasked == 0xFFFC || wmasked == 0xFFF2
 	|| wmasked == 0xFFF4 || wmasked == 0xFFF6 || wmasked == 0xFFE2)
 		return "audio/mpeg";
@@ -1761,7 +1766,7 @@ fast_magic(const char *file)
 	&& sig[3] == 'k')
 		return "audio/x-wavpack";
 
-	if (nread > 1 && (((uint16_t)sig[0] << 8 | (uint16_t)sig[1]) & 0xFFE0) == 0x56E0)
+	if (nread > 1 && (BE_U16(sig) & 0xFFE0) == 0x56E0)
 		return "audio/x-mp4a-latm";
 
 	if (nread > 3 && sig[0] == 'i' && sig[1] == 'c' && sig[2] == 'n'
@@ -1804,8 +1809,7 @@ fast_magic(const char *file)
 		return "image/jxr";
 
 	if (nread >= 2 && (sig[0] & 0x0F) == 8 && (sig[0] & 0x80) == 0
-	&& (sig[1] & 0x20) == 0
-	&& ((uint16_t)sig[0] << 8 | (uint16_t)sig[1]) % 31 == 0)
+	&& (sig[1] & 0x20) == 0 && BE_U16(sig) % 31 == 0)
 		return "application/zlib";
 
 	if (nread > 6 && sig[0] == 'B' && sig[1] == 'L' && sig[2] == 'E'
@@ -2008,13 +2012,9 @@ fast_magic(const char *file)
 		return "application/x-chrome-extension";
 
 	if (nread >= 14) {
-		uint16_t v12 = (uint16_t)sig[12] | (uint16_t)((uint16_t)sig[13] << 8);
-		if (v12 == 0 || v12 == 0xFF) {
-			uint32_t lelong = (uint32_t)sig[0] | ((uint32_t)sig[1] << 8)
-				| ((uint32_t)sig[2] << 16) | ((uint32_t)sig[3] << 24);
-			if ((lelong & 0x00FFFFFF) == 0x5D)
-				return "application/x-lzma";
-		}
+		const uint16_t v12 = LE_U16(sig + 12);
+		if ((v12 == 0 || v12 == 0xFF) && (LE_U32(sig) & 0x00FFFFFF) == 0x5D)
+			return "application/x-lzma";
 	}
 
 	if (nread > 9 && sig[0] == 'C' && sig[3] == 'Z' && sig[9] == ' '
@@ -2079,8 +2079,7 @@ fast_magic(const char *file)
 		return ret;
 
 	if (nread > 17 && sig[0] == 'B' && sig[1] == 'M') {
-		const uint32_t dib_header = (uint32_t)sig[14] | (uint32_t)sig[15] << 8
-			| (uint32_t)sig[16] << 16 | (uint32_t)sig[17] << 24;
+		const uint32_t dib_header = LE_U32(sig + 14);
 		if (dib_header == 12 || dib_header == 40 || dib_header == 56
 		|| dib_header == 64 || dib_header == 108 || dib_header == 124)
 			return "image/bmp";
@@ -2195,12 +2194,7 @@ fast_magic(const char *file)
 	&& sig[3] == 0x01)
 		return "video/x-flv";
 
-	if (nread > 16 && sig[4] == 0x12 && sig[5] == 0xAF && sig[12] == 0x08)
-		return "video/x-flc";
-
-	const uint32_t s = (uint32_t)sig[0] << 24 | (uint32_t)sig[1] << 16 |
-		(uint32_t)sig[2] << 8 | (uint32_t)sig[3];
-	if ((s & 0xffffff00) == 0x1f070000)
+	if ((BE_U32(sig) & 0xffffff00) == 0x1f070000)
 		return "video/x-dv";
 
 	if (nread > 3 && sig[0] == 'D' && sig[1] == 'K' && sig[2] == 'I'
@@ -2230,15 +2224,24 @@ fast_magic(const char *file)
 
 	if (nread > 7 && sig[0] == 'P' && sig[1] == 'S' && sig[2] == 'M'
 	&& sig[3] == 'F') /* Playstation Portable Movie Format */
-		return "video/x-sony-psmf"; /* Neither libmagic nor MIME-info */
+		return "video/x-sony-psmf";
 
 	if (nread > 7 && sig[0] == 'C' && sig[1] == 'I' && sig[2] == ','
 	&& sig[3] == 0x00 && sig[4] <= 0x02)
-		return "video/x-cine"; /* Neither libmagic nor MIME-info */
+		return "video/x-cine";
 
-	if (nread > 13 && sig[5] == 0xAF && sig[12] == 0x08 && sig[13] == 0x00) {
-		if (sig[4] == 0x11) return "video/x-fli";
-		if (sig[4] == 0x12) return "video/x-flc";
+	/* https://www.compuphase.com/flic.htm#FLICHEADER */
+	if (nread > 21 && sig[5] == 0xAF && LE_U16(sig + 14) <= 3
+	&& sig[20] == 0x00 && sig[21] == 0x00) {
+		if (sig[4] == 0x12)
+			return "video/x-flc";
+		if (sig[4] == 0x11) { /* Standard FLI files are 320x200x8 */
+			const uint16_t width = LE_U16(sig + 8);
+			const uint16_t height = LE_U16(sig + 10);
+			const uint16_t depth = LE_U16(sig + 12);
+			if (width == 320 && height == 200 && depth == 8)
+				return "video/x-fli";
+		}
 	}
 
 	/* https://wiki.multimedia.cx/index.php/GXF */
@@ -2381,6 +2384,17 @@ fast_magic(const char *file)
 			return "video/x-id-cin";
 	}
 
+	/* https://multimedia.cx/mirror/idroq.txt */
+	if (nread > 7 && sig[0] == 0x84 && sig[1] == 0x10 && sig[2] == 0xFF
+	&& sig[3] == 0xFF && sig[4] == 0xFF && sig[5] == 0xFF
+	&& sig[6] == 0x1E && sig[7] == 0x00)
+		return "video/x-id-roq";
+
+	/* https://wiki.multimedia.cx/index.php/HNM */
+	if (nread > 3 && sig[0] == 'H' && sig[1] == 'N' && sig[2] == 'M'
+	&& (sig[3] == '0' || sig[3] == '1' || sig[3] == '4' || sig[3] == '6'))
+		return "video/x-cryo-hnm";
+
 	if (nread > 13 && sig[7] == '*' && sig[8] == '*' && sig[9] == 'A'
 	&& sig[10] == 'C' && sig[11] == 'E' && sig[12] == '*' && sig[13] == '*')
 		return "application/x-ace-compressed";
@@ -2470,11 +2484,15 @@ fast_magic(const char *file)
 		return "audio/x-caf";
 
 	if (nread > 3 && sig[0] == 0x80 && sig[1] == 0x00) {
-		const uint16_t l = (uint16_t)(sig[2] << 8) | (uint16_t)(sig[3]);
+		const uint16_t l = BE_U16(sig + 2);
 		const size_t v = (size_t)l - 2;
 		if (nread >= v + 6 && memcmp(sig + v, "(c)CRI", 6) == 0)
 			return "audio/x-adx";
 	}
+
+	if (nread >= 16 && sig[0] == 'E' && sig[8] == ' ' && sig[9] == 'M'
+	&& memcmp(sig, "Extended Module:", 16) == 0)
+		return "audio/x-mod";
 
 	/* https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/IRCAM/IRCAM.html */
 	if (nread > 3 && ((sig[0] == 'd' && sig[1] == 0xA3 && sig[2] <= 0x04
@@ -2594,7 +2612,12 @@ fast_magic(const char *file)
 	/* https://wiki.amigaos.net/wiki/Bars_and_Pipes_Professional */
 	if (nread > 3 && sig[0] == 'B' && sig[1] == 'R' && sig[2] == 'P'
 	&& sig[3] == 'P')
-		return "audio/x-brpp";
+		return "video/x-brpp";
+
+	/* https://wiki.multimedia.cx/index.php/Maxis_XA */
+	if (nread > 3 && sig[0] == 'X' && sig[1] == 'A'
+	&& (sig[2] == 'I' || sig[2] == 'J') && sig[3] == 0x00)
+		return "audio/x-maxis-xa";
 
 	/* https://wiki.multimedia.cx/index.php/Electronic_Arts_Formats */
 	if (nread > 3 && sig[0] == 'S' && sig[1] == 'C'
