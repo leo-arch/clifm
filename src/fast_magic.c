@@ -10,12 +10,11 @@
 
 #ifndef NO_FAST_MAGIC
 
-#include "helpers.h"
+#include "helpers.h" /* IS_DIGIT, IS_ALPHA_UP, IS_ALPHA_LOW, IS_ALNUM */
 
 #include <unistd.h> /* close() */
 #include <string.h> /* memcmp() */
-
-#define ISDIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
+#include <errno.h>
 
 /* Convert S into a little-endian unsigned 32-bit value */
 #define LE_U32(s) ((uint32_t)((uint32_t)(s)[0] | ((uint32_t)(s)[1] << 8) \
@@ -27,6 +26,8 @@
 #define LE_U16(s) ((uint16_t)((uint16_t)(s)[0] | ((uint16_t)(s)[1] << 8)))
 /* Convert S into a big-endian unsigned 16-bit value */
 #define BE_U16(s) ((uint16_t)((uint16_t)(s)[0] << 8) | (uint16_t)(s)[1])
+
+#define GSM_MIN_BYTES 1056
 
 static void *
 xmemmem(const void *haystack, size_t haylen,
@@ -354,9 +355,12 @@ check_mp3_magic(const uint8_t *buf, const size_t buf_size)
 	const size_t taglen = id3v2_tag_size(buf, buf_size);
 	if (taglen > 0 && taglen + 2 <= buf_size
 	&& buf[taglen] == 0xFF && (buf[taglen + 1] & 0xE0) == 0xE0)
-		return "audio/mp3";
+		return "audio/mpeg";
+/*		return "audio/mp3"; // No such thing as audio/mp3 */
 
-	return NULL;
+	/* Invalid or absent ID3v2 tag. This is what both the Shared MIME-info
+	 * database and exiftool(1) do: report audio/mpeg. */
+	return "audio/mpeg";
 }
 
 static const char *
@@ -570,11 +574,20 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 	if (buf[8] == 'R' && buf[9] == 'D' && buf[10] == 'I' && buf[11] == 'B')
 		return "image/x-rdib";
 	if (buf[8] == 'A' && buf[9] == 'C' && buf[10] == 'I' && buf[11] == 'D')
-		return "application/x-acid";
+		return "audio/x-acid";
 	if (buf[8] == '4' && buf[9] == 'X' && buf[10] == 'M' && buf[11] == 'V')
 		return "video/x-4xmv";
 	if (buf[8] == 'C' && buf[9] == 'D' && buf[10] == 'X' && buf[11] == 'A')
 		return "video/x-cdxa";
+
+	if (buf[8] == 'M' && buf[9] == 'C' && buf[10] == '9' && buf[11] == '5')
+		return "video/x-shockwave-director";
+	if (buf[8] == 'M' && buf[9] == 'V' && buf[10] == '9' && buf[11] == '3')
+		return "video/x-shockwave-director";
+	if (buf[8] == 'F' && buf[9] == 'G' && buf[10] == 'D' && buf[11] == 'M')
+		return "video/x-shockwave-director";
+	if (buf[8] == 'F' && buf[9] == 'G' && buf[10] == 'D' && buf[11] == 'C')
+		return "video/x-shockwave-director";
 
 	if (buf[8] == 's' && buf[9] == 'h') {
 		if (buf[10] == 'w' && (buf[11] == '4' || buf[11] == '5'))
@@ -703,7 +716,7 @@ check_xml_magic(const uint8_t *s, const size_t slen)
 		return "application/x-amf";
 
 	if (n + 10 <= rem && p[n] == 'p' && p[n + 1] == 'l'
-	&& memcmp(p + n, "playlist version=", 17) == 0)
+	&& memcmp(p + n, "playlist ", 9) == 0)
 		return "application/xspf+xml";
 
 	return "text/xml";
@@ -833,6 +846,9 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 
 	if (plen > 3 && p[0] == 'Y' && p[1] == 'A' && p[2] == 'F' && p[3] == 'A')
 		return "video/x-yafa";
+
+	if (plen > 3 && p[0] == 'W' && p[1] == 'V' && p[2] == 'Q' && p[3] == 'A')
+		return "video/x-vqa";
 
 	return NULL;
 }
@@ -1235,14 +1251,14 @@ is_mtv_image(const uint8_t *s, const size_t slen)
 		if (s[i] == 0x0A) nl = i;
 	}
 
-	if (sp == 0 || nl == 0 || nl < sp || !ISDIGIT(s[sp - 1])
-	|| !ISDIGIT(s[nl - 1]))
+	if (sp == 0 || nl == 0 || nl < sp || !IS_DIGIT(s[sp - 1])
+	|| !IS_DIGIT(s[nl - 1]))
 		return 0;
 
 	for (size_t i = 0; i < nl; i++) {
 		if (i == sp)
 			continue;
-		if (!ISDIGIT(s[i]))
+		if (!IS_DIGIT(s[i]))
 			return 0;
 	}
 
@@ -1273,7 +1289,7 @@ is_sixel_image(const uint8_t *s, const size_t slen)
 	size_t num = 0;
 	size_t sc = 0;
 	for (i = 2; i < seq_max_len && dcs[i] != 'q'; i++) {
-		if (ISDIGIT(dcs[i])) {
+		if (IS_DIGIT(dcs[i])) {
 			if (dcs[i + 1] != 'q' && dcs[i + 1] != ';')
 				return 0;
 			num++;
@@ -1289,15 +1305,14 @@ is_sixel_image(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
-/*
-#define STREAM_MPEG_NONE     0
+/*#define STREAM_MPEG_NONE     0
 #define STREAM_MPEG_VIDEO    1
 #define STREAM_MPEG_AUDIO    2
-#define STREAM_MPEG4_GENERIC 3
+#define STREAM_MPEG4_GENERIC 3 */
 
-// The MPEG header my be not at offset 0x00. Let's check the first LEN bytes
-// for the header. Return >=1 if found or zero.
-static int
+/* The MPEG signature may be not at offset 0x00. Let's check the first LEN
+ * bytes for the signature. Return >=1 if found or zero if not. */
+/*static int
 is_mpeg_stream(const uint8_t *s, const size_t len)
 {
 	for (size_t i = 0; i + 4 < len; i++) {
@@ -1314,6 +1329,61 @@ is_mpeg_stream(const uint8_t *s, const size_t len)
 	return STREAM_MPEG_NONE;
 } */
 
+static int
+is_neochrome_image(const uint8_t *s, const size_t slen)
+{
+	if (slen <= 58)
+		return 0;
+
+	const uint16_t res = BE_U16(s + 2);
+	const uint16_t X = BE_U16(s + 54);
+	const uint16_t Y = BE_U16(s + 56);
+	/* Width and height are at offsets 58 and 60 (both BE_U16), but
+	 * are ignored (always 320x200). */
+	return (res <= 2 && X == 0 && Y == 0);
+}
+
+/* GSM-probe routine taken from FFmpeg (libavformat/gsmdec.c)
+ * See https://wiki.multimedia.cx/index.php/GSM_06.10 */
+static int
+is_gsm_audio(const uint8_t *s, const size_t slen)
+{
+	/* We want at least 32 GSM block header bytes. Since each header has
+	 * 33 byes, we need at least GSM_MIN_BYTES (1056) */
+	if (slen < GSM_MIN_BYTES)
+		return 0;
+
+	int valid = 0, invalid = 0;
+	const uint8_t *b = s;
+	while (b < s + slen - 32) {
+		if ((*b & 0xF0) == 0xD0) /* Valid values: 0xD0-0xDF */
+			valid++;
+		else
+			invalid++;
+		b += 33; /* GSM block size */
+	}
+
+	return (valid >> 5 > invalid); /* == (valid / 32) > invalid */
+}
+
+static const char *
+open_error(const char *file, const int err_no)
+{
+	if (!file)
+		return NULL;
+
+	struct stat st;
+	if (lstat(file, &st) != -1) {
+		/* We cannot read the file, but we can stat it */
+		if (err_no == EACCES && S_ISREG(st.st_mode))
+			return _("regular file, no read permission");
+
+		return fs_type_check(&st);
+	}
+
+	return NULL;
+}
+
 /* Read a few kilo bytes from the file FILE and attempt to find out an
  * appropiate MIME type based on the file's content.
  * Returns the found MIME type (as a constant string) or NULL if none is found.
@@ -1329,15 +1399,11 @@ fast_magic(const char *file)
 	if (!file || !*file)
 		return NULL;
 
-	struct stat st;
-
 	int fd = open(file, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
-	if (fd == -1) {
-		if (lstat(file, &st) != -1)
-			return fs_type_check(&st);
-		return NULL;
-	}
+	if (fd == -1)
+		return open_error(file, errno);
 
+	struct stat st;
 	if (fstat(fd, &st) == -1) {
 		close(fd);
 		return NULL;
@@ -1411,7 +1477,7 @@ fast_magic(const char *file)
 		return "image/gif"; /* Either "GIF87a" or "GIF89a" */
 
 	if (nread > 3 && sig[0] == 'f' && sig[1] == 'L' && sig[2] == 'a'
-	&& sig[3] == 'C') // flac
+	&& sig[3] == 'C')
 		return "audio/flac";
 
 	if (nread >= 10 && sig[0] == '%' && memcmp(sig, "%!PS-Adobe", 10) == 0) {
@@ -1421,7 +1487,7 @@ fast_magic(const char *file)
 	}
 
 	if (nread > 4 && sig[0] == '<' && sig[1] == '?' && sig[2] == 'x'
-	&& sig[3] == 'm' && sig[4] == 'l') // Mostly SVG
+	&& sig[3] == 'm' && sig[4] == 'l') /* Mostly SVG */
 		return check_xml_magic(sig, nread);
 
 	if (nread >= 13 && sig[0] == '<' && sig[1] == '!' && ((sig[2] == 'D'
@@ -1719,11 +1785,6 @@ fast_magic(const char *file)
 		return "audio/AMR";
 	}
 
-	/* https://dsd-guide.com/sites/default/files/white-papers/DSFFileFormatSpec_E.pdf */
-	if (nread > 80 && sig[0] == 'D' && sig[1] == 'S' && sig[2] == 'D'
-	&& sig[3] == ' ' && sig[28] == 'f' /* fmt */ && sig[80] == 'd' /* data */)
-		return "audio/x-dsf";
-
 	if (nread > 7 && sig[4] == 'W' && sig[5] == 0x90 && sig[6] == 'u'
 	&& sig[7] == '6')
 		return "audio/x-pn-audibleaudio";
@@ -1740,7 +1801,7 @@ fast_magic(const char *file)
 		return "audio/x-mo3";
 
 	if (nread > 5 && sig[0] == 'P' && sig[1] == 'V' && sig[2] == 'F'
-	&& sig[4] == 0x0A && ISDIGIT(sig[3]) && ISDIGIT(sig[5]))
+	&& sig[4] == 0x0A && IS_DIGIT(sig[3]) && IS_DIGIT(sig[5]))
 		return "audio/x-pvf";
 
 	if (nread > 12 && ((sig[0] == 0x00 && sig[1] == 0x01 && sig[2] == 0x00
@@ -1928,7 +1989,26 @@ fast_magic(const char *file)
 
 	if (nread >= 16 && sig[0] == 0xB7 && sig[1] == 0xD8 && sig[8] == 0xA6
 	&& memcmp(sig, "\xB7\xd8\x00\x20\x37\x49\xda\x11\xa6\x4e\x00\x07\xe9\x5e\xad\x8d", 16) == 0)
-		return "video/vnd.ms-wtv"; /* Neither libmagic nor MIME-info */
+		return "video/vnd.ms-wtv";
+
+	if (nread > 4 && sig[0] == '#' && sig[1] == 'E' && sig[2] == 'X'
+	&& sig[3] == 'T' && sig[4] == 'M' && sig[6] == 'U') {
+		if (sig[5] == '3') return "audio/x-mpegurl";
+		if (sig[5] == '4') return "video/vnd.mpegurl";
+	}
+
+	/* http://fileformats.archiveteam.org/wiki/Codec2 */
+	if (nread > 4 && sig[0] == 0xC0 && sig[1] == 0xDE && sig[2] == 0xC2
+	&& sig[3] <= 0x10 && sig[4] <= 0x10	/* Bytes 3-4: version (curren 1.2 (0x01 0x02)) */
+	&& (sig[3] > 0x00 || sig[4] >= 0x08)) /* Minimum version 0.8 */
+		return "audio/x-codec2";
+
+	if (nread > 10 && sig[0] == '[' && sig[9] == ']') {
+		if ((sig[1] == 'p' || sig[1] == 'P') && memcmp(sig + 2, "laylist", 7) == 0)
+			return "audio/x-scpls";
+		if (sig[1] == 'P' && sig[2] == 'L' && memcmp(sig + 1, "PLAYLIST", 8) == 0)
+			return "audio/x-scpls";
+	}
 
 	if (nread >= 4 && sig[0] == 'P' && sig[1] == 'S' && sig[2] == 'F') {
 		if (sig[3] == 0x01 || sig[3] == 0x02 || sig[3] == 0x11
@@ -1958,6 +2038,10 @@ fast_magic(const char *file)
 	&& sig[3] == 'b' && sig[4] == 'f' && sig[5] == 'e' && sig[6] == 'l'
 	&& sig[7] == 'd')
 		return "image/x-farbfeld";
+
+	if (nread > 5 && sig[0] == 'B' && sig[1] == '&' && sig[2] == 'W'
+	&& sig[3] == '2' && sig[4] == '5' && sig[5] == '6')
+		return "image/x-ilab";
 
 	if (nread >= 8 &&
 	((sig[0] == 'R' && sig[1] == 'a' && sig[2] == 'r'
@@ -2050,11 +2134,6 @@ fast_magic(const char *file)
 	&& (sig[3] & 0x80) == 0 && (sig[3] & 0x1F) == 7)
 		return "video/h264";
 
-/*	int mpeg_type = nread > 256 ? is_mpeg_stream(sig, 256) : STREAM_MPEG_NONE;
-	if (mpeg_type == STREAM_MPEG_VIDEO) return "video/mpeg";
-	if (mpeg_type == STREAM_MPEG_AUDIO) return "audio/mpeg";
-	if (mpeg_type == STREAM_MPEG4_GENERIC) return "video/mpeg4-generic"; */
-
 	/* https://multimedia.cx/mirror/av_format_v1.pdf */
 	if (nread > 3 && sig[0] == 'A' && sig[1] == 'V'
 	&& (sig[2] == 0x01 || sig[2] == 0x02) && sig[4] == 0x55
@@ -2064,6 +2143,21 @@ fast_magic(const char *file)
 	if (nread > 3 && sig[0] == 0xF5 && sig[1] == 0x46 && sig[2] == 0x7A
 	&& sig[3] == 0xBD)
 		return "video/x-tivo";
+
+	if (nread > 3 && sig[0] == '.' && (IS_ALPHA_UP(sig[1]) || IS_ALPHA_LOW(sig[1]))
+	&& IS_ALNUM(sig[2]) && (sig[3] == ' ' || sig[3] == '\t'))
+		return "text/troff";
+	if (nread > 3 && ((sig[0] == '.' && sig[1] == '\\' && sig[2] == '"')
+	|| (sig[0] == '\'' && sig[1] == '\\' && sig[2] == '"')
+	|| (sig[0] == '\'' && sig[1] == '.' && sig[2] == '\\' && sig[3] == '"')
+	|| (sig[0] == '\\' && sig[1] == '"')))
+		return "text/troff";
+
+	if (nread > 6 && sig[0] == 'W' && sig[1] == 'E' && sig[2] == 'B'
+	&& sig[3] == 'V' && sig[4] == 'T' && sig[5] == 'T'
+	&& (sig[6] == '\n' || sig[6] == '\t' || sig[6] == ' ' || sig[6] == '\r'))
+		return "text/vtt";
+
 
 			/* #############################
 			 * #       LEGACY/OBSOLETE     #
@@ -2102,8 +2196,8 @@ fast_magic(const char *file)
 	&& sig[3] == 't' && sig[4] == 'f')
 		return "text/rtf"; /* application/rtf (MIME-info) */
 
-	if (nread > 9 && sig[0] == 'M' && sig[1] == 'Z' && sig[7] == 0x00
-	&& sig[9] == 0x00)
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'Z' && (sig[3] == 0x00
+	|| sig[3] == 0x01))
 		return get_ms_exec_type(sig, nread); /* .exe */
 
 	if (nread > 384 && sig[369] == 'M'
@@ -2174,6 +2268,18 @@ fast_magic(const char *file)
 		if (bsid >= 11 && bsid <= 16) return "audio/eac3";
 	}
 
+	/* DSD Stream File (DSF)
+	 * https://dsd-guide.com/sites/default/files/white-papers/DSFFileFormatSpec_E.pdf
+	 * and FFmpeg: libavformat/dsfdec.c */
+	if (nread > 80 && sig[0] == 'D' && sig[1] == 'S' && sig[2] == 'D'
+	&& sig[3] == ' ' && sig[28] == 'f' /* fmt */ && sig[80] == 'd' /* data */)
+		return "audio/x-dsf";
+
+	/* MIDI Sample Dump Standard File. FFmpeg: libavformat/sdsdec.c */
+	if (nread > 20 && sig[0] == 0xF0 && sig[1] == 0x7E && sig[2] == 0x00
+	&& sig[3] == 0x01 && (sig[6] >= 8 && sig[6] <= 28) && sig[20] == 0xF7)
+		return "audio/x-sds";
+
 	if (nread > 3 && sig[0] == 'I' && sig[1] == 'M' && sig[2] == 'P'
 	&& (sig[3] == 'M' || sig[3] == 'S'))
 		return "audio/x-it";
@@ -2181,6 +2287,10 @@ fast_magic(const char *file)
 	if (nread > 3 && sig[0] == 'R' && sig[1] == 'S' && sig[2] == 'T'
 	&& sig[3] == 'M') /* Nintendo Wii BRSTM audio file */
 		return "audio/x-brstm";
+
+	if (nread >= GSM_MIN_BYTES && (sig[0] & 0xF0) == 0xD0
+	&& (sig[33] & 0xF0) == 0xD0 && is_gsm_audio(sig, nread) == 1)
+		return "audio/x-gsm";
 
 	if (nread > 3 && (sig[0] == 'I' || sig[0] == 'P') && sig[1] == 'W'
 	&& sig[2] == 'A' && sig[3] == 'D')
@@ -2207,11 +2317,11 @@ fast_magic(const char *file)
 
 	if (nread > 12 && sig[0] == 'N' && sig[1] == 'u' && sig[6] == 'V'
 	&& sig[11] == 0x00 && memcmp(sig, "NuppelVideo\0", 12) == 0)
-		return "video/x-nuv"; /* Neither libmagic nor MIME-info */
+		return "video/x-nuv";
 
 	if (nread > 12 && sig[0] == 'M' && sig[1] == 'L' && sig[2] == 'V'
 	&& sig[3] == 'I')
-		return "video/x-mlv"; /* Neither libmagic nor MIME-info */
+		return "video/x-mlv";
 
 	if (nread > 7 && sig[0] == 'A' && sig[1] == 'R' && sig[2] == 'M'
 	&& sig[3] == 'o' && sig[4] == 'v' && sig[5] == 'i' && sig[6] == 'e'
@@ -2342,6 +2452,16 @@ fast_magic(const char *file)
 	&& sig[11] == 'R')
 		return "video/x-san2";
 
+	/* http://fileformats.archiveteam.org/wiki/3D_Movie_Maker */
+	if (nread > 7 && sig[0] == 'C' && sig[1] == 'H' && sig[2] == 'N'
+	&& sig[3] == '2' && sig[4] == ' ' && sig[5] == 'C' && sig[6] == 'O'
+	&& sig[7] == 'S')
+		return "video/x-3d-movie-maker";
+
+	if (nread == BYTES_TO_READ && st.st_size == 10050 && sig[0] == 0x00
+	&& sig[1] == 0x58)
+		return "video/x-vidcom64";
+
 	if (nread > 3 && sig[0] == 'D' && sig[1] == 'E' && sig[2] == 'X'
 	&& sig[3] == 'A')
 		return "video/x-dxa";
@@ -2363,10 +2483,11 @@ fast_magic(const char *file)
 	&& sig[7] == '4')
 		return "video/x-magix";
 
-	/* http://justsolve.archiveteam.org/wiki/Video_Master_Film */
-	if (nread > 4 && sig[0] == 'V' && sig[1] == 'M' && sig[2] == 'A'
-	&& sig[3] == 'S' && sig[4] == '1')
-		return "video/x-video-master-film";
+	/* https://temlib.org/AtariForumWiki/index.php/Video_Master_file_format */
+	if (nread > 23 && sig[0] == 'V' && sig[1] == 'M' && sig[2] == 'A'
+	&& sig[3] == 'S' && sig[4] == '1'
+	&& (sig[20] + sig[21] + sig[22] + sig[23]) == 0x00)
+		return "video/x-video-master";
 
 	if (nread > 19 && sig[0] == 'F' && sig[1] == 'I' && sig[2] == 'L'
 	&& sig[3] == 'M' && sig[16] == 'F' && sig[17] == 'D' && sig[18] == 'S'
@@ -2435,8 +2556,13 @@ fast_magic(const char *file)
 		return "application/x-ms-dbx";
 
 	if (nread > 3 && sig[0] == 0xFF && sig[1] == 'W' && sig[2] == 'P'
-	&& sig[3] == 'C')
+	&& sig[3] == 'C') {
+		// sig + 4 = "\x10\x00\x00\x00\x01\x16\x01\x00" -> image/x-wordperfect-graphics
+		if (nread > 12 && sig[4] == 0x10 && sig[9] == 0x16
+		&& memcmp(sig + 4, "\x10\x00\x00\x00\x01\x16\x01\x00", 8) == 0)
+			return "image/x-wordperfect-graphics";
 		return "application/vnd.wordperfect";
+	}
 
 	if (nread >= 7 && sig[0] == 'W' && memcmp(sig, "WordPro", 7) == 0)
 		return "application/vnd.lotus-wordpro";
@@ -2462,6 +2588,11 @@ fast_magic(const char *file)
 	&& sig[3] == 'D')
 		return "application/vnd.smaf";
 
+	/* See FFmpeg: libavformat/dss.c */
+	if (nread > 4 && (sig[0] == 0x02 || sig[0] == 0x03) && sig[1] == 'd'
+	&& sig[2] == 's' && sig[3] == 's')
+		return "audio/x-dss";
+
 	if (nread >= 19 && sig[0] == 'C'
 	&& memcmp(sig, "Creative Voice File", 19) == 0)
 		return "audio/x-voc";
@@ -2485,7 +2616,7 @@ fast_magic(const char *file)
 
 	if (nread > 3 && sig[0] == 0x80 && sig[1] == 0x00) {
 		const uint16_t l = BE_U16(sig + 2);
-		const size_t v = (size_t)l - 2;
+		const size_t v = l >= 2 ? (size_t)l - 2 : 0;
 		if (nread >= v + 6 && memcmp(sig + v, "(c)CRI", 6) == 0)
 			return "audio/x-adx";
 	}
@@ -2583,6 +2714,11 @@ fast_magic(const char *file)
 	((sig[2] == 'C' && sig[3] == 'C') || (sig[2] == 'S' && sig[3] == 'X')))
 		return "audio/x-kss";
 
+	/* Sample Dump eXchange. See FFmpeg: libavformat/sdxdec.c */
+	if (nread > 4 && sig[0] == 'S' && sig[1] == 'D' && sig[2] == 'X'
+	&& sig[3] == ':')
+		return "audio/x-sdx";
+
 	/* http://fileformats.archiveteam.org/wiki/DiamondWare_Digitized */
 	if (nread > 12 && sig[0] == 'D' && sig[7] == 'W' && sig[11] == ' '
 	&& memcmp(sig, "DiamondWare ", 12) == 0) {
@@ -2609,15 +2745,66 @@ fast_magic(const char *file)
 	&& (sig[3] == 0x00 || sig[3] == 0x01))
 		return "audio/x-ahx";
 
-	/* https://wiki.amigaos.net/wiki/Bars_and_Pipes_Professional */
-	if (nread > 3 && sig[0] == 'B' && sig[1] == 'R' && sig[2] == 'P'
-	&& sig[3] == 'P')
-		return "video/x-brpp";
+	if (nread > 3 && sig[0] == 'D' && sig[1] == 'D' && sig[3] == 'F') {
+		if (sig[2] == 'M') return "audio/x-dmf";
+		if (sig[2] == 'S') return "audio/x-dsf";
+	}
+
+	if (nread > 3 && sig[0] == 'D' && sig[1] == '.' && sig[2] == 'T'
+	&& sig[3] == '.')
+		return "audio/x-dtm";
+
+	if (nread > 3 && sig[0] == 'S' && sig[1] == 'R' && sig[2] == 'F'
+	&& sig[3] == 'S')
+		return "audio/x-acid-sfr";
 
 	/* https://wiki.multimedia.cx/index.php/Maxis_XA */
 	if (nread > 3 && sig[0] == 'X' && sig[1] == 'A'
 	&& (sig[2] == 'I' || sig[2] == 'J') && sig[3] == 0x00)
 		return "audio/x-maxis-xa";
+
+	/* Adlib Tracker II modules
+	 * https://github.com/dmitrysmagin/a2t_play/blob/master/src/a2t.c */
+	if (nread > 15 && sig[0] == '_' && sig[1] == 'A' && sig[2] == '2') {
+		if (sig[3] == 'm' && memcmp(sig, "_A2module_", 10) == 0)
+			return "audio/x-a2m";
+		if (sig[3] == 't' && memcmp(sig, "_A2tiny_module_", 15) == 0)
+			return "audio/x-a2t";
+	}
+
+	/* https://wiki.multimedia.cx/index.php/Sierra_Audio */
+	if (nread > 7 && (sig[0] == 0x8D || sig[0] == 0x0D || sig[0] == 0x16)
+	&& sig[2] == 'S' && sig[3] == 'O' && sig[4] == 'L' && sig[5] == 0x00) {
+		if (sig[0] == 0x16) return "audio/x-sierra-rbt";
+		return "audio/x-sierra-sol";
+	}
+	/* https://wiki.multimedia.cx/index.php/VMD */
+	if (nread > 805 && LE_U16(sig) == 0x330 - 2 && LE_U16(sig + 804) == 22050) {
+		const uint16_t w = LE_U16(sig + 12);
+		const uint16_t h = LE_U16(sig + 14);
+		if (w > 0 && w <= 2048 && h > 0 && h <= 2048)
+			return "video/x-sierra-vmd";
+	}
+
+	/* https://wiki.amigaos.net/wiki/Bars_and_Pipes_Professional */
+	if (nread > 3 && sig[0] == 'B' && sig[1] == 'R' && sig[2] == 'P'
+	&& sig[3] == 'P')
+		return "video/x-brpp";
+
+	/* https://wiki.multimedia.cx/index.php/SIFF */
+	if (nread > 12 && sig[0] == 'S' && sig[1] == 'I' && sig[2] == 'F'
+	&& sig[3] == 'F') {
+		if (memcmp(sig + 8, "SOUN", 4) == 0) return "audio/x-siff";
+		return "video/x-siff";
+	}
+
+	/* https://wiki.multimedia.cx/index.php/IBM_PhotoMotion */
+	if (nread > 0x1a + 6 && LE_U16(sig) == 0x00 && LE_U16(sig + 8) == 10
+	&& LE_U16(sig + 10) == 0x13 && LE_U16(sig + 16) == 0x02
+	&& LE_U16(sig + 18) == 0x05 && LE_U16(sig + 20) == 0x0C
+	&& LE_U16(sig + 22) == 0x0D && LE_U16(sig + 24) == 0x0E
+	&& LE_U16(sig + 26) == 0x0F)
+		return "video/x-ibm-photomotion";
 
 	/* https://wiki.multimedia.cx/index.php/Electronic_Arts_Formats */
 	if (nread > 3 && sig[0] == 'S' && sig[1] == 'C'
@@ -2660,11 +2847,30 @@ fast_magic(const char *file)
 	&& memcmp(sig, "Interplay MVE File\x1A\0", 20) == 0)
 		return "video/x-interplay-mve";
 
+	/* Machintosh files begin with XFIR (little endian) instead of RIFX. */
+	if (nread > 12 && sig[0] == 'X' && sig[1] == 'F' && sig[2] == 'I'
+	&& sig[3] == 'R'
+	&& ((sig[8] == '3' && sig[9] == '9' && sig[10] == 'V' && sig[11] == 'M')
+	|| (sig[8] == '5' && sig[9] == '9' && sig[10] == 'C' && sig[11] == 'M')
+	|| (sig[8] == 'M' && sig[9] == 'D' && sig[10] == 'G' && sig[11] == 'F')
+	|| (sig[8] == 'C' && sig[9] == 'D' && sig[10] == 'G' && sig[11] == 'F')))
+		return "video/x-shockwave-director";
+
+	/* https://temlib.org/AtariForumWiki/index.php/Animatic_Film_file_format */
+	if (nread > 51 && sig[48] == 0x27 && sig[49] == 0x18 && sig[50] == 0x28
+	&& sig[51] == 0x18 && BE_U16(sig + 34) <= 99 && BE_U16(sig + 38) <= 2)
+		return "video/x-animatic";
+
+	/* https://wiki.multimedia.cx/index.php/ETV */
+	if (nread > 4 && sig[0] == 'E' && sig[1] == 'T' && sig[2] == 'V'
+	&& sig[3] == 0x0A)
+		return "video/x-etv";
+
 	if (nread > 2 && sig[0] == 'R' && sig[1] == 'K' && sig[2] == 'A')
 		return "application/x-rka";
 
 	if (nread > 3 && sig[0] == 'N' && sig[1] == 'G' && sig[2] == 0x00
-	&& sig[3] == 0x01)
+	&& sig[3] == 0x01 && LE_U32(sig + 2) == 0x00000100)
 		return "application/x-norton-guide";
 
 	if (nread > 4 && sig[0] == 'A' && sig[1] == 'L' && sig[2] == 'Z'
@@ -2688,6 +2894,7 @@ fast_magic(const char *file)
 		if (sig[0] == 0x14) return "image/x-deskmate-fig";
 	}
 
+	/* https://www.itu.int/rec/T-REC-T.82-199303-I/en */
 /*	if (nread > 19 && sig[0] == 0x00 && sig[2] == 0x01 && sig[3] == 0x00
 	&& sig[4] == 0x00 && sig[5] == 0x00 && sig[6] != 0x00
 	&& (sig[16] == 0x08 || sig[16] == 0x7F)
@@ -2696,6 +2903,7 @@ fast_magic(const char *file)
 		// any actual magic for this file type.
 		return "image/x-jbig"; */
 
+	/* https://www.itu.int/rec/T-REC-T.88-201808-I/en */
 	if (nread > 7 && sig[0] == 0x97 && sig[1] == 'J' && sig[2] == 'B'
 	&& sig[3] == '2' && sig[4] == 0x0D && sig[5] == 0x0A && sig[6] == 0x1A
 	&& sig[7] == 0x0A)
@@ -2744,6 +2952,44 @@ fast_magic(const char *file)
 	&& sig[2054] == 'I')
 		return "image/x-photo-cd";
 
+	if (nread > 4 && sig[0] == 0x01 && sig[1] == 0x40 && sig[2] == 0x00
+	&& sig[3] == 0xC8)
+		return "image/x-photochrome"; // .pcs
+
+	if (nread > 15 && sig[0] == 'J' && sig[1] == 'G'
+	&& (sig[2] == 0x03 || sig[2] == 0x04) && sig[3] == 0x0E
+	&& (sig[4] + sig[5] + sig[6] + sig[7]) == 0x00)
+		return "image/x-aol-art"; // .art
+
+	/* https://temlib.org/AtariForumWiki/index.php/NEOchrome_file_format */
+	if (st.st_size == 32128 && nread == BYTES_TO_READ && sig[0] == 0x00
+	&& sig[1] == 0x00 && is_neochrome_image(sig, nread) == 1)
+		return "image/x-neochrome"; // .neo
+
+	// https://temlib.org/AtariForumWiki/index.php/Spectrum_512_Compressed_file_format
+	if (nread > 24 && sig[0] == 'S' && sig[1] == 'P' && sig[2] == 0x00
+	&& sig[3] == 0x00) {
+		const uint32_t data_len = BE_U32(sig + 4);
+		const uint32_t color_len = BE_U32(sig + 8);
+		if (data_len + color_len + 4 + 4 + 2 + 2 == st.st_size)
+			return "image/x-spectrum-spc"; // .spc
+	}
+	//https://temlib.org/AtariForumWiki/index.php/Spectrum_512_file_format
+	if (st.st_size == 51104 && nread > 161 && sig[0] == 0x00 && sig[8] == 0x00
+	&& sig[32] == 0x00) { // First non-zero byte is at offset 160
+		size_t i;
+		for (i = 0; i <= 160 && sig[i] == 0x00; i++);
+		if (i == 160) return "image/x-spectrum-spu"; // .spu
+	}
+
+	/* https://wiki.multimedia.cx/index.php/Crack_Art */
+	if (nread > 16 && sig[0] == 'C' && sig[1] == 'A' && sig[2] >= 0x01
+	&& sig[3] <= 0x02) {
+		const uint16_t pal = BE_U16(sig + 4);
+		if (pal == 0 || pal == 4 || pal == 16)
+			return "image/x-crackart"; // .ca1
+	}
+
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'T' && sig[2] == 'O'
 	&& sig[3] == 'L' && sig[4] == 'I' && sig[5] == 'T' && sig[6] == 'L'
 	&& sig[7] == 'S')
@@ -2755,7 +3001,7 @@ fast_magic(const char *file)
 		if (sig[2] == 0x02)	return "image/x-win-bitmap";
 	}
 
-	if (nread > 7 && ISDIGIT(sig[0])
+	if (nread > 7 && IS_DIGIT(sig[0])
 	&& (sig[1] == ' ' || sig[2] == ' ' || sig[3] == ' ' || sig[4] == ' ')
 	&& (sig[4] == 0x0A || sig[5] == 0x0A || sig[6] == 0x0A || sig[7] == 0x0A
 	|| sig[8] == 0x0A || sig[9] == 0x0A)
@@ -2808,8 +3054,62 @@ fast_magic(const char *file)
 	&& memcmp(sig + 64, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16) == 0)
 		return "application/vnd.ms-fontobject";
 
+	if (nread > 4 && sig[0] == 0xFF && sig[1] == 'F' && sig[2] == 'O'
+	&& sig[3] == 'N' && sig[4] == 'T')
+		return "font/x-dos-cpi";
+
+	if (nread > 6 && sig[0] == 0x7F && sig[1] == 'D' && sig[2] == 'R'
+	&& sig[3] == 'F' && sig[4] == 'O' && sig[5] == 'N' && sig[6] == 'T')
+		return "font/x-drdos-cpi";
+
+	if (nread > 3 && sig[0] == 'L' && sig[1] == 'W' && sig[2] == 'F'
+	&& sig[3] == 'N')
+		return "font/x-postscript-pfb";
+	if (nread > 68 && sig[65] == 'L' && sig[66] == 'W' && sig[67] == 'F'
+	&& sig[68] == 'N')
+		return "font/x-postscript-pfb";
+	if (nread >= 23 && sig[6] == '%' && sig[7] == '!'
+	&& (sig[8] == 'P' || sig[8] == 'F')
+	&& (memcmp(sig + 6, "%!PS-AdobeFont-1.", 17) == 0
+	|| memcmp(sig + 6, "%!FontType1-1.", 14) == 0))
+		return "font/x-postscript-pfb";
+	if (nread >= 17 && sig[0] == '%' && sig[1] == '!'
+	&& (sig[2] == 'P' || sig[2] == 'F')
+	&& (memcmp(sig, "%!PS-AdobeFont-1.", 17) == 0
+	|| memcmp(sig, "%!FontType1-1.", 14) == 0))
+		return "font/x-postscript-pfb";
+
+	if (nread > 5 && sig[0] == 'H' && sig[1] == 'S' && sig[2] == 'P'
+	&& sig[4] == 0x9B && sig[5] == 0x00) {
+		if (sig[3] == 0x01) return "application/x-os2-inf";
+		if (sig[3] == 0x10) return "application/x-os2-hlp";
+	}
+	if (nread > 7 && sig[0] == 0xFF && sig[1] == 'M' && sig[2] == 'K'
+	&& sig[3] == 'M' && sig[4] == 'S' && sig[5] == 'G' && sig[6] == 'F'
+	&& sig[7] == 0x00)
+		return "application/x-os2-msg";
+	if (nread > 7 && sig[0] == 0xFF && sig[1] == 0xFF && sig[2] == 0xFF
+	&& sig[3] == 0xFF && sig[4] == 0x14 && sig[5] == 0x00 && sig[6] == 0x00
+	&& sig[7] == 0x00)
+		return "application/x-os2-ini";
+
+	if (nread > 6 && sig[0] == 'R' && sig[1] == 'E' && sig[2] == 'G'
+	&& sig[3] == 'E' && sig[4] == 'D' && sig[5] == 'I' && sig[6] == 'T')
+		return "application/x-ms-regedit";
+
+	/* https://sdif.sourceforge.net/standard/sdif-standard.html */
+	if (nread > 4 && sig[0] == 'S' && sig[1] == 'D' && sig[2] == 'I'
+	 && sig[3] == 'F')
+		return "application/x-sdif";
+
+	/* If none of the above, let's scan the first 256 bytes looking for an
+	 * MPEG signature. */
+/*	int mpeg_type = nread > 256 ? is_mpeg_stream(sig, 256) : STREAM_MPEG_NONE;
+	if (mpeg_type == STREAM_MPEG_VIDEO) return "video/mpeg";
+	if (mpeg_type == STREAM_MPEG_AUDIO) return "audio/mpeg";
+	if (mpeg_type == STREAM_MPEG4_GENERIC) return "video/mpeg4-generic"; */
+
 	return NULL;
-#undef BYTES_TO_READ
 }
 
 #else
