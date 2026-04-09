@@ -1190,7 +1190,7 @@ set_security_paranoid_mode(void)
 static inline void
 set_pledge(void)
 {
-	if (pledge("stdio rpath wpath cpath dpath tmppath fattr "
+	if (pledge("stdio rpath wpath cpath dpath fattr "
 	"chown flock getpw tty proc exec", NULL) == -1) {
 		fprintf(stderr, "%s: pledge: %s\n", PROGRAM_NAME, strerror(errno));
 		exit(errno);
