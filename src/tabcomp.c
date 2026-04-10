@@ -2479,6 +2479,9 @@ DISPLAY_MATCHES:
 		if (*matches[0] == '~') {
 			char *exp_path = tilde_expand(matches[0]);
 			if (exp_path) {
+				char *slash = strrchr(exp_path, '/');
+				if (slash && slash[1])
+					slash[1] = '\0';
 				xchdir(exp_path, NO_TITLE);
 				free(exp_path);
 				directory_changed = 1;
