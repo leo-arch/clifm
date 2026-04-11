@@ -174,6 +174,28 @@ get_mime_from_zip(const uint8_t *str, const size_t str_len)
 	if (l >= 20 && s[17] == 'z' && memcmp(s, "application/epub+zip", 20) == 0)
 		return "application/epub+zip";
 
+	/* CorelDraw documents */
+	if (l > 50 && s[18] == 'c' && memcmp(s, "application/x-vnd.corel.", 24) == 0) {
+		if (s[29] == 'd' && memcmp(s + 24, "draw.document+zip", 17) == 0)
+			return "application/x-vnd.corel.draw.document+zip";
+		if (s[28] == 'd' && memcmp(s + 24, "zcf.draw.document+zip", 21) == 0)
+			return "application/x-vnd.corel.zcf.draw.document+zip";
+		if (s[29] == 't' && memcmp(s + 24, "draw.template+zip", 17) == 0)
+			return "application/x-vnd.corel.draw.template+zip";
+		if (s[33] == 't' && memcmp(s + 24, "zcf.draw.template+zip", 21) == 0)
+			return "application/x-vnd.corel.zcf.draw.template+zip";
+		if (s[28] == 'p' && memcmp(s + 24, "zcf.pattern+zip", 15) == 0)
+			return "application/x-vnd.corel.zcf.pattern+zip";
+		if (s[33] == 'd' && memcmp(s + 24, "designer.document+zip", 21) == 0)
+			return "application/x-vnd.corel.designer.document+zip";
+		if (s[37] == 'z' && memcmp(s + 24, "zcf.designer.document+zip", 25) == 0)
+			return "application/x-vnd.corel.zcf.designer.document+zip";
+		if (s[24] == 's' && memcmp(s + 24, "symbol.library+zip", 18) == 0)
+			return "application/x-vnd.corel.symbol.library+zip";
+		if (s[28] == 'z' && memcmp(s + 24, "zcf.symbol.library+zip", 22) == 0)
+			return "application/x-vnd.corel.zcf.symbol.library+zip";
+	}
+
 	/* KDE Office suit (KOffice) */
 	if (l >= 26 && s[12] == 'x' && s[13] == '-' && s[14] == 'k') {
 		if (s[15] == 'a' && memcmp(s, "application/x-karbon", 20) == 0)
@@ -565,13 +587,13 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 	if (buf_len < 12)
 		return NULL;
 
-	if (buf[8] == 'W' && buf[9] == 'E' && buf[10] == 'B' && buf[11] == 'P') // webp
+	if (buf[8] == 'W' && buf[9] == 'E' && buf[10] == 'B' && buf[11] == 'P')
 		return "image/webp";
-	if (buf[8] == 'A' && buf[9] == 'V' && buf[10] == 'I' && buf[11] == ' ') // avi
+	if (buf[8] == 'A' && buf[9] == 'V' && buf[10] == 'I' && buf[11] == ' ')
 		return "video/x-msvideo";
-	if (buf[8] == 'W' && buf[9] == 'A' && buf[10] == 'V' && buf[11] == 'E') // wav
+	if (buf[8] == 'W' && buf[9] == 'A' && buf[10] == 'V' && buf[11] == 'E')
 		return "audio/x-wav";
-	if (buf[8] == 'A' && buf[9] == 'M' && buf[10] == 'V' && buf[11] == ' ') // amv
+	if (buf[8] == 'A' && buf[9] == 'M' && buf[10] == 'V' && buf[11] == ' ')
 		return "video/x-amv";
 	if (buf[8] == 'A' && buf[9] == 'C' && buf[10] == 'O' && buf[11] == 'N')
 		return "application/x-navi-animation";
@@ -593,6 +615,15 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 		return "video/x-4xmv";
 	if (buf[8] == 'C' && buf[9] == 'D' && buf[10] == 'X' && buf[11] == 'A')
 		return "video/x-cdxa";
+	if (buf[8] == 'V' && buf[9] == 'D' && buf[10] == 'R' && buf[11] == 'M')
+		return "video/x-vdr";
+	/* https://datatracker.ietf.org/doc/html/rfc3625 */
+	if (buf[8] == 'Q' && buf[9] == 'L' && buf[10] == 'C' && buf[11] == 'M')
+		return "audio/qcelp";
+	if (buf[8] == 'X' && buf[9] == 'W' && buf[10] == 'M' && buf[11] == 'A')
+		return "audio/vnd.ms-xwma";
+	if (buf[8] == 'T' && buf[9] == 'R' && buf[10] == 'I' && buf[11] == 'D')
+		return "application/x-trid-trd";
 
 	if (buf[8] == 'M' && buf[9] == 'C' && buf[10] == '9' && buf[11] == '5')
 		return "video/x-shockwave-director";
@@ -606,36 +637,28 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 	if (buf[8] == 's' && buf[9] == 'h') {
 		if (buf[10] == 'w' && (buf[11] == '4' || buf[11] == '5'))
 			return "application/x-corel-shw";
-		if ((buf[10] == 'r' || buf[10] == 'l') && buf[11] == '5')
-			return "application/x-corel-shw";
+		if (buf[10] == 'r' && buf[11] == '5')
+			return "application/x-corel-shr";
+		if (buf[10] == 'l' && buf[11] == '5')
+			return "application/x-corel-shb";
 	}
-
+	if (buf[8] == 'i' && buf[9] == 'm' && buf[10] == 'a' && buf[11] == 'g')
+		return "video/x-corel-cif";
 	/* See http://justsolve.archiveteam.org/wiki/CorelDRAW */
 	if (buf[8] == 'C' && buf[9] == 'M' && buf[10] == 'X' && buf[11] == '1')
 		return "application/vnd.corel-draw";
 	if (buf_len > 15 && buf[8] == 'C' && buf[9] == 'D' && buf[10] == 'R'
 	&& buf[12] == 'v' && buf[13] == 'r' && buf[14] == 's' && buf[15] == 'n')
 		return "application/vnd.corel-draw";
-
-	/* https://datatracker.ietf.org/doc/html/rfc3625 */
-	if (buf[8] == 'Q' && buf[9] == 'L' && buf[10] == 'C' && buf[11] == 'M')
-		return "audio/qcelp";
-
-	if (buf[8] == 'X' && buf[9] == 'W' && buf[10] == 'M' && buf[11] == 'A')
-		return "audio/vnd.ms-xwma";
-
-	if (buf[8] == 'T' && buf[9] == 'R' && buf[10] == 'I' && buf[11] == 'D')
-		return "application/x-trid-trd";
+	if (buf_len > 15 && buf[8] == 'c' && buf[9] == 'm' && buf[10] == 'o'
+	&& buf[11] == 'v' && buf[12] == 'D' && buf[13] == 'I' && buf[14] == 'S'
+	&& buf[15] == 'P')
+		return "video/x-corel-move";
 
 	if (buf_len > 15 && buf[8] == 'I' && buf[9] == 'D' && buf[10] == 'F'
 	&& buf[11] == ' ' && buf[12] == 'L' && buf[13] == 'I' && buf[14] == 'S'
 	&& buf[15] == 'T')
 		return "audio/x-idf";
-
-	if (buf_len > 15 && buf[8] == 'c' && buf[9] == 'm' && buf[10] == 'o'
-	&& buf[11] == 'v' && buf[12] == 'D' && buf[13] == 'I' && buf[14] == 'S'
-	&& buf[15] == 'P')
-		return "video/x-corel-move";
 
 	/* https://mab.greyserv.net/f/sony_wave64.pdf */
 	if (buf_len > 40 && buf[24] == 'w' && buf[28] == 0xF3
@@ -871,6 +894,15 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 	if (plen > 3 && p[0] == 'W' && p[1] == 'V' && p[2] == 'Q' && p[3] == 'A')
 		return "video/x-westwood-vqa";
 
+	if (plen > 3 && p[0] == 'D' && p[1] == 'R' && p[2] == '2' && p[3] == 'D')
+		return "image/x-dr2d";
+
+	if (plen > 3 && p[0] == 'L' && p[1] == 'W') {
+		if ((p[2] == 'O' && (p[3] == 'B' || p[3] == '2'))
+		|| (p[2] == 'L' && p[3] == 'O'))
+			return "image/x-lwo";
+	}
+
 	return NULL;
 }
 
@@ -1057,6 +1089,10 @@ check_pre_ole2_office_docs(const uint8_t *s, const size_t slen)
 	&& (memcmp(s + 4, "Standard Jet DB", 15) == 0
 	|| memcmp(s + 4, "Standard ACE DB", 15) == 0))
 		return "application/vnd.ms-access";
+
+	if (slen > 4 && s[0] == 0xe7 && s[1] == 0x0ac && s[2] == 0x2c
+	&& s[3] == 0x00) /* Microsoft Publisher (1.0) */
+		return "application/vnd.ms-publisher";
 
 	return NULL;
 }
@@ -1539,6 +1575,37 @@ is_cdxl_video(const uint8_t *s, const size_t slen)
 	if (chunk_size <= ((uint32_t)palette_size
 	+ (uint32_t)sound_size * (1 + !!(s[1] & 0x10))
 	+ cdxl_header_size))
+		return 0;
+
+	return 1;
+}
+
+/* See https://temlib.org/AtariForumWiki/index.php/Cyber_Paint_Sequence_file_format
+ * and
+ * https://wiki.preterhuman.net/Cyber_Paint_Sequence_Format_(.SEQ) */
+static int
+is_seq_video(const uint8_t *s, const size_t slen)
+{
+	if (slen < 256)
+		return 0;
+
+	const uint32_t frame_offset = BE_U32(s + 128);
+	const uint32_t frame_length = 128;
+	if (frame_offset > (uint32_t)slen - frame_length)
+		return 0;
+
+	const uint8_t *frame = s + frame_offset;
+
+	const uint16_t resolution = BE_U16(frame + 2);
+	const uint16_t X = BE_U16(frame + 54);
+	const uint16_t Y = BE_U16(frame + 56);
+	const uint16_t width = BE_U16(frame + 58);
+	const uint16_t height = BE_U16(frame + 60);
+	const uint8_t operation = frame[62];
+	const uint8_t storage_method = frame[63];
+
+	if (resolution != 0 || X > 319 || Y > 199 || operation > 1
+	|| storage_method > 1 || width > 320 || height > 200)
 		return 0;
 
 	return 1;
@@ -2179,6 +2246,10 @@ fast_magic(const char *file)
 	if (nread > 3 && sig[0] == 'B' && sig[1] == 'B' && sig[2] == 'C'
 	&& sig[3] == 'D')
 		return "video/x-dirac";
+
+	if (nread > 128 && sig[0] == 0xFE && (sig[1] == 0xDB || sig[1] == 0xDC)
+	&& is_seq_video(sig, nread) == 1)
+		return "video/x-atari-seq";
 
 	/* https://wiki.multimedia.cx/index.php/Vividas_VIV */
 	if (nread > 8 && sig[0] == 'v' && sig[1] == 'i' && sig[2] == 'v'
@@ -3321,6 +3392,11 @@ fast_magic(const char *file)
 	if (nread > 5 && sig[0] == 0x2E && sig[1] == 0x4B && sig[2] == 0x46
 	&& sig[3] == 0x68 && sig[4] == 0x80)
 		return "image/x-kofax";
+
+	/* http://fileformats.archiveteam.org/wiki/Prism_Paint */
+	if (nread > 3 && sig[0] == 'P' && sig[1] == 'N' && sig[2] == 'T'
+	&& sig[3] == 0x00)
+		return "image/x-pnt";
 
 	if (nread > 82 && sig[34] == 'L' && sig[35] == 'P' && sig[82] != 0x00
 	&& memcmp(sig + 64, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16) == 0)
