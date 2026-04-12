@@ -625,6 +625,10 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 	if (buf[8] == 'T' && buf[9] == 'R' && buf[10] == 'I' && buf[11] == 'D')
 		return "application/x-trid-trd";
 
+	/* http://fileformats.archiveteam.org/wiki/Notation_Interchange_File_Format */
+	if (buf[8] == 'N' && buf[9] == 'I' && buf[10] == 'F' && buf[11] == 'F')
+		return "application/vnd.music-niff";
+
 	if (buf[8] == 'M' && buf[9] == 'C' && buf[10] == '9' && buf[11] == '5')
 		return "video/x-shockwave-director";
 	if (buf[8] == 'M' && buf[9] == 'V' && buf[10] == '9' && buf[11] == '3')
@@ -873,6 +877,9 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 
 	if (plen > 3 && p[0] == 'M' && p[1] == 'L' && p[2] == 'D' && p[3] == 'F')
 		return "image/x-mldf";
+
+	if (plen > 3 && p[0] == 'R' && p[1] == 'E' && p[2] == 'A' && p[3] == 'L')
+		return "image/x-real3d";
 
 	if (plen > 3 && p[0] == 'A' && p[1] == 'N' && p[2] == 'I' && p[3] == 'M')
 		return "video/x-amiga-anim";
@@ -1446,6 +1453,34 @@ is_pcap_file(const uint8_t *s, const size_t slen)
 		return 1;
 
 	return 0;
+}
+
+/* https://dune-hd.com/support/misc/AAImageGen-README.txt */
+static int
+is_aai_image(const uint8_t *s, const size_t slen, const off_t file_size)
+{
+	const uint64_t aai_max_size = 2047 * 2047 * 4 + 8;
+	if (!s || slen < 8 || (uint64_t)file_size > aai_max_size)
+		return 0;
+
+	const uint32_t width = LE_U32(s);
+	const uint32_t height = LE_U32(s + 4);
+	if (width == 0 || width > 2047 || height == 0 || height > 2047)
+		return 0;
+
+	const uint64_t pixels = (uint64_t)width * (uint64_t)height;
+	const uint64_t expected_size = (pixels * 4) + 8;
+	if (expected_size != (uint64_t)file_size)
+		return 0;
+
+	size_t i = 8; /* First pixel data is at offset 0x08 */
+	while (i + 4 <= slen) {
+		if (s[i + 3] == 255) /* Valid alpha 0-254 */
+			return 0;
+		i += 4;
+	}
+
+	return 1;
 }
 
 /*
@@ -2182,31 +2217,6 @@ fast_magic(const char *file)
 		return NULL;
 	}
 
-	if (nread > 5 && sig[0] == '#' && sig[1] == 'V' && sig[2] == 'R'
-	&& sig[3] == 'M' && sig[4] == 'L' && sig[5] == ' ')
-		return "model/vrml";
-
-	if (nread > 3 && sig[0] == '#' && sig[1] == 'X' && sig[2] == '3'
-	&& sig[3] == 'D')
-		return "model/x3d+vrml";
-
-	if (nread > 3 && sig[0] == 'S' && sig[1] == 'T' && sig[2] == 'L'
-	&& sig[3] == ' ')
-		return "model/stl";
-	if (nread > 4 && sig[0] == 's' && sig[1] == 'o' && sig[2] == 'l'
-	&& sig[3] == 'i' && sig[4] == 'd')
-		return "model/stl";
-	if (nread > 4 && sig[0] == 'S' && sig[1] == 'O' && sig[2] == 'L'
-	&& sig[3] == 'I' && sig[4] == 'D')
-		return "model/stl";
-
-	if (nread > 6 && sig[0] == 'n' && sig[1] == 'e' && sig[2] == 'w'
-	&& sig[3] == 'm' && sig[4] == 't' && sig[5] == 'l' && sig[6] == ' ')
-		return "model/mtl";
-	if (nread > 6 && sig[0] == '#' && sig[1] == ' ' && sig[2] == 'B'
-	&& memcmp(sig, "# Blender MTL File: '", 21) == 0)
-		return "model/mtl";
-
 	if (nread > 3 && sig[0] == 'h' && sig[1] == 's' && sig[2] == 'i'
 	&& sig[3] == '1')
 		return "image/x-hsi";
@@ -2386,6 +2396,10 @@ fast_magic(const char *file)
 	&& sig[3] == '2')
 		return "image/x-fl32";
 
+	if (nread > 8 && LE_U32(sig) <= 2047 && LE_U32(sig + 4) <= 2047
+	&& is_aai_image(sig, nread, st.st_size) == 1)
+		return "image/x-aai";
+
 	if (nread > 2 && ((sig[0] == '%' && sig[1] == '!')
 	|| (sig[0] == 0x04 && sig[1] == '%' && sig[2] == '!')))
 		return "application/postscript";
@@ -2436,6 +2450,73 @@ fast_magic(const char *file)
 	if (nread > 512 && ((!sig[0] && !sig[1] && !sig[2] && sig[3] == 0x01)
 	|| (!sig[0] && !sig[1] && sig[2] == 0x01)) && is_vvc_video(sig, 512) == 1)
 		return "video/h266"; /* .vvc */
+
+	if (nread > 5 && sig[0] == '#' && sig[1] == 'V' && sig[2] == 'R'
+	&& sig[3] == 'M' && sig[4] == 'L' && sig[5] == ' ')
+		return "model/vrml";
+
+	if (nread > 3 && sig[0] == '#' && sig[1] == 'X' && sig[2] == '3'
+	&& sig[3] == 'D')
+		return "model/x3d+vrml";
+
+	if (nread > 3 && sig[0] == 'S' && sig[1] == 'T' && sig[2] == 'L'
+	&& sig[3] == ' ')
+		return "model/stl";
+	if (nread > 4 && sig[0] == 's' && sig[1] == 'o' && sig[2] == 'l'
+	&& sig[3] == 'i' && sig[4] == 'd')
+		return "model/stl";
+	if (nread > 4 && sig[0] == 'S' && sig[1] == 'O' && sig[2] == 'L'
+	&& sig[3] == 'I' && sig[4] == 'D')
+		return "model/stl";
+
+	if (nread > 6 && sig[0] == 'n' && sig[1] == 'e' && sig[2] == 'w'
+	&& sig[3] == 'm' && sig[4] == 't' && sig[5] == 'l' && sig[6] == ' ')
+		return "model/mtl";
+	if (nread >= 21 && sig[0] == '#' && sig[1] == ' ' && sig[2] == 'B'
+	&& memcmp(sig, "# Blender MTL File: '", 21) == 0)
+		return "model/mtl";
+
+	/* https://www.iana.org/assignments/media-types/model/u3d */
+	if (nread > 3 && sig[0] == 'U' && sig[1] == '3' && sig[2] == 'D'
+	&& sig[3] == 0x00)
+		return "model/u3d";
+
+	if (nread > 3 && sig[0] == 'p' && sig[1] == 'l' && sig[2] == 'y'
+	&& sig[3] == 0x0A)
+		return "model/x-ply";
+
+	if (nread > 5 && sig[0] == '(' && sig[1] == 'D' && sig[2] == 'W'
+	&& sig[3] == 'F' && sig[4] == ' ' && sig[5] == 'V')
+		return "model/vnd.dwf";
+
+	/* http://fileformats.archiveteam.org/wiki/Ray_Dream (legacy) */
+	if (nread > 4 && sig[0] == '3' && sig[1] == 'D' && sig[2] == 'C'
+	&& sig[3] == ' ' && sig[4] == '{')
+		return "model/x-3dc";
+
+	if (nread > 4 && sig[0] == '3' && sig[1] == 'D' && sig[2] == 'M'
+	&& sig[3] == 'F' && sig[4] == 0x00)
+		return "model/x-3dmf"; // legacy
+
+	if (nread >= 21 && sig[8] == 'F' && sig[9] == 'B' && sig[10] == 'X'
+	&& memcmp(sig, "Kaydara FBX Binary  \0", 21) == 0)
+		return "model/x-kaydara-fbx";
+
+	/* https://paulbourke.net/dataformats/ac3d/ */
+	if (nread > 32 && sig[0] == 'A' && sig[1] == 'C' && sig[2] == '3'
+	&& sig[3] == 'D' && xmemmem(sig + 4, 32, "MATERIAL", 8))
+		return "model/x-ac3d";
+
+	if (nread > 4 && sig[0] == 'g' && sig[1] == 'l' && sig[2] == 'T'
+	&& sig[3] == 'F')
+		return "model/gltf-binary";
+
+	if (nread >= 32 && sig[0] == 0xFF && sig[1] == 0xFE && sig[4] == 'S'
+	&& memcmp(sig, "\xff\xfe\xff\x0e\x53\x00\x6b\x00\x65\x00\x74\x00\x63\x00\x68\x00\x55\x00\x70\x00\x20\x00\x4d\x00\x6f\x00\x64\x00\x65\x00\x6c\x00", 32) == 0)
+		return "application/vnd.sketchup.skp";
+	if (nread >= 15 && sig[0] == 0x0E && sig[1] == 'S' && sig[7] == 'U'
+	&& memcmp(sig + 1, "SketchUp Model", 14) == 0)
+		return "application/vnd.sketchup.skp";
 
 			/* #############################
 			 * #       LEGACY/OBSOLETE     #
@@ -2948,6 +3029,10 @@ fast_magic(const char *file)
 	&& sig[4] == 0x00 && sig[5] == 0x60)
 		return "audio/x-oma";
 
+	if (nread > 5 && sig[0] == 'D' && sig[1] == 'V' && sig[2] == 'S'
+	&& sig[3] == 'M' && sig[4] == 0x00 && sig[5] == 0x00)
+		return "audio/x-dvsm";
+
 	/* http://svr-www.eng.cam.ac.uk/reports/ajr/TR192/node11.html */
 	if (nread > 6 && sig[0] == 'N' && sig[1] == 'I' && sig[2] == 'S'
 	&& sig[3] == 'T' && sig[4] == '_' && sig[5] == '1' && sig[6] == 'A')
@@ -3042,7 +3127,7 @@ fast_magic(const char *file)
 		return "audio/x-ahx";
 
 	if (nread > 3 && sig[0] == 'D' && sig[1] == 'D' && sig[3] == 'F') {
-		if (sig[2] == 'M') return "audio/x-dmf";
+		if (sig[2] == 'M') return "audio/x-xtracker-dmf";
 		if (sig[2] == 'S') return "audio/x-dsf";
 	}
 
@@ -3146,6 +3231,35 @@ fast_magic(const char *file)
 	if (nread >= 21 && sig[0] == 'I' && sig[10] == 'M' && sig[18] == 0x1A
 	&& memcmp(sig, "Interplay MVE File\x1A\0\x1A", 21) == 0)
 		return "video/x-interplay-mve";
+
+	/* https://web.archive.org/web/20150503020113/http://hackipedia.org/File%20formats/Music/Sample%20based/text/Digitrakker%203.0%20MDL%20module%20format.cp437.txt.utf-8.txt */
+	if (nread > 3 && sig[0] == 'D' && sig[1] == 'M' && sig[2] == 'D'
+	&& sig[3] == 'L')
+		return "audio/x-digitrakker-mdl";
+	if (nread > 3 && sig[0] == 'S' && sig[1] == 'O' && sig[2] == 'N'
+	&& sig[3] == 'G')
+		return "audio/x-digitrakker-dtm";
+
+	/* http://fileformats.archiveteam.org/wiki/Epic_Megagames_MASI */
+	if (nread > 3 && sig[0] == 'P' && sig[1] == 'S' && sig[2] == 'M'
+	&& sig[3] == ' ')
+		return "audio/x-protracker-psm";
+
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'T' && sig[2] == '2'
+	&& sig[3] == '0')
+		return "audio/x-madtracker-mt2";
+
+	if (nread > 3 && sig[0] == 'R' && sig[1] == 'T' && sig[2] == 'M'
+	&& sig[3] == 'M')
+		return "audio/x-realtracker-rtm";
+
+	if (nread > 5 && sig[0] == 'A' && sig[1] == 'M' && sig[2] == 'S'
+	&& sig[3] == 'h' && sig[4] == 'd' && sig[5] == 'r')
+		return "audio/x-velvet-ams";
+
+	if (nread > 6 && sig[0] == 'E' && sig[1] == 'x' && sig[2] == 't'
+	&& sig[3] == 'r' && sig[4] == 'e' && sig[5] == 'm' && sig[6] == 'e')
+		return "audio/x-extreme-tracker-ams";
 
 	/* FFmpeg: libavformat/westwood_aud.c */
 	if (nread >= 20 && sig[16] == 0xAF && sig[17] == 0xDE
@@ -3262,8 +3376,9 @@ fast_magic(const char *file)
 	&& sig[3] == 0x95)
 		return "image/x-sun-raster";
 
+	/* http://fileformats.archiveteam.org/wiki/NIFF_(Navy_Image_File_Format) */
 	if (nread > 3 && sig[0] == 'I' && sig[1] == 'I' && sig[2] == 'N'
-	&& sig[3] == '1') /* Navy Image File Format */
+	&& sig[3] == '1')
 		return "image/x-niff";
 
 	if (nread > 3 && sig[0] == 'N' && ((sig[1] == 'I' && sig[2] == 'T')
@@ -3377,6 +3492,18 @@ fast_magic(const char *file)
 	&& sig[3] == 'S' && sig[4] == 'I' && sig[5] == 'Z' && sig[6] == 'E')
 		return "image/x-vicar";
 
+	/* https://temlib.org/AtariForumWiki/index.php/Calamus_Raster_Graphic_file_format */
+	if (nread > 9 && sig[0] == 'C' && sig[1] == 'A' && sig[2] == 'L'
+	&& sig[3] == 'A' && sig[4] == 'M' && sig[5] == 'U' && sig[6] == 'S'
+	&& sig[7] == 'C' && sig[8] == 'R' && sig[9] == 'G')
+		return "image/x-calamus-crg";
+
+	/* http://fileformats.archiveteam.org/wiki/PabloPaint */
+	if (nread >= 28 && sig[0] == 'P' && sig[1] == 'A' && sig[2] == 'B'
+	&& sig[3] == 'L' && sig[4] == 'O'
+	&& memcmp(sig + 5, " PACKED PICTURE: Groupe CDND", 28) == 0)
+		return "image/x-pablo-paint";
+
 	if (nread > 83 && sig[80] == 'C' && sig[81] == 'T' && sig[82] == 0x00
 	&& sig[83] == 0x00)
 		return "image/x-scitex-ct";
@@ -3384,6 +3511,11 @@ fast_magic(const char *file)
 	if (nread > 4 && sig[0] == 'R' && sig[1] == 'I' && sig[2] == 'X'
 	&& sig[3] == '3')
 		return "image/x-colorix";
+
+	if (nread > 6 && sig[0] == 'P' && sig[1] == 'I' && sig[2] == 'X'
+	&& sig[3] == 'T' && (BE_U16(sig + 4) == 0x01 || BE_U16(sig + 4) == 0x02)
+	&& sig[6] <= 2)
+		return "image/x-pixart";
 
 	if (nread > 11 && sig[0] == 0x34 && sig[1] == 0x12 && sig[11] == 0xFF)
 		return "image/x-pcpaint";
