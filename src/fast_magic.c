@@ -1657,11 +1657,17 @@ static const char *
 check_modern_formats(const uint8_t *sig, const size_t nread,
 	const off_t file_size)
 {
-	if (!sig || !*sig || nread == 0)
+	if (!sig || nread == 0)
 		return NULL;
 
-	if (nread > 2 && sig[0] == 0xFF && sig[1] == 0xD8 && sig[2] == 0xFF)
+	if (nread > 2 && sig[0] == 0xFF && sig[1] == 0xD8 && sig[2] == 0xFF) {
+		/* JPEG-LS files usually have 0xF7 in the 4th byte. However,
+		 * 1. Conversion to JPG fails; 2. Most file type identification
+		 * tools (file(1), exiftool, and the Shared MIME-info database)
+		 * report plain image/jpeg for these files, or just fail (convert(1)).
+		if (nread > 3 && sig[3] == 0xF7) return "image/jls"; */
 		return "image/jpeg";
+	}
 
 	if (nread > 7 && sig[0] == 0x89 && sig[1] == 'P' && sig[2] == 'N'
 	&& sig[3] == 'G' && sig[4] == 0x0D && sig[5] == 0x0A && sig[6] == 0x1A
@@ -2208,10 +2214,6 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'D')
 		return "video/x-dirac";
 
-	if (nread > 128 && sig[0] == 0xFE && (sig[1] == 0xDB || sig[1] == 0xDC)
-	&& is_seq_video(sig, nread) == 1)
-		return "video/x-atari-seq";
-
 	/* https://wiki.multimedia.cx/index.php/Vividas_VIV */
 	if (nread > 8 && sig[0] == 'v' && sig[1] == 'i' && sig[2] == 'v'
 	&& sig[3] == 'i' && sig[4] == 'd' && sig[5] == 'a' && sig[6] == 's'
@@ -2488,7 +2490,7 @@ static const char *
 check_legacy_formats(const uint8_t *sig, const size_t nread,
 	const off_t file_size)
 {
-	if (!sig || !*sig || nread == 0)
+	if (!sig || nread == 0)
 		return NULL;
 
 	if (nread > 7 && sig[0] == 0xD0 && sig[1] == 0xCF && sig[2] == 0x11
@@ -3155,6 +3157,10 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 		if (memcmp(sig + 8, "SOUN", 4) == 0) return "audio/x-siff";
 		return "video/x-siff";
 	}
+
+	if (nread > 128 && sig[0] == 0xFE && (sig[1] == 0xDB || sig[1] == 0xDC)
+	&& is_seq_video(sig, nread) == 1)
+		return "video/x-atari-seq";
 
 	/* https://wiki.multimedia.cx/index.php/IBM_PhotoMotion */
 	if (nread > 0x1a + 6 && LE_U16(sig) == 0x00 && LE_U16(sig + 8) == 10
