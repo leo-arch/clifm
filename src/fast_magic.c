@@ -16,6 +16,9 @@
 #include <string.h> /* memcmp() */
 #include <errno.h>
 
+/* How many bytes to read from the input file. */
+#define BYTES_TO_READ 4096
+
 /* Convert S into a little-endian unsigned 32-bit value */
 #define LE_U32(s) ((uint32_t)((uint32_t)(s)[0] | ((uint32_t)(s)[1] << 8) \
 	| ((uint32_t)(s)[2] << 16) | ((uint32_t)(s)[3] << 24)))
@@ -910,6 +913,10 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 			return "image/x-lwo";
 	}
 
+	if (plen > 7 && p[0] == 'F' && p[1] == 'R' && p[2] == 'A' && p[3] == 'Y'
+	&& p[4] == 'M' && p[5] == 'A' && p[6] == 'T' && p[7] == '1')
+		return "model/x-c4d";
+
 	return NULL;
 }
 
@@ -1647,67 +1654,11 @@ is_seq_video(const uint8_t *s, const size_t slen)
 }
 
 static const char *
-open_error(const char *file, const int err_no)
+check_modern_formats(const uint8_t *sig, const size_t nread,
+	const off_t file_size)
 {
-	if (!file)
+	if (!sig || !*sig || nread == 0)
 		return NULL;
-
-	struct stat st;
-	if (lstat(file, &st) != -1) {
-		/* We cannot read the file, but we can stat it */
-		if (err_no == EACCES && S_ISREG(st.st_mode))
-			return _("regular file, no read permission");
-
-		return fs_type_check(&st);
-	}
-
-	return NULL;
-}
-
-/* Read a few kilo bytes from the file FILE and attempt to find out an
- * appropiate MIME type based on the file's content.
- * Returns the found MIME type (as a constant string) or NULL if none is found.
- *
- * Fast magic is ~15x times faster than libmagic! However, note that
- * the magic checks performed here are precisely FAST magic, meaning that it
- * won't be as accurate as libmagic (false positives are expected). The idea
- * is to avoid calling libmagic in those cases where this fast magic is enough.
- * If NULL is returned, libmagic will be used anyway by the xmagic function. */
-const char *
-fast_magic(const char *file)
-{
-	if (!file || !*file)
-		return NULL;
-
-	int fd = open(file, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
-	if (fd == -1)
-		return open_error(file, errno);
-
-	struct stat st;
-	if (fstat(fd, &st) == -1) {
-		close(fd);
-		return NULL;
-	}
-
-	/* Ignore non-regular files and empty regular files */
-	if (!S_ISREG(st.st_mode) || st.st_size == 0) {
-		close(fd);
-		return fs_type_check(&st);
-	}
-
-	FILE *f = fdopen(fd, "rb");
-	if (!f)
-		return NULL;
-
-#define BYTES_TO_READ 4096
-	uint8_t sig[BYTES_TO_READ];
-	const size_t nread = fread(sig, 1, BYTES_TO_READ, f);
-	if (ferror(f) || nread == 0) {
-		fclose(f);
-		return NULL;
-	}
-
-	fclose(f);
 
 	if (nread > 2 && sig[0] == 0xFF && sig[1] == 0xD8 && sig[2] == 0xFF)
 		return "image/jpeg";
@@ -2397,7 +2348,7 @@ fast_magic(const char *file)
 		return "image/x-fl32";
 
 	if (nread > 8 && LE_U32(sig) <= 2047 && LE_U32(sig + 4) <= 2047
-	&& is_aai_image(sig, nread, st.st_size) == 1)
+	&& is_aai_image(sig, nread, file_size) == 1)
 		return "image/x-aai";
 
 	if (nread > 2 && ((sig[0] == '%' && sig[1] == '!')
@@ -2511,6 +2462,18 @@ fast_magic(const char *file)
 	&& sig[3] == 'F')
 		return "model/gltf-binary";
 
+	if (nread > 6 && sig[1] == 'C' && sig[2] == '4' && sig[3] == 'D'
+	&& sig[4] == 'C' && sig[5] == '4' && sig[6] == 'D')
+		return "model/x-c4d";
+
+	/* http://fileformats.archiveteam.org/wiki/Maya_scene */
+	if (nread >= 12 && sig[0] == '/' && sig[1] == '/' && sig[6] == ' '
+	&& memcmp(sig, "//Maya ASCII", 12) == 0)
+		return "model/x-maya";
+	if (nread >= 16 && sig[0] == 'F' && sig[1] == 'O' && sig[2] == 'R'
+	&& ((sig[3] == '4' && sig[8] == 'M') || (sig[3] == '8' && sig[16] == 'M')))
+		return "model/x-maya";
+
 	if (nread >= 32 && sig[0] == 0xFF && sig[1] == 0xFE && sig[4] == 'S'
 	&& memcmp(sig, "\xff\xfe\xff\x0e\x53\x00\x6b\x00\x65\x00\x74\x00\x63\x00\x68\x00\x55\x00\x70\x00\x20\x00\x4d\x00\x6f\x00\x64\x00\x65\x00\x6c\x00", 32) == 0)
 		return "application/vnd.sketchup.skp";
@@ -2518,9 +2481,15 @@ fast_magic(const char *file)
 	&& memcmp(sig + 1, "SketchUp Model", 14) == 0)
 		return "application/vnd.sketchup.skp";
 
-			/* #############################
-			 * #       LEGACY/OBSOLETE     #
-			 * ############################# */
+	return NULL;
+}
+
+static const char *
+check_legacy_formats(const uint8_t *sig, const size_t nread,
+	const off_t file_size)
+{
+	if (!sig || !*sig || nread == 0)
+		return NULL;
 
 	if (nread > 7 && sig[0] == 0xD0 && sig[1] == 0xCF && sig[2] == 0x11
 	&& sig[3] == 0xE0 && sig[4] == 0xA1 && sig[5] == 0xB1 && sig[6] == 0x1A
@@ -2650,6 +2619,10 @@ fast_magic(const char *file)
 	if (nread >= GSM_MIN_BYTES && (sig[0] & 0xF0) == 0xD0
 	&& (sig[33] & 0xF0) == 0xD0 && is_gsm_audio(sig, nread) == 1)
 		return "audio/x-gsm";
+
+	if (nread >= 29 && sig[0] == 'S' && sig[1] == 'N' && sig[2] == 'E'
+	&& sig[3] == 'S' && memcmp(sig, "SNES-SPC700 Sound File Data v", 29) == 0)
+		return "audio/x-snes-spc";
 
 	if (nread > 3 && (sig[0] == 'I' || sig[0] == 'P') && sig[1] == 'W'
 	&& sig[2] == 'A' && sig[3] == 'D')
@@ -2835,7 +2808,7 @@ fast_magic(const char *file)
 	&& sig[7] == 'S')
 		return "video/x-3d-movie-maker";
 
-	if (nread == BYTES_TO_READ && st.st_size == 10050 && sig[0] == 0x00
+	if (nread == BYTES_TO_READ && file_size == 10050 && sig[0] == 0x00
 	&& sig[1] == 0x58)
 		return "video/x-vidcom64";
 
@@ -3318,12 +3291,12 @@ fast_magic(const char *file)
 	&& sig[3] == ' ')
 		return "image/x-dds";
 
-	if (nread > 4 && (st.st_size == 192022 || st.st_size == 256022)
+	if (nread > 4 && (file_size == 192022 || file_size == 256022)
 	&& sig[0] == 'E' && sig[1] == 'Y' && sig[2] == 'E' && sig[3] == 'S')
 		return "image/x-computer-eyes";
 
 	if (nread > 120 && sig[0] == 0x07 && LE_U16(sig + 11) == 320
-	&& is_mvi_video(sig, nread, st.st_size) == 1)
+	&& is_mvi_video(sig, nread, file_size) == 1)
 			return "video/x-mvi";
 
 	if (nread > 6 && sig[0] == 'P' && sig[1] == '7' && sig[2] == ' '
@@ -3404,7 +3377,7 @@ fast_magic(const char *file)
 		return "image/x-aol-art"; // .art
 
 	/* https://temlib.org/AtariForumWiki/index.php/NEOchrome_file_format */
-	if (st.st_size == 32128 && nread == BYTES_TO_READ && sig[0] == 0x00
+	if (file_size == 32128 && nread == BYTES_TO_READ && sig[0] == 0x00
 	&& sig[1] == 0x00 && is_neochrome_image(sig, nread) == 1)
 		return "image/x-neochrome"; // .neo
 
@@ -3413,11 +3386,11 @@ fast_magic(const char *file)
 	&& sig[3] == 0x00) {
 		const uint32_t data_len = BE_U32(sig + 4);
 		const uint32_t color_len = BE_U32(sig + 8);
-		if (data_len + color_len + 4 + 4 + 2 + 2 == st.st_size)
+		if (data_len + color_len + 4 + 4 + 2 + 2 == file_size)
 			return "image/x-spectrum-spc"; // .spc
 	}
 	//https://temlib.org/AtariForumWiki/index.php/Spectrum_512_file_format
-	if (st.st_size == 51104 && nread > 161 && sig[0] == 0x00 && sig[8] == 0x00
+	if (file_size == 51104 && nread > 161 && sig[0] == 0x00 && sig[8] == 0x00
 	&& sig[32] == 0x00) { // First non-zero byte is at offset 160
 		size_t i;
 		for (i = 0; i <= 160 && sig[i] == 0x00; i++);
@@ -3462,17 +3435,17 @@ fast_magic(const char *file)
 	&& sig[3] == '5')
 		return "image/x-cd5";
 
-	if (nread == BYTES_TO_READ && st.st_size == 33795 && sig[0] == 0xFF
+	if (nread == BYTES_TO_READ && file_size == 33795 && sig[0] == 0xFF
 	&& sig[1] == 0x3B && sig[2] == 0x62)
 		return "image/x-bfli";
 
 	if (nread == BYTES_TO_READ) {
-		if ((st.st_size == 32034 || st.st_size == 32066)
+		if ((file_size == 32034 || file_size == 32066)
 		&& sig[0] == 0x00 && (sig[1] == 0x00 || sig[1] == 0x01 || sig[1] == 0x02))
 			return "image/x-atari-degas";
-		if (st.st_size == 153664 && sig[0] == 0x00 && sig[1] == 0x04)
+		if (file_size == 153664 && sig[0] == 0x00 && sig[1] == 0x04)
 			return "image/x-atari-degas";
-		if (st.st_size == 154114 && sig[0] == 0x00 && sig[1] == 0x07)
+		if (file_size == 154114 && sig[0] == 0x00 && sig[1] == 0x07)
 			return "image/x-atari-degas";
 	}
 
@@ -3581,6 +3554,79 @@ fast_magic(const char *file)
 	if (nread > 4 && sig[0] == 'S' && sig[1] == 'D' && sig[2] == 'I'
 	 && sig[3] == 'F')
 		return "application/x-sdif";
+
+	return NULL;
+}
+
+static const char *
+open_error(const char *file, const int err_no)
+{
+	if (!file)
+		return NULL;
+
+	struct stat st;
+	if (lstat(file, &st) != -1) {
+		/* We cannot read the file, but we can stat it */
+		if (err_no == EACCES && S_ISREG(st.st_mode))
+			return _("regular file, no read permission");
+
+		return fs_type_check(&st);
+	}
+
+	return NULL;
+}
+
+/* Read a few kilo bytes from the file FILE and attempt to find out an
+ * appropiate MIME type based on the file's content.
+ * Returns the found MIME type (as a constant string) or NULL if none is found.
+ *
+ * Fast magic is ~15x times faster than libmagic! However, note that
+ * the magic checks performed here are precisely FAST magic, meaning that it
+ * won't be as accurate as libmagic (false positives are expected). The idea
+ * is to avoid calling libmagic in those cases where this fast magic is enough.
+ * If NULL is returned, libmagic will be used anyway by the xmagic function. */
+const char *
+fast_magic(const char *file)
+{
+	if (!file || !*file)
+		return NULL;
+
+	int fd = open(file, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
+	if (fd == -1)
+		return open_error(file, errno);
+
+	struct stat st;
+	if (fstat(fd, &st) == -1) {
+		close(fd);
+		return NULL;
+	}
+
+	/* Ignore non-regular files and empty regular files. */
+	if (!S_ISREG(st.st_mode) || st.st_size == 0) {
+		close(fd);
+		return fs_type_check(&st);
+	}
+
+	FILE *f = fdopen(fd, "rb");
+	if (!f)
+		return NULL;
+
+	uint8_t sig[BYTES_TO_READ];
+	const size_t nread = fread(sig, 1, BYTES_TO_READ, f);
+	if (ferror(f) || nread == 0) {
+		fclose(f);
+		return NULL;
+	}
+
+	fclose(f);
+
+	const char *mimetype = check_modern_formats(sig, nread, st.st_size);
+	if (mimetype)
+		return mimetype;
+
+	mimetype = check_legacy_formats(sig, nread, st.st_size);
+	if (mimetype)
+		return mimetype;
 
 	/* If none of the above, let's scan the first 256 bytes looking for an
 	 * MPEG signature. */
