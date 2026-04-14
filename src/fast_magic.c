@@ -1141,6 +1141,20 @@ check_gzipped_koffice(const uint8_t *s, const size_t slen)
 	return "application/gzip";
 }
 
+static const char *
+check_cafebabe(const uint8_t *s, const size_t slen)
+{
+	if (slen < 8)
+		return NULL;
+
+	const uint32_t v = BE_U32(s + 4);
+
+	if (v >= 1 && v < 20) return "application/x-mach-binary";
+	if (v > 30) return "application/x-java-applet";
+
+	return NULL;
+}
+
 static char *
 fs_type_check(const struct stat *a)
 {
@@ -2108,6 +2122,11 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0x01)
 		return "image/jxr";
 
+	/* http://fileformats.archiveteam.org/wiki/PGF_(Progressive_Graphics_File) */
+	if (nread > 3 && sig[0] == 'P' && sig[1] == 'G' && sig[2] == 'F'
+	&& sig[3] < 0x0A) /* 3rd byte is version (currently 6) */
+		return "image/x-pgf";
+
 	if (nread >= 2 && (sig[0] & 0x0F) == 8 && (sig[0] & 0x80) == 0
 	&& (sig[1] & 0x20) == 0 && BE_U16(sig) % 31 == 0)
 		return "application/zlib";
@@ -2117,7 +2136,7 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		return "application/x-blender";
 
 	if (nread > 3 && sig[0] == 0xCA && sig[1] == 0xFE) {
-		if (sig[2] == 0xBA && sig[3] == 0xBE) return "application/x-java-applet";
+		if (sig[2] == 0xBA && sig[3] == 0xBE) return check_cafebabe(sig, nread);
 		if (sig[2] == 0xD0 && sig[3] == 0x0D) return "application/x-java-pack200";
 	}
 
@@ -2128,10 +2147,6 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 18 && sig[0] == 0x7f && sig[1] == 'E' && sig[2] == 'L'
 	&& sig[3] == 'F')
 		return check_elf_magic(sig, nread);
-
-	if (nread > 105 && sig[102] == 'm' && sig[103] == 'B' && sig[104] == 'I'
-	&& sig[105] == 'N')
-		return "application/x-macbinary";
 
 	if (nread > 5 && sig[0] == 'M' && sig[1] == 'A' && sig[2] == 'T'
 	&& sig[3] == 'L' && sig[4] == 'A' && sig[5] == 'B')
@@ -2267,10 +2282,6 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'b' && sig[4] == 'f' && sig[5] == 'e' && sig[6] == 'l'
 	&& sig[7] == 'd')
 		return "image/x-farbfeld";
-
-	if (nread > 5 && sig[0] == 'B' && sig[1] == '&' && sig[2] == 'W'
-	&& sig[3] == '2' && sig[4] == '5' && sig[5] == '6')
-		return "image/x-ilab";
 
 	if (nread >= 8 &&
 	((sig[0] == 'R' && sig[1] == 'a' && sig[2] == 'r'
@@ -3387,6 +3398,14 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& sig[1] == 0x00 && is_neochrome_image(sig, nread) == 1)
 		return "image/x-neochrome"; // .neo
 
+	if (nread > 3 && sig[0] == 0xBA && sig[1] == 0xBE && sig[2] == 0xEB
+	&& sig[3] == 0xEA)
+		return "video/x-neochrome";
+
+	if (nread > 5 && sig[0] == 'B' && sig[1] == '&' && sig[2] == 'W'
+	&& sig[3] == '2' && sig[4] == '5' && sig[5] == '6')
+		return "image/x-ilab";
+
 	// https://temlib.org/AtariForumWiki/index.php/Spectrum_512_Compressed_file_format
 	if (nread > 24 && sig[0] == 'S' && sig[1] == 'P' && sig[2] == 0x00
 	&& sig[3] == 0x00) {
@@ -3474,8 +3493,37 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	/* https://temlib.org/AtariForumWiki/index.php/Calamus_Raster_Graphic_file_format */
 	if (nread > 9 && sig[0] == 'C' && sig[1] == 'A' && sig[2] == 'L'
 	&& sig[3] == 'A' && sig[4] == 'M' && sig[5] == 'U' && sig[6] == 'S'
-	&& sig[7] == 'C' && sig[8] == 'R' && sig[9] == 'G')
-		return "image/x-calamus-crg";
+	&& sig[7] == 'C' && sig[9] == 'G') {
+		if (sig[8] == 'R') return "image/x-calamus-crg";
+		if (sig[8] == 'V') return "image/x-calamus-cvg";
+	}
+
+	if (nread > 62 && sig[54] == 'A' && sig[55] == 'N' && sig[56] == 'v'
+	&& sig[57] == 'i' && sig[58] == 's' && sig[59] == 'i' && sig[60] == 'o'
+	&& sig[61] == 'n' && sig[62] == 'A')
+		return "image/x-paintworks";
+
+	if (nread > 5 && sig[0] == 't' && sig[1] == 'm' && sig[2] == '8'
+	&& sig[3] == '9' && sig[4] == 'P' && sig[5] == 'S')
+		return "image/x-paintshop";
+
+	if (nread > 7 && sig[0] == 'b' && sig[1] == 'i' && sig[2] == 'm'
+	&& sig[3] == 'c' && sig[4] == '0' && sig[5] == '0' && sig[6] == '0'
+	&& sig[7] == '2')
+		return "image/x-signum";
+
+	if (nread > 7 && sig[0] == 'I' && sig[1] == 'S' && sig[2] == '_'
+	&& sig[3] == 'I' && sig[4] == 'M' && sig[5] == 'A' && sig[6] == 'G'
+	&& sig[7] == 'E')
+		return "image/x-inshape";
+
+	if (nread > 3 && sig[0] == 'I' && sig[1] == 'n' && sig[2] == 'd'
+	&& sig[3] == 'y')
+		return "image/x-indypaint";
+
+	if (nread > 3 && sig[0] == 'I' && sig[1] == 'M' && sig[2] == 'D'
+	&& sig[3] == 'C')
+		return "image/x-imagic";
 
 	/* http://fileformats.archiveteam.org/wiki/PabloPaint */
 	if (nread >= 28 && sig[0] == 'P' && sig[1] == 'A' && sig[2] == 'B'
@@ -3496,7 +3544,9 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& sig[6] <= 2)
 		return "image/x-pixart";
 
-	if (nread > 11 && sig[0] == 0x34 && sig[1] == 0x12 && sig[11] == 0xFF)
+	/* https://netghost.narod.ru/gff/vendspec/pictor/pictor.txt */
+	if (nread > 13 && sig[0] == 0x34 && sig[1] == 0x12 && sig[11] == 0xFF
+	&& sig[12] >= 'A' && sig[12] <= 'O' && sig[13] <= 0x04)
 		return "image/x-pcpaint";
 
 	/* https://netghost.narod.ru/gff/graphics/book/ch03_03.htm */
@@ -3507,7 +3557,27 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/Prism_Paint */
 	if (nread > 3 && sig[0] == 'P' && sig[1] == 'N' && sig[2] == 'T'
 	&& sig[3] == 0x00)
-		return "image/x-pnt";
+		return "image/x-prism";
+
+	if (nread > 3 && sig[0] == 'E' && sig[1] == 'Z' && sig[2] == 0x00
+	&& sig[3] == 0xC8)
+		return "image/x-ez-art";
+
+	if (nread > 4 && sig[0] == 0xFF && sig[1] == 0x80 && sig[2] == 0xC9
+	&& sig[3] == 0xC7 && sig[4] == 0x1A)
+		return "image/x-koala";
+
+	if (file_size == 3845 && nread > 4 && sig[0] == 0xF4 && sig[1] == 0x0E
+	&& sig[2] == 0x36 && sig[3] == 0x00)
+		return "image/x-magic-painter";
+
+	if (nread > 3 && sig[0] == 'C' && sig[1] == 'O' && sig[2] == 'K'
+	&& sig[3] == 'E' && memcmp(sig, "COKE format.", 12) == 0)
+		return "image/x-coke";
+
+	if (nread >= 21 && sig[0] == 0xCC && sig[1] == 0xF5 && sig[2] == 0xE4
+	&& memcmp(sig, "\xCC\xF5\xE4\xE5\xEB\xA0\xCD\xE1\xEB\xE5\xF2\xA0\xE4\xE1\xF4\xE1\xA0\xE6\xE9\xEC\xE5", 21) == 0)
+		return "image/x-ludek-maker";
 
 	if (nread > 82 && sig[34] == 'L' && sig[35] == 'P' && sig[82] != 0x00
 	&& memcmp(sig + 64, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16) == 0)
@@ -3537,6 +3607,17 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& (memcmp(sig, "%!PS-AdobeFont-1.", 17) == 0
 	|| memcmp(sig, "%!FontType1-1.", 14) == 0))
 		return "font/x-postscript-pfb";
+
+	if (nread > 3 && sig[0] == 0x0F && (sig[1] == 0x00 || sig[1] == 0x02)
+	&& BE_U16(sig + 2) > 0x00)
+		return "font/x-amiga-font";
+
+	/* https://web.archive.org/web/20050305044255/http://www.lazerware.com:80/formats/macbinary/macbinary_iii.html */
+	if (nread > 123 && !sig[0] && !sig[74] && !sig[82] && sig[1]
+	&& sig[102] == 'm' && sig[103] == 'B' && sig[104] == 'I' && sig[105] == 'N'
+	&& (sig[122] == 0x81 || sig[122] == 0x82) && sig[123] == 0x81)
+		/* MacBinary III (version I and II produce false positives) */
+		return "application/x-macbinary";
 
 	if (nread > 5 && sig[0] == 'H' && sig[1] == 'S' && sig[2] == 'P'
 	&& sig[4] == 0x9B && sig[5] == 0x00) {
