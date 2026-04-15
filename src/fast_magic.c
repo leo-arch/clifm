@@ -667,6 +667,11 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 	&& buf[15] == 'T')
 		return "audio/x-idf";
 
+	/* https://www.cpcwiki.eu/index.php/Format:CPR_CPC_Plus_cartridge_file_format */
+	if (buf_len > 11 && buf[8] == 'A' && (buf[9] == 'm' || buf[9] == 'M')
+	&& (buf[10] == 's' || buf[10] == 'S') && buf[11] == '!')
+		return "application/x-spectrum-cpr";
+
 	/* https://mab.greyserv.net/f/sony_wave64.pdf */
 	if (buf_len > 40 && buf[24] == 'w' && buf[28] == 0xF3
 	&& memcmp(buf + 24, "wave\xF3\xAC\xD3\x11\x8C\xD1\x00\xC0\x4F\x8E\xDB\x8A", 16) == 0)
@@ -887,6 +892,7 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 	if (plen > 3 && p[0] == 'A' && p[1] == 'N' && p[2] == 'I' && p[3] == 'M')
 		return "video/x-amiga-anim";
 
+	/* https://wiki.amigaos.net/wiki/DEEP_IFF_Chunky_Pixel_Image */
 	if (plen > 3 && ((p[0] == 'D' && p[1] == 'E' && p[2] == 'E' && p[3] == 'P')
 	|| (p[0] == 'T' && p[1] == 'V' && p[2] == 'P' && p[3] == 'P')))
 		return "video/x-deep";
@@ -912,6 +918,13 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 		|| (p[2] == 'L' && p[3] == 'O'))
 			return "image/x-lwo";
 	}
+
+	if (plen > 3 && p[0] == 'W' && p[1] == 'O' && p[2] == 'R' && p[3] == 'D')
+		return "application/x-amiga-prowrite";
+
+	if (plen > 3 && ((p[0] == 'W' && p[1] == 'O' && p[2] == 'W' && p[3] == 'O')
+	|| (p[0] == 'W' && p[1] == 'T' && p[2] == 'X' && p[3] == 'T')))
+		return "application/x-document.wordworth";
 
 	if (plen > 7 && p[0] == 'F' && p[1] == 'R' && p[2] == 'A' && p[3] == 'Y'
 	&& p[4] == 'M' && p[5] == 'A' && p[6] == 'T' && p[7] == '1')
@@ -1875,6 +1888,7 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0xd7)
 		return "image/x-kodak-cin";
 
+	/* http://fileformats.archiveteam.org/wiki/Camera_Image_File_Format */
 	if (nread >= 15 && sig[0] == 'I' && sig[1] == 'I' && sig[2] == 0x1A
 	&& sig[3] == 0x00 && sig[4] == 0x00 && sig[5] == 0x00
 	&& memcmp(sig + 6, "HEAPCCDR", 8) == 0)
@@ -2642,7 +2656,7 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 		return "application/x-doom-wad";
 
 	if (nread > 3 && sig[0] == 'D' && sig[1] == 'O' && sig[2] == 'S'
-	&& sig[3] == 0x00)
+	&& sig[3] < 0x08)
 		return "application/x-amiga-disk-format";
 
 	if (nread > 3 && sig[0] == 'F' && sig[1] == 'L' && sig[2] == 'V'
@@ -3289,6 +3303,10 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& is_cdxl_video(sig, nread) == 1)
 			return "video/x-cdxl";
 
+	if (nread > 3 && sig[0] == '2' && sig[1] == 'T' && sig[2] == 'S'
+	&& sig[3] == 'F')
+		return "video/x-future-vision";
+
 	if (nread > 2 && sig[0] == 'R' && sig[1] == 'K' && sig[2] == 'A')
 		return "application/x-rka";
 
@@ -3356,6 +3374,10 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& sig[525] == 0xFF && sig[526] == 0x0C && sig[527] == 0x00) /* version 2 */
 	|| (sig[522] == 0x11 && sig[523] == 0x00))) /* version 1 */
 		return "image/x-pict"; /* Macintosh QuickDraw */
+
+	if (nread > 73 && sig[65] == 'P' && sig[66] == 'N' && sig[67] == 'T'
+	&& sig[68] == 'G' && memcmp(sig + 65, "PNTGMPNT", 8) == 0)
+		return "image/x-macpaint";
 
 	if (nread > 8 && sig[0] == 'C' && sig[1] == 'P' && sig[2] == 'T'
 	&& (sig[3] >= '0' && sig[3] <= '9') && sig[4] == 'F' && sig[5] == 'I'
@@ -3579,9 +3601,28 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& memcmp(sig, "\xCC\xF5\xE4\xE5\xEB\xA0\xCD\xE1\xEB\xE5\xF2\xA0\xE4\xE1\xF4\xE1\xA0\xE6\xE9\xEC\xE5", 21) == 0)
 		return "image/x-ludek-maker";
 
+	/* https://www.fileformat.info/format/cgm/egff.htm */
+	if (nread > 128 && (BE_U16(sig) & 0xFFE0) == 0x0020
+	&& xmemmem(sig + 2, 128, "\x10\x22", 2))
+		return "image/cgm";
+	if (nread > 4 && TOLOWER(sig[0]) == 'b' && TOLOWER(sig[1]) == 'e'
+	&& TOLOWER(sig[2]) == 'g' && TOLOWER(sig[3]) == 'm'
+	&& TOLOWER(sig[4]) == 'f')
+		return "image/cgm";
+
 	if (nread > 82 && sig[34] == 'L' && sig[35] == 'P' && sig[82] != 0x00
 	&& memcmp(sig + 64, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16) == 0)
 		return "application/vnd.ms-fontobject";
+
+	/* https://applesaucefdc.com/a2r/ */
+	if (nread > 7 && sig[0] == 'A' && sig[1] == '2' && sig[2] == 'R'
+	&& sig[3] >= 0x31 && sig[3] <= 0x33 && sig[4] == 0xFF && sig[5] == 0x0A
+	&& sig[6] == 0x0D && sig[7] == 0x0A)
+		return "application/x-a2r-disk";
+
+	if (nread > 5 && sig[2] == 'E' && sig[3] == 'Y' && sig[4] == 'W'
+	&& sig[5] == 'R')
+		return "application/x-amiga-writer";
 
 	if (nread > 4 && sig[0] == 0xFF && sig[1] == 'F' && sig[2] == 'O'
 	&& sig[3] == 'N' && sig[4] == 'T')
@@ -3632,6 +3673,17 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0xFF && sig[4] == 0x14 && sig[5] == 0x00 && sig[6] == 0x00
 	&& sig[7] == 0x00)
 		return "application/x-os2-ini";
+
+	if (nread > 7 && sig[0] == 'Z' && sig[1] == 'X' && sig[2] == 'T'
+	&& sig[3] == 'a' && sig[4] == 'p' && sig[5] == 'e' && sig[6] == '!'
+	&& sig[7] == 0x1A)
+		return "application/x-spectrum-tzx";
+
+	/* https://www.cpcwiki.eu/index.php/Format:DSK_disk_image_file_format */
+	if (nread > 34 && sig[17] == 'F' && sig[18] == 'i' && sig[19] == 'l'
+	&& sig[20] == 'e' && sig[21] == 0x0D && sig[22] == 0x0A
+	&& memcmp(sig + 23, "Disk-Info\r\n", 11) == 0)
+		return "application/x-spectrum-dsk";
 
 	if (nread > 6 && sig[0] == 'R' && sig[1] == 'E' && sig[2] == 'G'
 	&& sig[3] == 'E' && sig[4] == 'D' && sig[5] == 'I' && sig[6] == 'T')
