@@ -592,7 +592,9 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 
 	if (buf[8] == 'W' && buf[9] == 'E' && buf[10] == 'B' && buf[11] == 'P')
 		return "image/webp";
-	if (buf[8] == 'A' && buf[9] == 'V' && buf[10] == 'I' && buf[11] == ' ')
+	/* FFmpeg: libavformat/avidec.c */
+	if (buf[8] == 'A' && buf[9] == 'V' && buf[10] == 'I'
+	&& (buf[11] == ' ' || buf[11] == 'X' || buf[11] == 0x19))
 		return "video/x-msvideo";
 	if (buf[8] == 'W' && buf[9] == 'A' && buf[10] == 'V' && buf[11] == 'E')
 		return "audio/x-wav";
@@ -918,6 +920,9 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 		|| (p[2] == 'L' && p[3] == 'O'))
 			return "image/x-lwo";
 	}
+
+	if (plen > 3 && p[0] == 'F' && p[1] == 'A' && p[2] == 'X' && p[3] == '3')
+		return "image/x-gpfax";
 
 	if (plen > 3 && p[0] == 'W' && p[1] == 'O' && p[2] == 'R' && p[3] == 'D')
 		return "application/x-amiga-prowrite";
@@ -2297,6 +2302,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[7] == 'd')
 		return "image/x-farbfeld";
 
+	if (nread > 16 && BE_U32(sig + 4) == 7 && BE_U32(sig) > 99
+	&& BE_U32(sig + 8) < 3 && BE_U32(sig + 12) < 33)
+		return "image/x-xwindowdump";
+	if (nread > 36 && BE_U32(sig) == 0x000000028 && BE_U32(sig + 4) == 6)
+		return "image/x-xwindowdump";
+
 	if (nread >= 8 &&
 	((sig[0] == 'R' && sig[1] == 'a' && sig[2] == 'r'
 	&& sig[3] == '!' && sig[4] == 0x1A && sig[5] == 0x07
@@ -2428,6 +2439,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 512 && ((!sig[0] && !sig[1] && !sig[2] && sig[3] == 0x01)
 	|| (!sig[0] && !sig[1] && sig[2] == 0x01)) && is_vvc_video(sig, 512) == 1)
 		return "video/h266"; /* .vvc */
+
+	/* FFmpeg: libavformat/avidec.c (VP5 codec) */
+	if (nread > 115 && sig[0] == 'O' && sig[1] == 'N' && sig[2] == '2'
+	&& sig[3] == ' ' && sig[8] == 'O' && sig[9] == 'N'
+	&& sig[10] == '2' && sig[11] == 'f')
+		return "video/x-msvideo";
 
 	if (nread > 5 && sig[0] == '#' && sig[1] == 'V' && sig[2] == 'R'
 	&& sig[3] == 'M' && sig[4] == 'L' && sig[5] == ' ')
@@ -2818,6 +2835,12 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == ' ' && sig[4] == 'F' && sig[5] == 'i' && sig[6] == 'l'
 	&& sig[7] == 'e')
 		return "video/x-nxv";
+
+	/* http://fileformats.archiveteam.org/wiki/Imageiio/imaginfo_(Ulead) */
+	if (nread > 4 && sig[0] == 'I' && sig[1] == 'I' && sig[2] == 'O') {
+		if (sig[3] == '1' && sig[4] == '$') return "image/x-ulead-pe3";
+		if (sig[3] == '2' && sig[4] == 'H') return "image/x-ulead-pe4";
+	}
 
 	/* LucasArts SMUSH video (v1 and v2) */
 	if (nread > 11 && sig[0] == 'A' && sig[1] == 'N' && sig[2] == 'I'
@@ -3693,6 +3716,20 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 4 && sig[0] == 'S' && sig[1] == 'D' && sig[2] == 'I'
 	 && sig[3] == 'F')
 		return "application/x-sdif";
+
+	if (nread > 34 && sig[0] == 0x3D && (sig[1] == 0x3D || sig[1] == 0x02)
+	&& BE_U16(sig + 4) <= 0x01 && BE_U16(sig + 10) <= 0x07
+	&& BE_U16(sig + 2) <= (sig[1] == 0x3D ? 20 : 40))
+		return "model/x-cad-3d";
+
+	if (nread > 512 && sig[2] == 0xFE && (BE_U16(sig) & 0x3F73) == 0x0801
+	&& !(BE_U32(sig + 508) & 0xFFFFFF00) && BE_U16(sig) == 0x0809) {
+		const uint16_t v4 = LE_U16(sig + 4);
+		if (v4 == 0x0009) return "image/x-intergraph-rle";
+		if (v4 == 0x0018) return "image/x-intergraph-cit";
+		if (v4 == 27)     return "image/x-intergraph-rgb";
+		return "image/x-intergraph";
+	}
 
 	return NULL;
 }
