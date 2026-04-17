@@ -57,6 +57,9 @@
 #define IS_VC1_NAL(n) ((n) == VC1_CODE_SEQHDR || (n) == VC1_CODE_ENTRYPOINT \
 	|| (n) == VC1_CODE_FRAME || (n) == VC1_CODE_FIELD || (n) == VC1_CODE_SLICE)
 
+/* Check wether the most significant bit is zero. */
+#define MSB_IS_ZERO(b) (((b) >> 7) == 0x00)
+
 static void *
 xmemmem(const void *haystack, size_t haylen,
 	const void *needle, size_t needlelen)
@@ -1511,9 +1514,12 @@ detect_startcode_video_stream(const uint8_t *s, const size_t slen)
 		if (nal == 0xB0 || nal == 0xB5) return "video/mpeg4-generic";
 
 		/* VVC. See FFmpeg: libavformat/vvcdec.c */
-		if (nal == 0x00 && nal2 > 0x00) {
+		if (MSB_IS_ZERO(nal) && nal2 > 0x00) {
 			const int type = (nal2 & 0xF8) >> 3;
-			if (check_vvc_temporal_id(nal2 & 0x7, type)) {
+			const int nuh_layer_id = (nal & 0x01) << 5 | type;
+			const uint8_t nuh_temp_id_plus1 = nal2 & 0x7;
+			if (nuh_layer_id <= 55
+			&& check_vvc_temporal_id(nuh_temp_id_plus1, type)) {
 				check_vvc_nal2(type, &vvc_sps, &vvc_pps, &vvc_irap,
 					&vvc_valid_pps, &vvc_valid_irap);
 				if (vvc_valid_irap) return "video/h266";
@@ -1530,10 +1536,10 @@ detect_startcode_video_stream(const uint8_t *s, const size_t slen)
 
 		/* HEVC */
 		const uint8_t hevc_unit = (nal >> 1) & 0x3F;
-		if (hevc_unit <= 34) {
+		if (hevc_unit <= 34 && MSB_IS_ZERO(nal)) {
 			check_hevc(hevc_unit, &hevc_slice, &hevc_vps_sps_pps);
 			if (hevc_vps_sps_pps > 2
-			|| (hevc_vps_sps_pps > 0 && hevc_slice > 0))
+			|| (hevc_vps_sps_pps > 1 && hevc_slice > 0))
 				return "video/x-hevc";
 		}
 
