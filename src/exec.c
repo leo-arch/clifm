@@ -1334,10 +1334,32 @@ ls_function(void)
 	return ret;
 }
 
+#ifndef _NO_LIRA
+static int
+run_mime_info(char **args)
+{
+	char cmd_name[] = "mm";
+	char param[] = "info";
+	int ret = FUNC_SUCCESS;
+
+	for (size_t i = 0; args[i]; i++) {
+		char *cmd[] = {cmd_name, param, args[i], NULL};
+		const int retval = mime_open(cmd);
+		if (retval != FUNC_SUCCESS)
+			ret = retval;
+	}
+
+	return ret;
+}
+#endif /* !_NO_LIRA*/
+
 static int
 lira_function(char **args)
 {
 #ifndef _NO_LIRA
+	if (args && args[1] && strcmp(args[1], "info") == 0 && args[2])
+		return run_mime_info(args + 2);
+
 	return mime_open(args);
 #else
 	UNUSED(args);
