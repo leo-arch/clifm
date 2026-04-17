@@ -46,6 +46,17 @@
 #define VVC_EOS_NUT       21
 #define VVC_EOB_NUT       22
 
+/* Macros for VC-1 file detection */
+#define VC1_CODE_SLICE       0x0B
+#define VC1_CODE_FIELD       0x0C
+#define VC1_CODE_FRAME       0x0D
+#define VC1_CODE_ENTRYPOINT  0x0E
+#define VC1_CODE_SEQHDR      0x0F
+#define VC1_PROFILE_ADVANCED 3
+
+#define IS_VC1_NAL(n) ((n) == VC1_CODE_SEQHDR || (n) == VC1_CODE_ENTRYPOINT \
+	|| (n) == VC1_CODE_FRAME || (n) == VC1_CODE_FIELD || (n) == VC1_CODE_SLICE)
+
 static void *
 xmemmem(const void *haystack, size_t haylen,
 	const void *needle, size_t needlelen)
@@ -1299,46 +1310,6 @@ is_bittorrent(const uint8_t *s, const size_t slen)
 	return 0;
 }
 
-static int
-is_hevc(const uint8_t *s, const size_t slen)
-{
-	const size_t l = slen < 128 ? slen : 128;
-	/* Checking the first 128 bytes of the file is usually enough. */
-
-	int found_vps_sps_pps = 0;
-	int found_slice = 0;
-	size_t i = 0;
-
-	while (i + 4 <= l) {
-		if (s[i] == 0x00 && s[i + 1] == 0x00 && ((s[i + 2] == 0x01)
-		|| (s[i + 2] == 0x00 && i + 3 < l && s[i + 3] == 0x01))) {
-			size_t sc_len = (s[i + 2] == 0x01) ? 3 : 4;
-			size_t nal_pos = i + sc_len;
-			if (nal_pos >= l)
-				break;
-
-			uint8_t unit_type = (s[nal_pos] >> 1) & 0x3F;
-			if (unit_type <= 31)
-				found_slice++;
-			else if (unit_type >= 32 && unit_type <= 34)
-				found_vps_sps_pps++;
-			i = nal_pos;
-
-			if (found_vps_sps_pps > 2
-			|| (found_vps_sps_pps > 0 && found_slice > 0))
-				break;
-		} else {
-			i++;
-		}
-	}
-
-	if (found_vps_sps_pps > 2
-	|| (found_vps_sps_pps > 0 && found_slice > 0))
-		return 1;
-
-	return 0;
-}
-
 /* Return 1 if the string S, whose length in SLEN, has this format: "NUM NUM\n",
  * or 0 if not. */
 static int
@@ -1371,9 +1342,9 @@ is_mtv_image(const uint8_t *s, const size_t slen)
 static int
 is_sixel_image(const uint8_t *s, const size_t slen)
 {
-	// Check for DCS in the first 32 bytes
+	/* Check for DCS in the first 32 bytes */
 	const size_t max_dcs_offset = 32;
-	// 9 bytes for a complete sixel beginning sequence: "DCS n;n;n;q"
+	/* 9 bytes for a complete sixel beginning sequence: "DCS n;n;n;q" */
 	const size_t seq_max_len = 9;
 	if (slen < max_dcs_offset + seq_max_len)
 		return 0;
@@ -1384,7 +1355,7 @@ is_sixel_image(const uint8_t *s, const size_t slen)
 			break;
 	}
 
-	if (i == max_dcs_offset) // No DCS found
+	if (i == max_dcs_offset) /* No DCS found */
 		return 0;
 
 	const unsigned char *dcs = (const unsigned char *)s + i;
@@ -1409,7 +1380,7 @@ is_sixel_image(const uint8_t *s, const size_t slen)
 }
 
 static int
-check_temporal_id(uint8_t nuh_temporal_id_plus1, int type)
+check_vvc_temporal_id(const uint8_t nuh_temporal_id_plus1, const int type)
 {
 	if (nuh_temporal_id_plus1 == 0)
 		return 0;
@@ -1425,58 +1396,151 @@ check_temporal_id(uint8_t nuh_temporal_id_plus1, int type)
 	return 1;
 }
 
-/* FFmpeg: libavformat/vvcdec.c
- * See https://www.itu.int/rec/dologin_pub.asp?lang=e&id=T-REC-H.266-202601-I!!PDF-E&type=items */
-static int
-is_vvc_video(const uint8_t *s, const size_t slen)
+static void
+check_vvc_nal2(const int type, size_t *sps, size_t *pps, size_t *irap,
+	size_t *valid_pps, size_t *valid_irap)
 {
-	uint32_t code = (uint32_t)-1;
-	size_t sps = 0, pps = 0, irap = 0;
-	size_t valid_pps = 0, valid_irap = 0;
+	switch (type) {
+	case VVC_SPS_NUT: (*sps)++; break;
 
-	for (size_t i = 0; i < slen - 1; i++) {
-		code = (code << 8) + s[i];
-		if ((code & 0xffffff00) != 0x100)
-			continue;
+	case VVC_PPS_NUT:
+		(*pps)++;
+		if (*sps)
+			(*valid_pps)++;
+		break;
 
-		uint8_t nal2 = s[i + 1];
-		int type = (nal2 & 0xF8) >> 3;
+	case VVC_IDR_N_LP:
+	case VVC_IDR_W_RADL:
+	case VVC_CRA_NUT:
+	case VVC_GDR_NUT:
+		(*irap)++;
+		if (*valid_pps)
+			(*valid_irap)++;
+		break;
 
-		if (code & 0x80) // forbidden_zero_bit
-			return 0;
+	default: break;
+	}
+}
 
-		if ((code & 0x3F) > 55) // nuh_layer_id must be in [0, 55]
-			return 0;
-
-		if (!check_temporal_id(nal2 & 0x7, type))
-			return 0;
-
-		switch (type) {
-		case VVC_SPS_NUT: sps++;  break;
-		case VVC_PPS_NUT:
-			pps++;
-			if (sps)
-				valid_pps++;
-			break;
-		case VVC_IDR_N_LP:
-		case VVC_IDR_W_RADL:
-		case VVC_CRA_NUT:
-		case VVC_GDR_NUT:
-			irap++;
-			if (valid_pps)
-				valid_irap++;
+static void
+check_vc1_nal(const uint8_t type, const uint8_t i4, size_t *seq, size_t *frames,
+	size_t *entry, size_t *invalid)
+{
+	switch (type) {
+	case VC1_CODE_SEQHDR: {
+		int profile = (i4 & 0xc0) >> 6;
+		if (profile != VC1_PROFILE_ADVANCED) {
+			*seq = 0;
+			(*invalid)++;
 			break;
 		}
-
-		if (valid_irap > 0)
+		int level = (i4 & 0x38) >> 3;
+		if (level >= 5) {
+			*seq = 0;
+			(*invalid)++;
 			break;
+		}
+		int chromaformat = (i4 & 0x6) >> 1;
+		if (chromaformat != 1) {
+			*seq = 0;
+			(*invalid)++;
+			break;
+		}
+		(*seq)++;
+		break;
 	}
 
-	if (valid_irap || (sps && pps && irap))
-		return 1;
-/*	if (sps || pps || irap) // Removed to avoid false positives
-		return 1; */
-	return 0;
+	case VC1_CODE_ENTRYPOINT:
+		if (!*seq) {
+			(*invalid)++;
+		}
+		(*entry)++;
+		break;
+
+	case VC1_CODE_FRAME:
+	case VC1_CODE_FIELD:
+	case VC1_CODE_SLICE:
+		if (*seq && *entry)
+			(*frames)++;
+		break;
+
+	default: break;
+	}
+}
+
+static void
+check_hevc(const uint8_t unit, size_t *slice, size_t *vps_sps_pps)
+{
+	if (unit <= 31)
+		(*slice)++;
+	else if (unit >= 32 && unit <= 34)
+		(*vps_sps_pps)++;
+}
+
+/* Heuristic single-pass scanner over a byte buffer (S, whose length is SLEN)
+ * that looks for MPEG-style start-code prefix (0x000001) and attempts to
+ * identify streams that use that framing: MPEG-1/2, HEVC/H.265, VC-1, and
+ * VVC/H.266.
+ * Returns a MIME type string for the detected format, or NULL if no match
+ * is found. */
+static const char *
+detect_startcode_video_stream(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen < 4)
+		return NULL;
+
+	size_t vvc_sps = 0, vvc_pps = 0, vvc_irap = 0;
+	size_t vvc_valid_pps = 0, vvc_valid_irap = 0;
+
+	size_t vc1_seq = 0, vc1_entry = 0, vc1_invalid = 0, vc1_frames = 0;
+
+	size_t hevc_slice = 0, hevc_vps_sps_pps = 0;
+
+	for (size_t i = 0; i + 4 < slen; i++) {
+		if (s[i] != 0x00 || s[i + 1] != 0x00 || s[i + 2] != 0x01)
+			continue;
+
+		const uint8_t nal = s[i + 3];
+		const uint8_t nal2 = s[i + 4];
+
+		/* MPEG */
+		if (nal == 0xA5 || nal == 0xB6) return "video/mpeg";
+		if (nal == 0xB3 || nal == 0xB8 || nal == 0xBA) return "video/mpeg";
+		if (nal >= 0xE0 && nal <= 0xEF) return "video/mpeg";
+		if (nal >= 0xC0 && nal <= 0xDF) return "audio/mpeg";
+		if (nal == 0xB0 || nal == 0xB5) return "video/mpeg4-generic";
+
+		/* VVC. See FFmpeg: libavformat/vvcdec.c */
+		if (nal == 0x00 && nal2 > 0x00) {
+			const int type = (nal2 & 0xF8) >> 3;
+			if (check_vvc_temporal_id(nal2 & 0x7, type)) {
+				check_vvc_nal2(type, &vvc_sps, &vvc_pps, &vvc_irap,
+					&vvc_valid_pps, &vvc_valid_irap);
+				if (vvc_valid_irap) return "video/h266";
+			}
+		}
+
+		/* VC-1. See FFmpeg: libavformat/vc1dec.c */
+		if (IS_VC1_NAL(nal)) {
+			check_vc1_nal(nal, nal2, &vc1_seq, &vc1_frames,
+				&vc1_entry, &vc1_invalid);
+			if (vc1_frames >= 1 && vc1_invalid == 0)
+				return "video/x-vc1";
+		}
+
+		/* HEVC */
+		const uint8_t hevc_unit = (nal >> 1) & 0x3F;
+		if (hevc_unit <= 34) {
+			check_hevc(hevc_unit, &hevc_slice, &hevc_vps_sps_pps);
+			if (hevc_vps_sps_pps > 2
+			|| (hevc_vps_sps_pps > 0 && hevc_slice > 0))
+				return "video/x-hevc";
+		}
+
+		i += 3;
+	}
+
+	return NULL;
 }
 
 /* See https://datatracker.ietf.org/doc/draft-ietf-opsawg-pcap/
@@ -1521,31 +1585,6 @@ is_aai_image(const uint8_t *s, const size_t slen, const off_t file_size)
 
 	return 1;
 }
-
-/*
-#define STREAM_MPEG_NONE     0
-#define STREAM_MPEG_VIDEO    1
-#define STREAM_MPEG_AUDIO    2
-#define STREAM_MPEG4_GENERIC 3
-
-// The MPEG signature may be not at offset 0x00. Let's check the first LEN
-// bytes for the signature. Return >=1 if found or zero if not.
-static int
-is_mpeg_stream(const uint8_t *s, const size_t len)
-{
-	for (size_t i = 0; i + 4 < len; i++) {
-		if (s[i] != 0x00 || s[i + 1] != 0x00 || s[i + 2] != 0x01)
-			continue;
-
-		const uint8_t v = s[i + 3];
-		if (v == 0xB3 || v == 0xB8 || v == 0xBA) return STREAM_MPEG_VIDEO;
-		if (v >= 0xE0 && v <= 0XEF) return STREAM_MPEG_VIDEO;
-		if (v >= 0xC0 && v <= 0xDF) return STREAM_MPEG_AUDIO;
-		if (v == 0xB0 || v == 0xB5) return STREAM_MPEG4_GENERIC;
-	}
-
-	return STREAM_MPEG_NONE;
-} */
 
 static int
 is_neochrome_image(const uint8_t *s, const size_t slen)
@@ -2216,10 +2255,6 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == '3')
 		return "image/x-paintnet";
 
-	if (nread > 3 && sig[0] == 0x00 && sig[1] == 0x00 && (sig[2] == 0x01
-	|| (sig[2] == 0x00 && sig[3] == 0x01)) && is_hevc(sig, nread) == 1)
-		return "video/x-hevc";
-
 	/* https://git.ffmpeg.org/gitweb/nut.git/blob_plain/HEAD:/docs/nut.txt */
 	if (nread >= 25 && sig[0] == 'n' && sig[1] == 'u' && sig[2] == 't'
 	&& sig[3] == '/' && memcmp(sig, "nut/multimedia container\0", 25) == 0)
@@ -2436,16 +2471,6 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& (sig[6] == '\n' || sig[6] == '\t' || sig[6] == ' ' || sig[6] == '\r'))
 		return "text/vtt";
 
-	if (nread > 512 && ((!sig[0] && !sig[1] && !sig[2] && sig[3] == 0x01)
-	|| (!sig[0] && !sig[1] && sig[2] == 0x01)) && is_vvc_video(sig, 512) == 1)
-		return "video/h266"; /* .vvc */
-
-	/* FFmpeg: libavformat/avidec.c (VP5 codec) */
-	if (nread > 115 && sig[0] == 'O' && sig[1] == 'N' && sig[2] == '2'
-	&& sig[3] == ' ' && sig[8] == 'O' && sig[9] == 'N'
-	&& sig[10] == '2' && sig[11] == 'f')
-		return "video/x-msvideo";
-
 	if (nread > 5 && sig[0] == '#' && sig[1] == 'V' && sig[2] == 'R'
 	&& sig[3] == 'M' && sig[4] == 'L' && sig[5] == ' ')
 		return "model/vrml";
@@ -2524,6 +2549,9 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread >= 15 && sig[0] == 0x0E && sig[1] == 'S' && sig[7] == 'U'
 	&& memcmp(sig + 1, "SketchUp Model", 14) == 0)
 		return "application/vnd.sketchup.skp";
+
+	if (nread > 512)
+		return detect_startcode_video_stream(sig, 512);
 
 	return NULL;
 }
@@ -2646,6 +2674,10 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 80 && sig[0] == 'D' && sig[1] == 'S' && sig[2] == 'D'
 	&& sig[3] == ' ' && sig[28] == 'f' /* fmt */ && sig[80] == 'd' /* data */)
 		return "audio/x-dsf";
+	if (nread > 11 && sig[0] == 'F' && sig[1] == 'R' && sig[2] == 'M'
+	&& sig[3] == '8' && sig[8] == 'D' && sig[9] == 'S'
+	&& sig[10] == 'D' && sig[11] == ' ')
+		return "audio/x-dff"; /* DSDIFF */
 
 	/* MIDI Sample Dump Standard File. FFmpeg: libavformat/sdsdec.c */
 	if (nread > 20 && sig[0] == 0xF0 && sig[1] == 0x7E && sig[2] == 0x00
@@ -2805,6 +2837,8 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 7 && ((sig[4] == 'm' && sig[5] == 'o' && sig[6] == 'o'
 	&& sig[7] == 'v')
 	|| (sig[4] == 'm' && sig[5] == 'd' && sig[6] == 'a' && sig[7] == 't')
+	|| (sig[4] == 'f' && sig[5] == 'r' && sig[6] == 'e' && sig[7] == 'e')
+	|| (sig[4] == 's' && sig[5] == 'k' && sig[6] == 'i' && sig[7] == 'p')
 	|| (sig[4] == 'w' && sig[5] == 'i' && sig[6] == 'd' && sig[7] == 'e')))
 		return "video/quicktime";
 	/* https://wiki.multimedia.cx/index.php/QuickTime_container#mvhd */
@@ -2812,6 +2846,12 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 15 && sig[12] == 'm' && sig[13] == 'v' && sig[14] == 'h'
 	&& sig[15] == 'd')
 		return "video/quicktime";
+
+	/* FFmpeg: libavformat/avidec.c (VP5 codec) */
+	if (nread > 115 && sig[0] == 'O' && sig[1] == 'N' && sig[2] == '2'
+	&& sig[3] == ' ' && sig[8] == 'O' && sig[9] == 'N'
+	&& sig[10] == '2' && sig[11] == 'f')
+		return "video/x-msvideo";
 
 	/* http://www.textfiles.com/programming/FORMATS/animfile.txt */
 	if (nread > 19 && sig[0] == 'L' && sig[1] == 'P' && sig[2] == 'F'
@@ -3295,6 +3335,11 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 		if (sample_rate >= 4000 && sample_rate <= 48000)
 			return "audio/x-westwood-aud";
 	}
+
+	/* FFmpeg: libavformat/ipudec.c */
+	if (nread > 3 && sig[0] == 'i' && sig[1] == 'p' && sig[2] == 'u'
+	&& sig[3] == 'm')
+		return "video/x-ipu";
 
 	/* Machintosh files begin with XFIR (little endian) instead of RIFX. */
 	if (nread > 12 && sig[0] == 'X' && sig[1] == 'F' && sig[2] == 'I'
@@ -3803,13 +3848,6 @@ fast_magic(const char *file)
 	mimetype = check_legacy_formats(sig, nread, st.st_size);
 	if (mimetype)
 		return mimetype;
-
-	/* If none of the above, let's scan the first 256 bytes looking for an
-	 * MPEG signature. */
-/*	int mpeg_type = nread > 256 ? is_mpeg_stream(sig, 256) : STREAM_MPEG_NONE;
-	if (mpeg_type == STREAM_MPEG_VIDEO) return "video/mpeg";
-	if (mpeg_type == STREAM_MPEG_AUDIO) return "audio/mpeg";
-	if (mpeg_type == STREAM_MPEG4_GENERIC) return "video/mpeg4-generic"; */
 
 	return NULL;
 }
