@@ -19,6 +19,13 @@
 /* How many bytes to read from the input file. */
 #define BYTES_TO_READ 4096
 
+/* See RFC-6838 (https://datatracker.ietf.org/doc/html/rfc6838#section-3)
+ * for the naming requirements of a MIME-type string. */
+#define IS_VALID_MIMETYPE_CHAR(c, subtype)                  \
+	(IS_ALNUM((c)) || ((subtype) == 1 && ((c) == '!'        \
+	|| (c) == '#' || (c) == '$' || (c) == '-' || (c) == '^' \
+	|| (c) == '_' || (c) == '.' || (c) == '+')))
+
 /* Convert S into a little-endian unsigned 32-bit value */
 #define LE_U32(s) ((uint32_t)((uint32_t)(s)[0] | ((uint32_t)(s)[1] << 8) \
 	| ((uint32_t)(s)[2] << 16) | ((uint32_t)(s)[3] << 24)))
@@ -80,162 +87,57 @@ xmemmem(const void *haystack, size_t haylen,
 	return NULL;
 }
 
-/* Return the MIME-type recorded in a ZIP file or NULL if none is found. */
+/* Return the MIME-type recorded in a ZIP file, or NULL if none is found.
+ * This covers (at least):
+ * Libreoffice:      application/vnd.oasis.opendocument.*
+ * Old OpenOffice:   application/vnd.sun.xml.*
+ * CorelDraw:        application/x-vnd.corel.*
+ * KDE Office suite: application/x-k* (e.g. application/x-kwrite)
+ * OpenRaster:       image/openraster
+ * Krita:            application/x-krita
+ * Epub:             application/epub+zip */
 static const char *
-get_mime_from_zip(const uint8_t *str, const size_t str_len)
+get_mimetype_from_zip(const uint8_t *str, const size_t str_len,
+	const size_t name_offset)
 {
-	const uint8_t *s = str;
-	const size_t l = str_len;
+	/* It is guaranteed that STR starts with "PK\x03\x04" and that
+	 * "mimetype" is found at offset 0x1E (30). */
+	if (!str || str_len < name_offset)
+		return NULL;
 
-	/* OpenOffice/Libreoffice */
-	if (l >= 41 && s[35] == 't'
-	&& memcmp(s, "application/vnd.oasis.opendocument.text", 39) == 0) {
-		if (s[39] == '-' && str[40] == 't')
-			return "application/vnd.oasis.opendocument.text-template";
-		if (s[39] == '-' && str[40] == 'm')
-			return "application/vnd.oasis.opendocument.text-master";
-		if (s[39] == '-' && str[40] == 'w')
-			return "application/vnd.oasis.opendocument.text-web";
-		return "application/vnd.oasis.opendocument.text";
+	/* A buffer with enough room to hold a MIME-type string.
+	 * See RFC-6838 (https://datatracker.ietf.org/doc/html/rfc6838#section-3)
+	 * for the naming requirements of a MIME-type string. */
+	static char buf[256];
+
+	/* Length of the content of the "mimetype" tag. */
+	const uint32_t comp_size = LE_U32(str + 18);
+	const size_t mimetype_len = (size_t)comp_size;
+
+	if (mimetype_len == 0 || mimetype_len > sizeof(buf) - 1
+	|| mimetype_len + name_offset > str_len)
+		return NULL;
+
+	/* Position the pointer right after the 'mimetype' tag. */
+	const uint8_t *s = str + name_offset;
+
+	size_t slashes = 0;
+	for (size_t i = 0; i < mimetype_len; i++) {
+		const int is_subtype = (slashes > 0);
+		if (s[i] != '/' && !IS_VALID_MIMETYPE_CHAR(s[i], is_subtype))
+			return NULL;
+		if (s[i] == '/' && i > 0 && i < mimetype_len - 1)
+			slashes++;
+		buf[i] = (char)s[i];
 	}
 
-	if (l >= 48 && s[35] == 's'
-	&& memcmp(s, "application/vnd.oasis.opendocument.spreadsheet", 46) == 0) {
-		if (s[46] == '-' && s[47] == 't')
-			return "application/vnd.oasis.opendocument.spreadsheet-template";
-		if (s[46] == '-' && s[47] == 'm')
-			return "application/vnd.oasis.opendocument.spreadsheet-master";
-		if (s[46] == '-' && s[47] == 'w')
-			return "application/vnd.oasis.opendocument.spreadsheet-web";
-		return "application/vnd.oasis.opendocument.spreadsheet";
-	}
+	buf[mimetype_len] = '\0';
 
-	if (l >= 49 && s[35] == 'p'
-	&& memcmp(s, "application/vnd.oasis.opendocument.presentation", 47) == 0) {
-		if (s[47] == '-' && s[48] == 't')
-			return "application/vnd.oasis.opendocument.presentation-template";
-		if (s[47] == '-' && s[48] == 'm')
-			return "application/vnd.oasis.opendocument.presentation-master";
-		if (s[47] == '-' && s[48] == 'w')
-			return "application/vnd.oasis.opendocument.presentation-web";
-		return "application/vnd.oasis.opendocument.presentation";
-	}
+	/* A MIME type has the form "type/subtype": only a single slash is allowed. */
+	if (slashes != 1)
+		return NULL;
 
-	if (l >= 45 && s[35] == 'g'
-	&& memcmp(s, "application/vnd.oasis.opendocument.graphics", 43) == 0) {
-		if (s[43] == '-' && s[44] == 't')
-			return "application/vnd.oasis.opendocument.graphics-template";
-		if (s[43] == '-' && s[44] == 'm')
-			return "application/vnd.oasis.opendocument.graphics-master";
-		if (s[43] == '-' && s[44] == 'w')
-			return "application/vnd.oasis.opendocument.graphics-web";
-		return "application/vnd.oasis.opendocument.graphics";
-	}
-
-	if (l >= 44 && s[35] == 'f'
-	&& memcmp(s, "application/vnd.oasis.opendocument.formula", 42) == 0) {
-		if (s[42] == '-' && s[43] == 't')
-			return "application/vnd.oasis.opendocument.formula-template";
-		if (s[42] == '-' && s[43] == 'm')
-			return "application/vnd.oasis.opendocument.formula-master";
-		if (s[42] == '-' && s[43] == 'w')
-			return "application/vnd.oasis.opendocument.formula-web";
-		return "application/vnd.oasis.opendocument.formula";
-	}
-
-	if (l >= 41 && s[35] == 'b'
-	&& memcmp(s, "application/vnd.oasis.opendocument.base", 39) == 0) {
-		if (s[39] == '-' && s[40] == 't')
-			return "application/vnd.oasis.opendocument.base-template";
-		if (s[39] == '-' && s[40] == 'm')
-			return "application/vnd.oasis.opendocument.base-master";
-		if (s[39] == '-' && s[40] == 'w')
-			return "application/vnd.oasis.opendocument.base-web";
-		return "application/vnd.oasis.opendocument.base";
-	}
-
-	if (l >= 40 && s[35] == 'c'
-	&& memcmp(s, "application/vnd.oasis.opendocument.chart", 40) == 0)
-		return "application/vnd.oasis.opendocument.chart";
-
-	if (l >= 40 && s[35] == 'i'
-	&& memcmp(s, "application/vnd.oasis.opendocument.image", 40) == 0)
-		return "application/vnd.oasis.opendocument.image";
-
-	/* Old OpenOffice format */
-	if (l >= 30 && s[24] == 'w'
-	&& memcmp(s, "application/vnd.sun.xml.writer", 30) == 0)
-		return "application/vnd.sun.xml.writer";
-	if (l >= 28 && s[24] == 'c'
-	&& memcmp(s, "application/vnd.sun.xml.calc", 28) == 0)
-		return "application/vnd.sun.xml.calc";
-	if (l >= 31 && s[24] == 'i'
-	&& memcmp(s, "application/vnd.sun.xml.impress", 31) == 0)
-		return "application/vnd.sun.xml.impress";
-	if (l >= 28 && s[24] == 'd'
-	&& memcmp(s, "application/vnd.sun.xml.draw", 28) == 0)
-		return "application/vnd.sun.xml.draw";
-	if (l >= 28 && s[24] == 'm'
-	&& memcmp(s, "application/vnd.sun.xml.math", 28) == 0)
-		return "application/vnd.sun.xml.math";
-	if (l >= 28 && s[24] == 'b'
-	&& memcmp(s, "application/vnd.sun.xml.base", 28) == 0)
-		return "application/vnd.sun.xml.base";
-
-	if (l >= 16 && s[6] == 'o' && memcmp(s, "image/openraster", 16) == 0)
-		return "image/openraster";
-
-	if (l >= 19 && s[14] == 'k' && memcmp(s, "application/x-krita", 19) == 0)
-		return "application/x-krita";
-
-	if (l >= 20 && s[17] == 'z' && memcmp(s, "application/epub+zip", 20) == 0)
-		return "application/epub+zip";
-
-	/* CorelDraw documents */
-	if (l > 50 && s[18] == 'c' && memcmp(s, "application/x-vnd.corel.", 24) == 0) {
-		if (s[29] == 'd' && memcmp(s + 24, "draw.document+zip", 17) == 0)
-			return "application/x-vnd.corel.draw.document+zip";
-		if (s[28] == 'd' && memcmp(s + 24, "zcf.draw.document+zip", 21) == 0)
-			return "application/x-vnd.corel.zcf.draw.document+zip";
-		if (s[29] == 't' && memcmp(s + 24, "draw.template+zip", 17) == 0)
-			return "application/x-vnd.corel.draw.template+zip";
-		if (s[33] == 't' && memcmp(s + 24, "zcf.draw.template+zip", 21) == 0)
-			return "application/x-vnd.corel.zcf.draw.template+zip";
-		if (s[28] == 'p' && memcmp(s + 24, "zcf.pattern+zip", 15) == 0)
-			return "application/x-vnd.corel.zcf.pattern+zip";
-		if (s[33] == 'd' && memcmp(s + 24, "designer.document+zip", 21) == 0)
-			return "application/x-vnd.corel.designer.document+zip";
-		if (s[37] == 'z' && memcmp(s + 24, "zcf.designer.document+zip", 25) == 0)
-			return "application/x-vnd.corel.zcf.designer.document+zip";
-		if (s[24] == 's' && memcmp(s + 24, "symbol.library+zip", 18) == 0)
-			return "application/x-vnd.corel.symbol.library+zip";
-		if (s[28] == 'z' && memcmp(s + 24, "zcf.symbol.library+zip", 22) == 0)
-			return "application/x-vnd.corel.zcf.symbol.library+zip";
-	}
-
-	/* KDE Office suit (KOffice) */
-	if (l >= 26 && s[12] == 'x' && s[13] == '-' && s[14] == 'k') {
-		if (s[15] == 'a' && memcmp(s, "application/x-karbon", 20) == 0)
-			return "application/x-karbon";
-		if (s[15] == 'c' && memcmp(s, "application/x-kchart", 20) == 0)
-			return "application/x-kchart";
-		if (s[15] == 'f' && memcmp(s, "application/x-kformula", 22) == 0)
-			return "application/x-kformula";
-		if (s[15] == 'i' && memcmp(s, "application/x-killustrator", 26) == 0)
-			return "application/x-killustrator";
-		if (s[15] == 'i' && memcmp(s, "application/x-kivio", 19) == 0)
-			return "application/x-kivio";
-		if (s[15] == 'o' && memcmp(s, "application/x-kontour", 21) == 0)
-			return "application/x-kontour";
-		if (s[15] == 'p' && memcmp(s, "application/x-kpresenter", 24) == 0)
-			return "application/x-kpresenter";
-		if (s[15] == 's' && memcmp(s, "application/x-kspread", 21) == 0)
-			return "application/x-kspread";
-		if (s[15] == 'w' && memcmp(s, "application/x-kword", 19) == 0)
-			return "application/x-kword";
-	}
-
-	return NULL;
+	return buf;
 }
 
 static const char *
@@ -244,9 +146,9 @@ check_zip_magic(const uint8_t *str, const size_t str_len)
 	if (str_len >= 39 && str[30] == 'm' && str[31] == 'i' && str[32] == 'm'
 	&& str[33] == 'e' && str[34] == 't' && str[35] == 'y' && str[36] == 'p'
 	&& str[37] == 'e')
-		return get_mime_from_zip(str + 38, str_len - 38);
+		return get_mimetype_from_zip(str, str_len, 38);
 
-	/* STR starts with "PK x03 x04" (4 bytes). Let's skip those bytes. */
+	/* STR starts with "PK\x03\x04" (4 bytes). Let's skip these bytes. */
 	const uint8_t *s = str + 4;
 	const size_t l = str_len - 4;
 
