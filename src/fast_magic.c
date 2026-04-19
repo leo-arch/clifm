@@ -386,36 +386,6 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 	return NULL;
 }
 
-static size_t
-id3v2_tag_size(const uint8_t *buf, size_t buflen)
-{
-	if (buflen < 10)
-		return 0;
-
-	/* Bytes 6..9 are sync-safe size */
-	const uint32_t b6 = buf[6], b7 = buf[7], b8 = buf[8], b9 = buf[9];
-	/* Validate sync-safe (MSB must be zero) */
-	if ((b6 & 0x80) || (b7 & 0x80) || (b8 & 0x80) || (b9 & 0x80))
-		return 0; /* Malformed */
-
-	const uint32_t size = (b6 << 21) | (b7 << 14) | (b8 << 7) | b9;
-	return (size_t)size + 10;
-}
-
-static const char *
-check_mp3_magic(const uint8_t *buf, const size_t buf_size)
-{
-	const size_t taglen = id3v2_tag_size(buf, buf_size);
-	if (taglen > 0 && taglen + 2 <= buf_size
-	&& buf[taglen] == 0xFF && (buf[taglen + 1] & 0xE0) == 0xE0)
-		return "audio/mpeg";
-/*		return "audio/mp3"; // No such thing as audio/mp3 */
-
-	/* Invalid or absent ID3v2 tag. This is what both the Shared MIME-info
-	 * database and exiftool(1) do: report audio/mpeg. */
-	return "audio/mpeg";
-}
-
 static const char *
 check_ftyp_magic(const uint8_t *s, const size_t l)
 {
@@ -521,7 +491,7 @@ check_ftyp_magic(const uint8_t *s, const size_t l)
 		return "image/heic-sequence";
 
 	if (l > 2 && ((s[0] == 'q' && s[1] == 't')
-	|| (s[0] == 'm' && s[1] == 'q' && s[2] == 't'))) // .mov, .qt */
+	|| (s[0] == 'm' && s[1] == 'q' && s[2] == 't'))) /* .mov, .qt */
 		return "video/quicktime";
 
 	/* avif, avis */
@@ -573,19 +543,40 @@ check_ogg_magic(const uint8_t *s, const size_t slen)
 	return NULL;
 }
 
+static size_t
+get_ebml_vint_len(const uint8_t vint)
+{
+	size_t vint_len = 1;
+	uint8_t mask = 0x80;
+	while (vint_len < 8 && !(vint & mask)) {
+		vint_len++;
+		mask >>= 1;
+	}
+
+	return vint_len;
+}
+
 /* See http://fileformats.archiveteam.org/wiki/EBML */
 static const char *
 check_ebml_magic(const uint8_t *s, const size_t nread)
 {
+	/* In practice, docType appears within the first 128–512 bytes for
+	 * valid files, so that 1K is more than enough. */
+	const size_t max = nread > 1024 ? 1024 : nread;
 	size_t n = 0;
-	for (size_t i = 4; i < nread - 3; i++) {
+
+	/* The EBML header takes 4 bytes (0..3): skip these bytes. */
+	for (size_t i = 4; i + 2 < max; i++) {
 		if (s[i] == 0x42 && s[i + 1] == 0x82) {
-			n = i + 3; /* Skip 0x42, 0x82, and VINT-byte */
+			const size_t vint_len = get_ebml_vint_len(s[i + 2]);
+			if (i + 2 + vint_len > max)
+				return NULL;
+			n = i + 2 + vint_len; /* Skip ID (0x42 0x82) + VINT */
 			break;
 		}
 	}
 
-	if (n == 0)
+	if (n == 0 || n + 8 > nread)
 		return NULL;
 
 	const uint8_t *p = s + n;
@@ -1730,6 +1721,41 @@ is_seq_video(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
+static size_t
+id3v2_tag_size(const uint8_t *buf, const size_t buflen, const off_t file_size)
+{
+	if (buflen < 10)
+		return 0;
+
+	const uint8_t ver = buf[3];       /* Version */
+	const uint8_t id3_flags = buf[5]; /* Flags byte is at offset 5 */
+	if (ver < 2 || ver > 4)           /* Accept v2.2..v2.4 */
+		return 0;
+
+	/* Bytes 6..9 are sync-safe size */
+	const uint32_t b6 = buf[6], b7 = buf[7], b8 = buf[8], b9 = buf[9];
+	/* Validate sync-safe (MSB must be zero) */
+	if ((b6 & 0x80) || (b7 & 0x80) || (b8 & 0x80) || (b9 & 0x80))
+		return 0; /* Malformed */
+
+	uint32_t tag_payload = (b6 << 21) | (b7 << 14) | (b8 << 7) | b9; /* payload size */
+	size_t total = (size_t)tag_payload + 10; /* header + payload */
+
+	/* Footer for v2.4 adds 10 bytes */
+	if (ver == 4 && (id3_flags & 0x10))
+		total += 10;
+
+	/* Sanity cap */
+	const size_t MAX_TAG_BYTES = 1024 * 1024; /* 1 MiB */
+	if (total > MAX_TAG_BYTES)
+		return 0;
+
+	if (file_size > 0 && total > (size_t)file_size)
+		return 0;
+
+	return total;
+}
+
 static const char *
 check_modern_formats(const uint8_t *sig, const size_t nread,
 	const off_t file_size)
@@ -1761,9 +1787,6 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == '<' && sig[1] == 's' && sig[2] == 'v'
 	&& sig[3] == 'g') /* SVG without XML declaration */
 		return "image/svg+xml";
-
-	if (nread > 2 && sig[0] == 'I' && sig[1] == 'D' && sig[2] == '3')
-		return check_mp3_magic(sig, nread);
 
 	/* At least Adobe Reader versions 3 through 6 did support this header:
 	 * %!PS-Adobe-N.n PDF-M.m
@@ -3089,7 +3112,7 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 
 	/* Sony ATRAC Advanced lossless (oma, aa3) */
 	if (nread > 2 && sig[0] == 'e' && sig[1] == 'a' && sig[2] == '3') {
-		const size_t v = id3v2_tag_size(sig, nread);
+		const size_t v = id3v2_tag_size(sig, nread, file_size);
 		if (v + 5 < nread && sig[v] == 'E' && sig[v + 1] == 'A'
 		&& sig[v + 2] == '3' && sig[v + 4] == 0x00 && sig[v + 5] == 0x60)
 			return "audio/x-oma"; /* MIME type used by FFmpeg */
@@ -3304,6 +3327,11 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	if (nread >= 21 && sig[0] == 'I' && sig[10] == 'M' && sig[18] == 0x1A
 	&& memcmp(sig, "Interplay MVE File\x1A\0\x1A", 21) == 0)
 		return "video/x-interplay-mve";
+
+	/* FFmpeg: libavformat/betsoftvid.c */
+	if (nread > 4 && sig[0] == 'V' && sig[1] == 'I' && sig[2] == 'D'
+	&& sig[3] == 0x00)
+		return "video/x-bethsoftvid";
 
 	/* https://web.archive.org/web/20150503020113/http://hackipedia.org/File%20formats/Music/Sample%20based/text/Digitrakker%203.0%20MDL%20module%20format.cp437.txt.utf-8.txt */
 	if (nread > 3 && sig[0] == 'D' && sig[1] == 'M' && sig[2] == 'D'
@@ -3803,6 +3831,16 @@ open_error(const char *file, const int err_no)
 	return NULL;
 }
 
+static void
+skip_id3_tag(const uint8_t **sig, size_t *nread, const off_t file_size)
+{
+	const size_t taglen = id3v2_tag_size(*sig, *nread, file_size);
+	if (taglen > 0 && taglen < *nread) {
+		*nread -= taglen;
+		*sig += taglen;
+	}
+}
+
 /* Read a few kilo bytes from the file FILE and attempt to find out an
  * appropiate MIME type based on the file's content.
  * Returns the found MIME type (as a constant string) or NULL if none is found.
@@ -3834,18 +3872,19 @@ fast_magic(const char *file)
 		return fs_type_check(&st);
 	}
 
-	FILE *f = fdopen(fd, "rb");
-	if (!f)
+	uint8_t buf[BYTES_TO_READ];
+	const ssize_t bytes = pread(fd, buf, BYTES_TO_READ, 0);
+	close(fd);
+
+	if (bytes <= 0)
 		return NULL;
 
-	uint8_t sig[BYTES_TO_READ];
-	const size_t nread = fread(sig, 1, BYTES_TO_READ, f);
-	if (ferror(f) || nread == 0) {
-		fclose(f);
-		return NULL;
-	}
+	size_t nread = (size_t)bytes;
+	const uint8_t *sig = buf;
 
-	fclose(f);
+	/* Skip the ID3 tag: actual file format data is immediately after the tag. */
+	if (nread >= 10 && sig[0] == 'I' && sig[1] == 'D' && sig[2] == '3')
+		skip_id3_tag(&sig, &nread, st.st_size);
 
 	const char *mimetype = check_modern_formats(sig, nread, st.st_size);
 	if (mimetype)
