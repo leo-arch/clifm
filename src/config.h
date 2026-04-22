@@ -32,6 +32,7 @@ void set_env(const int reload);
 int  get_fzf_border_type(const char *line);
 int  get_fzf_height(char *line);
 #endif /* !_NO_FZF */
+void set_main_config_dir(const int secure_mode);
 void set_sel_file(void);
 void set_time_style(char *line, char **str, const int ptime);
 

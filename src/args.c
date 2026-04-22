@@ -849,6 +849,12 @@ RUN:
 	if (preview == 1)
 		clear_term_img();
 
+	/* Required by load_user_mimetypes() to check ~/.config/clifm/mime.types */
+	if (!config_dir_gral) {
+		const int se = (xargs.secure_env == 1 || xargs.secure_env_full == 1);
+		set_main_config_dir(se);
+	}
+
 	load_user_mimetypes();
 	const char *fm = getenv("CLIFM_FAST_MAGIC");
 	if (fm && fm[0] == '1' && !fm[1])

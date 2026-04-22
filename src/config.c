@@ -1441,7 +1441,7 @@ create_tmp_files(void)
  * 2. XDG_CONFIG_HOME/clifm (if not secure-env).
  * 3. user.home/.config/clifm: $HOME if not secure-env or pw_dir from the
  * passwd database. */
-static void
+void
 set_main_config_dir(const int secure_mode)
 {
 	if (alt_config_dir && *alt_config_dir) {
