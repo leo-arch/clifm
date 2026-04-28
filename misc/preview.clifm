@@ -38,6 +38,11 @@
 # If this script is not found under ~/.config/clifm, you can copy it from
 # the data directory (usually /usr/share/clifm/plugins).
 #
+# Legacy formats (amiga, commodore, atari, etc). recoil2png is required.
+;^image/x-(amiga-|atari-|coco-|commodore-|msx-|nec-|spectrum-|ilbm|deep|award-bioslogo|ilab|signum|compuserve|msp|pic|cpc|sony-tim|makichan|vicar|ice|amos|graph2font|grob|apple-a2gs|pi|spr|deskmate-paint|multiartist|daisy-dot-font|artmaster88|spritepad|q4|pcpaint)=~/.config/clifm/clifmimg legacy %f %u;
+;^application/x-atari-sfdn=~/.config/clifm/clifmimg legacy %f %u;
+;^font/x-(atari-|commodore-)=~/.config/clifm/clifmimg legacy %f %u;
+
 ;^(text|application)/rtf$|^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument|vnd\.(sun\.xml|ms-office|wordperfect)).*=~/.config/clifm/clifmimg doc %f %u;
 ;^application/pdf$=~/.config/clifm/clifmimg pdf %f %u;
 ;^application/epub\+zip$=~/.config/clifm/clifmimg epub %f %u;
