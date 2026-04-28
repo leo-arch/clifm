@@ -18,6 +18,7 @@
 # image (direct image display)
 # gif, svg, krita (image format convertion and display)
 # video, epub, mobi, djvu, pdf, doc, audio, font, and postscript (convertion to image and display)
+# legacy (preview legacy image files with recoil2png)
 #
 # The second parameter is the file name to be previewed.
 #
@@ -70,6 +71,7 @@
 # gs                      (Postscript files - provided by the ghostscript package)
 # magick                  (image format convertion - provided by the imagemagick package)
 # unzip                   (Krita image files)
+# recoil2png              (Legacy image files)
 #
 # NOTE: The exact package names providing these programs may vary depending
 # on your OS/distribution, but ususally they have the same name as the program.
