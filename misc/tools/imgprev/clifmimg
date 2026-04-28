@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # clifmimg
-# Version: 1.4
+# Version: 1.5
 
 # Based on https://github.com/cirala/vifmimg, licensed GPL-3.0
 # All changes are licensed GPL-2.0+
@@ -396,6 +396,11 @@ gen_svg_preview() {
 	print_err_msg "magick (librsvg)" "$?" "svg"
 }
 
+gen_legacy_preview() {
+	recoil2png -o "$2" "$1" >/dev/null 2>&1 && add_to_info_file "$2" && return 0
+	print_err_msg "recoil2png" "$?" "legacy"
+}
+
 gen_video_preview() {
 	ffmpegthumbnailer -i "$1" -o "$2" -s "${DEFAULT_SIZE%%x*}" -q 5 >/dev/null 2>&1 && \
 		add_to_info_file "$2" && return 0
@@ -460,6 +465,11 @@ main() {
 	;;
 	"krita")
 		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_krita_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
+			display "${PCACHE}.$THUMB_FORMAT"
+		fi
+	;;
+	"legacy")
+		if [ -f "${PCACHE}.$THUMB_FORMAT" ] || gen_legacy_preview "$file" "${PCACHE}.$THUMB_FORMAT"; then
 			display "${PCACHE}.$THUMB_FORMAT"
 		fi
 	;;
