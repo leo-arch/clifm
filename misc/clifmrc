@@ -513,8 +513,6 @@
 
 # Use the faster built-in magic check; fall back to libmagic if no result
 # is found.
-# Note: The built-in magic is significantly faster but less accurate than
-# libmagic.
 ;FastMagic=true
 
 # When sorting files by 'version' or 'name', skip non-alphanumeric characters.
