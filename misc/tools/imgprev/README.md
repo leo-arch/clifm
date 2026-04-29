@@ -30,6 +30,11 @@
 # If the clifmimg script cannot be found under '~/.config/clifm/', you can copy it from the data
 # directory, usually '/usr/local/share/clifm/plugins/' or '/usr/share/clifm/plugins'.
 
+# Legacy formats (amiga, commodore, atari, etc). recoil2png is required.
+^image/x-(amiga-|atari-|coco-|commodore-|msx-|nec-|spectrum-|ilbm|deep|award-bioslogo|ilab|signum|compuserve|msp|pic|cpc|sony-tim|makichan|vicar|ice|amos|graph2font|grob|apple-a2gs|pi|spr|deskmate-paint|multiartist|daisy-dot-font|artmaster88|spritepad|q4|pcpaint)=~/.config/clifm/clifmimg legacy %f %u;
+^application/x-atari-sfdn=~/.config/clifm/clifmimg legacy %f %u;
+^font/x-(atari-|commodore-)=~/.config/clifm/clifmimg legacy %f %u;
+
 ^text/rtf$|^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc %f %u;
 ^application/epub\+zip$=~/.config/clifm/clifmimg epub %f %u;
 ^application/x-mobipocket-ebook$=~/.config/clifm/clifmimg mobi %f %u;
@@ -137,6 +142,7 @@ The first parameter (thumbnailing method) can be any of the following:
 | `image` | Display image directly, without previous convertion | No |
 | `gif`, `svg`, `krita` | Convert image and display | Yes |
 | `audio`, `djvu`, `doc`, `epub`, `font`, `mobi`, `pdf`, `postscript`, and `video` | Convert file to image and display | Yes |
+| `legacy` | Generate thumbnails of legacy image formats ([recoil2png](https://recoil.sourceforge.net/) is required) | Yes |
 
 The `audio` method accepts four modes: `cover`, `wave`, `spectogram`, and `info`. Set the desired mode via the `audio_method` variable (defaults to `cover`, which falls back to `info` if there is no cover image available).
 
@@ -177,7 +183,8 @@ The following applications are used to generate thumbnails:
 | `librsvg` | SVG image | Required by **magick**(1) to convert SVG files | |
 | `gs` | Postscript | Provided by the `ghostscript` package |
 | `magick` | Several image formats | Provided by the `imagemagick` package |
-| `unzip` | Krita images | | 
+| `unzip` | Krita images | |
+| `recoil2png` | Legacy image formats | https://recoil.sourceforge.net/ |
 
 > [!NOTE]
 > The exact package names providing the above programs may vary depending on your OS/distribution, but they usually have the same name as the corresponding program.
