@@ -1761,8 +1761,12 @@ rm_confirm(const struct rm_info *info, const size_t start, const int have_dirs)
 	printf(_("File(s) to be removed%s:\n"),
 		have_dirs > 0 ? _(" (recursively)") : "");
 
-	for (size_t i = start; info[i].name; i++)
-		print_file_name(info[i].name, info[i].dir);
+	for (size_t i = start; info[i].name; i++) {
+		char *name = abbreviate_file_name(info[i].name);
+		print_file_name(name, info[i].dir);
+		if (name != info[i].name)
+			free(name);
+	}
 
 	return rl_get_y_or_n(_("Continue?"), conf.default_answer.remove);
 }
