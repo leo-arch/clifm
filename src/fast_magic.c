@@ -2806,6 +2806,24 @@ is_tx_image(const uint8_t *s, const size_t slen)
 	return (s[slen - 1] == 0xA0 || s[slen - 1] <= 0x0D);
 }
 
+static int
+is_pictor_clp_image(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen <= 10)
+		return 0;
+
+	const uint16_t W = LE_U16(s + 2);
+	const uint16_t H = LE_U16(s + 4);
+	const uint16_t X = LE_U16(s + 6);
+	const uint16_t Y = LE_U16(s + 8);
+/*	s[10] holds the pixel depth (bits per pixel): usually 255 (0xFF) */
+
+	if (W == 0 || W > 1024 || H == 0 || H > 1024 || X > 1024 || Y > 1024)
+		return 0;
+
+	return 1;
+}
+
 static const char *
 check_legacy_formats(const uint8_t *sig, const size_t nread,
 	const off_t file_size)
@@ -4595,8 +4613,9 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& LE_U16(sig + 2) <= 2048 && LE_U16(sig + 4) <= 2048 && sig[13] <= 0x04)
 		return "image/x-pcpaint";
 
-	/* http://fileformats.archiveteam.org/wiki/PCPaint_CLP */
-	if (nread > 1 && LE_U16(sig) == file_size)
+	/* https://www.fileformat.info/format/pictor/egff.htm */
+	if (nread > 10 && (size_t)LE_U16(sig) == (size_t)file_size
+	&& is_pictor_clp_image(sig, nread) == 1)
 		return "image/x-pcpaint-clp";
 
 	/* http://fileformats.archiveteam.org/wiki/Pi_(image_format) */
@@ -4801,6 +4820,22 @@ skip_id3_tag(const uint8_t **sig, size_t *nread, const off_t file_size)
 	}
 }
 
+static int
+get_packed_ext(const char *filename)
+{
+	int ext = 0;
+	const size_t len = strlen(filename);
+	for (size_t i = len; --i >= 0;) {
+		int c = filename[i];
+		if (c == '.')
+			return ext | 538976288;
+		if (c <= ' ' || c > 'z' || ext >= 16777216)
+			return 0;
+		ext = (ext << 8) + c;
+	}
+	return 0;
+}
+
 /* Read a few kilo bytes from the file FILE and attempt to find out an
  * appropiate MIME type based on the file's content.
  * Returns the found MIME type (as a constant string) or NULL if none is found.
@@ -4841,6 +4876,9 @@ fast_magic(const char *file)
 
 	size_t nread = (size_t)bytes;
 	const uint8_t *sig = buf;
+
+	const int pext = get_packed_ext(file);
+	printf("%s: %d\n", file, pext); fflush(stdout);
 
 	/* Skip the ID3 tag: actual file format data is immediately after the tag. */
 	if (nread >= 10 && sig[0] == 'I' && sig[1] == 'D' && sig[2] == '3')
