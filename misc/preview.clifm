@@ -39,7 +39,7 @@
 # the data directory (usually /usr/share/clifm/plugins).
 #
 # Legacy formats (amiga, commodore, atari, etc). recoil2png is required.
-;^image/x-(amiga-|atari-|coco-|commodore-|msx-|nec-|oric-|spectrum-|amos|apple-a2gs|artmaster88|award-bioslogo|charpad|compuserve|cpc|daisy-dot-font|deep|deskmate-paint|graph2font|grob|ice|ilab|ilbm|makichan|msp|multiartist|pcpaint|pi|pic|ppr|q4|signum|spritepad|sony-tim|spr|vicar)=~/.config/clifm/clifmimg legacy %f %u;
+;^image/x-(amiga-|apple2-|atari-|coco-|commodore-|msx-|nec-|oric-|spectrum-|amos|artmaster88|award-bioslogo|charpad|compuserve|cpc|deep|deskmate-paint|graph2font|grob|ice|ilab|ilbm|makichan|msp|multiartist|pcpaint|pi|pic|ppr|q4|signum|spritepad|sony-tim|spr|vicar)=~/.config/clifm/clifmimg legacy %f %u;
 ;^application/x-atari-sfdn=~/.config/clifm/clifmimg legacy %f %u;
 ;^font/x-(amiga-|amstrad-|atari-|commodore-|image72)=~/.config/clifm/clifmimg legacy %f %u;
 
