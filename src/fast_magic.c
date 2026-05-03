@@ -4896,23 +4896,6 @@ skip_id3_tag(const uint8_t **sig, size_t *nread, const off_t file_size)
 	}
 }
 
-/*
-static int
-get_packed_ext(const char *filename)
-{
-	int ext = 0;
-	const size_t len = strlen(filename);
-	for (size_t i = len; --i >= 0;) {
-		int c = filename[i];
-		if (c == '.')
-			return ext | 538976288;
-		if (c <= ' ' || c > 'z' || ext >= 16777216)
-			return 0;
-		ext = (ext << 8) + c;
-	}
-	return 0;
-} */
-
 /* Read a few kilo bytes from the file FILE and attempt to find out an
  * appropiate MIME type based on the file's content.
  * Returns the found MIME type (as a constant string) or NULL if none is found.
@@ -4953,9 +4936,6 @@ fast_magic(const char *file)
 
 	size_t nread = (size_t)bytes;
 	const uint8_t *sig = buf;
-
-//	const int pext = get_packed_ext(file);
-//	printf("%s: %d\n", file, pext); fflush(stdout);
 
 	/* Skip the ID3 tag: actual file format data is immediately after the tag. */
 	if (nread >= 10 && sig[0] == 'I' && sig[1] == 'D' && sig[2] == '3')
