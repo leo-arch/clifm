@@ -2824,6 +2824,29 @@ is_pictor_clp_image(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
+static int
+is_ascii_art(const uint8_t *s, const size_t slen)
+{
+	size_t x = 0, y = 0;
+
+	for (size_t i = 0; i < slen; i++) {
+		if (s[i] < 0x02) /* Exclude NUL and SOH (not seen in samples) */
+			return 0;
+		if (s[i] == 0x9B) {
+			x = 0;
+			y++;
+			if (y > 24) /* Max lines */
+				return 0;
+		} else {
+			if (x >= 64) /* Max rows per line */
+				return 0;
+			x++;
+		}
+	}
+
+	return 1;
+}
+
 static const char *
 check_legacy_formats(const uint8_t *sig, const size_t nread,
 	const off_t file_size)
@@ -3845,11 +3868,21 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0xC8)
 		return "image/x-atari-photochrome";
 
-	/* http://fileformats.archiveteam.org/wiki/ART_(AOL_compressed_image) */
-	if (nread > 15 && sig[0] == 'J' && sig[1] == 'G'
-	&& (sig[2] == 0x03 || sig[2] == 0x04) && sig[3] == 0x0E
-	&& (sig[4] + sig[5] + sig[6] + sig[7]) == 0x00)
-		return "image/x-aol-art";
+	if (nread > 15 && sig[0] == 'J' && sig[1] == 'G') {
+		/* http://fileformats.archiveteam.org/wiki/ART_(AOL_compressed_image) */
+		if ((sig[2] == 0x03 || sig[2] == 0x04) && sig[3] == 0x0E
+		&& !sig[4] && !sig[5] && !sig[6])
+			return "image/x-aol-art";
+		/* http://fileformats.archiveteam.org/wiki/Jigsaw_(Walter_A._Kuhn) */
+		if (sig[4] <= 0x03 && !BE_U32(sig + 5) && !sig[9] && sig[10] == 0x36
+		&& sig[11] == 0x04 && !sig[12] && !sig[13] && sig[14] == 0x28)
+			return "image/x-jigzaw";
+	}
+
+	/* http://fileformats.archiveteam.org/wiki/JGF5_(image_format) */
+	if (nread > 4 && sig[0] == 'J' && sig[1] == 'G' && sig[2] == 'F'
+	&& sig[3] == '5' && sig[4] == 0x00)
+		return "image/x-jgf5";
 
 	/* https://temlib.org/AtariForumWiki/index.php/NEOchrome_file_format */
 	if (file_size == 32128 && nread == BYTES_TO_READ && sig[0] == 0x00
@@ -3863,7 +3896,7 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/ComputerEyes */
 	if (nread > 4 && (file_size == 192022 || file_size == 256022)
 	&& sig[0] == 'E' && sig[1] == 'Y' && sig[2] == 'E' && sig[3] == 'S')
-		return "image/x-atari-computer-eyes";
+		return "image/x-atari-eyes";
 
 	/* http://fileformats.archiveteam.org/wiki/ImageLab/PrintTechnic */
 	if (nread > 5 && sig[0] == 'B' && sig[1] == '&' && sig[2] == 'W'
@@ -4608,10 +4641,30 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 			return "image/x-amstrad-perfectpix"; /* .pph */
 	}
 
+	/* https://www.fileformat.info/format/pictor/egff.htm */
+	if (nread >= 10 && sig[0] == 0xFD && sig[1] == 0x00 && sig[2] == 0xB8
+	&& !LE_U16(sig + 3)) {
+		const size_t data_size = (size_t)LE_U16(sig + 5);
+		if (data_size == 0 || data_size == 16384 || data_size == 32768
+		|| sig[nread - 1] == 0x1A)
+			return "image/x-pcpaint-bsave";
+	}
+
+	/* http://fileformats.archiveteam.org/wiki/BSAVE_Image */
+	/* https://www.fileformat.info/format/pictor/egff.htm */
+	if (nread >= 10 && sig[0] == 0xFD) {
+		const size_t data_size = (size_t)LE_U16(sig + 5);
+		if (data_size + 7 == (size_t)file_size /* 7 == header length */
+		|| data_size + 8 == (size_t)file_size) /* +1 for trailing 0x1A */
+			return "image/x-bsave";
+		if (data_size + 7 < nread && sig[data_size + 7] == 0x1A)
+			return "image/x-bsave";
+	}
+
 	/* https://netghost.narod.ru/gff/vendspec/pictor/pictor.txt */
 	if (nread > 13 && sig[0] == 0x34 && sig[1] == 0x12 && sig[11] == 0xFF
 	&& LE_U16(sig + 2) <= 2048 && LE_U16(sig + 4) <= 2048 && sig[13] <= 0x04)
-		return "image/x-pcpaint";
+		return "image/x-pcpaint-pic";
 
 	/* https://www.fileformat.info/format/pictor/egff.htm */
 	if (nread > 10 && (size_t)LE_U16(sig) == (size_t)file_size
@@ -4758,7 +4811,7 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/Psion_PIC */
 	/* http://fileformats.archiveteam.org/wiki/PIC_(Yanagisawa) */
 	if (nread > 3 && sig[0] == 'P' && sig[1] == 'I' && sig[2] == 'C'
-	&& (sig[3] == 0x1A || sig[3] == 0xDC || sig[3] == 0x2F))
+	&& (sig[3] == 0x1A || sig[3] == 0xDC || sig[3] == '/'))
 		return "image/x-pic";
 
 	if ((file_size == 262 || file_size == 257) && is_tx_image(sig, nread) == 1)
@@ -4766,6 +4819,25 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 
 	if (file_size == 17351 && nread > 10 && sig[0] == 0x03 && !LE_U32(sig + 7))
 		return "image/x-atari-din";
+
+	/* RECOIL: recoil.c:RECOIL_DecodeMonoArt */
+	if (nread > 3 && sig[0] <= 30 && sig[1] <= 64
+	&& (size_t)file_size == (3 + (((size_t)sig[0] + 1) * ((size_t)sig[1] + 1))))
+		return "image/x-atari-art";
+
+	/* RECOIL: recoil.c:RECOIL_AsciiArtEditor */
+	/* Max: 64 bytes per row (plus 0x1b terminator) x 24 lines = 1560 */
+	if (file_size <= 1560 && nread > 1 && sig[nread - 1] == 0x9B
+	&& is_ascii_art(sig, nread) == 1)
+		return "image/x-atari-ascii-art-editor";
+
+	/* http://fileformats.archiveteam.org/wiki/Picture_Publisher */
+	if (nread > 7 && sig[0] == 'I' && sig[1] == 'I' && sig[2] == 0x02
+	&& sig[3] == 0x01 && sig[4] == 0x01 && !sig[5] && sig[6] == 0x26 && !sig[7])
+		return "image/x-micrografx-pp4";
+	if (nread > 5 && sig[0] == 'P' && sig[1] == 'P' && sig[2] == 'U'
+	&& sig[3] == 'B' && sig[4] == 'I' && sig[5] == 'I')
+		return "image/x-micrografx-pp5";
 
 	/* =================================
 	 * WEAK MAGIC! Only 2-3 conditions
@@ -4788,6 +4860,10 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	/* Super IRG: IR2 and IRG file sizes respectivelly */
 	if ((file_size == 18310 || file_size == 18314) && sig[0] == 0x01)
 		return "image/x-atari-irg";
+
+	/* RECOIL: recoil.c:RECOIL_DecodeAtari8Artist */
+	if (file_size == 3206 && sig[0] == 0x07)
+		return "image/x-atari-artist";
 
 	return NULL;
 }
@@ -4820,6 +4896,7 @@ skip_id3_tag(const uint8_t **sig, size_t *nread, const off_t file_size)
 	}
 }
 
+/*
 static int
 get_packed_ext(const char *filename)
 {
@@ -4834,7 +4911,7 @@ get_packed_ext(const char *filename)
 		ext = (ext << 8) + c;
 	}
 	return 0;
-}
+} */
 
 /* Read a few kilo bytes from the file FILE and attempt to find out an
  * appropiate MIME type based on the file's content.
@@ -4877,8 +4954,8 @@ fast_magic(const char *file)
 	size_t nread = (size_t)bytes;
 	const uint8_t *sig = buf;
 
-	const int pext = get_packed_ext(file);
-	printf("%s: %d\n", file, pext); fflush(stdout);
+//	const int pext = get_packed_ext(file);
+//	printf("%s: %d\n", file, pext); fflush(stdout);
 
 	/* Skip the ID3 tag: actual file format data is immediately after the tag. */
 	if (nread >= 10 && sig[0] == 'I' && sig[1] == 'D' && sig[2] == '3')
