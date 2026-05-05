@@ -1068,7 +1068,8 @@ resolve_path(char *file, const size_t flen)
 			exit(EXIT_FAILURE);
 		}
 
-	} else if (*file == '~' || strstr(file, "./")) {
+	} else if (*file == '~' || strstr(file, "./")
+	|| (*file == '.' && (!file[1] || (file[1] == '.' && !file[2])))) {
 		s_path = normalize_path(file, strlen(file));
 		if (!s_path) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
