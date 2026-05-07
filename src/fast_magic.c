@@ -2731,7 +2731,7 @@ is_msx_screen(const uint16_t v3, const off_t file_size)
 
 	if (vs + 7 == fs || vs + 8 == fs)
 		return 1;
-	if (v3 == 0xFA9F || v3 == 0xFAFF) return 1; /* SC8 */
+	if (v3 == 0xFA9F || v3 == 0xFAFF || v3 == 0xD407) return 1; /* SC8 */
 	if (v3 == 0x37FF) return 1; /* SC2/GRP */
 	if (v3 > 0x769E && v3 < 0x8000) return 1; /* GE5/GE6 */
 	if (v3 == 0xD3FF) return 1; /* Screen 7-12 */
@@ -2847,8 +2847,169 @@ is_ascii_art(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
+static int
+is_atari_hir_image(const uint8_t *s, const size_t slen, const off_t file_size)
+{
+	if (!s || slen < 10)
+		return 0;
+
+	const uint16_t width = BE_U16(s + 4);
+	const uint16_t height = BE_U16(s + 6);
+	if (((size_t)width * (size_t)height) + 10 == (size_t)file_size)
+		return 1;
+
+	return 0;
+}
+
+static int
+is_art_studio(const uint8_t *s, const size_t width, const size_t height,
+	const off_t file_size)
+{
+	const size_t bytes_per_line = (width + 7) >> 3;
+	const size_t offset = s ? get_amstrad_header_len(s, file_size) : 0;
+
+	if ((size_t)file_size == offset + (bytes_per_line * height) + 5)
+		return 1;
+
+	return 0;
+}
+
+static int
+is_atari_wnd(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen < 2)
+		return 0;
+
+	const uint8_t width = s[0] + 1;
+	const uint8_t height = s[1];
+	const uint8_t stride = (width + 3) >> 2;
+
+	if (stride > 40 || height == 0 || height > 192
+	|| (size_t)stride * (size_t)height > 3070)
+		return 0;
+
+	return 1;
+}
+
+static int
+is_atari_paintshop(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen < 14)
+		return 0;
+
+	const uint16_t width = BE_U16(s + 10) + 1;
+	const uint16_t height = BE_U16(s + 12) + 1;
+	if (width != 0 && width <= 640 && height != 0 && height <= 400)
+		return 1;
+
+	return 0;
+}
+
+struct companion_t {
+	const char *ext1;       /* Original file extension */
+	const size_t ext1_len;  /* Length of the original extension */
+	const char *ext2_lower; /* Companion file extension (lower) */
+	const char *ext2_upper; /* Companion file extension (upper) */
+	const size_t ext2_len;  /* Length of the companion file extension */
+	const char *mime_type;
+};
+
+static struct companion_t companion[] = {
+	{"CM5", 3, "gfx", "GFX", 3, "image/x-amstrad-mode5"},
+	{"CMP", 3, "pl5", "PL5", 3, "image/x-msx-ddgraph"},
+	{"CPT", 3, "hbl", "HBL", 3, "image/x-atari-canvas"},
+	{"MUR", 3, "pal", "PAL", 3, "image/x-atari-mur"},
+	{"PIC0", 4, "pic1", "PIC1", 4, "image/x-commodore-picasso"},
+	{"SCR", 3, "col", "COL", 3, "image/x-commodore-petscii-editor"},
+	{"SCR", 3, "pal", "PAL", 3, "image/x-art-studio"},
+	{"WIN", 3, "pal", "PAL", 3, "image/x-art-studio"},
+	{NULL, 0, NULL, NULL, 0, NULL}
+	/* https://recoil.sourceforge.net/formats.html list more formats
+	 * requiring a compaion file. But most of them do not need to be added
+	 * here, since we already identify them by pure magic.
+	PPH+ODD+EVE          Amstrad PerfectPix
+	LUM+COL              Atari Technicolor Dream
+	MIC+COL              Atari Graph2Font
+	MIC+PMG+RP+RP.INI    Atari RastaConverter
+	VSC+G2F              Atari Graph2Font vertical scroll
+	NEO+RST              Atari NEOchrome Master
+	SH5+PL5, SH6+PL6, SH7+PL7 MSX
+	SC5+S15, SC6+S16, SC7+S17, SC8+S18 MSX Screen 5-8 interlaced
+	SCA+S1A                            MSX Screen 10 interlaced
+	SCC+S1C                            MSX Screen 12 interlaced
+	SR5+PL5, SR6+PL6, SR7+PL7, SRI+PL7 MSX GraphSaurus
+	GLA/GLB/SHA/SHB+PLA                MSX */
+};
+
+static int
+check_companion_file(const char *filename, const size_t namelen,
+	struct companion_t *comp)
+{
+	if (!filename || !comp)
+		return 0;
+
+	const size_t ext_len = comp->ext2_len;
+	char basename[PATH_MAX + 1];
+	if (namelen + ext_len + 1 >= sizeof(basename))
+		return 0;
+
+	/* Copy filename up to and including the last dot */
+	xstrsncpy(basename, filename, namelen + 1);
+	basename[namelen] = '\0';
+
+	/* Append extensions (those of the companion file) and check for
+	 * file existence */
+	struct stat a;
+	xstrsncpy(basename + namelen, comp->ext2_upper, ext_len + 1);
+	basename[namelen + ext_len + 1] = '\0';
+	if (lstat(basename, &a) != -1 && S_ISREG(a.st_mode))
+		return 1;
+
+	xstrsncpy(basename + namelen, comp->ext2_lower, ext_len + 1);
+	basename[namelen + ext_len + 1] = '\0';
+	if (lstat(basename, &a) != -1 && S_ISREG(a.st_mode))
+		return 1;
+
+	return 0;
+}
+
 static const char *
-check_legacy_formats(const uint8_t *sig, const size_t nread,
+get_mimetype_from_companion_file(const char *filename)
+{
+	if (!filename)
+		return NULL;
+
+	const char *ext = strrchr(filename, '.');
+	if (!ext || ext == filename || !++ext)
+		return NULL;
+
+	const size_t ext_len = !ext[1] ? 1 : !ext[2] ? 2
+		: !ext[3] ? 3 : strlen(ext);
+	/* Length of filename up to and including the dot */
+	const size_t name_len = (size_t)(ext - filename);
+	const size_t comp_num = sizeof(companion) / sizeof(companion[0]) - 1;
+
+	for (size_t i = 0; i < comp_num; i++) {
+		if (ext_len != companion[i].ext1_len)
+			continue;
+
+		size_t j;
+		for (j = 0; j < ext_len; j++) {
+			if (TOUPPER(ext[j]) != companion[i].ext1[j])
+				break;
+		}
+		if (j != ext_len) /* No match */
+			continue;
+
+		if (check_companion_file(filename, name_len, &companion[i]) == 1)
+			return companion[i].mime_type;
+	}
+
+	return NULL;
+}
+
+static const char *
+check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	const off_t file_size)
 {
 	if (!sig || nread == 0)
@@ -3033,11 +3194,11 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 7 && sig[0] == 'A' && sig[1] == 'R' && sig[2] == 'M'
 	&& sig[3] == 'o' && sig[4] == 'v' && sig[5] == 'i' && sig[6] == 'e'
 	&& sig[7] == 0x0A)
-		return "video/x-acorn-replay"; /* Neither libmagic nor MIME-info */
+		return "video/x-acorn-replay";
 
 	if (nread > 7 && sig[0] == 'W' && sig[1] == 'O' && sig[2] == 'T'
 	&& sig[3] == 'F')
-		return "video/x-webex-wrf"; /* Neither libmagic nor MIME-info */
+		return "video/x-webex-wrf";
 
 	if (nread > 10 && sig[0] == 'Y' && sig[1] == 'O' && sig[2] < 10
 	&& sig[3] < 10 && sig[6] && sig[7] && !(sig[8] & 1) && !(sig[10] & 1))
@@ -3124,7 +3285,8 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	|| sig[2] == 33) && is_tga_image(sig, nread) == 1)
 		return "image/x-tga";
 
-	if (nread > 1 && sig[0] == 0x11 && (sig[1] == 0x06 || sig[1] == 0x09))
+	if (nread > 1 && ((sig[0] == 0x11 && (sig[1] == 0x06 || sig[1] == 0x09))
+	|| (sig[0] == 0x10 && sig[1] == 0x09)))
 		return "image/x-award-bioslogo";
 	if (nread > 1 && sig[0] == 'A' && sig[1] == 'W' && sig[2] == 'B'
 	&& sig[3] == 'M' && LE_U16(sig + 4) < 1981)
@@ -3944,6 +4106,10 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& sig[2] == '_' && sig[3] == 'S' && sig[4] == 'S' && sig[5] == 'C'
 	&& sig[6] == 'I' && sig[7] == 'I')
 		return "image/x-spectrum-zxs";
+	/* RECOIL: recoil.c:RECOIL_DecodeSev */
+	if (nread >= 23 && sig[0] == 'S' && sig[1] == 'e' && sig[2] == 'v'
+	&& sig[3] == 0x00 && sig[6] == 0x01 && sig[7] == 0x00)
+		return "image/x-spectrum-sevenup"; /* .sev */
 
 	/* https://temlib.org/AtariForumWiki/index.php/CrackArt_file_format */
 	if (nread > 16 && sig[0] == 'C' && sig[1] == 'A' && sig[2] <= 0x01
@@ -3982,7 +4148,7 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 
 	/* http://fileformats.archiveteam.org/wiki/BFLI */
 	if (nread == BYTES_TO_READ && file_size == 33795 && sig[0] == 0xFF
-	&& sig[1] == 0x3B && sig[2] == 0x62)
+	&& sig[1] == 0x3B && sig[2] == 'b')
 		return "image/x-commodore-bfli";
 
 	/* http://fileformats.archiveteam.org/wiki/DEGAS_image
@@ -4092,8 +4258,9 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 		return "image/x-atari-paintworks";
 
 	/* http://fileformats.archiveteam.org/wiki/PaintShop_(Atari_ST) */
-	if (nread > 5 && sig[0] == 't' && sig[1] == 'm' && sig[2] == '8'
-	&& sig[3] == '9' && sig[4] == 'P' && sig[5] == 'S')
+	if (nread > 14 && sig[0] == 't' && sig[1] == 'm' && sig[2] == '8'
+	&& sig[3] == '9' && sig[8] == 0x02 && sig[9] == 0x01
+	&& is_atari_paintshop(sig, nread) == 1)
 		return "image/x-atari-paintshop";
 
 	/* https://sdo.dseiler.eu/formats/bimc.html */
@@ -4372,18 +4539,19 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 		return "image/x-commodore-vidcom64";
 
 	/* http://fileformats.archiveteam.org/wiki/Picasso_64 */
-	if (file_size == 10050 && nread > 1 && !sig[0] && sig[1] == 0x18)
+	if (file_size == 10050 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x18)
 		return "image/x-commodore-picasso64";
 
 	/* http://fileformats.archiveteam.org/wiki/KoalaPainter */
-	if (file_size == 10003 && nread > 1 && !sig[0] && sig[1] == 0x60)
+	if (file_size == 10003 && nread > 1 && sig[0] == 0x00
+	&& (sig[1] == 0x60 || sig[1] == 0x20))
 		return "image/x-commodore-koalapaint";
 
-	if (file_size == 10050 && nread > 1 && !sig[0] && sig[1] == 0x78)
+	if (file_size == 10050 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x78)
 		return "image/x-commodore-p4i";
 
 	/* http://fileformats.archiveteam.org/wiki/Cheese */
-	if (file_size == 20482 && nread > 1 && !sig[0] && sig[1] == 0x80)
+	if (file_size == 20482 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x80)
 		return "image/x-commodore-cheese";
 
 	if ((file_size == 10018 || file_size == 10219) && nread > 1
@@ -4391,10 +4559,10 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 		return "image/x-commodore-sar";
 
 	/* http://fileformats.archiveteam.org/wiki/Doodle!_(C64) */
-	if (file_size == 9218 && nread > 1 && !sig[0] && sig[1] == 0x1C)
+	if (file_size == 9218 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x1C)
 		return "image/x-commodore-doodle";
 
-	if (file_size == 8170 && nread > 1 && !sig[0] && sig[1] == 0x40)
+	if (file_size == 8170 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x40)
 		return "image/x-commodore-cfli";
 
 	if (nread > 8 && sig[0] == 0xF0 && sig[1] == 0x38 && sig[5] == 0x3F
@@ -4403,7 +4571,7 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 
 	/* http://fileformats.archiveteam.org/wiki/Art_Studio */
 	if ((file_size == 9002 || file_size == 9003 || file_size == 9009)
-	&& nread > 1 && !sig[0] && sig[1] == ' ')
+	&& nread > 1 && sig[0] == 0x00 && sig[1] == 0x20)
 		return "image/x-commodore-art";
 
 	/* http://justsolve.archiveteam.org/wiki/Micro_Illustrator */
@@ -4415,8 +4583,29 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	if (file_size == 33603 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x40)
 		return "image/x-commodore-gunpaint";
 
+	/* http://fileformats.archiveteam.org/wiki/Wigmore_Artist_64 */
+	if (file_size == 10242 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x40)
+		return "image/x-commodore-artist64";
+
+	/* https://dn710204.ca.archive.org/0/items/bombjack-50-gigabytes-of-commodore-manuals-books-disks-assembly-and-more/Applications/The_Image_System_User_Guide.pdf */
 	if (file_size == 10218 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x3C)
-		return "image/x-commodore-image-system";
+		return "image/x-commodore-image-system"; /* .ism */
+	if ((file_size == 9194 || file_size == 30738) && nread > 2
+	&& sig[0] == 0x00 && sig[1] == 0x40)
+		return "image/x-commodore-image-system"; /* .ish */
+
+	if (file_size == 16194 && nread > 1 && !sig[0] && sig[1] == 0x20)
+		return "image/x-commodore-hires-interlace"; /* .ihe */
+
+	if (file_size == 9218 && nread > 1 && !sig[0]
+	&& (sig[1] == 0x20 || sig[1] == 0x40))
+		return "image/x-commodore-hed"; /* .hed */
+
+	if (file_size == 16386 && nread > 1 && !sig[0] && sig[1] == 0x40)
+		return "image/x-commodore-hfc"; /* .hfc */
+
+	if (file_size == 16385 && nread > 1 && !sig[0] && sig[1] == 0x40)
+		return "image/x-commodore-afl"; /* .afl */
 
 	/* RECOIL: recoil.c (RECOIL_DecodeBp) */
 	if (file_size == 4083 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x11)
@@ -4426,11 +4615,42 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& sig[0] == 0x00 && sig[1] == 0x18)
 		return "image/x-commodore-lp3";
 
+	if (file_size == 24578 && !sig[0] && sig[1] == 0x20)
+		return "image/x-commodore-hlf";
+
 	/* http://fileformats.archiveteam.org/wiki/Shoot_%27Em_Up_Construction_Kit */
 	if (file_size == 514 && nread > 1 && sig[0] == 'B' && sig[1] == 0x00)
 		return "font/x-commodore-seuck";
 	if (file_size == 8130 && nread > 1 && sig[0] == 'B' && sig[1] == 0x00)
 		return "image/x-commodore-seuck";
+
+	/* http://fileformats.archiveteam.org/wiki/FFLI */
+	if (file_size == 26115 && nread > 2 && sig[0] == 0xFF && sig[1] == 0x3A
+	&& sig[2] == 0x66)
+		return "image/x-commodore-ffli";
+
+	if (nread > 5 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 'B'
+	&& sig[3] == 'R' && sig[4] == 'U' && sig[5] == 'S')
+		return "image/x-commodore-ipaint";
+
+	/* RECOIL: recoil.c:RECOIL_DecodeGr,DecodeZs */
+	if (nread > 3 && file_size == 5378 && sig[0] == ' ' && sig[1] == 0x15
+	&& !sig[3])
+		return "image/x-commodore-starpainter"; /* .cs */
+	if (nread > 3 && file_size == 1026 && sig[0] == 0xB0 && sig[1] == 0xF0
+	&& !sig[3])
+		return "image/x-commodore-starpainter"; /* .zs */
+	if (nread > 1 && file_size == 2 + (sig[0] * (sig[1] << 3)))
+		return "image/x-commodore-starpainter"; /* .gr */
+
+	/* RECOIL: recoil.c (RECOIL_DecodeHim) */
+	if (nread > 5 && sig[0] == 0x00 && sig[1] == 0x40) {
+		if (sig[3] == 0xFF && file_size == 16385)
+			return "image/x-commodore-him";
+		if (sig[2] + (sig[3] << 8) == 16381 + file_size
+		&& sig[4] == 0xF2 && sig[5] == 0x7F)
+			return "image/x-commodore-him";
+	}
 
 	if (nread > 34 && sig[0] == 0x3D && (sig[1] == 0x3D || sig[1] == 0x02)
 	&& BE_U16(sig + 4) <= 0x01 && BE_U16(sig + 10) <= 0x07
@@ -4454,27 +4674,12 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'F' && sig[4] == 'F' && sig[5] == '6' && sig[6] == '4')
 		return "image/x-amiga-flf";
 
-	/* http://fileformats.archiveteam.org/wiki/FFLI */
-	if (file_size == 26115 && nread > 2 && sig[0] == 0xFF && sig[1] == 0x3A
-	&& sig[2] == 0x66)
-		return "image/x-commodore-ffli";
-
-	if (nread > 5 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 'B'
-	&& sig[3] == 'R' && sig[4] == 'U' && sig[5] == 'S')
-		return "image/x-commodore-ipaint";
-
-	/* RECOIL: recoil.c:RECOIL_DecodeGr,DecodeZs */
-	if (nread > 3 && file_size == 5378 && sig[0] == ' ' && sig[1] == 0x15
-	&& !sig[3])
-		return "image/x-commodore-starpainter"; /* .cs */
-	if (nread > 3 && file_size == 1026 && sig[0] == 0xB0 && sig[1] == 0xF0
-	&& !sig[3])
-		return "image/x-commodore-starpainter"; /* .zs */
-	if (nread > 1 && file_size == 2 + (sig[0] * (sig[1] << 3)))
-		return "image/x-commodore-starpainter"; /* .gr */
-
-	if (nread > 3 && sig[0] == 'S' && sig[1] == 'P' && sig[2] == 'D'
-	&& sig[3] == 0x01)
+	/* RECOIL: recoil.c:RECOIL_DecodeSpd */
+	if (nread > 4 && sig[0] == 'S' && sig[1] == 'P' && sig[2] == 'D'
+	&& sig[3] == 0x01 && (size_t)file_size >= 9 + (((size_t)sig[4] + 1) << 6))
+		return "image/x-spritepad";
+	if (nread >= 67 && (file_size & 63) == 3 && sig[0] == 0x0B && !sig[1]
+	&& sig[2] == 0x01 && !sig[3])
 		return "image/x-spritepad";
 
 	/* http://fileformats.archiveteam.org/wiki/ArtMaster88 */
@@ -4496,15 +4701,6 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& (sig[2] == 'U' || sig[2] == 'C') && ((sig[2] == 'U' && sig[3] == 0x01)
 	|| (sig[2] == 'C' && sig[3] <= 0x03)))
 		return "image/x-atari-dunegraph";
-
-	/* RECOIL: recoil.c (RECOIL_DecodeHim) */
-	if (nread > 5 && sig[0] == 0x00 && sig[1] == 0x40) {
-		if (sig[3] == 0xFF && file_size == 16385)
-			return "image/x-commodore-him";
-		if (sig[2] + (sig[3] << 8) == 16381 + file_size
-		&& sig[4] == 0xF2 && sig[5] == 0x7F)
-			return "image/x-commodore-him";
-	}
 
 	/* http://fileformats.archiveteam.org/wiki/INT95a */
 	if (nread > 5 && sig[0] == 'I' && sig[1] == 'N' && sig[2] == 'T'
@@ -4633,6 +4829,16 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& (size_t)sig[0] + 2 == (size_t)file_size && is_msl_image(sig, nread) == 1)
 		return "image/x-atari-mad-studio"; /* .msl */
 
+	/* RECOIL: recoil.c:RECOIL_DecodeAn2/4 */
+	if (nread > 1 && nread <= 967 && sig[0] < 40 && sig[1] < 24) {
+		const uint8_t columns = sig[0] + 1;
+		const uint8_t rows = sig[1] + 1;
+		const size_t cr = (size_t)columns * (size_t)rows;
+		if ((size_t)file_size == 2 + cr /* ANTIC 2 (.an2) */
+		|| (size_t)file_size == 7 + cr) /* ANTIC 4-5 (.an4/5) */
+			return "image/x-atari-mad-studio";
+	}
+
 	if (nread > 9 && ((nread == 22 && (sig[0] == 3 || sig[0] == 4))
 	|| (sig[0] == 5 && nread == ((1 + (size_t)sig[5]) * 5)))) {
 		const uint16_t W = LE_U16(sig + 1);
@@ -4709,6 +4915,10 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 8 && (sig[0] == 0x0F || (sig[0] >= 0x08 && sig[0] <= 0x0B))
 	&& !BE_U32(sig + 1) && sig[8] == 0x00)
 		return "image/x-atari-tools-800";
+
+	if (file_size >= 3 && file_size <= 42
+	&& 2 + (size_t)sig[0] == (size_t)file_size)
+		return "image/x-atari-spr";
 
 	/* http://fileformats.archiveteam.org/wiki/Rembrandt */
 	if (nread > 10 && sig[0] == 'T' && sig[1] == 'R' && sig[2] == 'U'
@@ -4795,8 +5005,22 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& is_atari_hip_image(sig, nread, file_size) == 1)
 		return "image/x-atari-hip";
 
+	/* http://fileformats.archiveteam.org/wiki/Advanced_Art_Studio */
+	if (file_size == 10018 && sig[0] == 0x00 && sig[1] == 0x20)
+		return "image/x-art-studio"; /* .ocp */
+
+	/* RECOIL: recoil.c:REOCIL_DecodeWin */
+	if ((size_t)file_size < BYTES_TO_READ) {
+		const size_t W = (size_t)LE_U16(sig + file_size - 4);
+		const size_t H = (size_t)sig[file_size - 2];
+		if (W > 0 && W <= 640 && H > 0 && H <= 200
+		&& is_art_studio(sig, W, H, file_size) == 1)
+			return "image/x-art-studio"; /* .win */
+	}
+
 	/* RECOIL: recoil.c:REOCIL_DecodeGhg */
-	if (nread > 4) {
+	/* With a max dimension of 320x200, max size is 8003 */
+	if (nread > 4 && file_size <= 8003) {
 		const size_t W = (size_t)LE_U16(sig);
 		const size_t H = (size_t)sig[2];
 		if (W > 0 && W <= 320 && H > 0 && H <= 200
@@ -4825,11 +5049,43 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	&& (size_t)file_size == (3 + (((size_t)sig[0] + 1) * ((size_t)sig[1] + 1))))
 		return "image/x-atari-art";
 
+	/* https://atarionline.pl/utils/2.%20Grafika/Interlace%20Graphics%20Editor/Interlace%20Graphics%20Editor%20-%20readme%20PL.txt */
+	if (nread > 7 && file_size == 6160 && sig[0] == 0xFF && sig[1] == 0xFF
+	&& sig[2] == 0xF6 && sig[3] == 0xA3 && sig[4] == 0xFF && sig[5] == 0xBB
+	&& sig[6] == 0xFF && sig[7] == 0x5F)
+		return "image/x-atari-ige";
+
+	if (file_size == 3072 && is_atari_wnd(sig, nread) == 1)
+		return "image/x-atari-blazing-paddles"; /*.wnd */
+	if (file_size == 10242 && !sig[0] && sig[1] == 0xA0)
+		return "image/x-atari-blazing-paddles"; /*.ip */
+
 	/* RECOIL: recoil.c:RECOIL_AsciiArtEditor */
 	/* Max: 64 bytes per row (plus 0x1b terminator) x 24 lines = 1560 */
 	if (file_size <= 1560 && nread > 1 && sig[nread - 1] == 0x9B
 	&& is_ascii_art(sig, nread) == 1)
 		return "image/x-atari-ascii-art-editor";
+
+	/* https://temlib.org/AtariForumWiki/index.php/Print-Technik_Raw_Data_file_format */
+	if (nread > 10 && sig[0] == 0x0F && sig[1] == 0x0F && sig[2] == 0x00
+	&& sig[3] == 0x01 && is_atari_hir_image(sig, nread, file_size) == 1)
+		return "image/x-atari-hir";
+
+	/* RECOIL: recoil.c:RECOIL_DecodeEnvision */
+	if (nread > 1505 && sig[2] + 1 <= 204) {
+		const uint8_t cols = sig[1] + 1;
+		const uint8_t rows = sig[2] + 1;
+		const size_t offset = 8 + cols * rows + 463;
+		if (nread >= offset
+		&& (size_t)file_size == offset + (size_t)sig[offset - 1] * 1033)
+			return "image/x-atari-envision"; /* .map */
+	}
+
+	/* RECOIL: recoil.c:RECOIL_DecodeFwa */
+	if (nread >= 7960 && sig[0] == 0xFE && sig[1] == 0xFE && sig[6] == 0x70
+	&& sig[7] == 0x70 && sig[8] == 0x70 && sig[11] == 0x50 && sig[115] == 0x60
+	&& sig[205] == 0x41 && 7960 + (size_t)LE_U16(sig + 7958) == (size_t)file_size)
+		return "image/x-atari-fwa"; /* Fun With Art */
 
 	/* http://fileformats.archiveteam.org/wiki/Picture_Publisher */
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'I' && sig[2] == 0x02
@@ -4864,6 +5120,10 @@ check_legacy_formats(const uint8_t *sig, const size_t nread,
 	/* RECOIL: recoil.c:RECOIL_DecodeAtari8Artist */
 	if (file_size == 3206 && sig[0] == 0x07)
 		return "image/x-atari-artist";
+
+	const char *mimetype = get_mimetype_from_companion_file(file);
+	if (mimetype)
+		return mimetype;
 
 	return NULL;
 }
@@ -4945,7 +5205,7 @@ fast_magic(const char *file)
 	if (mimetype)
 		return mimetype;
 
-	mimetype = check_legacy_formats(sig, nread, st.st_size);
+	mimetype = check_legacy_formats(file, sig, nread, st.st_size);
 	if (mimetype)
 		return mimetype;
 
