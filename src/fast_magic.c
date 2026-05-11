@@ -2383,6 +2383,11 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 32 && is_sixel_image(sig, nread) == 1)
 		return "image/x-sixel";
 
+	/* http://fileformats.archiveteam.org/wiki/PIK */
+	if (nread > 4 && sig[0] == 0xD7 && sig[1] == 0x4C && sig[2] == 0x4D
+	&& sig[3] == 0x0A)
+		return "image/x-pik";
+
 	if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x00
 	&& sig[3] == 0x01 && (sig[4] & 0x80) == 0 && (sig[4] & 0x1F) == 7)
 		return "video/h264";
@@ -2991,7 +2996,7 @@ static struct companion_t companion[] = {
 	{"CM5", 3, "gfx", "GFX", 3, "image/x-amstrad-mode5"},
 	{"CMP", 3, "pl5", "PL5", 3, "image/x-msx-ddgraph"},
 	{"CPT", 3, "hbl", "HBL", 3, "image/x-atari-canvas"},
-	{"MIC", 3, "col", "COL", 3, "image/x-graph2font"},
+	{"MIC", 3, "col", "COL", 3, "image/x-atari-graph2font"},
 	{"MUR", 3, "pal", "PAL", 3, "image/x-atari-mur"},
 	{"PIC0", 4, "pic1", "PIC1", 4, "image/x-commodore-picasso"},
 	{"SCR", 3, "col", "COL", 3, "image/x-commodore-petscii-editor"},
@@ -3321,9 +3326,12 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 8 && sig[0] == 'p' && sig[1] == 'm' && sig[2] == 'p'
 	&& sig[3] == 'm' && LE_U32(sig + 4) == 1)
 		return "video/x-sony-pmp";
-	if (nread > 8 && sig[0] == 0x10 && (sig[1] + sig[2] + sig[3]) == 0x00
-	&& (LE_U32(sig + 4) & 0xFFFFFFF0) == 0x00)
-		return "image/x-sony-tim";
+	if (nread > 8 && BE_U32(sig) == 0x10
+	&& (LE_U32(sig + 4) & 0xFFFFFFF0) == 0x00) {
+		const uint8_t v = (sig[4] & 0x0F);
+		if (v == 2 || v == 3 || v == 8 || v == 9)
+			return "image/x-sony-tim";
+	}
 
 	if (nread > 2 && (sig[0] == 'C' || sig[0] == 'F') && sig[1] == 'W'
 	&& sig[2] == 'S')
@@ -3358,15 +3366,20 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	|| (sig[14] == 'P' && sig[15] == 'T') )) /* OS/2 bitmap array */
 		return "image/x-os2-graphics";
 
-	if (nread > 2 && (sig[2] == 1 || sig[2] == 2 || sig[2] == 3
+	if (nread > 17 && (sig[2] == 1 || sig[2] == 2 || sig[2] == 3
 	|| sig[2] == 9 || sig[2] == 10 || sig[2] == 11 || sig[2] == 32
 	|| sig[2] == 33) && is_tga_image(sig, nread) == 1)
 		return "image/x-tga";
 
-	if (nread > 1 && ((sig[0] == 0x11 && (sig[1] == 0x06 || sig[1] == 0x09))
-	|| (sig[0] == 0x10 && sig[1] == 0x09)))
-		return "image/x-award-bioslogo";
-	if (nread > 1 && sig[0] == 'A' && sig[1] == 'W' && sig[2] == 'B'
+	/* http://fileformats.archiveteam.org/wiki/Award_BIOS_logo */
+	if (nread >= 17) {
+		const size_t columns = (size_t)sig[0];
+		const size_t rows = (size_t)sig[1];
+		if (columns <= 80 && rows <= 25
+		&& (size_t)file_size == 2 + columns * rows * 15 + 70)
+			return "image/x-award-bioslogo";
+	}
+	if (nread > 6 && sig[0] == 'A' && sig[1] == 'W' && sig[2] == 'B'
 	&& sig[3] == 'M' && LE_U16(sig + 4) < 1981)
 		return "image/x-award-bioslogo2";
 
@@ -4024,7 +4037,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/Graph2Font */
 	if (nread > 6 && sig[0] == 'G' && sig[1] == '2' && sig[2] == 'F'
 	&& sig[3] == 'Z' && sig[4] == 'L' && sig[5] == 'I' && sig[6] == 'B')
-		return "image/x-graph2font";
+		return "image/x-atari-graph2font";
 
 	/* http://fileformats.archiveteam.org/wiki/MAKIchan_Graphics */
 	if (nread > 12 && sig[0] == 'M' && sig[1] == 'A' && sig[2] == 'K'
@@ -4730,14 +4743,18 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 
 	/* RECOIL: recoil.c (RECOIL_DecodeBp) */
 	if (file_size == 4083 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x11)
-		return "image/x-commodore-bp";
+		return "image/x-commodore-bestpaint";
 
 	if ((file_size == 4174 || file_size == 4098) && nread > 1
 	&& sig[0] == 0x00 && sig[1] == 0x18)
 		return "image/x-commodore-lp3";
 
-	if (file_size == 24578 && !sig[0] && sig[1] == 0x20)
+	if (file_size == 24578 && nread > 1 && !sig[0] && sig[1] == 0x20)
 		return "image/x-commodore-hlf";
+
+	/* http://fileformats.archiveteam.org/wiki/Hi-Pic_Creator */
+	if (file_size == 9003 && nread > 1 && !sig[0] && sig[1] == 0x60)
+		return "image/x-commodore-hpc";
 
 	/* http://fileformats.archiveteam.org/wiki/Shoot_%27Em_Up_Construction_Kit */
 	if (file_size == 514 && nread > 1 && sig[0] == 'B' && sig[1] == 0x00)
@@ -4880,10 +4897,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/AMOS_Picture_Bank */
 	if (nread > 20 && sig[0] == 'A' && sig[1] == 'm' && sig[2] == 'B'
 	&& sig[3] == 'k' && memcmp(sig + 12, "Pac.Pic.", 8) == 0)
-		return "image/x-amos";
+		return "image/x-amiga-amos";
 	if (nread > 3 && sig[0] == 'A' && sig[1] == 'm'
 	&& ((sig[2] == 'S' && sig[3] == 'p') || (sig[2] == 'I' && sig[3] == 'c')))
-		return "image/x-amos";
+		return "image/x-amiga-amos";
 
 	/* http://fileformats.archiveteam.org/wiki/Graph_Saurus
 	 * file(1): magic/Magdir/msx */
@@ -5098,7 +5115,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/DeskMate_Paint */
 	if (nread > 3 && sig[0] == 0x13 && sig[1] == 'P' && sig[2] == 'N'
 	&& sig[3] == 'T')
-		return "image/x-deskmate-paint";
+		return "image/x-tandy-deskmate";
 
 	/* http://fileformats.archiveteam.org/wiki/Storyboard_PIC/CAP */
 	if (nread > 5 && sig[0] == 'E' && sig[1] == 'P' && sig[2] == '_'
