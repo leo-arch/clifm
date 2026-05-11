@@ -1512,7 +1512,7 @@ get_shell_cmd_opts(char *cmd)
 	int n = 0;
 	char line[NAME_MAX]; *line = '\0';
 	while (fgets(line, (int)sizeof(line), fp)) {
-		if (n >= MAX_EXT_OPTS)
+		if (n + 1 >= MAX_EXT_OPTS)
 			break;
 		if (!*line || *line == '#' || *line == '\n')
 			continue;
