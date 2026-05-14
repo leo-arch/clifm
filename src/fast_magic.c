@@ -1499,20 +1499,6 @@ is_aai_image(const uint8_t *s, const size_t slen, const off_t file_size)
 	return 1;
 }
 
-static int
-is_neochrome_image(const uint8_t *s, const size_t slen)
-{
-	if (slen <= 58)
-		return 0;
-
-	const uint16_t res = BE_U16(s + 2);
-	const uint16_t X = BE_U16(s + 54);
-	const uint16_t Y = BE_U16(s + 56);
-	/* Width and height are at offsets 58 and 60 (both BE_U16), but
-	 * are ignored (always 320x200). */
-	return (res <= 2 && X == 0 && Y == 0);
-}
-
 /* GSM-probe routine taken from FFmpeg (libavformat/gsmdec.c)
  * See https://wiki.multimedia.cx/index.php/GSM_06.10 */
 static int
@@ -1789,7 +1775,8 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		return "text/x-php";
 
 	if (nread > 2 && sig[0] == 'P'
-	&& (sig[2] == 0x09 || sig[2] == '\n' || sig[2] == 0x0D || sig[2] == '#')) {
+	&& (sig[2] == 0x09 || sig[2] == '\n' || sig[2] == 0x0D || sig[2] == '#'
+	|| sig[2] == ' ')) {
 		if (sig[1] == '1' || sig[1] == '4') return "image/x-portable-bitmap";
 		if (sig[1] == '2' || sig[1] == '5') return "image/x-portable-graymap";
 		if (sig[1] == '3' || sig[1] == '6') return "image/x-portable-pixmap";
@@ -3055,6 +3042,35 @@ is_dali_compressed(const uint8_t *s, const size_t slen, const off_t file_size)
 	return 0;
 }
 
+static int
+is_neochrome_image(const uint8_t *s, const size_t slen)
+{
+	if (slen <= 58)
+		return 0;
+
+	const uint16_t res = BE_U16(s + 2);
+	const uint16_t X = BE_U16(s + 54);
+	const uint16_t Y = BE_U16(s + 56);
+	/* Width and height are at offsets 58 and 60 (both BE_U16), but
+	 * are ignored (always 320x200). */
+	return (res <= 2 && X == 0 && Y == 0);
+}
+
+static int
+is_neochrome_animation(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen < 22)
+		return 0;
+
+	const uint16_t width = BE_U16(s + 4);
+	const uint16_t x_offset = BE_U16(s + 10) + 1;
+	const uint32_t reserved = BE_U32(s + 18);
+	if (width % 8 == 0 && x_offset % 16 == 0 && reserved == 0)
+		return 1;
+
+	return 0;
+}
+
 struct companion_t {
 	const char *ext1;       /* Original file extension */
 	const size_t ext1_len;  /* Length of the original extension */
@@ -4208,11 +4224,12 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* https://temlib.org/AtariForumWiki/index.php/NEOchrome_file_format */
 	if (file_size == 32128 && nread == BYTES_TO_READ && sig[0] == 0x00
 	&& sig[1] == 0x00 && is_neochrome_image(sig, nread) == 1)
-		return "image/x-atari-neochrome";
-
-	if (nread > 3 && sig[0] == 0xBA && sig[1] == 0xBE && sig[2] == 0xEB
-	&& sig[3] == 0xEA)
-		return "video/x-atari-neochrome";
+		return "image/x-atari-neochrome"; /* Standard .neo file */
+	if (nread > 22 && sig[0] == 0xBA && sig[1] == 0xBE && sig[2] == 0xEB
+	&& sig[3] == 0xEA && is_neochrome_animation(sig, nread) == 1)
+			return "video/x-atari-neochrome"; /* Animation (.ani) */
+	if (nread > 1 && file_size == 128128 && sig[0] == 0xBA && sig[1] == 0xBE)
+		return "image/x-atari-neochrome"; /* Virtual canvas */
 
 	/* http://fileformats.archiveteam.org/wiki/ComputerEyes */
 	if (nread > 4 && (file_size == 192022 || file_size == 256022)
@@ -4481,7 +4498,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/Prism_Paint */
 	if (nread > 3 && sig[0] == 'P' && sig[1] == 'N' && sig[2] == 'T'
 	&& sig[3] == 0x00)
-		return "image/x-atari-prism";
+		return "image/x-atari-prism-paint";
 
 	if (nread > 3 && sig[0] == 'E' && sig[1] == 'Z' && sig[2] == 0x00
 	&& sig[3] == 0xC8)
