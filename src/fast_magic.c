@@ -2584,16 +2584,17 @@ is_gem_image(const uint8_t *s, const size_t slen)
 	const uint16_t img_width = BE_U16(s + 12);
 	const uint16_t img_height = BE_U16(s + 14);
 
-	if (num_planes != 1 && num_planes != 4 && num_planes != 8)
+	if (num_planes != 1 && num_planes != 2 && num_planes != 4
+	&& num_planes != 8)
 		return 0;
 
-	if (pat_def_len != 1 && pat_def_len % 2 != 0)
+	if (pat_def_len != 1 && pat_def_len != 3 && pat_def_len % 2 != 0)
 		return 0;
 
 	if (microns_width > 1024 || microns_height > 1024)
 		return 0;
 
-	if (img_width > 2048 || img_height > 2048)
+	if (img_width > 2048 || img_height > 4096)
 		return 0;
 
 	return 1;
@@ -2983,6 +2984,77 @@ is_c64_loadstar(const uint8_t *s, const size_t slen)
 	return (count >= 20);
 }
 
+static int
+is_delmpaint(const uint8_t *s, const size_t slen, const off_t file_size)
+{
+	if (!s || slen < 12)
+		return 0;
+
+	/* .del files have only 2 packed blocks, each taking 4 bytes. */
+	size_t header_len = 8;
+	const size_t len1 = (size_t)BE_U32(s); /* Length of 1st packed block */
+	const size_t len2 = (size_t)BE_U32(s + 4); /* Length of 2nd packed block */
+	if (len1 == 0 || len2 == 0 || len1 + len2 + header_len > (size_t)file_size)
+		return 0;
+
+	if (s[10] == 0x01 && s[11] == 0x40)
+		return 1; /* .del */
+
+	/* .dph files have 10 packed blocks, each taking 4 bytes. */
+	header_len = 40;
+	if (slen <= header_len)
+		return 0;
+
+	/* We already have blocks 1 and 2. Let's retrieve the next 8 blocks. */
+	size_t dph_len = len1 + len2;
+	for (size_t i = 8, blocks = 2; i + 4 < slen && blocks < 10; i += 4) {
+		if (s[i] != 0x00 || s[i + 1] != 0x00)
+			return 0;
+		dph_len += (size_t)BE_U32(s + i);
+		blocks++;
+	}
+
+	if (dph_len > 0 && dph_len + header_len <= (size_t)file_size)
+		return 1; /* .dph */
+
+	return 0;
+}
+
+static int
+is_dali_compressed(const uint8_t *s, const size_t slen, const off_t file_size)
+{
+	if (!s || slen <= 47) /* 32 + "32000"\0x0D\0x0A"32000"\0x0D\0x0A */
+		return 0;
+
+	s += 32; /* Jump to the first ASCII number */
+
+	char *ptr = NULL;
+	const long n1 = strtol((const char *)s, &ptr, 10);
+	if (ptr == (const char *)s || n1 <= 0 || n1 > 32000)
+		return 0;
+
+	const size_t n1len = DIGINUM(n1);
+	if (s[n1len] != 0x0D || s[n1len + 1] != 0x0A || !IS_DIGIT(s[n1len + 2]))
+		return 0;
+
+	s += n1len + 2; /* Jump to the second ASCII number */
+
+	const long n2 = strtol((const char *)s, &ptr, 10);
+	if (ptr == (const char *)s || n2 <= 0 || n2 > 32000)
+		return 0;
+
+	const size_t n2len = DIGINUM(n2);
+	if (s[n2len] != 0x0D || s[n2len + 1] != 0x0A)
+		return 0;
+
+	const size_t expected_size =
+		32 + (size_t)n1 + 2 + (size_t)n2 + 2 + n1len + n2len;
+	if (expected_size == (size_t)file_size)
+		return 1;
+
+	return 0;
+}
+
 struct companion_t {
 	const char *ext1;       /* Original file extension */
 	const size_t ext1_len;  /* Length of the original extension */
@@ -3365,6 +3437,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	|| (sig[14] == 'C' && sig[15] == 'P')
 	|| (sig[14] == 'P' && sig[15] == 'T') )) /* OS/2 bitmap array */
 		return "image/x-os2-graphics";
+
+	if (nread > 18 && sig[0] == 'C' && sig[1] == 'I'
+	&& ((LE_U32(sig + 6) & 0xFF00FF00) == 0 || LE_U32(sig + 14) < 65))
+		return "image/x-os2-ico";
 
 	if (nread > 17 && (sig[2] == 1 || sig[2] == 2 || sig[2] == 3
 	|| sig[2] == 9 || sig[2] == 10 || sig[2] == 11 || sig[2] == 32
@@ -3817,9 +3893,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "video/x-siff";
 	}
 
+	/* https://www.fileformat.info/format/atari/egff.h */
 	if (nread > 128 && sig[0] == 0xFE && (sig[1] == 0xDB || sig[1] == 0xDC)
 	&& is_seq_video(sig, nread) == 1)
-		return "video/x-atari-seq";
+		return "video/x-atari-cyber-paint"; /* .seq */
 
 	/* https://wiki.multimedia.cx/index.php/IBM_PhotoMotion */
 	if (nread > 0x1a + 6 && LE_U16(sig) == 0x00 && LE_U16(sig + 8) == 10
@@ -4040,7 +4117,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 32 && ((sig[0] == 'L' && sig[1] == 'i' && sig[2] == 'n'
 	&& sig[3] == 'S')
 	|| (sig[0] == 'D' && sig[1] == 'a' && sig[2] == 'n' && sig[3] == 'M')))
-		return "image/x-msp";
+		return "image/x-mspaint";
 
 	/* http://fileformats.archiveteam.org/wiki/Mapletown_Network */
 	if (nread > 3 && sig[0] == '1' && sig[1] == '0' && sig[2] == '0'
@@ -4285,10 +4362,16 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& (sig[3] == 'I' || sig[3] == '3'))
 		return "image/x-atari-icdraw";
 
-	/* http://fileformats.archiveteam.org/wiki/Enhanced_Simplex */
-	if (nread > 3 && sig[0] == 'T' && sig[1] == 'M' && sig[2] == 'S'
+	/* https://temlib.org/AtariForumWiki/index.php/TmS_Cranach_file_format */
+	if (nread > 812 && sig[0] == 'T' && sig[1] == 'M' && sig[2] == 'S'
 	&& sig[3] == 0x00)
 		return "image/x-atari-esm";
+
+	/* https://temlib.org/AtariForumWiki/index.php/DelmPaint_file_format */
+	if (nread > 11 && !BE_U16(sig) && sig[2] && !BE_U16(sig + 4) && sig[6]
+	&& (sig[10] == 0x01 || sig[10] == 0x03)
+	&& is_delmpaint(sig, nread, file_size) == 1)
+		return "image/x-atari-delm-paint";
 
 	if (nread > 2 && file_size == 63054 && sig[0] == 'K' && sig[1] == 'D')
 		return "image/x-atari-kid";
@@ -4344,11 +4427,19 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& is_atari_paintshop(sig, nread) == 1)
 		return "image/x-atari-paintshop";
 
-	/* https://sdo.dseiler.eu/formats/bimc.html */
-	if (nread > 7 && sig[0] == 'b' && sig[1] == 'i' && sig[2] == 'm'
+	/* https://temlib.org/AtariForumWiki/index.php/Signum!_file_format */
+	if (nread > 8 && sig[0] == 'b' && sig[1] == 'i' && sig[2] == 'm'
 	&& sig[3] == 'c' && sig[4] == '0' && sig[5] == '0' && sig[6] == '0'
 	&& sig[7] == '2')
-		return "image/x-signum";
+		return "image/x-atari-signum";
+
+	/* http://fileformats.archiveteam.org/wiki/Picture_Packer */
+	if (nread > 9 && sig[0] == 'L' && sig[1] == 'i' && sig[9] == 'k'
+	&& memcmp(sig, "Lionpoubnk", 10) == 0)
+		return "image/x-atari-picture-packer"; /* .mbk */
+	if (nread > 5 && sig[0] == 0x06 && sig[1] == 0x07 && sig[2] == 0x19
+	&& sig[3] == 0x63 && sig[4] == 0x00 && sig[5] <= 0x02)
+		return "image/x-atari-picture-packer"; /* .pp1, .pp2, .pp3 */
 
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'S' && sig[2] == '_'
 	&& sig[3] == 'I' && sig[4] == 'M' && sig[5] == 'A' && sig[6] == 'G'
@@ -4834,6 +4925,12 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'F' && sig[4] == 'F' && sig[5] == '6' && sig[6] == '4')
 		return "image/x-amiga-flf";
 
+	/* http://fileformats.archiveteam.org/wiki/SGX */
+	if (nread > 17 && sig[0] == 'S' && ((sig[1] == 'V' && sig[2] == 'G')
+	|| (sig[1] == 'G' && sig[2] == 'X')) && sig[3] == ' '
+	&& memcmp(sig + 4, "Graphics File\0", 14) == 0)
+		return "image/x-amiga-sgx";
+
 	/* http://fileformats.archiveteam.org/wiki/ArtMaster88 */
 	if (nread > 12 && sig[0] == 'S' && sig[1] == 'S' && sig[2] == '_'
 	&& sig[3] == 'S' && sig[4] == 'I' && sig[5] == 'F'
@@ -4869,9 +4966,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& memcmp(sig + 8, "PowerGFX", 8) == 0)
 		return "image/x-atari-powergfx";
 
+	/* http://fileformats.archiveteam.org/wiki/Cyber_Paint_Cell */
 	if (nread > 128 && BE_U32(sig) == 0xFFFF0000 && !BE_U16(sig + 62)
 	&& is_cel_image(sig, nread) == 1)
-		return "image/x-atari-cel";
+		return "image/x-atari-cyber-paint"; /* .cel */
 
 	if (nread > 12 && sig[0] == 0xF0 && sig[1] == 0xED && sig[2] == 0xE4
 	&& is_atari_pmg(sig, nread, file_size) == 1)
@@ -5115,7 +5213,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 20 && sig[16] == 'S' && sig[17] == 'T' && sig[18] == 'T'
 	&& sig[19] == 'T' && sig[20] == 0x00)
 		return "image/x-atari-gem";
-	if (nread > 16 && BE_U16(sig) <= 3 && BE_U16(sig + 2) == 8
+//	if (nread > 16 && BE_U16(sig) <= 3 && BE_U16(sig + 2) == 8
+	if (nread > 16 && BE_U16(sig) <= 3 && !sig[2]
+	&& (sig[3] == 0x08 || sig[3] == 0x09 || sig[3] == 0x19)
 	&& is_gem_image(sig, nread) == 1)
 		return "image/x-atari-gem";
 
@@ -5170,6 +5270,11 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		&& (size_t)file_size == (3 + ((W + 7) >> 3) * H))
 			return "image/x-atari-ghg";
 	}
+
+	/* http://fileformats.archiveteam.org/wiki/Dali */
+	if (nread > 47 && IS_DIGIT(sig[32]) && IS_DIGIT(sig[33])
+	&& is_dali_compressed(sig, nread, file_size) == 1)
+		return "image/x-atari-dali";
 
 	/* http://fileformats.archiveteam.org/wiki/Oric_HIRES_screen */
 	if (nread >= 26 && BE_U32(sig) == 0x16161624 && !sig[4] && !sig[12])
@@ -5228,6 +5333,31 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[7] == 0x70 && sig[8] == 0x70 && sig[11] == 0x50 && sig[115] == 0x60
 	&& sig[205] == 0x41 && 7960 + (size_t)LE_U16(sig + 7958) == (size_t)file_size)
 		return "image/x-atari-fwa"; /* Fun With Art */
+
+	/* https://www.idealine.info/portfolio/library/text/pgxspec.txt */
+	if (nread > 8 && sig[0] == 'P' && sig[1] == 'G' && sig[2] == 'X'
+	&& !BE_U32(sig + 4) && sig[3] <= 0x0A)
+		return "image/x-atari-pgx";
+
+	/* https://github.com/th-otto/zview/blob/master/zview/plugins/arabesqu/abm.c */
+	if (nread > 6 && sig[0] == 'E' && sig[1] == 'S' && sig[2] == 'O'
+	&& sig[3] == '8' && ((sig[4] == '8' && sig[5] == 'b')
+	|| (sig[4] == '9' && sig[5] == 'a')))
+		return "image/x-atari-arabesque";
+
+	if (nread > 37 && sig[2] == 0x0E && !sig[3] && !sig[4]
+	&& (sig[5] == 0x0E || sig[5] == 0xE0) && sig[34] == 0x0E
+	&& !sig[35] && !sig[36] && (sig[37] == 0x0E || sig[37] == 0xE0))
+		return "image/x-atari-colorburst2";
+
+	/* RECOIL: recoil.c:RECOIL_DecodeGrx */
+	if (nread >= 1588 && sig[0] == 'G' && sig[1] == 'R' && sig[2] == 'X'
+	&& sig[3] == 'P' && sig[4] == 0x01 && sig[5] == 0x01)
+		return "image/x-atari-grafix"; /* .grx */
+
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'G' && sig[2] == 'F'
+	&& (sig[3] == '1' || sig[3] == '2'))
+		return "image/x-atari-mgf";
 
 	/* http://fileformats.archiveteam.org/wiki/Picture_Publisher */
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'I' && sig[2] == 0x02
