@@ -3056,6 +3056,7 @@ is_neochrome_image(const uint8_t *s, const size_t slen)
 	return (res <= 2 && X == 0 && Y == 0);
 }
 
+/* See https://temlib.org/AtariForumWiki/index.php/NEOchrome_Animation_file_format */
 static int
 is_neochrome_animation(const uint8_t *s, const size_t slen)
 {
@@ -3066,6 +3067,28 @@ is_neochrome_animation(const uint8_t *s, const size_t slen)
 	const uint16_t x_offset = BE_U16(s + 10) + 1;
 	const uint32_t reserved = BE_U32(s + 18);
 	if (width % 8 == 0 && x_offset % 16 == 0 && reserved == 0)
+		return 1;
+
+	return 0;
+}
+
+/* See https://temlib.org/AtariForumWiki/index.php/Animaster_Sprite_Bank_file_format */
+static int
+is_animaster(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen <= 44)
+		return 0;
+
+	const uint16_t frames    = BE_U16(s);
+	const uint16_t frame_len = BE_U16(s + 2);
+	const uint8_t max_width  = s[4];
+	const uint8_t max_height = s[5];
+	const uint16_t frame_width  = BE_U16(s + 38) + 1;
+	const uint16_t frame_height = BE_U16(s + 40) + 1;
+
+	if (max_width > 0 && max_width == frame_width
+	&& max_height > 0 && max_height == frame_height
+	&& frames > 0 && frame_len > 0)
 		return 1;
 
 	return 0;
@@ -4228,7 +4251,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 22 && sig[0] == 0xBA && sig[1] == 0xBE && sig[2] == 0xEB
 	&& sig[3] == 0xEA && is_neochrome_animation(sig, nread) == 1)
 			return "video/x-atari-neochrome"; /* Animation (.ani) */
-	if (nread > 1 && file_size == 128128 && sig[0] == 0xBA && sig[1] == 0xBE)
+	if (file_size == 128128 && nread > 1 && sig[0] == 0xBA && sig[1] == 0xBE)
 		return "image/x-atari-neochrome"; /* Virtual canvas */
 
 	/* http://fileformats.archiveteam.org/wiki/ComputerEyes */
@@ -5230,11 +5253,14 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 20 && sig[16] == 'S' && sig[17] == 'T' && sig[18] == 'T'
 	&& sig[19] == 'T' && sig[20] == 0x00)
 		return "image/x-atari-gem";
-//	if (nread > 16 && BE_U16(sig) <= 3 && BE_U16(sig + 2) == 8
 	if (nread > 16 && BE_U16(sig) <= 3 && !sig[2]
 	&& (sig[3] == 0x08 || sig[3] == 0x09 || sig[3] == 0x19)
 	&& is_gem_image(sig, nread) == 1)
 		return "image/x-atari-gem";
+	/* http://fileformats.archiveteam.org/wiki/GEM_VDI_Metafile */
+	if (nread > 4 && sig[0] == 0xFF && sig[1] == 0xFF && sig[3] == 0x00
+	&& (sig[2] == 0x18 || sig[2] == 0x0E || sig[2] == 0x0F))
+		return "image/x-atari-gem-vdi";
 
 	/* http://fileformats.archiveteam.org/wiki/DeskMate_Paint */
 	if (nread > 3 && sig[0] == 0x13 && sig[1] == 'P' && sig[2] == 'N'
@@ -5375,6 +5401,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == 'M' && sig[1] == 'G' && sig[2] == 'F'
 	&& (sig[3] == '1' || sig[3] == '2'))
 		return "image/x-atari-mgf";
+
+	if (nread > 44 && BE_U16(sig + 42) == 0x04 && is_animaster(sig, nread) == 1)
+		return "video/x-atari-animaster"; /* .asb, .msk */
 
 	/* http://fileformats.archiveteam.org/wiki/Picture_Publisher */
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'I' && sig[2] == 0x02

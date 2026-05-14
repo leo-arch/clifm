@@ -40,7 +40,7 @@
 #
 # Legacy formats (amiga, commodore, atari, etc). recoil2png is required.
 ;^image/x-(amiga-|amstrad-|apple2-|atari-|coco-|commodore-|mac-|msx-|nec-|oric-|psion-|spectrum-|tandy-|award-bioslogo|compuserve|cpc|grob|ice|ilab|ilbm|makichan|msp|pcpaint|ppr|sony-tim|spr|vicar)=~/.config/clifm/clifmimg legacy %f %u;
-;^video/x-atari-animatic=~/.config/clifm/clifmimg legacy %f %u;
+;^video/x-atari-.*=~/.config/clifm/clifmimg legacy %f %u;
 ;^application/x-atari-sfdn=~/.config/clifm/clifmimg legacy %f %u;
 ;^font/x-(amiga-|amstrad-|atari-|commodore-|image72)=~/.config/clifm/clifmimg legacy %f %u;
 
