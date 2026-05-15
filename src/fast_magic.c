@@ -3094,6 +3094,58 @@ is_animaster(const uint8_t *s, const size_t slen)
 	return 0;
 }
 
+/* See RECOIL: recoil.c:RECOIL_DecodeSrt */
+static int
+is_srt_image(const char *file)
+{
+	int fd = open(file, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
+	if (fd == -1)
+		return 0;
+
+	if (lseek(fd, 32000, SEEK_SET) == (off_t)-1) {
+		close(fd);
+		return 0;
+	}
+
+	uint8_t buf[6];
+	const ssize_t bytes = read(fd, buf, sizeof(buf));
+	close(fd);
+
+	if (bytes > 0 && buf[0] == 'J' && buf[1] == 'H' && buf[2] == 'S'
+	&& buf[3] == 'y' && buf[4] == 0x00 && buf[5] == 0x01)
+		return 1;
+
+	return 0;
+}
+
+static int
+is_quantum_paint(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen <= 176)
+		return 0;
+
+	const uint32_t mode = BE_U32(s + 4);
+	if (mode == 0x80010000 || mode == 0x80000000 || mode == 0x03330000)
+		return 1;
+
+	const uint16_t palette_size = 32; /* Available colors */
+
+	const uint16_t start = BE_U16(s + 160);
+	const uint16_t active = BE_U16(s + 162);
+	const uint16_t first_color = BE_U16(s + 164);
+	const uint16_t last_color = BE_U16(s + 166);
+	const uint16_t cycle_speed = BE_U16(s + 168);
+	const uint16_t cycle = BE_U16(s + 170);
+	const uint32_t reserved = BE_U32(s + 172);
+
+	if (start == 0 && active > 0 && first_color <= palette_size
+	&& last_color <= palette_size && cycle_speed <= 255
+	&& (cycle <= 1 || cycle == 0xFFFF) && reserved == 0)
+		return 1;
+
+	return 0;
+}
+
 struct companion_t {
 	const char *ext1;       /* Original file extension */
 	const size_t ext1_len;  /* Length of the original extension */
@@ -4135,11 +4187,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 
 	/* https://temlib.org/AtariForumWiki/index.php/QuantumPaint_file_format */
 	if (nread > 128 && !sig[0] && !BE_U16(sig + 1)
-	&& (sig[3] == 0x00 || sig[3] == 0x01 || sig[3] == 0x80 || sig[3] == 0x81)) {
-		const uint32_t v = BE_U32(sig + 4);
-		if (v == 0x80010000 || v == 0x80000000 || v == 0x03330000)
-			return "image/x-atari-quantum-paint";
-	}
+	&& (sig[3] == 0x00 || sig[3] == 0x01 || sig[3] == 0x80 || sig[3] == 0x81)
+	&& is_quantum_paint(sig, nread) == 1)
+		return "image/x-atari-quantum-paint"; /* .pbx */
 
 	/* http://fileformats.archiveteam.org/wiki/Graph2Font */
 	if (nread > 6 && sig[0] == 'G' && sig[1] == '2' && sig[2] == 'F'
@@ -4193,9 +4243,14 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "image/x-pict"; /* Macintosh QuickDraw */
 
 	/* https://www.fileformat.info/format/macpaint/egff.htm */
-	if (nread > 68 && sig[0] == 0x00 && sig[65] == 'P' && sig[66] == 'N'
+	if (nread > 128 && sig[0] == 0x00 && sig[65] == 'P' && sig[66] == 'N'
 	&& sig[67] == 'T' && sig[68] == 'G')
 		return "image/x-mac-macpaint";
+	if (nread > 528 && BE_U32(sig) <= 0x000003) {
+		if (BE_U32(sig + 512) == 0xB900B900 && BE_U32(sig + 516) == 0xB900B900
+		&& BE_U32(sig + 520) == 0xB900B900 && BE_U32(sig + 524) == 0xB900B900)
+			return "image/x-mac-macpaint";
+	}
 
 	if (nread > 8 && sig[0] == 'C' && sig[1] == 'P' && sig[2] == 'T'
 	&& (sig[3] >= '0' && sig[3] <= '9') && sig[4] == 'F' && sig[5] == 'I'
@@ -5020,6 +5075,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == '1')
 		return "application/x-atari-sfdn";
 
+	if (file_size == 32038 && is_srt_image(file) == 1)
+		return "image/x-atari-synthetic-arts";
+
 	if (nread > 8 && sig[0] == 'P' && !sig[1] && !sig[2] && sig[3] == 'P'
 	&& !sig[4] && !sig[5] && sig[6] == 'R' && !sig[7] && !sig[8])
 		return "image/x-ppr";
@@ -5412,6 +5470,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 5 && sig[0] == 'P' && sig[1] == 'P' && sig[2] == 'U'
 	&& sig[3] == 'B' && sig[4] == 'I' && sig[5] == 'I')
 		return "image/x-micrografx-pp5";
+
+	if (nread > 5 && sig[0] == 'T' && sig[1] == 'M' && sig[2] == '-'
+	&& sig[3] == 'F' && sig[4] == 'a' && sig[5] == 'x')
+		return "image/x-perfect-fax";
 
 	/* =================================
 	 * WEAK MAGIC! Only 2-3 conditions
