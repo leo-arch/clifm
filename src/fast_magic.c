@@ -2375,6 +2375,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0x0A)
 		return "image/x-pik";
 
+	/* http://fileformats.archiveteam.org/wiki/Xar_(vector_graphics) */
+	if (nread > 7 && sig[0] == 'X' && sig[1] == 'A' && sig[2] == 'R'
+	&& sig[3] == 'A' && sig[4] == 0xA3 && sig[5] == 0xA3
+	&& sig[6] == 0x0D && sig[7] == 0x0A)
+		return "image/vnd.xara";
+
 	if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x00
 	&& sig[3] == 0x01 && (sig[4] & 0x80) == 0 && (sig[4] & 0x1F) == 7)
 		return "video/h264";
@@ -3409,6 +3415,179 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == 'D' && sig[1] == 'O' && sig[2] == 'S'
 	&& sig[3] < 0x08)
 		return "application/x-amiga-disk-format";
+
+	/* http://fileformats.archiveteam.org/wiki/LIMIT */
+	if (nread > 2 && sig[0] == 'L' && sig[1] == 'M' && sig[2] == 0x1A)
+		return "application/x-lim";
+	/* http://fileformats.archiveteam.org/wiki/BlakHole */
+	if (nread > 6 && sig[0] == 'B' && sig[1] == 'H' && sig[2] == 0x05
+	&& sig[3] == 0x07 && sig[5] == 0x00 && sig[6] == 0x25)
+		return "application/x-blackhole";
+	/* http://fileformats.archiveteam.org/wiki/AKT */
+	if (nread > 4 && sig[0] == 'A' && sig[1] == 'K' && sig[2] == 'T'
+	&& sig[3] >= 0x07 && sig[3] <= 0x0B && sig[4] == 0x09)
+		return "application/x-akt";
+	/* http://fileformats.archiveteam.org/wiki/FOXSQZ */
+	if (nread > 24 && sig[0] == 'F' && sig[2] == 'X' && sig[5] == 'Z'
+	&& sig[22] == 0x00 && sig[23] == 0x1A
+	&& memcmp(sig, "FOXSQZ COMPRESSED FILE", 22) == 0)
+		return "application/x-foxsqz";
+	/* http://fileformats.archiveteam.org/wiki/Apple_Disk_Image */
+	if (nread > 2 && sig[0] == '2' && sig[1] == 'I' && sig[2] == 'M'
+	&& sig[3] == 'G')
+		return "application/x-apple-diskimage";
+	/* http://fileformats.archiveteam.org/wiki/ASD_Archiver */
+	if (nread > 4 && sig[0] == 'A' && sig[1] == 'S' && sig[2] == 'D'
+	&& sig[3] == '0' && (sig[4] == '1' || sig[4] == '2') && sig[5] == 0x1A)
+		return "application/x-asd";
+	/* http://fileformats.archiveteam.org/wiki/CRUSH */
+	if (nread > 6 && sig[0] == 'C' && sig[1] == 'R' && sig[2] == 'U'
+	&& sig[3] == 'S' && sig[4] == 'H' && sig[5] == ' ' && sig[6] == 'v')
+		return "application/x-crush";
+	/* http://fileformats.archiveteam.org/wiki/ESP_(compressed_archive) */
+	if (nread > 3 && sig[0] == 'E' && sig[1] == 'S' && sig[2] == 'P'
+	&& sig[3] == '>')
+		return "application/x-esp";
+	/* http://fileformats.archiveteam.org/wiki/HPACK_(compressed_archive) */
+	if (nread > 3 && sig[0] == 'H' && sig[1] == 'P' && sig[2] == 'A'
+	&& sig[3] == 'K')
+		return "application/x-hpack";
+	/* http://fileformats.archiveteam.org/wiki/UHARC */
+	if (nread > 3 && sig[0] == 'U' && sig[1] == 'H' && sig[2] == 'A')
+		return "application/x-uha";
+	/* http://fileformats.archiveteam.org/wiki/PIM */
+	if (nread > 3 && (sig[0] == 0x01 || sig[0] == 0x02) && sig[1] == 'P'
+	&& sig[2] == 'I' && sig[3] == 'M')
+		return "application/x-pim";
+	if (nread > 3 && sig[0] == 'P' && sig[1] == 'I' && sig[2] == 'M'
+	&& sig[3] == '2')
+		return "application/x-pim";
+	/* http://fileformats.archiveteam.org/wiki/EGG_(ALZip) */
+	if (nread > 3 && sig[0] == 'E' && sig[1] == 'G' && sig[2] == 'G'
+	&& sig[3] == 'A')
+		return "application/x-egg";
+	/* http://fileformats.archiveteam.org/wiki/BSArc_and_BSA */
+	if (nread > 3 && sig[0] == 0xFF && sig[1] == 'B' && sig[2] == 'S'
+	&& sig[3] == 'G')
+		return "application/x-bsa";
+	/* http://fileformats.archiveteam.org/wiki/UC2 */
+	if (nread > 3 && sig[0] == 'U' && sig[1] == 'C' && sig[2] == '2'
+	&& sig[3] == 0x1A)
+		return "application/x-uc2";
+	/* http://fileformats.archiveteam.org/wiki/SQX */
+	if (nread > 11 && sig[7] == '-' && sig[8] == 's' && sig[9] == 'q'
+	&& sig[10] == 'x' && sig[11] == '-')
+		return "application/x-sqx";
+	/* http://fileformats.archiveteam.org/wiki/TPK_(compressed_archive) */
+	if (nread > 6 && sig[2] == '-' && sig[3] == 'T' && sig[4] == 'K'
+	&& (sig[5] == '0' || sig[5] == '1') && sig[6] == '-')
+		return "application/x-tpk";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 4 && (BE_U32(sig) & 0xFFFFFFF0) == 0x797A3030)
+		return "application/x-deepfreezer";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 4 && sig[0] == 0x1F && sig[1] == 0x9F && sig[2] == 0x4A
+	&& sig[3] == 0x10 && sig[4] == 0x0A)
+		return "application/x-freeze";
+	/* http://fileformats.archiveteam.org/wiki/PAKLEO */
+	if (nread > 5 && sig[0] == 'L' && sig[1] == 'E' && sig[2] == 'O'
+	&& sig[3] == 'L' && sig[4] == 'Z' && sig[5] == 'W')
+		return "application/x-pakleo";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 5 && sig[0] == 0xC2 && sig[1] == 0xA8 && sig[2] == 'M'
+	&& sig[3] == 'P' && sig[4] == 0xC2 && sig[5] == 0xA8)
+		return "application/x-kboom";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 6 && sig[0] == 'D' && sig[1] == 'S' && sig[2] == 'I'
+	&& sig[3] == 'G' && sig[4] == 'D' && sig[5] == 'C' && sig[6] == 'C')
+		return "application/x-crossepac";
+	/* http://fileformats.archiveteam.org/wiki/ChArc */
+	if (nread > 3 && sig[0] == 'S' && sig[1] == 'C' && sig[2] == 'h'
+	&& sig[3] == 'f')
+		return "application/x-charc";
+	/* http://fileformats.archiveteam.org/wiki/NuFX */
+	if (nread > 5 && sig[0] == 0x4E && sig[1] == 0xF5 && sig[2] == 0x46
+	&& sig[3] == 0xE9 && sig[4] == 0x6C && sig[5] == 0xE5)
+		return "application/x-nufx";
+	/* http://fileformats.archiveteam.org/wiki/JRchive */
+	if (nread > 6 && sig[0] == 'J' && sig[1] == 'R' && sig[2] == 'c'
+	&& sig[3] == 'h' && sig[4] == 'i' && sig[5] == 'v' && sig[6] == 'e')
+		return "application/x-jrc";
+	/* http://fileformats.archiveteam.org/wiki/Pretty_Simple_Archiver */
+	if (nread > 6 && sig[0] == 'P' && sig[1] == 'S' && sig[2] == 'A'
+	&& sig[3] == 0x01 && sig[4] == 0x03)
+		return "application/x-psa";
+	/* file(1): magic/Magdir/archives */
+	if (nread >= 10 && sig[0] == 'D' && sig[4] == ' ' && sig[5] == 'P'
+	&& memcmp(sig, "Dirk Paehl", 10) == 0)
+		return "application/x-dpa";
+	/* http://fileformats.archiveteam.org/wiki/SAR_(Streamline_Design) */
+	if (nread > 3 && sig[3] == 'L' && sig[4] == 'H'
+	&& (sig[5] == '5' || sig[5] == '0'))
+		return "application/x-sar";
+	/* http://fileformats.archiveteam.org/wiki/HAP */
+	if (nread > 3 && sig[0] == 0x91 && sig[1] == '3' && sig[2] == 'H'
+	&& sig[3] == 'F')
+		return "application/x-hap";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 4 && sig[2] == '-' && sig[3] == 'a' && sig[4] == 'h')
+		return "application/x-mar";
+	/* http://fileformats.archiveteam.org/wiki/MAR_Utility */
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'A' && sig[2] == 'R'
+	&& sig[3] == 0x80)
+		return "application/x-mar";
+	/* http://fileformats.archiveteam.org/wiki/MDCD */
+	if (nread > 4 && sig[0] == 'M' && sig[1] == 'D' && sig[2] == 'm'
+	&& sig[3] == 'd' && sig[4] == 0x01)
+		return "application/x-mdcd";
+	/* http://fileformats.archiveteam.org/wiki/SQWEZ */
+	if (nread > 4 && sig[0] == 'S' && sig[1] == 'Q' && sig[2] == 'W'
+	&& sig[3] == 'E' && sig[4] == 'Z')
+		return "application/x-sqwez";
+	/* http://fileformats.archiveteam.org/wiki/DRY */
+	if (nread > 3 && sig[0] == '-' && sig[1] == 'H' && sig[2] == '2'
+	&& sig[3] == 'O')
+		return "application/x-dry";
+	/* http://fileformats.archiveteam.org/wiki/Squeeze_It */
+	if (nread > 4 && sig[0] == 'H' && sig[1] == 'L' && sig[2] == 'S'
+	&& sig[3] == 'Q' && sig[4] == 'Z')
+		return "application/x-squeeze-it";
+	if (nread > 3 && sig[0] == 'C' && sig[1] == 'F' && sig[2] == 'L'
+	&& sig[3] == '3')
+		return "application/x-cfl";
+	/* http://fileformats.archiveteam.org/wiki/ARQ */
+	if (nread > 3 && sig[0] == 'g' && sig[1] == 'W' && sig[2] == 0x04
+	&& sig[3] == 0x01)
+		return "application/x-arq";
+	/* http://fileformats.archiveteam.org/wiki/YAC */
+	if (nread > 16 && sig[14] == 'Y' && sig[15] == 'C')
+		return "application/x-yac";
+	/* http://fileformats.archiveteam.org/wiki/ArcFS */
+	if (nread > 7 && sig[0] == 0x1A && sig[1] == 'a' && sig[2] == 'r'
+	&& sig[3] == 'c' && sig[4] == 'h' && sig[5] == 'i' && sig[6] == 'v'
+	&& sig[7] == 'e')
+		return "application/x-arcfs";
+	if (nread > 7 && sig[0] == 'A' && sig[1] == 'r' && sig[2] == 'c'
+	&& sig[3] == 'h' && sig[4] == 'i' && sig[5] == 'v' && sig[6] == 'e'
+	&& sig[7] == 0x00)
+		return "application/x-arcfs";
+	/* http://fileformats.archiveteam.org/wiki/EA_archive */
+	if (nread > 2 && sig[0] == 0x1A && sig[1] == 'E' && sig[2] == 'A')
+		return "application/x-ea-archive";
+	if (nread > 4) {
+		/* file(1): magic/Magdir/archives */
+		const uint32_t v = LE_U32(sig) & 0x8080FFFF;
+		if (v == 0x00000021A || v == 0x00000031A || v == 0x00000031A
+		|| v == 0x00000041A || v == 0x00000061A || v == 0x00000081A
+		|| v == 0x00000091A || v == 0x000000a1A || v == 0x00000141A
+		|| v == 0x00000481A)
+			return "application/x-arc";
+	}
+
+	/* http://fileformats.archiveteam.org/wiki/DrawPlus */
+	if (nread >= 20 && sig[0] == 'V' && sig[1] == '{' && sig[2] == 'D'
+	&& memcmp(sig, "V{DrawPlus Picture V", 20) == 0)
+		return "image/x-drawplus";
 
 	if (nread > 3 && sig[0] == 'F' && sig[1] == 'L' && sig[2] == 'V'
 	&& sig[3] == 0x01)
