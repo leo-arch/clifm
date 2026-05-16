@@ -519,6 +519,7 @@ normalize_path(char *src, const size_t src_len)
 	/* Resolve references to . and .. */
 	char *res = NULL;
 	size_t res_len = 0;
+	size_t buf_size = 0;
 
 	if (l == 0 || *s != '/') {
 		/* Relative path */
@@ -534,15 +535,19 @@ normalize_path(char *src, const size_t src_len)
 		if (pwd_len == 1 && *cwd == '/') {
 			/* If CWD is root (/) do not copy anything. Just create a buffer
 			 * big enough to hold "/dir", which will be appended next */
-			res = xnmalloc(l + 2, sizeof(char));
+			buf_size = l + 2;
+			res = xnmalloc(buf_size, sizeof(char));
 			res_len = 0;
 		} else {
-			res = xnmalloc(pwd_len + 1 + l + 1, sizeof(char));
+			buf_size = pwd_len + 1 + l + 1;
+			res = xnmalloc(buf_size, sizeof(char));
+			if (pwd_len >= buf_size) { free(tmp); free(res); return NULL; }
 			memcpy(res, cwd, pwd_len);
 			res_len = pwd_len;
 		}
 	} else {
-		res = xnmalloc(l + 1, sizeof(char));
+		buf_size = l + 1;
+		res = xnmalloc(buf_size, sizeof(char));
 		res_len = 0;
 	}
 
@@ -567,6 +572,7 @@ normalize_path(char *src, const size_t src_len)
 			}
 		}
 
+		if (res_len + 1 + len >= buf_size) { free(res); if (s == tmp) free(s); return NULL; }
 		res[res_len++] = '/';
 		memcpy(&res[res_len], ptr, len);
 		res_len += len;
