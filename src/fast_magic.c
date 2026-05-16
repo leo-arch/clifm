@@ -3571,16 +3571,72 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'h' && sig[4] == 'i' && sig[5] == 'v' && sig[6] == 'e'
 	&& sig[7] == 0x00)
 		return "application/x-arcfs";
+	/* http://fileformats.archiveteam.org/wiki/Sunzip */
+	if (nread > 3 && sig[0] == 'S' && sig[1] == 'Z' && sig[2] == 0x0A
+	&& sig[3] == 0x04)
+		return "application/x-sunzip";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 3 && sig[0] == 0xAD && sig[1] == '6' && sig[2] == '"')
+		return "application/x-agmc";
+	/* http://fileformats.archiveteam.org/wiki/WWPACK */
+	if (nread > 3 && sig[0] == 'W' && sig[1] == 'W' && sig[2] == 'P')
+		return "application/x-wwpack";
+	/* http://fileformats.archiveteam.org/wiki/HKI */
+	if (nread > 3 && sig[0] == 'H' && sig[1] == 'K' && sig[2] == 'I'
+	&& sig[3] > 0x00 && sig[3] <= 0x03)
+		return "application/x-winhki";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 3 && sig[0] == 0x61 && sig[1] == 0x5C && sig[2] == 0x04
+	&& sig[3] == 0x05)
+		return "application/x-winhki";
+	/* http://fileformats.archiveteam.org/wiki/SABDU */
+	if (nread >= 20 && sig[0] == 'S' && sig[1] == 'A' && sig[2] == 'B'
+	&& memcmp(sig, "SAB Diskette Utility\0", 21) == 0)
+		return "application/x-sabdu";
+	/* http://fileformats.archiveteam.org/wiki/Compressia */
+	if (nread > 6 && sig[0] == 'C' && sig[1] == 'M' && sig[2] == 'P'
+	&& sig[3] == '0' && sig[4] == 'C' && sig[5] == 'M' && sig[6] == 'P')
+		return "application/x-compressia";
+	/* http://fileformats.archiveteam.org/wiki/UHBC */
+	if (nread > 3 && sig[0] == 'U' && sig[1] == 'H' && sig[2] == 'B')
+		return "application/x-uhbc";
+	/* http://fileformats.archiveteam.org/wiki/GCA */
+	if (nread > 3 && sig[0] == 'G' && sig[1] == 'C' && sig[2] == 'A'
+	&& sig[3] == 'X')
+		return "application/x-gca";
+	/* file(1): magic/Magdir/archives */
+	if (nread >= 11 && sig[3] == 'W' && sig[4] == 'I' && sig[5] == 'N'
+	&& memcmp(sig + 3, "WINIMAGE", 8) == 0)
+		return "application/x-winimage";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 3 && sig[0] == 'r' && sig[1] == 'd' && sig[2] == 'q'
+	&& sig[3] == 'x')
+		return "application/x-reduq";
+	/* http://fileformats.archiveteam.org/wiki/Disk_Masher_System */
+	if (nread > 3 && sig[0] == 'D' && sig[1] == 'M' && sig[2] == 'S'
+	&& sig[3] == '!')
+		return "application/x-dms";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 3 && sig[0] == 0x8F && sig[1] == 0xAF && sig[2] == 0xAC
+	&& sig[3] == 0x8C)
+		return "application/x-epc";
+	/* http://fileformats.archiveteam.org/wiki/PPMd */
+	if (nread > 3 && sig[0] == 0x8F && sig[1] == 0xAF && sig[2] == 0xAC
+	&& sig[3] == 0x84)
+		return "application/x-ppmd";
+	/* http://fileformats.archiveteam.org/wiki/Ai_Archiver */
+	if (nread > 3 && sig[0] == 'A' && sig[1] == 'i'
+	&& (sig[2] == 0x01 || sig[2] == 0x02) && sig[3] <= 0x01)
+		return "application/x-compress-ai";
 	/* http://fileformats.archiveteam.org/wiki/EA_archive */
 	if (nread > 2 && sig[0] == 0x1A && sig[1] == 'E' && sig[2] == 'A')
 		return "application/x-ea-archive";
 	if (nread > 4) {
 		/* file(1): magic/Magdir/archives */
 		const uint32_t v = LE_U32(sig) & 0x8080FFFF;
-		if (v == 0x00000021A || v == 0x00000031A || v == 0x00000031A
-		|| v == 0x00000041A || v == 0x00000061A || v == 0x00000081A
-		|| v == 0x00000091A || v == 0x000000a1A || v == 0x00000141A
-		|| v == 0x00000481A)
+		if (v == 0x00000021A || v == 0x00000031A || v == 0x00000041A
+		|| v == 0x00000061A || v == 0x00000081A || v == 0x00000091A
+		|| v == 0x000000a1A || v == 0x00000141A || v == 0x00000481A)
 			return "application/x-arc";
 	}
 
