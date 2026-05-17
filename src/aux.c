@@ -519,6 +519,7 @@ normalize_path(char *src, const size_t src_len)
 	/* Resolve references to . and .. */
 	char *res = NULL;
 	size_t res_len = 0;
+	size_t buf_size = 0;
 
 	if (l == 0 || *s != '/') {
 		/* Relative path */
@@ -534,15 +535,53 @@ normalize_path(char *src, const size_t src_len)
 		if (pwd_len == 1 && *cwd == '/') {
 			/* If CWD is root (/) do not copy anything. Just create a buffer
 			 * big enough to hold "/dir", which will be appended next */
-			res = xnmalloc(l + 2, sizeof(char));
+#ifdef HAVE_BUILTIN_ADD_OVERFLOW
+			if (__builtin_add_overflow(l, 2, &buf_size)) {
+				free(tmp);
+				return NULL;
+			}
+#else
+			if (l > SIZE_MAX - 2) {
+				free(tmp);
+				return NULL;
+			}
+			buf_size = l + 2;
+#endif
+			res = xnmalloc(buf_size, sizeof(char));
 			res_len = 0;
 		} else {
-			res = xnmalloc(pwd_len + 1 + l + 1, sizeof(char));
+#ifdef HAVE_BUILTIN_ADD_OVERFLOW
+			size_t temp;
+			if (__builtin_add_overflow(pwd_len, l, &temp) ||
+			    __builtin_add_overflow(temp, 2, &buf_size)) {
+				free(tmp);
+				return NULL;
+			}
+#else
+			if (pwd_len > SIZE_MAX - l - 2) {
+				free(tmp);
+				return NULL;
+			}
+			buf_size = pwd_len + l + 2;
+#endif
+			res = xnmalloc(buf_size, sizeof(char));
 			memcpy(res, cwd, pwd_len);
 			res_len = pwd_len;
 		}
 	} else {
-		res = xnmalloc(l + 1, sizeof(char));
+#ifdef HAVE_BUILTIN_ADD_OVERFLOW
+		if (__builtin_add_overflow(l, 1, &buf_size)) {
+			free(tmp);
+			return NULL;
+		}
+#else
+		if (l > SIZE_MAX - 1) {
+			free(tmp);
+			return NULL;
+		}
+		buf_size = l + 1;
+#endif
+		res = xnmalloc(buf_size, sizeof(char));
 		res_len = 0;
 	}
 
@@ -567,6 +606,38 @@ normalize_path(char *src, const size_t src_len)
 			}
 		}
 
+		if (res_len + 1 + len >= buf_size) {
+			/* Defensive reallocation: buffer should be correctly sized, but grow if needed */
+			size_t new_size;
+#ifdef HAVE_BUILTIN_MUL_OVERFLOW
+			if (__builtin_mul_overflow(buf_size, 2, &new_size)) {
+#else
+			if (buf_size > SIZE_MAX / 2) {
+#endif
+				/* Can't double - try exact size needed */
+#ifdef HAVE_BUILTIN_ADD_OVERFLOW
+				if (__builtin_add_overflow(res_len, len, &new_size) ||
+				    __builtin_add_overflow(new_size, 2, &new_size)) {
+#else
+				if (res_len > SIZE_MAX - len - 2) {
+#endif
+					free(res);
+					if (s == tmp) free(s);
+					return NULL;
+				}
+#ifndef HAVE_BUILTIN_MUL_OVERFLOW
+				new_size = res_len + len + 2;
+#endif
+			}
+#ifndef HAVE_BUILTIN_MUL_OVERFLOW
+			else {
+				new_size = buf_size * 2;
+			}
+#endif
+			char *new_res = xnrealloc(res, new_size, sizeof(char));
+			res = new_res;
+			buf_size = new_size;
+		}
 		res[res_len++] = '/';
 		memcpy(&res[res_len], ptr, len);
 		res_len += len;
