@@ -18,6 +18,12 @@
 # endif
 #endif
 
+#if defined(__has_builtin) && !defined(NO_BUILTIN_ADD_OVERFLOW)
+# if __has_builtin(__builtin_add_overflow)
+#  define HAVE_BUILTIN_ADD_OVERFLOW
+# endif
+#endif
+
 void *
 xnrealloc(void *ptr, const size_t nmemb, const size_t size)
 {
