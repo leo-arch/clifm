@@ -516,6 +516,11 @@ normalize_path(char *src, const size_t src_len)
 	char *s = tmp ? tmp : src;
 	const size_t l = tmp ? strlen(tmp) : src_len;
 
+	/* Guard against theoretical size_t overflow in buffer allocation.
+	 * Ensures pwd_len (at most PATH_MAX) + 2 + l will not overflow. */
+	if (l >= SIZE_MAX - PATH_MAX - 2)
+		return NULL;
+
 	/* Resolve references to . and .. */
 	char *res = NULL;
 	size_t res_len = 0;
