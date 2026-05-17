@@ -3422,7 +3422,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/BlakHole */
 	if (nread > 6 && sig[0] == 'B' && sig[1] == 'H' && sig[2] == 0x05
 	&& sig[3] == 0x07 && sig[5] == 0x00 && sig[6] == 0x25)
-		return "application/x-blackhole";
+		return "application/x-blakhole";
 	/* http://fileformats.archiveteam.org/wiki/AKT */
 	if (nread > 4 && sig[0] == 'A' && sig[1] == 'K' && sig[2] == 'T'
 	&& sig[3] >= 0x07 && sig[3] <= 0x0B && sig[4] == 0x09)
@@ -3468,7 +3468,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "application/x-egg";
 	/* http://fileformats.archiveteam.org/wiki/BSArc_and_BSA */
 	if (nread > 3 && sig[0] == 0xFF && sig[1] == 'B' && sig[2] == 'S'
-	&& sig[3] == 'G')
+	&& sig[3] == 'G') /* Might also be found at offset 1 or 3 */
+		return "application/x-bsa";
+	if (nread > 2 && sig[0] == 0x00 && sig[1] == 0xAE && (sig[2] == 0x02
+	|| sig[2] == 0x03 || sig[2] == 0x07))
 		return "application/x-bsa";
 	/* http://fileformats.archiveteam.org/wiki/UC2 */
 	if (nread > 3 && sig[0] == 'U' && sig[1] == 'C' && sig[2] == '2'
@@ -3631,6 +3634,57 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/EA_archive */
 	if (nread > 2 && sig[0] == 0x1A && sig[1] == 'E' && sig[2] == 'A')
 		return "application/x-ea-archive";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 4 && (BE_U32(sig) & 0xFFFFF0F0) == 0x4D530000)
+		return "application/x-msxie";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 3 && sig[0] == 'F' && sig[1] == 'I' && sig[2] == 'Z')
+		return "application/x-fiz";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 3 && sig[0] == 'S' && sig[1] == 'E' && sig[2] == 'M')
+		return "application/x-sem";
+	/* http://fileformats.archiveteam.org/wiki/TPAC_(Tim_Gordon) */
+	if (nread > 3 && sig[0] == 'T' && sig[1] == 'P' && sig[2] == 'A'
+	&& sig[3] == 'C')
+		return "application/x-tpac";
+	/* http://fileformats.archiveteam.org/wiki/NPack */
+	if (nread > 4 && sig[0] == 'M' && sig[1] == 'S' && sig[2] == 'T'
+	&& sig[3] == 'S' && sig[4] == 'M')
+		return "application/x-npack";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 4 && sig[0] == 'C' && sig[1] == 'h' && sig[2] == 'f'
+	&& sig[3] == 'L' && sig[4] == 'Z')
+		return "application/x-chief-lza";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 5 && sig[0] == 0x04 && sig[1] == 'T' && sig[2] == 'P'
+	&& sig[3] == 'A' && sig[4] == 'C' && sig[5] == 0x03)
+		return "application/x-tpac";
+	/* http://fileformats.archiveteam.org/wiki/BLINK */
+	if (nread > 4 && sig[0] == 'B' && sig[1] == 'l' && sig[2] == 'i'
+	&& sig[3] == 'n' && sig[4] == 'k')
+		return "application/x-blink";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 3 && sig[0] == '<' && sig[1] == 'D' && sig[2] == 'C'
+	&& sig[3] == '-')
+		return "application/x-dc-archive";
+	/* http://fileformats.archiveteam.org/wiki/ARS */
+	if (nread >= 13 && sig[0] == 0x0D && sig[1] == '(' && sig[13] == 'K'
+	&& memcmp(sig + 1, "(C) STEPANYUK", 13) == 0)
+		return "application/x-ars-sfx";
+	/* http://fileformats.archiveteam.org/wiki/BIX */
+	if (nread > 3 && sig[0] == 'B' && sig[1] == 'I' && sig[2] == 'X'
+	&& sig[3] == '0')
+		return "application/x-bix";
+	/* http://fileformats.archiveteam.org/wiki/Top4 */
+	if (nread > 3 && sig[0] == 'T' && sig[1] == '4' && sig[2] == 0x1A)
+		return "application/x-top4";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 3 && sig[0] == 'P' && sig[1] == 'D' && sig[2] == 'Z')
+		return "application/x-pdz";
+	/* http://fileformats.archiveteam.org/wiki/PACKER_(ImagiSOFT) */
+	if (nread > 3 && sig[0] == 0x00 && sig[1] == 0x50 && sig[2] == 0x00
+	&& (sig[3] == 0x14 || sig[3] == 0x1E))
+		return "application/x-packer";
 	if (nread > 4) {
 		/* file(1): magic/Magdir/archives */
 		const uint32_t v = LE_U32(sig) & 0x8080FFFF;
