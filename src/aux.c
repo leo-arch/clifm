@@ -468,6 +468,36 @@ xmemrchr(const void *s, const int c, size_t n)
 #endif /* HAVE_MEMRCHR */
 }
 
+/* Return 1 if the path S contains self or parent directories in any path
+ * component. Otherwise, 0 is returned. */
+static int
+has_self_or_parent(const char *s)
+{
+	if (!s)
+		return 0;
+
+	/* Self or parent as first path component */
+	if (s[0] == '.') {
+		if (!s[1] || s[1] == '/')
+			return 1; /* Self dir */
+		if (s[1] == '.' && (!s[2] || s[2] == '/'))
+			return 1; /* Parent dir */
+	}
+
+	/* Self or parent in any subsequent path component */
+	while (*s) {
+		if (s[0] == '/' && s[1] == '.') {
+			if (!s[2] || s[2] == '/')
+				return 1; /* Self dir */
+			if (s[2] == '.' && (!s[3] || s[3] == '/'))
+				return 1; /* Parent dir */
+		}
+		s++;
+	}
+
+	return 0;
+}
+
 /* Canonicalize/normalize the path SRC without resolving symlinks.
  * SRC is unescaped if necessary.
  * ~/./.. are resolved.
@@ -509,7 +539,7 @@ normalize_path(char *src, const size_t src_len)
 		if (tlen > 1 && tmp[tlen - 1] == '/')
 			tmp[tlen - 1] = '\0';
 
-		if (!strstr(tmp, "/.."))
+		if (!has_self_or_parent(tmp))
 			return tmp;
 	}
 
@@ -579,7 +609,6 @@ normalize_path(char *src, const size_t src_len)
 
 	if (res_len == 0)
 		res[res_len++] = '/';
-
 
 	res[res_len] = '\0';
 
