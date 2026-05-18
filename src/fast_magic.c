@@ -1036,9 +1036,22 @@ check_pre_ole2_office_docs(const uint8_t *s, const size_t slen)
 	|| memcmp(s + 4, "Standard ACE DB", 15) == 0))
 		return "application/vnd.ms-access";
 
-	if (slen > 4 && s[0] == 0xe7 && s[1] == 0x0ac && s[2] == 0x2c
+	if (slen > 4 && s[0] == 0xE7 && s[1] == 0x0AC && s[2] == 0x2C
 	&& s[3] == 0x00) /* Microsoft Publisher (1.0) */
 		return "application/vnd.ms-publisher";
+
+	/* file(1): magic/Magdir/windows */
+	if (slen > 14 && LE_U32(s) == 0x4E444221)
+		return "application/vnd.ms-outlook";
+
+	/* file(1): magic/Magdir/windows */
+	if (slen > 128 && s[0] == 0xCF && s[1] == 0xAD && s[2] == 0x12
+	&& s[3] == 0xFE && LE_U32(s + 124) > 0)
+		return "application/x-ms-dbx";
+
+	/* file(1): magic/Magdir/windows */
+	if (slen > 4 && BE_U32(s) == 0x0DF0ADBA)
+		return "application/x-ms-nickfile";
 
 	return NULL;
 }
@@ -2049,6 +2062,10 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[4] == 0x0A && IS_DIGIT(sig[3]) && IS_DIGIT(sig[5]))
 		return "audio/x-pvf";
 
+	if (nread > 8 && sig[0] == 0x0F && sig[1] == 'S' && sig[5] == 'L'
+	&& memcmp(sig + 1, "SIBELIUS", 8) == 0)
+		return "application/x-sibelius-score";
+
 	if (nread > 12 && ((sig[0] == 0x00 && sig[1] == 0x01 && sig[2] == 0x00
 	&& sig[3] == 0x00 && sig[4] < 48
 	&& sig[8] != 0x07) /* Avoid conflict with .PI2 (Atari Degas) */
@@ -2131,6 +2148,17 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == 0xCA && sig[1] == 0xFE) {
 		if (sig[2] == 0xBA && sig[3] == 0xBE) return check_cafebabe(sig, nread);
 		if (sig[2] == 0xD0 && sig[3] == 0x0D) return "application/x-java-pack200";
+	}
+
+	/* file(1): magic/Magdir/kde */
+	if (nread >= 19 && sig[0] == '[' && sig[1] == 'K'
+	&& memcmp(sig, "[KDE Desktop Entry]", 19) == 0)
+		return "application/x-kdelnk";
+	if (nread > 17 && sig[0] == '#' && sig[1] == ' ') {
+		if (sig[2] == 'x' && sig[3] == 'm' && sig[4] == 'c' && sig[5] == 'd')
+			return "text/x-xmcd";
+		if (sig[2] == 'K' && memcmp(sig + 2, "KDE Config File", 15) == 0)
+			return "application/x-kdelnk";
 	}
 
 	if (nread >= 518 && sig[514] == 'H' && sig[515] == 'd' && sig[516] == 'r'
@@ -2311,8 +2339,9 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0x5C && sig[4] == 0x06)
 		return "image/x-astc"; /* MIME-info: image/astc (but it's not registered)*/
 
-	if (nread > 3 && sig[0] == 'X' && sig[1] == 'c' && sig[2] == 'u'
-	&& sig[3] == 'r')
+	/* file(1): magic/Magdir/xwindows */
+	if (nread > 8 && sig[0] == 'X' && sig[1] == 'c' && sig[2] == 'u'
+	&& sig[3] == 'r' && LE_U32(sig + 4) < 64)
 		return "image/x-xcursor";
 
 	if (nread > 3 && sig[0] == 'S' && ((sig[1] == 'I' && sig[2] == 'T'
@@ -2415,11 +2444,18 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/Property_List/Binary */
 	if (nread > 7 && sig[0] == 'b' && sig[1] == 'p' && sig[2] == 'l'
 	&& sig[3] == 'i' && sig[4] == 's' && sig[5] == 't' && sig[6] == '0'
-	&& (sig[7] == '0' || sig[1] == '1')) {
+	&& (sig[7] == '0' || sig[7] == '1')) {
 		if (nread > 24
 		&& xmemmem(sig + 8, nread > 512 ? 512 : nread, "WebMainResource", 15))
 			return "application/x-webarchive";
 		return "application/x-bplist";
+	}
+
+	/* Windows 32/64-bit crash dump (file(1)) */
+	if (nread > 7 && sig[0] == 'P' && sig[1] == 'A' && sig[2] == 'G'
+	&& sig[3] == 'E' && sig[4] == 'D' && sig[5] == 'U') {
+		if (sig[6] == 'M' && sig[7] == 'P') return "application/x-ms-dmp";
+		if (sig[6] == '6' && sig[7] == '4') return "application/x-ms-dmp";
 	}
 
 	if (nread > 3 && sig[0] == '.' && (IS_ALPHA_UP(sig[1]) || IS_ALPHA_LOW(sig[1]))
@@ -3318,6 +3354,13 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == 0x3F && sig[1] == 0x5F && sig[2] == 0x03
 	&& sig[3] == 0x00)
 		return "application/x-winhelp";
+	/* Old help files. file(1): magic/Magdir/windows */
+	if (nread > 6 && LE_U16(sig) == 0x036C && LE_U16(sig + 4) == 1)
+		return "application/x-winhelp";
+	if (nread > 4 && sig[1] == 'f' && sig[2] == 'M' && sig[3] == 'R') {
+		if (sig[0] == 't') return "application/x-winhelp-fts";
+		if (sig[0] == 'g') return "application/x-winhelp-ftg";
+	}
 
 	if (nread > 5 && sig[0] == 'I' && sig[1] == 'T' && sig[2] == 'S'
 	&& sig[3] == 'F' && sig[4] == 0x03 && sig[5] == 0x00)
@@ -3327,6 +3370,23 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0x00 && (sig[4] == 0x01 || sig[4] == 0x00) && sig[5] == 0x00
 	&& sig[6] == 0x3a && sig[7] == 0x00)
 		return "application/x-ms-hlp";
+
+	/* file(1): magic/Magdir/windows */
+	if (nread > 3 && sig[0] == 'P' && sig[1] == 'M' && sig[2] == 'C'
+	&& sig[3] == 'C') /* Win 3.1 group file (.grp) */
+		return "application/x-ms-group-file";
+
+	/* file(1): magic/Magdir/windows */
+	if (nread > 7 && sig[0] == 'E' && sig[1] == 'l' && sig[2] == 'f'
+	&& sig[3] == 'F' && sig[4] == 'i' && sig[5] == 'l' && sig[6] == 'e'
+	&& sig[7] == 0x00) /* MS Vista event log */
+		return "application/x-ms-evtx";
+
+	/* file(1): magic/Magdir/windows */
+	if (nread > 7 && sig[0] == '$' && sig[1] == 'S' && sig[2] == 'D'
+	&& sig[3] == 'I' && sig[4] == '0' && sig[5] == '0' && sig[6] == '0'
+	&& sig[7] == '1') /* Windows System Deployment Image */
+		return "application/x-ms-sdi";
 
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'D' && sig[2] == ';'
 	&& sig[3] == 'P' && sig[4] > 0 && sig[5] > 0 && sig[6] > 0
@@ -5005,9 +5065,45 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'M' && sig[4] == 0x00)
 		return "application/x-scumm-room";
 
+	/* file(1): magic/Magdir/windows */
 	if (nread > 6 && sig[0] == 'R' && sig[1] == 'E' && sig[2] == 'G'
 	&& sig[3] == 'E' && sig[4] == 'D' && sig[5] == 'I' && sig[6] == 'T')
 		return "application/x-ms-regedit";
+	if (nread > 3 && sig[0] == 'r' && sig[1] == 'e' && sig[2] == 'g'
+	 && sig[3] == 'f')
+		return "application/x-ms-regedit";
+	if (nread > 3 && sig[0] == 'C' && sig[1] == 'R' && sig[2] == 'E'
+	 && sig[3] == 'G')
+		return "application/x-ms-regedit";
+	if (nread > 4 && sig[0] == 'S' && sig[1] == 'H' && sig[2] == 'C'
+	 && sig[3] == 'C' && sig[4] == '3')
+		return "application/x-ms-regedit";
+	if (nread >= 36 && sig[0] == 'W' && sig[32] == '5'
+	&& memcmp(sig, "Windows Registry Editor Version 5.00", 36) == 0)
+		return "application/x-ms-regedit";
+
+	/* file(1): magic/Magdir/windows */
+	if (nread > 4 && BE_U32(sig) == 0xDC058340 && !sig[4])
+		return "application/x-perfmon";
+
+	/* file(1): magic/Magdir/windows */
+	if (nread > 4 && BE_U32(sig) == 0xB8C90C00)
+		return "application/x-installshield-ins";
+
+	/* file(1): magic/Magdir/windows */
+	if (nread >= 17 && sig[0] == 's' && sig[6] == ' ' && sig[14] == ':'
+	&& memcmp(sig, "screen mode id:i:", 17) == 0)
+		return "application/x-ms-rdp";
+
+	/* file(1): magic/Magdir/windows */
+	if (nread > 3 && sig[0] == '1' && sig[1] == 'g' && sig[2] == 'i'
+	 && sig[3] == 'M')
+		return "application/x-ms-mig";
+
+	/* file(1): magic/Magdir/windows */
+	if (nread > 8 && sig[0] == 'T' && sig[1] == 'A' && sig[2] == 'P'
+	&& sig[3] == 'E' && !(LE_U32(sig + 4) & 0xFFFCFFE0))
+		return "application/x-ntbackup";
 
 	/* https://sdif.sourceforge.net/standard/sdif-standard.html */
 	if (nread > 4 && sig[0] == 'S' && sig[1] == 'D' && sig[2] == 'I'
@@ -5778,7 +5874,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (file_size == 4766 && sig[0] == 0x04)
 		return "image/x-atari-technicolor";
 
-	/* ICE formats: IPN/IMN, IPC, and IP2 file sizes respectivelly */
+	/* ICE formats: IPN/IMN, IPC, and IP2 file sizes respectively */
 	if ((file_size == 17350 || file_size == 17354 || file_size == 17358)
 	&& sig[0] == 0x01)
 		return "image/x-atari-ice";
