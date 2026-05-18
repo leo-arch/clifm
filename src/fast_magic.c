@@ -3136,28 +3136,60 @@ is_animaster(const uint8_t *s, const size_t slen)
 	return 0;
 }
 
-/* See RECOIL: recoil.c:RECOIL_DecodeSrt */
-static int
-is_srt_image(const char *file)
+/* Read BUF_SIZE bytes at offset OFFSET from the file FILE and store read
+ * bytes into BUF. The number of actually read bytes are returned
+ * (<= 0 in case of error). */
+static ssize_t
+read_file_at(const char *file, const off_t offset, uint8_t *buf,
+	const size_t buf_size)
 {
 	int fd = open(file, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
 	if (fd == -1)
 		return 0;
 
-	if (lseek(fd, 32000, SEEK_SET) == (off_t)-1) {
+	if (lseek(fd, offset, SEEK_SET) == (off_t)-1) {
 		close(fd);
 		return 0;
 	}
 
-	uint8_t buf[6];
-	const ssize_t bytes = read(fd, buf, sizeof(buf));
+	const ssize_t bytes = read(fd, buf, buf_size);
 	close(fd);
+
+	return bytes;
+}
+
+/* See RECOIL: recoil.c:RECOIL_DecodeSrt */
+static int
+is_srt_image(const char *file)
+{
+	uint8_t buf[6];
+	const ssize_t bytes = read_file_at(file, 32000, buf, sizeof(buf));
 
 	if (bytes > 0 && buf[0] == 'J' && buf[1] == 'H' && buf[2] == 'S'
 	&& buf[3] == 'y' && buf[4] == 0x00 && buf[5] == 0x01)
 		return 1;
 
 	return 0;
+}
+
+/* See RECOIL: recoil.c:RECOIL_DecodePaletteMaster */
+static int
+is_palette_master(const char *file)
+{
+	uint8_t buf[32];
+	const ssize_t bytes = read_file_at(file, 35968, buf, sizeof(buf));
+
+	/* 0xFFFF (-1 or 65535) marks the end of the picture. */
+	if (bytes <= 0 || buf[0] != 0xFF || buf[1] != 0xFF)
+		return 0;
+
+	/* After 0xFFFF, all bytes should be zero (we check only 30). */
+	for (size_t i = 2; i < (size_t)bytes; i++) {
+		if (buf[i] != 0x00)
+			return 0;
+	}
+
+	return 1;
 }
 
 static int
@@ -4050,6 +4082,14 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == 0x01 && sig[1] == 'f' && sig[2] == 'c'
 	&& sig[3] == 'p')
 		return "application/x-font-pcf";
+
+	/* file(1): magic/Magdir/fonts */
+	if (nread > 101 && sig[0] == 0x00 && sig[1] == 0x01
+	&& LE_U16(sig + 66) == 0x0081) {
+		const size_t offset = (size_t)sig[101];
+		if (offset + 10 < nread && memcmp(sig + offset, "PostScript", 10) == 0)
+			return "application/x-font-pfm";
+	}
 
 	if (nread > 3 && sig[0] == 'M' && sig[1] == 'O' && sig[2] == 'V'
 	&& sig[3] == 'I')
@@ -5462,6 +5502,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 
 	if (file_size == 32038 && is_srt_image(file) == 1)
 		return "image/x-atari-synthetic-arts";
+
+	if (file_size == 36864 && is_palette_master(file) == 1)
+		return "image/x-atari-palette-master";
 
 	if (nread > 8 && sig[0] == 'P' && !sig[1] && !sig[2] && sig[3] == 'P'
 	&& !sig[4] && !sig[5] && sig[6] == 'R' && !sig[7] && !sig[8])
