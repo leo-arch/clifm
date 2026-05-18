@@ -3220,6 +3220,31 @@ is_quantum_paint(const uint8_t *s, const size_t slen)
 	return 0;
 }
 
+/* See RECOIL: recoli.c:RECOIL_DecodeGraphicsProcessor */
+static int
+is_graphics_processor(const uint8_t *s, const size_t slen)
+{
+	if (!s || s[0] != 0x00 || s[1] < 10 || s[1] > 12 || slen < 493)
+		return 0;
+
+	const uint8_t mode = s[1] - 10;
+	size_t bitplanes = 4 >> (size_t)mode;
+	size_t offset = 333;
+	int count = 0;
+
+	for (size_t i = 0; i < 32000 && offset < slen; i += bitplanes) {
+		if (count == 0) {
+			count = (int)s[offset];
+			if (count == 0)
+				return 0;
+			offset += 1 + bitplanes;
+		}
+		count--;
+	}
+
+	return 1;
+}
+
 struct companion_t {
 	const char *ext1;       /* Original file extension */
 	const size_t ext1_len;  /* Length of the original extension */
@@ -5902,6 +5927,13 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 5 && sig[0] == 'T' && sig[1] == 'M' && sig[2] == '-'
 	&& sig[3] == 'F' && sig[4] == 'a' && sig[5] == 'x')
 		return "image/x-perfect-fax";
+
+	/* RECOIL: recoil.c:RECOIL_DecodeGraphicsProcessor */
+	if (file_size == 32331 && BE_U16(sig) <= 0x0002)
+		return "image/x-atari-graphics-processor";
+	if (file_size >= 493 && !sig[0] && sig[1] >= 10 && sig[1] <= 12
+	&& is_graphics_processor(sig, nread) == 1)
+		return "image/x-atari-graphics-processor";
 
 	/* =================================
 	 * WEAK MAGIC! Only 2-3 conditions
