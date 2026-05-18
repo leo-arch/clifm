@@ -31,9 +31,10 @@
 # directory, usually '/usr/local/share/clifm/plugins/' or '/usr/share/clifm/plugins'.
 
 # Legacy formats (amiga, commodore, atari, etc). recoil2png is required.
-^image/x-(amiga-|atari-|coco-|commodore-|msx-|nec-|spectrum-|ilbm|deep|award-bioslogo|ilab|signum|compuserve|msp|pic|cpc|sony-tim|makichan|vicar|ice|amos|graph2font|grob|apple-a2gs|pi|spr|deskmate-paint|multiartist|daisy-dot-font|artmaster88|spritepad|q4|pcpaint)=~/.config/clifm/clifmimg legacy %f %u;
+^image/x-(amiga-|amstrad-|apple2-|atari-|coco-|commodore-|mac-|msx-|nec-|oric-|psion-|spectrum-|tandy-|award-bioslogo|compuserve|cpc|grob|ice|ilab|ilbm|makichan|msp|pcpaint|ppr|sony-tim|spr|vicar)=~/.config/clifm/clifmimg legacy %f %u;
+^video/x-atari-.*=~/.config/clifm/clifmimg legacy %f %u;
 ^application/x-atari-sfdn=~/.config/clifm/clifmimg legacy %f %u;
-^font/x-(atari-|commodore-)=~/.config/clifm/clifmimg legacy %f %u;
+^font/x-(amiga-|amstrad-|atari-|commodore-|image72)=~/.config/clifm/clifmimg legacy %f %u;
 
 ^text/rtf$|^application/.*(officedocument|msword|ms-excel|ms-powerpoint|opendocument).*=~/.config/clifm/clifmimg doc %f %u;
 ^application/epub\+zip$=~/.config/clifm/clifmimg epub %f %u;
