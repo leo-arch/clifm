@@ -3,6 +3,7 @@
 ######################
 
 OS != uname -s
+OS ?= $(shell uname -s)
 
 BIN ?= clifm
 
@@ -32,7 +33,7 @@ LIBS_FreeBSD ?= -I/usr/local/include -L/usr/local/lib -lreadline -lintl -lmagic
 LIBS_DragonFly ?= -I/usr/local/include -L/usr/local/lib -lreadline -lintl -lmagic
 LIBS_NetBSD ?= -I/usr/pkg/include -I/usr/pkg/include/gettext -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline -lintl -lmagic -lutil
 LIBS_OpenBSD ?= -I/usr/local/include -L/usr/local/lib -lereadline -lintl -lmagic
-LIBS_Darwin ?= -I/opt/local/include -L/opt/local/lib -lreadline -lintl -lmagic
+LIBS_Darwin ?= -I/opt/homebrew/opt/readline/include -I/opt/homebrew/opt/gettext/include -I/opt/homebrew/opt/libmagic/include -I/opt/local/include -L/opt/homebrew/opt/readline/lib -L/opt/homebrew/opt/gettext/lib -L/opt/homebrew/opt/libmagic/lib -L/opt/local/lib -lreadline -lintl -lmagic
 
 $(BIN): $(SRC) $(HEADERS)
 	@printf "Detected operating system: %s\n" "$(OS)"
