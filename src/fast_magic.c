@@ -3284,6 +3284,39 @@ is_graphics_processor(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
+static int
+is_atari_16color_palette(const uint8_t *s, const size_t slen)
+{
+	const size_t pal_bytes = 32;
+	if (!s || slen < pal_bytes)
+		return 0;
+
+	uint16_t prev = 0xFFFF;
+	size_t nonzero = 0;
+	size_t identical = 0;
+
+	for (size_t i = 0; i < pal_bytes; i += 2) {
+		const uint16_t v = BE_U16(s + i);
+		if (v > 0x0FFF)
+			return 0;
+		if (v != 0)
+			nonzero++;
+		if (v == prev) {
+			identical++;
+			if (identical > 2)
+				return 0;
+		} else {
+			prev = v;
+			identical = 1;
+		}
+	}
+
+	if (nonzero < 12)
+		return 0;
+
+	return 1;
+}
+
 struct companion_t {
 	const char *ext1;       /* Original file extension */
 	const size_t ext1_len;  /* Length of the original extension */
@@ -3790,6 +3823,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/EA_archive */
 	if (nread > 2 && sig[0] == 0x1A && sig[1] == 'E' && sig[2] == 'A')
 		return "application/x-ea-archive";
+	/* http://fileformats.archiveteam.org/wiki/Electronic_Arts_LIB_Game_Archive */
+	if (nread > 4 && sig[0] == 'E' && sig[1] == 'A' && sig[2] == 'L'
+	&& sig[3] == 'I' && sig[4] == 'B')
+		return "application/x-ea-lib";
 	/* file(1): magic/Magdir/archives */
 	if (nread > 4 && (BE_U32(sig) & 0xFFFFF0F0) == 0x4D530000)
 		return "application/x-msxie";
@@ -4172,14 +4209,13 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "application/vnd.wordperfect";
 	}
 
-	if (nread >= 7 && sig[0] == 'W' && memcmp(sig, "WordPro", 7) == 0)
-		return "application/vnd.lotus-wordpro";
-
+	/* file(1): magic/Magdir/msdos */
 	if (nread > 7 && BE_U32(sig) == 0x00000200 && sig[6] > 0 && sig[7] == 0)
 		return "application/vnd.lotus-1-2-3";
-	/* file(1): magic/Magdir/msdos */
 	if (nread > 20 && BE_U32(sig) == 0x00001A00 && sig[20] > 0 && sig[20] < 32)
 		return "application/vnd.lotus-1-2-3";
+	if (nread >= 7 && sig[0] == 'W' && memcmp(sig, "WordPro", 7) == 0)
+		return "application/vnd.lotus-wordpro";
 
 	if (nread > 113 && sig[0] == 0x01 && sig[1] == 0xFE && sig[112] == 0x01
 	&& sig[113] == 0x00)
@@ -5896,9 +5932,18 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "image/x-atari-din";
 
 	/* RECOIL: recoil.c:RECOIL_DecodeMonoArt */
-	if (nread > 3 && sig[0] <= 30 && sig[1] <= 64
+	if (nread > 3 && sig[0] > 0 && sig[0] <= 30 && sig[1] > 0 && sig[1] <= 64
 	&& (size_t)file_size == (3 + (((size_t)sig[0] + 1) * ((size_t)sig[1] + 1))))
 		return "image/x-atari-art";
+
+	/* https://temlib.org/AtariForumWiki/index.php/GFA_Artist_file_format */
+	/* 1000-color mode */
+	if (nread > 2 && file_size == 34360 && sig[0] == 0x00 && sig[1] == 0x04
+	&& BE_U16(sig + 2) == 0)
+		return "image/x-atari-gfa-artist";
+	if (nread > 32 && file_size == 32032
+	&& is_atari_16color_palette(sig, nread) == 1)
+		return "image/x-atari-gfa-artist";
 
 	/* https://atarionline.pl/utils/2.%20Grafika/Interlace%20Graphics%20Editor/Interlace%20Graphics%20Editor%20-%20readme%20PL.txt */
 	if (nread > 7 && file_size == 6160 && sig[0] == 0xFF && sig[1] == 0xFF
@@ -5982,6 +6027,11 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (file_size >= 493 && !sig[0] && sig[1] >= 10 && sig[1] <= 12
 	&& is_graphics_processor(sig, nread) == 1)
 		return "image/x-atari-graphics-processor";
+
+	/* https://moddingwiki.shikadi.net/wiki/JAM_Format */
+	if (nread > 14 && sig[0] == 'X' && sig[1] == 'C' && sig[2] == 'O'
+	&& sig[3] == 'M' && LE_U16(sig + 12) == 0x08)
+		return "image/x-jam";
 
 	/* =================================
 	 * WEAK MAGIC! Only 2-3 conditions
