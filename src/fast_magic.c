@@ -997,6 +997,50 @@ check_elf_magic(const uint8_t *s, const size_t slen)
 	}
 }
 
+/* See file(1): magic/Magdir/msdos */
+static int
+is_msdos_excel(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen < 8 || s[0] != 0x09)
+		return 0;
+
+	const uint16_t len = LE_U16(s + 2);
+	const uint16_t version = LE_U16(s + 4);
+	const uint16_t type = LE_U16(s + 6);
+
+	/* Excel 2 BIFF 2 */
+	if (s[1] == 0x00 && len == 4 && (version == 0 || version == 2)
+	&& (type == 0x0010 || type == 0x0020 || type == 0x0040))
+		return 1;
+	/* Excel 3 BIFF 3 */
+	if (s[1] == 0x02 && len == 6 && (version == 0 || version == 3)
+	&& (type == 0x0010 || type == 0x0020 || type == 0x0040 || type == 0x0100))
+		return 1;
+	/* Excel 4 BIFF 4 */
+	if (s[1] == 0x04 && len == 6 && (version == 0 || version == 4)
+	&& (type == 0x0010 || type == 0x0020 || type == 0x0040 || type == 0x0100))
+		return 1;
+	/* Excel 5 BIFF 5 */
+	if (s[1] == 0x08 && len == 8 && (version == 0 || version == 5
+	|| version == 0x0500) && (type == 0x0010 || type == 0x0020
+	|| type == 0x0040 || type == 0x0100))
+		return 1;
+	/* Excel 8 BIFF 8 */
+	if (s[1] == 0x08 && len == 16 && (version == 0 || version == 8
+	|| version == 0x0600) && (type == 0x0010 || type == 0x0020
+	|| type == 0x0040 || type == 0x0100 || type == 0x0005 || type == 0x0006))
+		return 1;
+
+	/* BOFF records written by other external tools */
+	if (s[1] == 0x08 && len > 3 && (version == 0 || version == 2
+	|| version == 3 || version == 4 || version == 5 || version == 6
+	|| version == 8) && (type == 0x0010 || type == 0x0020 || type == 0x0040
+	|| type == 0x0100 || type == 0x0005 || type == 0x0006))
+		return 1;
+
+	return 0;
+}
+
 static const char *
 check_pre_ole2_office_docs(const uint8_t *s, const size_t slen)
 {
@@ -1006,10 +1050,6 @@ check_pre_ole2_office_docs(const uint8_t *s, const size_t slen)
 		if (b != 0) return "application/mswrite";
 		return "application/msword";
 	}
-
-	if (slen > 5 && s[0] == 0xDB && s[1] == 0xA5 && s[2] == '-'
-	&& s[3] == 0x00 && s[4] == 0x00 && s[5] == 0x00)
-		return "application/msword"; /* Word 2 (pre OLE2) */
 
 	if (slen > 3 && s[0] == 0xDB && s[1] == 0xA5 && s[2] == 0x2D
 	&& s[3] == 0x00)
@@ -1026,9 +1066,8 @@ check_pre_ole2_office_docs(const uint8_t *s, const size_t slen)
 	}
 
 	/* Magic taken from libmagic */
-	if (slen > 7 && s[0] == 0x09 && s[1] == 0x04 && s[2] == 0x06
-	&& s[3] == 0x00 && s[4] == 0x00 && s[5] == 0x00 && s[6] == 0x10
-	&& s[7] == 0x00) /* MS Excel Worksheet */
+	if (slen > 8 && s[0] == 0x09 && (s[1] == 0x00 || s[1] == 0x02
+	|| s[1] == 0x04 || s[1] == 0x08) && is_msdos_excel(s, slen) == 1)
 		return "application/vnd.ms-excel";
 
 	if (slen >= 19 && s[4] == 'S' && s[7] == 'n'
@@ -4136,13 +4175,15 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread >= 7 && sig[0] == 'W' && memcmp(sig, "WordPro", 7) == 0)
 		return "application/vnd.lotus-wordpro";
 
-	if (nread > 7 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x02
-	&& sig[6] > 0x00 && sig[7] == 0x00)
+	if (nread > 7 && BE_U32(sig) == 0x00000200 && sig[6] > 0 && sig[7] == 0)
+		return "application/vnd.lotus-1-2-3";
+	/* file(1): magic/Magdir/msdos */
+	if (nread > 20 && BE_U32(sig) == 0x00001A00 && sig[20] > 0 && sig[20] < 32)
 		return "application/vnd.lotus-1-2-3";
 
 	if (nread > 113 && sig[0] == 0x01 && sig[1] == 0xFE && sig[112] == 0x01
 	&& sig[113] == 0x00)
-		return "application/vnd-ms-works";
+		return "application/vnd.ms-works";
 
 	if (nread > 3 && sig[0] == 'S' && sig[1] == 'G' && sig[2] == 'A'
 	&& sig[3] == '3')
