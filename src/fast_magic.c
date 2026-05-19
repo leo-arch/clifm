@@ -4540,6 +4540,13 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0x01 && LE_U32(sig + 2) == 0x00000100)
 		return "application/x-norton-guide";
 
+	/* http://fileformats.archiveteam.org/wiki/ATR */
+	if (nread > 6 && (file_size == 92176 || file_size == 133136
+	|| file_size == 183952) && sig[0] == 0x96 && sig[1] == 0x02
+	&& (LE_U16(sig + 4) == 128 || LE_U16(sig + 4) == 256
+	|| LE_U16(sig + 4) == 512))
+		return "application/x-atari-disk-image"; /* .atr */
+
 	if (nread > 4 && sig[0] == 'A' && sig[1] == 'L' && sig[2] == 'Z'
 	&& sig[3] == 0x01 && sig[4] == 0x0A)
 		return "application/x-alz";
