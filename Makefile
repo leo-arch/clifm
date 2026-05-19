@@ -3,6 +3,7 @@
 ######################
 
 OS != uname -s
+OS ?= $(shell uname -s)
 
 BIN ?= clifm
 
