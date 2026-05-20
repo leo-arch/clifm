@@ -580,6 +580,10 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 	&& buf[15] == 'T')
 		return "audio/x-idf";
 
+	/* https://www.iana.org/assignments/media-types/audio/dls */
+	if (buf[8] == 'D' && buf[9] == 'L' && buf[10] == 'S' && buf[11] == ' ')
+		return "audio/dls";
+
 	/* https://www.cpcwiki.eu/index.php/Format:CPR_CPC_Plus_cartridge_file_format */
 	if (buf_len > 11 && buf[8] == 'A' && (buf[9] == 'm' || buf[9] == 'M')
 	&& (buf[10] == 's' || buf[10] == 'S') && buf[11] == '!')
@@ -3490,6 +3494,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		if (sig[0] == 't') return "application/x-winhelp-fts";
 		if (sig[0] == 'g') return "application/x-winhelp-ftg";
 	}
+	if (nread >= 23 && sig[0] == '[' && sig[1] == 'I' && sig[17] == ']'
+	&& memcmp(sig, "[InternetShortcut]", 18) == 0)
+		return "application/x-mswinurl";
 
 	if (nread > 5 && sig[0] == 'I' && sig[1] == 'T' && sig[2] == 'S'
 	&& sig[3] == 'F' && sig[4] == 0x03 && sig[5] == 0x00)
@@ -5150,6 +5157,60 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& BE_U16(sig + 2) > 0x00)
 		return "font/x-amiga-font";
 
+	/* http://fileformats.archiveteam.org/wiki/FNT_(Windows_Font) */
+	if (nread > 8 && sig[0] == 0x00 && sig[1] >= 0x01 && sig[1] <= 0x03
+	&& (size_t)LE_U32(sig + 2) == (size_t)file_size)
+		return "font/x-ms-font";
+
+	/* http://fileformats.archiveteam.org/wiki/Calamus_Font */
+	if (nread >= 10 && sig[0] == 'C' && sig[8] == 'F' && sig[9] == 'N'
+	&& memcmp(sig, "CALAMUSCFN", 10) == 0)
+		return "font/x-calamus";
+
+	/* http://fileformats.archiveteam.org/wiki/FONTEDIT_font */
+	if (nread > 96 && sig[0] == 0xEB && (sig[1] == 0x32 || sig[1] == 0x33)
+	&& memcmp(sig + 41 + sig[1], "\xb8\x10\x11\xcd\x10", 5) == 0)
+		return "application/x-fontedit";
+
+	if (nread > 63 && (sig[60] == 0x01 || sig[60] == 0x02 || sig[60] == 0x04)
+	&& sig[59] == 0x00 && sig[61] == 0x00 && sig[62] == 'U' && sig[63] == 'U')
+		return "font/x-atari-gem";
+
+	/* http://fileformats.archiveteam.org/wiki/TexFont */
+	if (nread > 8 && sig[0] == 0xff && sig[1] == 't' && sig[2] == 'x'
+	&& sig[3] == 'f')
+		return "font/x-texfont";
+
+	/* http://fileformats.archiveteam.org/wiki/PFF2 */
+	if (nread > 12 && sig[8] == 'P' && sig[9] == 'F' && sig[10] == 'F'
+	&& sig[11] == '2' && memcmp(sig, "FILE\0\0\0\4PFF2", 12) == 0)
+		return "application/x-font-pf2";
+
+	/* http://fileformats.archiveteam.org/wiki/PFR */
+	if (nread > 3 && sig[0] == 'P' && sig[1] == 'F' && sig[2] == 'R'
+	&& (sig[3] == '0' || sig[3] == '1') && sig[4] == 0x00)
+		return "application/x-font-pfr";
+
+	/* http://fileformats.archiveteam.org/wiki/PK_font */
+	/* Partial detection */
+	if (nread > 2 && nread == (size_t)file_size && sig[0] == 0xf7
+	&& sig[1] == 0x59 && (sig[nread - 1] == 0xf5 || sig[nread - 1] == 0xf6))
+		return "application/x-pkfont";
+
+	/* http://fileformats.archiveteam.org/wiki/Speedo */
+	if (nread > 5 && sig[0] == 'D' && sig[1] == '1' && sig[2] == '.'
+	&& sig[3] == '0' && sig[4] == 0x0D && sig[5] == 0x0A)
+		return "application/x-font-speedo";
+
+	/* http://fileformats.archiveteam.org/wiki/Fontographer */
+	if (nread > 3 && sig[0] == 'C' && sig[1] == 'f' && sig[2] == 'f'
+	&& (sig[3] == '1' || sig[3] == '2'))
+		return "application/x-font-fog";
+
+	/* http://fileformats.archiveteam.org/wiki/Raw_Bitmap_Font */
+	if (nread > 8 && BE_U32(sig) == 0xE00EF00D && BE_U32(sig + 4) == 0x03000000)
+		return "font/x-rbf";
+
 	/* https://web.archive.org/web/20050305044255/http://www.lazerware.com:80/formats/macbinary/macbinary_iii.html */
 	if (nread > 123 && !sig[0] && !sig[74] && !sig[82] && sig[1]
 	&& sig[102] == 'm' && sig[103] == 'B' && sig[104] == 'I' && sig[105] == 'N'
@@ -5181,6 +5242,11 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[20] == 'e' && sig[21] == 0x0D && sig[22] == 0x0A
 	&& memcmp(sig + 23, "Disk-Info\r\n", 11) == 0)
 		return "application/x-spectrum-dsk";
+
+	/* http://fileformats.archiveteam.org/wiki/PaintShop_Pro */
+	if (nread >= 25 && sig[0] == 'P' && sig[6] == 'S' && sig[11] == 'P'
+	&& memcmp(sig, "Paint Shop Pro Image File", 25) == 0)
+		return "image/x-paintshop-pro";
 
 	/* https://github.com/reyco2000/CoCo-Image-Viewer/blob/main/documentation/COCO-PICS-FORMATS.md#clp-format-max-10-clipboard */
 	if (nread > 25 && nread == (size_t)file_size && sig[file_size - 1] == 0x64) {
@@ -5937,9 +6003,8 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "image/x-atari-art";
 
 	/* https://temlib.org/AtariForumWiki/index.php/GFA_Artist_file_format */
-	/* 1000-color mode */
 	if (nread > 2 && file_size == 34360 && sig[0] == 0x00 && sig[1] == 0x04
-	&& BE_U16(sig + 2) == 0)
+	&& BE_U16(sig + 2) == 0) /* 1000-color mode */
 		return "image/x-atari-gfa-artist";
 	if (nread > 32 && file_size == 32032
 	&& is_atari_16color_palette(sig, nread) == 1)
