@@ -15,6 +15,7 @@
 #define RL_ANSWER_YES  1
 #define RL_ANSWER_ALL  2
 #define RL_ANSWER_QUIT 3
+#define RL_ANSWER_NONE 4
 
 __BEGIN_DECLS
 

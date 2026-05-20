@@ -1557,6 +1557,7 @@ check_overwrite(char **args, const int force, size_t *skipped)
 	const size_t dest_len = strlen(dest);
 	const int ends_with_slash =
 		(dest_len > 1 && dest[dest_len - 1] == '/');
+	int answer_none = 0;
 
 	for (size_t i = 1; i < files_num; i++) {
 		char *p = unescape_str(args[i]);
@@ -1576,9 +1577,23 @@ check_overwrite(char **args, const int force, size_t *skipped)
 		if (lstat(buf, &a) == -1)
 			continue;
 
+		if (answer_none == 1) {
+			*args[i] = '\0';
+			(*skipped)++;
+			continue;
+		}
+
 		snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
 			cmd_name, buf);
 		const int answer = rl_get_y_n_all(msg, conf.default_answer.overwrite);
+
+		if (answer == RL_ANSWER_NONE) { /* Skip all existent files */
+			answer_none = 1;
+			*args[i] = '\0';
+			(*skipped)++;
+			continue;
+		}
+
 		if (answer == RL_ANSWER_ALL)
 			return 1;
 

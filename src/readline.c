@@ -110,12 +110,12 @@ gen_yes_no_str(char def_answer, int allow_all)
 {
 	switch (def_answer) {
 	case 'y':
-		return allow_all ? "[Y/n/all/quit]" : "[Y/n]";
+		return allow_all ? "[Y/n/all/none/quit]" : "[Y/n]";
 	case 'n':
-		return allow_all ? "[y/N/all/quit]" : "[y/N]";
-	case 'u': /* fallthrough */
+		return allow_all ? "[y/N/all/none/quit]" : "[y/N]";
+	case 'u': /* fallthrough */ /* unset */
 	default:
-		return allow_all ? "[y/n/all/quit]" : "[y/n]";
+		return allow_all ? "[y/n/all/none/quit]" : "[y/n]";
 	}
 }
 
@@ -179,6 +179,8 @@ rl_get_y_n_common(const char *msg_str, char default_answer, int allow_all)
 
 		case 'n': /* fallthrough */
 		case 'N':
+			if (TOLOWER(answer[1]) == 'o' && strcasecmp(answer, "none") == 0)
+				{ free(answer); free(msg); return RL_ANSWER_NONE; }
 			if (!answer[1] || strcasecmp(answer, "no") == 0)
 				{ free(answer); free(msg); return RL_ANSWER_NO; }
 			else
