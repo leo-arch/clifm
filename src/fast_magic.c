@@ -2105,6 +2105,10 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[4] == 0x0A && IS_DIGIT(sig[3]) && IS_DIGIT(sig[5]))
 		return "audio/x-pvf";
 
+	if (nread > 8 && sig[0] == 'P' && sig[1] == 'M' && sig[2] == 'D'
+	&& sig[3] == 0x80 && BE_U32(sig + 4) == 0x18040000)
+		return "audio/x-pmd";
+
 	if (nread > 8 && sig[0] == 0x0F && sig[1] == 'S' && sig[5] == 'L'
 	&& memcmp(sig + 1, "SIBELIUS", 8) == 0)
 		return "application/x-sibelius-score";
@@ -2593,6 +2597,198 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread >= 15 && sig[0] == 0x0E && sig[1] == 'S' && sig[7] == 'U'
 	&& memcmp(sig + 1, "SketchUp Model", 14) == 0)
 		return "application/vnd.sketchup.skp";
+
+	/* file(1): magic/Magdir/console */
+	if (nread > 3 && sig[0] == 'N' && sig[1] == 'E' && sig[2] == 'S'
+	&& (sig[3] == 0x1A || sig[3] == 0x00))
+		return "application/x-nes-rom";
+	if (nread > 8 && sig[0] == 'U' && sig[1] == 'N' && sig[2] == 'I'
+	&& sig[3] == 'F' && LE_U32(sig + 4) < 16)
+		return "application/x-nes-rom";
+	if (nread > 4 && sig[0] == 'T' && sig[1] == 'N' && sig[2] == 'E'
+	&& sig[3] == 'S')
+		return "application/x-nes-rom";
+	if (nread > 4 && sig[0] == 'N' && sig[1] == 'E' && sig[2] == 'S'
+	&& sig[3] == 'M' && sig[4] == 0x1A)
+		return "application/x-nes-music";
+	if (nread > 3 && sig[0] == 'F' && sig[1] == 'D' && sig[2] == 'S'
+	&& sig[3] == 0x1A)
+		return "application/x-fds-disk";
+	if (nread >= 14 && sig[1] == '*' && sig[2] == 'N' && sig[3] == 'I'
+	&& memcmp(sig + 1, "*NINTENDO-HVC*", 14) == 0)
+		return "application/x-fds-disk";
+	if (nread > 323 && BE_U32(sig + 260) == 0xCEED6666
+	&& BE_U32(sig + 264) == 0xCC0D000B) {
+		if ((sig[323] & 0x80) == 0x80) return "application/x-gameboy-color-rom";
+		return "application/x-gameboy-rom";
+	}
+	if (nread > 12 && BE_U32(sig + 4) == 0x24FFAE51
+	&& BE_U32(sig + 8) == 0x699AA221)
+		return "application/x-gba-rom";
+	if (nread > 3 && sig[0] == 'G' && sig[1] == 'B' && sig[2] == 'S'
+	&& sig[3] == 0x01)
+		return "audio/x-nintendo-gbs";
+
+	if (nread > 3 && sig[0] == 'X' && sig[1] == 'B' && sig[2] == 'E'
+	&& sig[3] == 'H')
+		return "audio/x-xbox-executable";
+	if (nread > 3 && sig[0] == 'X' && sig[1] == 'E' && sig[2] == 'X'
+	&& (sig[3] == '2' || sig[3] == '1'))
+		return "audio/x-xbox360-executable";
+
+	if (nread > 323 && BE_U32(sig + 260) == 0x0110CEEF
+	&& BE_U32(sig + 264) == 0x000044AA)
+		return "application/x-analogue-pocket-rom";
+
+	if (nread > 8 && BE_U32(sig) == 0x80371240 && BE_U32(sig + 4) == 0x0000000F)
+		return "application/x-n64-rom";
+	if (nread > 8 && BE_U32(sig) == 0x37804012 && BE_U32(sig + 4) == 0x00000F00)
+		return "application/x-n64-rom";
+	if (nread > 8 && BE_U32(sig) == 0x12408037 && BE_U32(sig + 4) == 0x000F0000)
+		return "application/x-n64-rom";
+	if (nread > 8 && BE_U32(sig) == 0x40123780 && BE_U32(sig + 4) == 0x0F000000)
+		return "application/x-n64-rom";
+
+	if (nread > 200 && BE_U32(sig + 192) == 0x24FFAE51
+	&& BE_U32(sig + 196) == 0x699AA221)
+		return "application/x-nintendo-ds-rom";
+	if (nread > 200 && BE_U32(sig + 192) == 0xC8604FE2
+	&& BE_U32(sig + 196) == 0x01708FE2)
+		return "application/x-nintendo-ds-rom";
+
+	if (nread > 16 && sig[0] == 'S' && sig[1] == 'E' && sig[2] == 'G'
+	&& sig[3] == 'A') {
+		if (sig[4] == 'D' && memcmp(sig, "SEGADISCSYSTEM  ", 16) == 0)
+			return "application/x-sega-cd-rom";
+		if (sig[4] == 'B' && memcmp(sig, "SEGABOOTDISK    ", 16) == 0)
+			return "application/x-sega-cd-rom";
+		if (sig[5] == 'S' && memcmp(sig + 4, " SEGASATURN ", 12) == 0)
+			return "application/x-saturn-rom";
+		if (sig[5] == 'S' && memcmp(sig + 4, " SEGAKATANA ", 12) == 0)
+			return "application/x-dc-rom";
+	}
+	if (nread > 36 && sig[16] == 'S' && sig[17] == 'E' && sig[18] == 'G'
+	&& sig[19] == 'A') {
+		if (sig[20] == 'D' && memcmp(sig + 16, "SEGADISCSYSTEM  ", 16) == 0)
+			return "application/x-sega-cd-rom";
+		if (sig[20] == 'B' && memcmp(sig + 16, "SEGABOOTDISK    ", 16) == 0)
+			return "application/x-sega-cd-rom";
+		if (sig[21] == 'S' && memcmp(sig + 20, " SEGASATURN ", 12) == 0)
+			return "application/x-saturn-rom";
+		if (sig[21] == 'S' && memcmp(sig + 20, " SEGAKATANA ", 12) == 0)
+			return "application/x-dc-rom";
+	}
+	if (nread > 975 && sig[256] == 'S' && sig[257] == 'E' && sig[258] == 'G'
+	&& sig[259] == 'A') {
+		if (sig[960] == 'M' && memcmp(sig + 960, "MARS CHECK MODE", 15) == 0)
+			return "application/x-genesis-32x-rom";
+		if (sig[261] == 'P' && memcmp(sig + 260, " PICO", 5) == 0)
+			return "application/x-sega-pico-rom";
+		if (sig[260] == 'T' && memcmp(sig + 260, "TOYS PICO", 9) == 0)
+			return "application/x-sega-pico-rom";
+		if (sig[261] == 'T' && memcmp(sig + 260, " TOYS PICO", 10) == 0)
+			return "application/x-sega-pico-rom";
+		if (sig[261] == 'I' && memcmp(sig + 260, " IAC", 4) == 0)
+			return "application/x-sega-pico-rom";
+		if (sig[261] == 'T' && memcmp(sig + 260, " TERA", 4) == 0)
+			return "application/x-sega-teradrive-rom";
+		return "application/x-genesis-rom";
+	}
+
+	if (nread > 644 && BE_U16(sig + 8) == 0xAABB && sig[640] == 'E'
+	&& sig[641] == 'A' && ((sig[642] == 'G' && sig[643] == 'N')
+	|| (sig[642] == 'M' && sig[643] == 'G')))
+		return "application/x-genesis-rom";
+
+	if (nread > 976 && sig[256] == 'P' && sig[257] == 'i' && sig[258] == 'c'
+	&& memcmp(sig + 256, "Picture Magic", 13) == 0
+	&& sig[960] == 'P' && memcmp(sig + 960, "PICTURE MAGIC-01", 16) == 0)
+		return "application/x-genesis-32x-rom";
+
+	if (nread > 268 && sig[256] == 'S' && sig[257] == 'A' && sig[258] == 'M'
+	&& memcmp(sig + 256, "SAMSUNG PICO", 12) == 0)
+		return "application/x-sega-pico-rom";
+	if (nread > 271 && sig[256] == 'I' && sig[257] == 'M' && sig[258] == 'A') {
+		if (memcmp(sig + 256, "IMA IKUNOUJYUKU", 15) == 0
+		|| memcmp(sig + 256, "IMA IKUNOJYUKU", 14) == 0)
+			return "application/x-sega-pico-rom";
+	}
+
+	if (nread > 5 && sig[0] == ' ' && sig[1] == 'S' && sig[2] == 'E'
+	&& sig[3] == 'G' && sig[4] == 'A')
+		return "application/x-genesis-rom";
+
+	/* May also be at offset 16368 or 32752 */
+	if (nread >= 8192 && sig[8176] == 'T' && sig[8177] == 'M'
+	&& sig[8178] == 'R' && sig[8179] == ' ' && sig[8180] == 'S'
+	&& sig[8181] == 'E' && sig[8182] == 'G' && sig[8183] == 'A') {
+		const uint8_t v = sig[15] & 0xF0;
+		if (v == 0x50 || v == 0x60 || v == 0x70)
+			return "application/x-gamegear-rom";
+		return "application/x-sms-rom";
+	}
+
+	if (nread > 18 && sig[10] == 'B' && sig[13] == 'S' && sig[17] == 'C'
+	&& memcmp(sig + 10, "BY SNK CORPORATION", 18) == 0)
+		return "application/x-neo-geo-pocket-rom";
+
+	if (nread > 7 && sig[0] == 'P' && sig[1] == 'S' && sig[2] == '-'
+	&& sig[3] == 'X' && sig[4] == ' ' && sig[5] == 'E' && sig[6] == 'X'
+	&& sig[7] == 'E')
+		return "application/x-psx-executable";
+	if (nread > 3 && sig[0] == 'P' && sig[1] == 'S' && sig[2] == 'A'
+	&& sig[3] == 'R')
+		return "application/x-psx-archive";
+
+	if (nread > 9 && sig[0] == 0x80 && sig[1] == 0x08 && sig[6] == 'B'
+	&& sig[7] == 'S' && sig[8] == '9' && sig[9] == '3')
+		return "application/x-atari-lynx-rom";
+	if (nread > 3 && sig[0] == 'L' && sig[1] == 'Y' && sig[2] == 'N'
+	&& sig[3] == 'X')
+		return "application/x-atari-lynx-rom";
+
+	if (nread > 24 && sig[0] == 'C' && sig[1] == 'I' && sig[2] == 'S'
+	&& sig[3] == 'O') {
+		if (sig[20] < 2 && LE_U32(sig + 16) == 2048)
+			return "application/x-compressed-iso";
+		if (sig[20] == 2 && LE_U16(sig + 22) == 0 && LE_U32(sig + 4) == 4)
+			return "application/x-compressed-iso";
+	}
+
+	if (nread > 32 && BE_U32(sig + 28) == 0xC2339F3D)
+		return "application/x-gamecube-rom";
+	if (nread > 540 && sig[0] == 'W' && sig[1] == 'B' && sig[2] == 'F'
+	&& sig[3] == 'S' && BE_U32(sig + 536) == 0x5D1C9EA3)
+		return "application/x-wii-rom";
+	if (nread > 8 && LE_U32(sig) == 0xB10BC001) {
+		const uint32_t v = LE_U32(sig + 4);
+		if (v == 0) return "application/x-gamecube-rom";
+		if (v == 1) return "application/x-wii-rom";
+	}
+	if (nread > 92 && sig[0] == 'W' && sig[1] == 'I' && sig[2] == 'I'
+	&& sig[3] == 0x01 && sig[4] == 'D' && sig[5] == 'I' && sig[6] == 'S'
+	&& sig[7] == 'C' && BE_U32(sig + 8) == 1) {
+		if (BE_U32(sig + 84) == 0xC2339F3D)
+			return "application/x-gamecube-rom";
+		if (BE_U32(sig + 88) == 0x5D1C9EA3)
+			return "application/x-wii-rom";
+	}
+	if (nread > 3 && sig[0] == 'W' && sig[1] == 'I' && sig[2] == 'A'
+	&& sig[3] == 0x01) {
+		const uint32_t v = BE_U32(sig + 72);
+		if (v == 1) return "application/x-gamecube-rom";
+		if (v == 2) return "application/x-wii-rom";
+	}
+	if (nread > 3 && sig[0] == 'R' && sig[1] == 'B' && sig[2] == 'Z'
+	&& sig[3] == 0x01) {
+		const uint32_t v = BE_U32(sig + 72);
+		if (v == 1) return "application/x-gamecube-rom";
+		if (v == 2) return "application/x-wii-rom";
+	}
+
+	if (nread > 9 && sig[0] > 0 && sig[0] < 3 && sig[1] == 'A' && sig[2] == 'T'
+	&& memcmp(sig + 1, "ATARI7800", 9) == 0)
+		return "application/x-atari-7800-rom";
 
 	return NULL;
 }
@@ -3321,6 +3517,73 @@ is_atari_16color_palette(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
+static const char *
+check_epoc5(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen <= 12)
+		return NULL;
+
+	if (LE_U32(s + 4) == 0x10000039) return "application/x-epoc-font";
+	if (LE_U32(s + 4) == 0x1000003A) return "application/x-epoc-pdriver";
+	if (LE_U32(s + 4) == 0x1000003B) return "application/x-epoc-clipboard";
+	if (LE_U32(s + 4) == 0x10000042) return "image/x-epoc-mbm";
+	if (LE_U32(s + 4) == 0x10000073) return "application/x-epoc-opo";
+	if (LE_U32(s + 4) == 0x10000074) return "application/x-epoc-app";
+	if (LE_U32(s + 4) == 0x1000008A) return "image/x-epoc-xmbm";
+	if (LE_U32(s + 4) == 0x1000006A) return "application/x-epoc-aif";
+
+	if (LE_U32(s + 4) != 0x1000006D) return NULL;
+
+	if (LE_U32(s + 8) == 0x1000007D) return "image/x-epoc-sketch";
+	if (LE_U32(s + 8) == 0x1000007E) return "application/x-epoc-voice";
+	if (LE_U32(s + 8) == 0x1000007F) return "application/x-epoc-word";
+	if (LE_U32(s + 8) == 0x10000085) return "application/x-epoc-opl";
+	if (LE_U32(s + 8) == 0x10000086) return "application/x-epoc-data";
+	if (LE_U32(s + 8) == 0x10000088) return "application/x-epoc-sheet";
+	if (LE_U32(s + 8) == 0x100001C4) return "application/x-epoc-eini";
+
+	return NULL;
+}
+
+static const char *
+check_epoc5_2(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen <= 12)
+		return NULL;
+
+	if (LE_U32(s + 4) == 0x100000E4) return "application/x-epoc-ini";
+	if (LE_U32(s + 4) == 0x10000075) return "application/x-epoc-backlite";
+
+	if (LE_U32(s + 4) != 0x1000006D) return NULL;
+
+	if (LE_U32(s + 8) == 0x10000084) return "application/x-epoc-agenda";
+	if (LE_U32(s + 8) == 0x10000086) return "application/x-epoc-addressbook";
+	if (LE_U32(s + 8) == 0x10000CEA) return "application/x-epoc-jotter";
+
+	return NULL;
+}
+
+static const char *
+check_epoc5_binary(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen <= 8)
+		return NULL;
+
+	if (LE_U32(s + 4) == 0x00000000) return "application/x-epoc-dll";
+	if (LE_U32(s + 4) == 0x10000049) return "application/x-epoc-chlib";
+	if (LE_U32(s + 4) == 0x1000004A) return "application/x-epoc-cplib";
+	if (LE_U32(s + 4) == 0x1000005D) return "application/x-epoc-opx";
+	if (LE_U32(s + 4) == 0x1000006C) return "application/x-epoc-app";
+	if (LE_U32(s + 4) == 0x1000008D) return "application/x-epoc-dll";
+	if (LE_U32(s + 4) == 0x100000AC) return "application/x-epoc-ldd";
+	if (LE_U32(s + 4) == 0x100000AD) return "application/x-epoc-pdd";
+	if (LE_U32(s + 4) == 0x100000E5) return "application/x-epoc-ftp";
+	if (LE_U32(s + 4) == 0x10000140) return "application/x-epoc-ppd";
+	if (LE_U32(s + 4) == 0x10000141) return "application/x-epoc-ppd";
+
+	return NULL;
+}
+
 struct companion_t {
 	const char *ext1;       /* Original file extension */
 	const size_t ext1_len;  /* Length of the original extension */
@@ -3608,6 +3871,14 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0x1A)
 		return "audio/x-doom-music"; /* .mus */
 
+	/* https://wiki.multimedia.cx/index.php?title=Scream_Tracker_3_Module */
+	if (nread > 47 && sig[44] == 'S' && sig[45] == 'C' && sig[46] == 'R'
+	&& sig[47] == 'M' && sig[28] == 0x1A)
+		return "audio/x-s3m";
+	if (nread > 79 && sig[76] == 'S' && sig[77] == 'C' && sig[78] == 'R'
+	&& (sig[79] == 'S' || sig[79] == 'I') && sig[0] <= 0x02)
+		return "audio/x-st3";
+
 	if (nread > 3 && sig[0] == 'D' && sig[1] == 'O' && sig[2] == 'S'
 	&& sig[3] < 0x08)
 		return "application/x-amiga-disk-format";
@@ -3894,10 +4165,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 			return "application/x-arc";
 	}
 
-	/* http://fileformats.archiveteam.org/wiki/DrawPlus */
-	if (nread >= 20 && sig[0] == 'V' && sig[1] == '{' && sig[2] == 'D'
-	&& memcmp(sig, "V{DrawPlus Picture V", 20) == 0)
-		return "image/x-drawplus";
+	if (nread > 3 && sig[0] == 'U' && sig[1] == 'H' && sig[2] == 'S'
+	&& sig[3] == 0x0D) /* Universal hint system */
+		return "application/x-uhs";
 
 	if (nread > 3 && sig[0] == 'F' && sig[1] == 'L' && sig[2] == 'V'
 	&& sig[3] == 0x01)
@@ -3978,7 +4248,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 8 && sig[0] == 'p' && sig[1] == 'm' && sig[2] == 'p'
 	&& sig[3] == 'm' && LE_U32(sig + 4) == 1)
 		return "video/x-sony-pmp";
-	if (nread > 8 && BE_U32(sig) == 0x10
+	if (nread > 8 && LE_U32(sig) == 0x00000010
 	&& (LE_U32(sig + 4) & 0xFFFFFFF0) == 0x00) {
 		const uint8_t v = (sig[4] & 0x0F);
 		if (v == 2 || v == 3 || v == 8 || v == 9)
@@ -3998,17 +4268,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0xFF)))
 		return "application/vnd.rn-realmedia";
 
-	/* https://wiki.multimedia.cx/index.php?title=Scream_Tracker_3_Module */
-	if (nread > 47 && sig[44] == 'S' && sig[45] == 'C' && sig[46] == 'R'
-	&& sig[47] == 'M' && sig[28] == 0x1A)
-		return "audio/x-s3m";
-	if (nread > 79 && sig[76] == 'S' && sig[77] == 'C' && sig[78] == 'R'
-	&& (sig[79] == 'S' || sig[79] == 'I') && sig[0] <= 0x02)
-		return "audio/x-st3";
-
-	if (nread > 3 && sig[0] == 'U' && sig[1] == 'H' && sig[2] == 'S'
-	&& sig[3] == 0x0D) /* Universal hint system */
-		return "application/x-uhs";
+	/* http://fileformats.archiveteam.org/wiki/DrawPlus */
+	if (nread >= 20 && sig[0] == 'V' && sig[1] == '{' && sig[2] == 'D'
+	&& memcmp(sig, "V{DrawPlus Picture V", 20) == 0)
+		return "image/x-drawplus";
 
 	if (nread > 15 && sig[0] == 'B' && sig[1] == 'A' && (
 	(sig[14] == 'B' && sig[15] == 'M')
@@ -4241,6 +4504,34 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'D')
 		return "application/vnd.smaf";
 
+	if (nread > 2 && sig[0] == 'R' && sig[1] == 'K' && sig[2] == 'A')
+		return "application/x-rka";
+
+	if (nread > 3 && sig[0] == 'N' && sig[1] == 'G' && sig[2] == 0x00
+	&& sig[3] == 0x01 && LE_U32(sig + 2) == 0x00000100)
+		return "application/x-norton-guide";
+
+	if (nread > 4 && sig[0] == 'A' && sig[1] == 'L' && sig[2] == 'Z'
+	&& sig[3] == 0x01 && sig[4] == 0x0A)
+		return "application/x-alz";
+
+	/* http://fileformats.archiveteam.org/wiki/ATR */
+	if (nread > 6 && (file_size == 92176 || file_size == 133136
+	|| file_size == 183952) && sig[0] == 0x96 && sig[1] == 0x02
+	&& (LE_U16(sig + 4) == 128 || LE_U16(sig + 4) == 256
+	|| LE_U16(sig + 4) == 512))
+		return "application/x-atari-disk-image"; /* .atr */
+
+	if (nread > 2 && sig[0] == 0x60 && (sig[1] == 0x1A || sig[1] == 0x1B)
+	&& sig[2] == 0x00)
+		return "application/x-atari-exec";
+	if (nread > 6 && sig[0] == 0x0E && sig[1] == 0x0F && BE_U16(sig + 4) < 0x02)
+		return "application/x-atari-msa";
+
+	if (nread > 3 && sig[0] == 0x0E && sig[1] == 0x03 && sig[2] == 0x13
+	&& sig[3] == 0x01)
+		return "application/x-hdf";
+
 	/* See FFmpeg: libavformat/dss.c */
 	if (nread > 4 && (sig[0] == 0x02 || sig[0] == 0x03) && sig[1] == 'd'
 	&& sig[2] == 's' && sig[3] == 's')
@@ -4448,6 +4739,30 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 			return "audio/x-a2t";
 	}
 
+	/* http://fileformats.archiveteam.org/wiki/Dynamic_Studio_Professional_module */
+	if (nread > 3 && sig[0] == 'D' && sig[1] == 'S' && sig[2] == 'm'
+	&& sig[3] == 0x1A)
+		return "audio/x-dsm";
+
+	/* https://www.fileformat.info/format/gravis/corion.htm */
+	if (nread > 10 && sig[0] == 'G' && sig[1] == 'F' && sig[2] == '1'
+	&& memcmp(sig, "GF1PATCH110", 11) == 0)
+		return "audio/x-gf1-patch"; /* .pat */
+
+	if (nread > 3 && sig[0] == 'P' && sig[1] == 'A' && sig[2] == 'C'
+	&& sig[3] == 'G')
+		return "audio/x-pac";
+
+	/* http://fileformats.archiveteam.org/wiki/VAG_(PlayStation) */
+	if (nread > 48 && sig[0] == 'V' && sig[1] == 'A' && sig[2] == 'G'
+	&& sig[3] == 'p' && (size_t)BE_U32(sig + 12) + 48 == (size_t)file_size)
+		return "audio/x-psx-vag";
+
+	/* https://asap.sourceforge.net/sap-format.html */
+	if (nread > 4 && sig[0] == 'S' && sig[1] == 'A' && sig[2] == 'P'
+	&& sig[3] == 0x0D && sig[4] == 0x0A)
+		return "audio/x-sap";
+
 	if (nread > 15 && sig[12] == 'S' && sig[13] == 'N' && sig[14] == 'D'
 	&& sig[15] == 'H')
 		return "audio/x-atari-sndh";
@@ -4455,6 +4770,43 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 14 && sig[0] == 'I' && sig[10] == 'A' && sig[19] == 0x1A
 	&& memcmp(sig, "Interplay ACMP Data\x1A", 20) == 0)
 		return "audio/x-interplay-acmp";
+
+	/* https://web.archive.org/web/20150503020113/http://hackipedia.org/File%20formats/Music/Sample%20based/text/Digitrakker%203.0%20MDL%20module%20format.cp437.txt.utf-8.txt */
+	if (nread > 3 && sig[0] == 'D' && sig[1] == 'M' && sig[2] == 'D'
+	&& sig[3] == 'L')
+		return "audio/x-digitrakker-mdl";
+	if (nread > 3 && sig[0] == 'S' && sig[1] == 'O' && sig[2] == 'N'
+	&& sig[3] == 'G')
+		return "audio/x-digitrakker-dtm";
+
+	/* http://fileformats.archiveteam.org/wiki/Epic_Megagames_MASI */
+	if (nread > 3 && sig[0] == 'P' && sig[1] == 'S' && sig[2] == 'M'
+	&& sig[3] == ' ')
+		return "audio/x-protracker-psm";
+
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'T' && sig[2] == '2'
+	&& sig[3] == '0')
+		return "audio/x-madtracker-mt2";
+
+	if (nread > 3 && sig[0] == 'R' && sig[1] == 'T' && sig[2] == 'M'
+	&& sig[3] == 'M')
+		return "audio/x-realtracker-rtm";
+
+	if (nread > 5 && sig[0] == 'A' && sig[1] == 'M' && sig[2] == 'S'
+	&& sig[3] == 'h' && sig[4] == 'd' && sig[5] == 'r')
+		return "audio/x-velvet-ams";
+
+	if (nread > 6 && sig[0] == 'E' && sig[1] == 'x' && sig[2] == 't'
+	&& sig[3] == 'r' && sig[4] == 'e' && sig[5] == 'm' && sig[6] == 'e')
+		return "audio/x-extreme-tracker-ams";
+
+	/* FFmpeg: libavformat/westwood_aud.c */
+	if (nread >= 20 && sig[16] == 0xAF && sig[17] == 0xDE
+	&& (sig[11] == 0x63 || sig[11] == 0x01) && !(sig[10] & 0xFC)) {
+		const uint16_t sample_rate = LE_U16(sig);
+		if (sample_rate >= 4000 && sample_rate <= 48000)
+			return "audio/x-westwood-aud";
+	}
 
 	/* https://wiki.multimedia.cx/index.php/Sierra_Audio */
 	if (nread > 7 && (sig[0] == 0x8D || sig[0] == 0x0D || sig[0] == 0x16)
@@ -4541,43 +4893,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0x00)
 		return "video/x-bethsoftvid";
 
-	/* https://web.archive.org/web/20150503020113/http://hackipedia.org/File%20formats/Music/Sample%20based/text/Digitrakker%203.0%20MDL%20module%20format.cp437.txt.utf-8.txt */
-	if (nread > 3 && sig[0] == 'D' && sig[1] == 'M' && sig[2] == 'D'
-	&& sig[3] == 'L')
-		return "audio/x-digitrakker-mdl";
-	if (nread > 3 && sig[0] == 'S' && sig[1] == 'O' && sig[2] == 'N'
-	&& sig[3] == 'G')
-		return "audio/x-digitrakker-dtm";
-
-	/* http://fileformats.archiveteam.org/wiki/Epic_Megagames_MASI */
-	if (nread > 3 && sig[0] == 'P' && sig[1] == 'S' && sig[2] == 'M'
-	&& sig[3] == ' ')
-		return "audio/x-protracker-psm";
-
-	if (nread > 3 && sig[0] == 'M' && sig[1] == 'T' && sig[2] == '2'
-	&& sig[3] == '0')
-		return "audio/x-madtracker-mt2";
-
-	if (nread > 3 && sig[0] == 'R' && sig[1] == 'T' && sig[2] == 'M'
-	&& sig[3] == 'M')
-		return "audio/x-realtracker-rtm";
-
-	if (nread > 5 && sig[0] == 'A' && sig[1] == 'M' && sig[2] == 'S'
-	&& sig[3] == 'h' && sig[4] == 'd' && sig[5] == 'r')
-		return "audio/x-velvet-ams";
-
-	if (nread > 6 && sig[0] == 'E' && sig[1] == 'x' && sig[2] == 't'
-	&& sig[3] == 'r' && sig[4] == 'e' && sig[5] == 'm' && sig[6] == 'e')
-		return "audio/x-extreme-tracker-ams";
-
-	/* FFmpeg: libavformat/westwood_aud.c */
-	if (nread >= 20 && sig[16] == 0xAF && sig[17] == 0xDE
-	&& (sig[11] == 0x63 || sig[11] == 0x01) && !(sig[10] & 0xFC)) {
-		const uint16_t sample_rate = LE_U16(sig);
-		if (sample_rate >= 4000 && sample_rate <= 48000)
-			return "audio/x-westwood-aud";
-	}
-
 	/* FFmpeg: libavformat/ipudec.c */
 	if (nread > 3 && sig[0] == 'i' && sig[1] == 'p' && sig[2] == 'u'
 	&& sig[3] == 'm')
@@ -4616,30 +4931,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == '2' && sig[1] == 'T' && sig[2] == 'S'
 	&& sig[3] == 'F')
 		return "video/x-future-vision";
-
-	if (nread > 2 && sig[0] == 'R' && sig[1] == 'K' && sig[2] == 'A')
-		return "application/x-rka";
-
-	if (nread > 3 && sig[0] == 'N' && sig[1] == 'G' && sig[2] == 0x00
-	&& sig[3] == 0x01 && LE_U32(sig + 2) == 0x00000100)
-		return "application/x-norton-guide";
-
-	/* http://fileformats.archiveteam.org/wiki/ATR */
-	if (nread > 6 && (file_size == 92176 || file_size == 133136
-	|| file_size == 183952) && sig[0] == 0x96 && sig[1] == 0x02
-	&& (LE_U16(sig + 4) == 128 || LE_U16(sig + 4) == 256
-	|| LE_U16(sig + 4) == 512))
-		return "application/x-atari-disk-image"; /* .atr */
-
-	if (nread > 4 && sig[0] == 'A' && sig[1] == 'L' && sig[2] == 'Z'
-	&& sig[3] == 0x01 && sig[4] == 0x0A)
-		return "application/x-alz";
-
-	if (nread > 2 && sig[0] == 0x60 && (sig[1] == 0x1A || sig[1] == 0x1B)
-	&& sig[2] == 0x00)
-		return "application/x-atari-exec";
-	if (nread > 6 && sig[0] == 0x0E && sig[1] == 0x0F && BE_U16(sig + 4) < 0x02)
-		return "application/x-atari-msa";
 
 	if (nread > 3 && sig[0] == 0xB1 && sig[1] == 0x68 && sig[2] == 0xDE
 	&& sig[3] == 0x3A)
@@ -4734,10 +5025,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& (sig[2] == 'H' || sig[2] == 'M'))
 		return "image/x-compuserve-rle";
 
-	if (nread > 3 && sig[0] == 0x0E && sig[1] == 0x03 && sig[2] == 0x13
-	&& sig[3] == 0x01)
-		return "application/x-hdf";
-
 	/* http://fileformats.archiveteam.org/wiki/PICT */
 	if (nread > 527 && sig[522] == 0x00 && (sig[523] == 0x11
 	|| sig[523] == 0x10) && sig[524] == 0x02 && sig[525] == 0xFF
@@ -4784,10 +5071,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[2054] == 'I')
 		return "image/x-photo-cd";
 
-	if (nread > 4 && sig[0] == 0x01 && sig[1] == 0x40 && sig[2] == 0x00
-	&& sig[3] == 0xC8)
-		return "image/x-atari-photochrome";
-
 	if (nread > 15 && sig[0] == 'J' && sig[1] == 'G') {
 		/* http://fileformats.archiveteam.org/wiki/ART_(AOL_compressed_image) */
 		if ((sig[2] == 0x03 || sig[2] == 0x04) && sig[3] == 0x0E
@@ -4803,21 +5086,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 4 && sig[0] == 'J' && sig[1] == 'G' && sig[2] == 'F'
 	&& sig[3] == '5' && sig[4] == 0x00)
 		return "image/x-jgf5";
-
-	/* https://temlib.org/AtariForumWiki/index.php/NEOchrome_file_format */
-	if (file_size == 32128 && nread == BYTES_TO_READ && sig[0] == 0x00
-	&& sig[1] == 0x00 && is_neochrome_image(sig, nread) == 1)
-		return "image/x-atari-neochrome"; /* Standard .neo file */
-	if (nread > 22 && sig[0] == 0xBA && sig[1] == 0xBE && sig[2] == 0xEB
-	&& sig[3] == 0xEA && is_neochrome_animation(sig, nread) == 1)
-			return "video/x-atari-neochrome"; /* Animation (.ani) */
-	if (file_size == 128128 && nread > 1 && sig[0] == 0xBA && sig[1] == 0xBE)
-		return "image/x-atari-neochrome"; /* Virtual canvas */
-
-	/* http://fileformats.archiveteam.org/wiki/ComputerEyes */
-	if (nread > 4 && (file_size == 192022 || file_size == 256022)
-	&& sig[0] == 'E' && sig[1] == 'Y' && sig[2] == 'E' && sig[3] == 'S')
-		return "image/x-atari-eyes";
 
 	/* http://fileformats.archiveteam.org/wiki/ImageLab/PrintTechnic */
 	if (nread > 5 && sig[0] == 'B' && sig[1] == '&' && sig[2] == 'W'
@@ -4871,11 +5139,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0x00 && sig[6] == 0x01 && sig[7] == 0x00)
 		return "image/x-spectrum-sevenup"; /* .sev */
 
-	/* https://temlib.org/AtariForumWiki/index.php/CrackArt_file_format */
-	if (nread > 16 && sig[0] == 'C' && sig[1] == 'A' && sig[2] <= 0x01
-	&& sig[3] <= 0x02)
-		return "image/x-atari-crackart";
-
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'T' && sig[2] == 'O'
 	&& sig[3] == 'L' && sig[4] == 'I' && sig[5] == 'T' && sig[6] == 'L'
 	&& sig[7] == 'S')
@@ -4905,6 +5168,31 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == '_' && sig[1] == 'C' && sig[2] == 'D'
 	&& sig[3] == '5')
 		return "image/x-cd5";
+
+	/* https://temlib.org/AtariForumWiki/index.php/CrackArt_file_format */
+	if (nread > 16 && sig[0] == 'C' && sig[1] == 'A' && sig[2] <= 0x01
+	&& sig[3] <= 0x02)
+		return "image/x-atari-crackart";
+
+	/* http://fileformats.archiveteam.org/wiki/PhotoChrome */
+	if (nread > 4 && sig[0] == 0x01 && sig[1] == 0x40 && sig[2] == 0x00
+	&& sig[3] == 0xC8)
+		return "image/x-atari-photochrome";
+
+	/* https://temlib.org/AtariForumWiki/index.php/NEOchrome_file_format */
+	if (file_size == 32128 && nread == BYTES_TO_READ && sig[0] == 0x00
+	&& sig[1] == 0x00 && is_neochrome_image(sig, nread) == 1)
+		return "image/x-atari-neochrome"; /* Standard .neo file */
+	if (nread > 22 && sig[0] == 0xBA && sig[1] == 0xBE && sig[2] == 0xEB
+	&& sig[3] == 0xEA && is_neochrome_animation(sig, nread) == 1)
+			return "video/x-atari-neochrome"; /* Animation (.ani) */
+	if (file_size == 128128 && nread > 1 && sig[0] == 0xBA && sig[1] == 0xBE)
+		return "image/x-atari-neochrome"; /* Virtual canvas */
+
+	/* http://fileformats.archiveteam.org/wiki/ComputerEyes */
+	if (nread > 4 && (file_size == 192022 || file_size == 256022)
+	&& sig[0] == 'E' && sig[1] == 'Y' && sig[2] == 'E' && sig[3] == 'S')
+		return "image/x-atari-eyes";
 
 	/* http://fileformats.archiveteam.org/wiki/DEGAS_image
 	 * file(1): magic/Magdir/images */
@@ -4994,19 +5282,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		if (sig[2] == 'e' && sig[3] == '1') return "image/x-atari-spooky";
 	}
 
-	/* http://fileformats.archiveteam.org/wiki/CharPad */
-	if (nread > 3 && sig[0] == 'C' && sig[1] == 'T' && sig[2] == 'M'
-	&& sig[3] == 0x05)
-		return "image/x-commodore-charpad";
-
-	if (nread > 4 && sig[0] == 0x08 && sig[1] == 0xF2 && sig[2] == 0xA6
-	&& sig[3] == 0xB6)
-		return "image/x-vips";
-
-	if (nread > 6 && sig[0] == 'L' && sig[1] == 'B' && sig[2] == 'L'
-	&& sig[3] == 'S' && sig[4] == 'I' && sig[5] == 'Z' && sig[6] == 'E')
-		return "image/x-vicar";
-
 	/* https://temlib.org/AtariForumWiki/index.php/Calamus_Raster_Graphic_file_format */
 	if (nread > 9 && sig[0] == 'C' && sig[1] == 'A' && sig[2] == 'L'
 	&& sig[3] == 'A' && sig[4] == 'M' && sig[5] == 'U' && sig[6] == 'S'
@@ -5060,23 +5335,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& memcmp(sig + 5, " PACKED PICTURE: Groupe CDND", 28) == 0)
 		return "image/x-atari-pablo-paint";
 
-	if (nread > 83 && sig[80] == 'C' && sig[81] == 'T' && sig[82] == 0x00
-	&& sig[83] == 0x00)
-		return "image/x-scitex-ct";
-
-	if (nread > 4 && sig[0] == 'R' && sig[1] == 'I' && sig[2] == 'X'
-	&& sig[3] == '3')
-		return "image/x-colorix";
-
 	if (nread > 6 && sig[0] == 'P' && sig[1] == 'I' && sig[2] == 'X'
 	&& sig[3] == 'T' && (BE_U16(sig + 4) == 0x01 || BE_U16(sig + 4) == 0x02)
 	&& sig[6] <= 2)
 		return "image/x-atari-pixart";
-
-	/* https://netghost.narod.ru/gff/graphics/book/ch03_03.htm */
-	if (nread > 5 && sig[0] == 0x2E && sig[1] == 0x4B && sig[2] == 0x46
-	&& sig[3] == 0x68 && sig[4] == 0x80)
-		return "image/x-kofax";
 
 	/* http://fileformats.archiveteam.org/wiki/Prism_Paint */
 	if (nread > 3 && sig[0] == 'P' && sig[1] == 'N' && sig[2] == 'T'
@@ -5104,6 +5366,27 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread >= 21 && sig[0] == 0xCC && sig[1] == 0xF5 && sig[2] == 0xE4
 	&& memcmp(sig, "\xCC\xF5\xE4\xE5\xEB\xA0\xCD\xE1\xEB\xE5\xF2\xA0\xE4\xE1\xF4\xE1\xA0\xE6\xE9\xEC\xE5", 21) == 0)
 		return "image/x-atari-ludek-maker";
+
+	if (nread > 83 && sig[80] == 'C' && sig[81] == 'T' && sig[82] == 0x00
+	&& sig[83] == 0x00)
+		return "image/x-scitex-ct";
+
+	if (nread > 4 && sig[0] == 'R' && sig[1] == 'I' && sig[2] == 'X'
+	&& sig[3] == '3')
+		return "image/x-colorix";
+
+	if (nread > 4 && sig[0] == 0x08 && sig[1] == 0xF2 && sig[2] == 0xA6
+	&& sig[3] == 0xB6)
+		return "image/x-vips";
+
+	if (nread > 6 && sig[0] == 'L' && sig[1] == 'B' && sig[2] == 'L'
+	&& sig[3] == 'S' && sig[4] == 'I' && sig[5] == 'Z' && sig[6] == 'E')
+		return "image/x-vicar";
+
+	/* https://netghost.narod.ru/gff/graphics/book/ch03_03.htm */
+	if (nread > 5 && sig[0] == 0x2E && sig[1] == 0x4B && sig[2] == 0x46
+	&& sig[3] == 0x68 && sig[4] == 0x80)
+		return "image/x-kofax";
 
 	/* https://www.fileformat.info/format/cgm/egff.htm */
 	if (nread > 128 && (BE_U16(sig) & 0xFFE0) == 0x0020
@@ -5179,7 +5462,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/TexFont */
 	if (nread > 8 && sig[0] == 0xff && sig[1] == 't' && sig[2] == 'x'
 	&& sig[3] == 'f')
-		return "font/x-texfont";
+		return "application/x-font-tex";
 
 	/* http://fileformats.archiveteam.org/wiki/PFF2 */
 	if (nread > 12 && sig[8] == 'P' && sig[9] == 'F' && sig[10] == 'F'
@@ -5209,7 +5492,28 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 
 	/* http://fileformats.archiveteam.org/wiki/Raw_Bitmap_Font */
 	if (nread > 8 && BE_U32(sig) == 0xE00EF00D && BE_U32(sig + 4) == 0x03000000)
-		return "font/x-rbf";
+		return "application/x-font-rbf";
+
+	if (nread > 18 && sig[0] == 'D' && sig[5] == '-' && sig[12] == 'Q'
+	&& memcmp(sig, "DAISY-DOT NLQ FONT", 18) == 0)
+		return "font/x-atari-daisydot";
+
+	if (nread > 8 && file_size == 1030 && nread > 6 && sig[0] == 0xFF
+	&& sig[1] == 0xFF && sig[2] == 0x00 && sig[4] == 0xFF && sig[6] == 0x00)
+		return "font/x-atari-sxs";
+
+	/* RECOIL: recoil.c:RECOIL_DecodeImage72Fnt */
+	if (nread > 3 && sig[0] == 0x00 && sig[1] == 0x08
+	&& (size_t)file_size == 3 + ((size_t)sig[2] << 8))
+		return "font/x-image72";
+
+	if (nread > 66 && sig[64] == sig[24] && sig[65] == sig[25] && !sig[66]) {
+		const size_t len = get_amstrad_header_len(sig, file_size);
+		if (file_size == 896 && len > 0)
+			return "font/x-amstrad-cpc";
+		if (len > 0 && len + 16384 == (size_t)file_size)
+			return "image/x-amstrad-hgb";
+	}
 
 	/* https://web.archive.org/web/20050305044255/http://www.lazerware.com:80/formats/macbinary/macbinary_iii.html */
 	if (nread > 123 && !sig[0] && !sig[74] && !sig[82] && sig[1]
@@ -5242,38 +5546,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[20] == 'e' && sig[21] == 0x0D && sig[22] == 0x0A
 	&& memcmp(sig + 23, "Disk-Info\r\n", 11) == 0)
 		return "application/x-spectrum-dsk";
-
-	/* http://fileformats.archiveteam.org/wiki/PaintShop_Pro */
-	if (nread >= 25 && sig[0] == 'P' && sig[6] == 'S' && sig[11] == 'P'
-	&& memcmp(sig, "Paint Shop Pro Image File", 25) == 0)
-		return "image/x-paintshop-pro";
-
-	/* https://github.com/reyco2000/CoCo-Image-Viewer/blob/main/documentation/COCO-PICS-FORMATS.md#clp-format-max-10-clipboard */
-	if (nread > 25 && nread == (size_t)file_size && sig[file_size - 1] == 0x64) {
-		const size_t payload_len = (size_t)file_size - 0x19 - 1; /* Exclude final 0x64 */
-		const size_t expected_len = (size_t)BE_U16(sig + 20) * (size_t)sig[24];
-		if (payload_len == expected_len)
-			return "image/x-coco-clp";
-	}
-	/* RECOIL: recoil.c (RECOIL_DecodeCocoMax)
-	 * This is bad heuristic. Take a look at
-	 * https://github.com/reyco2000/CoCo-Image-Viewer/blob/main/documentation/COCO-PICS-FORMATS.md#max-format-cocomax-12 */
-	if (file_size == 6154 || file_size == 6155 || file_size == 6272
-	|| file_size == 7168) {
-		if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x18 && sig[2] <= 0x01
-		&& sig[3] == 0x0E && sig[4] == 0x00)
-			return "image/x-coco-max";
-	}
-	/* RECOIL: recoil.c (RECOIL_DecodeP11) */
-	if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x0C && sig[3] == 0x0E
-	&& sig[4] == 0x00 && (file_size == 3243 || file_size == 3083))
-		return "image/x-coco-p11";
-
-	/* http://fileformats.archiveteam.org/wiki/PaperPort_(MAX) */
-	if (nread > 4 && sig[0] == 'V' && sig[1] == 'i' && sig[2] == 'G'
-	&& (sig[3] == 'A' || sig[3] == 'B' || sig[3] == 'C' || sig[3] == 'E'
-	|| sig[3] == 'F'))
-		return "image/x-paperport";
 
 	/* https://github-wiki-see.page/m/AlbanBedel/scummc/wiki/Scumm-6-data-format */
 	if (nread > 4 && sig[0] == 'R' && sig[1] == 'N' && sig[2] == 'A'
@@ -5335,6 +5607,11 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& BE_U16(sig + 14) != 0x00 && memcmp(sig + 1, "           ", 11) == 0)
 		return "application/x-lbr";
 
+	/* http://fileformats.archiveteam.org/wiki/SFDN_Packer */
+	if (nread > 3 && sig[0] == 'S' && sig[1] == '1' && sig[2] == '0'
+	&& sig[3] == '1')
+		return "application/x-atari-sfdn";
+
 	/* file(1): magic/Magdir/c64 */
 	if (nread >= 2 && sig[0] == 'C' && sig[1] == '6' && sig[2] == '4') {
 		if (nread >= 12 && memcmp(sig, "C64-TAPE-RAW", 12) == 0)
@@ -5376,6 +5653,11 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread == BYTES_TO_READ && file_size == 33795 && sig[0] == 0xFF
 	&& sig[1] == 0x3B && sig[2] == 'b')
 		return "image/x-commodore-bfli";
+
+	/* http://fileformats.archiveteam.org/wiki/CharPad */
+	if (nread > 3 && sig[0] == 'C' && sig[1] == 'T' && sig[2] == 'M'
+	&& sig[3] == 0x05)
+		return "image/x-commodore-charpad";
 
 	/* https://csbruce.com/cbm/postings/csc19950906-1.txt */
 	if (nread > 8 && sig[0] == 'B' && sig[1] == 'M' && sig[2] == 0xCB
@@ -5598,11 +5880,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& (sig[1] == 0x20 || sig[1] == 0x60))
 		return "image/x-commodore-hires";
 
-	if (nread > 34 && sig[0] == 0x3D && (sig[1] == 0x3D || sig[1] == 0x02)
-	&& BE_U16(sig + 4) <= 0x01 && BE_U16(sig + 10) <= 0x07
-	&& BE_U16(sig + 2) <= (sig[1] == 0x3D ? 20 : 40))
-		return "model/x-cad-3d";
-
 	if (nread > 512 && sig[2] == 0xFE && (BE_U16(sig) & 0x3F73) == 0x0801
 	&& !(BE_U32(sig + 508) & 0xFFFFFF00) && BE_U16(sig) == 0x0809) {
 		const uint16_t v4 = LE_U16(sig + 4);
@@ -5612,9 +5889,37 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "image/x-intergraph";
 	}
 
-	if (nread > 12 && sig[0] == '(' && sig[1] == 'c' && sig[2] == ')'
-	&& sig[3] == 'F' && memcmp(sig, "(c)F.MARCHAL", 12) == 0)
-		return "image/x-atari-rgh";
+	/* http://fileformats.archiveteam.org/wiki/PaintShop_Pro */
+	if (nread >= 25 && sig[0] == 'P' && sig[6] == 'S' && sig[11] == 'P'
+	&& memcmp(sig, "Paint Shop Pro Image File", 25) == 0)
+		return "image/x-paintshop-pro";
+
+	/* https://github.com/reyco2000/CoCo-Image-Viewer/blob/main/documentation/COCO-PICS-FORMATS.md#clp-format-max-10-clipboard */
+	if (nread > 25 && nread == (size_t)file_size && sig[file_size - 1] == 0x64) {
+		const size_t payload_len = (size_t)file_size - 0x19 - 1; /* Exclude final 0x64 */
+		const size_t expected_len = (size_t)BE_U16(sig + 20) * (size_t)sig[24];
+		if (payload_len == expected_len)
+			return "image/x-coco-clp";
+	}
+	/* RECOIL: recoil.c (RECOIL_DecodeCocoMax)
+	 * This is bad heuristic. Take a look at
+	 * https://github.com/reyco2000/CoCo-Image-Viewer/blob/main/documentation/COCO-PICS-FORMATS.md#max-format-cocomax-12 */
+	if (file_size == 6154 || file_size == 6155 || file_size == 6272
+	|| file_size == 7168) {
+		if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x18 && sig[2] <= 0x01
+		&& sig[3] == 0x0E && sig[4] == 0x00)
+			return "image/x-coco-max";
+	}
+	/* RECOIL: recoil.c (RECOIL_DecodeP11) */
+	if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x0C && sig[3] == 0x0E
+	&& sig[4] == 0x00 && (file_size == 3243 || file_size == 3083))
+		return "image/x-coco-p11";
+
+	/* http://fileformats.archiveteam.org/wiki/PaperPort_(MAX) */
+	if (nread > 4 && sig[0] == 'V' && sig[1] == 'i' && sig[2] == 'G'
+	&& (sig[3] == 'A' || sig[3] == 'B' || sig[3] == 'C' || sig[3] == 'E'
+	|| sig[3] == 'F'))
+		return "image/x-paperport";
 
 	if (nread > 6 && sig[0] == 'F' && sig[1] == 'L' && sig[2] == 'U'
 	&& sig[3] == 'F' && sig[4] == 'F' && sig[5] == '6' && sig[6] == '4')
@@ -5626,11 +5931,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& memcmp(sig + 4, "Graphics File\0", 14) == 0)
 		return "image/x-amiga-sgx";
 
-	/* http://fileformats.archiveteam.org/wiki/ArtMaster88 */
-	if (nread > 12 && sig[0] == 'S' && sig[1] == 'S' && sig[2] == '_'
-	&& sig[3] == 'S' && sig[4] == 'I' && sig[5] == 'F'
-	&& memcmp(sig + 6, "    0.0", 7) == 0)
-		return "image/x-nec-artmaster88";
+	if (nread > 12 && sig[0] == '(' && sig[1] == 'c' && sig[2] == ')'
+	&& sig[3] == 'F' && memcmp(sig, "(c)F.MARCHAL", 12) == 0)
+		return "image/x-atari-rgh";
 
 	if (nread > 8 && sig[0] == 'U' && sig[1] == 'I' && sig[2] == 'M'
 	&& sig[3] == 'G' && sig[4] == 0x01 && sig[7] <= 0x03)
@@ -5669,11 +5972,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 12 && sig[0] == 0xF0 && sig[1] == 0xED && sig[2] == 0xE4
 	&& is_atari_pmg(sig, nread, file_size) == 1)
 		return "image/x-atari-pmg-designer";
-
-	/* http://fileformats.archiveteam.org/wiki/SFDN_Packer */
-	if (nread > 2 && sig[0] == 'S' && sig[1] == '1' && sig[2] == '0'
-	&& sig[3] == '1')
-		return "application/x-atari-sfdn";
 
 	if (file_size == 32038 && is_srt_image(file) == 1)
 		return "image/x-atari-synthetic-arts";
@@ -5779,29 +6077,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[2] == 0xD0 && sig[3] == 0x00)
 		return "image/x-apple2-graphics";
 
-	/* RECOIL: recoil.c:RECOIL_DecodeMsl */
-	if (file_size >= 3 && file_size <= 36
-	&& (size_t)sig[0] + 2 == (size_t)file_size && is_msl_image(sig, nread) == 1)
-		return "image/x-atari-mad-studio"; /* .msl */
-
-	/* RECOIL: recoil.c:RECOIL_DecodeAn2/4 */
-	if (nread > 1 && nread <= 967 && sig[0] < 40 && sig[1] < 24) {
-		const uint8_t columns = sig[0] + 1;
-		const uint8_t rows = sig[1] + 1;
-		const size_t cr = (size_t)columns * (size_t)rows;
-		if ((size_t)file_size == 2 + cr /* ANTIC 2 (.an2) */
-		|| (size_t)file_size == 7 + cr) /* ANTIC 4-5 (.an4/5) */
-			return "image/x-atari-mad-studio";
-	}
-
-	if (nread > 9 && ((nread == 22 && (sig[0] == 3 || sig[0] == 4))
-	|| (sig[0] == 5 && nread == ((1 + (size_t)sig[5]) * 5)))) {
-		const uint16_t W = LE_U16(sig + 1);
-		const uint16_t H = LE_U16(sig + 3);
-		if (W > 0 && W <= 384 && !(W & 0x03) && H > 0 && H <= 272)
-			return "image/x-amstrad-perfectpix"; /* .pph */
-	}
-
 	/* https://www.fileformat.info/format/pictor/egff.htm */
 	if (nread >= 10 && sig[0] == 0xFD && sig[1] == 0x00 && sig[2] == 0xB8
 	&& !LE_U16(sig + 3)) {
@@ -5840,6 +6115,11 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == 'P' && sig[1] == '2' && sig[2] == 'D'
 	&& sig[3] == 'T')
 		return "image/x-nec-pic2";
+	/* http://fileformats.archiveteam.org/wiki/ArtMaster88 */
+	if (nread > 12 && sig[0] == 'S' && sig[1] == 'S' && sig[2] == '_'
+	&& sig[3] == 'S' && sig[4] == 'I' && sig[5] == 'F'
+	&& memcmp(sig + 6, "    0.0", 7) == 0)
+		return "image/x-nec-artmaster88";
 
 	if (nread > 3 && sig[0] == 'S' && sig[1] == 'p' && sig[2] == 'r'
 	 && sig[3] == '!')
@@ -5851,9 +6131,55 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	||sig[4] == '8') && sig[5] == (sig[4] == '5' ? 'B' : 'A'))
 		return "image/x-sfw";
 
-	if (nread > 18 && sig[0] == 'D' && sig[5] == '-' && sig[12] == 'Q'
-	&& memcmp(sig, "DAISY-DOT NLQ FONT", 18) == 0)
-		return "font/x-atari-daisydot";
+	/* http://fileformats.archiveteam.org/wiki/DeskMate_Paint */
+	if (nread > 3 && sig[0] == 0x13 && sig[1] == 'P' && sig[2] == 'N'
+	&& sig[3] == 'T')
+		return "image/x-tandy-deskmate";
+
+	/* http://fileformats.archiveteam.org/wiki/Storyboard_PIC/CAP */
+	if (nread > 5 && sig[0] == 'E' && sig[1] == 'P' && sig[2] == '_'
+	&& sig[3] == 'C' && sig[4] == 'A' && sig[5] == 'P')
+		return "image/x-ibm-cap";
+	if (nread > 5 && sig[1] == 0x84 && sig[2] == 0xC1 && sig[4] == 0x00
+	&& (sig[3] == 1 || sig[3] == 3 || sig[3] == 7 || sig[3] == 8
+	|| sig[3] == 10 || sig[3] == 11))
+		return "image/x-ibm-cap";
+
+	/* RECOIL: recoil.c:REOCIL_DecodeWin */
+	if ((size_t)file_size < BYTES_TO_READ) {
+		const size_t W = (size_t)LE_U16(sig + file_size - 4);
+		const size_t H = (size_t)sig[file_size - 2];
+		if (W > 0 && W <= 640 && H > 0 && H <= 200
+		&& is_art_studio(sig, W, H, file_size) == 1)
+			return "image/x-amstrad-art-studio"; /* .win */
+	}
+
+	if (nread > 9 && ((nread == 22 && (sig[0] == 3 || sig[0] == 4))
+	|| (sig[0] == 5 && nread == ((1 + (size_t)sig[5]) * 5)))) {
+		const uint16_t W = LE_U16(sig + 1);
+		const uint16_t H = LE_U16(sig + 3);
+		if (W > 0 && W <= 384 && !(W & 0x03) && H > 0 && H <= 272)
+			return "image/x-amstrad-perfectpix"; /* .pph */
+	}
+
+	/* http://fileformats.archiveteam.org/wiki/Oric_HIRES_screen */
+	if (nread >= 26 && BE_U32(sig) == 0x16161624 && !sig[4] && !sig[12])
+		return "image/x-oric-hrs";
+
+	/* RECOIL: recoil.c:RECOIL_DecodeMsl */
+	if (file_size >= 3 && file_size <= 36
+	&& (size_t)sig[0] + 2 == (size_t)file_size && is_msl_image(sig, nread) == 1)
+		return "image/x-atari-mad-studio"; /* .msl */
+
+	/* RECOIL: recoil.c:RECOIL_DecodeAn2/4 */
+	if (nread > 1 && nread <= 967 && sig[0] < 40 && sig[1] < 24) {
+		const uint8_t columns = sig[0] + 1;
+		const uint8_t rows = sig[1] + 1;
+		const size_t cr = (size_t)columns * (size_t)rows;
+		if ((size_t)file_size == 2 + cr /* ANTIC 2 (.an2) */
+		|| (size_t)file_size == 7 + cr) /* ANTIC 4-5 (.an4/5) */
+			return "image/x-atari-mad-studio";
+	}
 
 	if (nread > 24 && sig[0] == 'B' && sig[9] == 'A' && sig[18] == 'P'
 	&& memcmp(sig, "BUGBITER_APAC239I_PICTURE", 25) == 0)
@@ -5886,23 +6212,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& (size_t)file_size == (2 + ((size_t)sig[0] * (size_t)sig[1] * 9)))
 		return "image/x-atari-tl4";
 
-	if (nread > 8 && file_size == 1030 && nread > 6 && sig[0] == 0xFF
-	&& sig[1] == 0xFF && sig[2] == 0x00 && sig[4] == 0xFF && sig[6] == 0x00)
-		return "font/x-atari-sxs";
-
-	/* RECOIL: recoil.c:RECOIL_DecodeImage72Fnt */
-	if (nread > 3 && sig[0] == 0x00 && sig[1] == 0x08
-	&& (size_t)file_size == 3 + ((size_t)sig[2] << 8))
-		return "font/x-image72";
-
-	if (nread > 66 && sig[64] == sig[24] && sig[65] == sig[25] && !sig[66]) {
-		const size_t len = get_amstrad_header_len(sig, file_size);
-		if (file_size == 896 && len > 0)
-			return "font/x-amstrad-cpc";
-		if (len > 0 && len + 16384 == (size_t)file_size)
-			return "image/x-amstrad-hgb";
-	}
-
 	if (nread > 41 && file_size <= 32044 && sig[0] <= 0x03
 	&& is_tinystuff_image(sig, nread, file_size) == 1)
 		return "image/x-atari-tiny";
@@ -5923,20 +6232,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& (sig[2] == 0x18 || sig[2] == 0x0E || sig[2] == 0x0F))
 		return "image/x-atari-gem-vdi";
 
-	/* http://fileformats.archiveteam.org/wiki/DeskMate_Paint */
-	if (nread > 3 && sig[0] == 0x13 && sig[1] == 'P' && sig[2] == 'N'
-	&& sig[3] == 'T')
-		return "image/x-tandy-deskmate";
-
-	/* http://fileformats.archiveteam.org/wiki/Storyboard_PIC/CAP */
-	if (nread > 5 && sig[0] == 'E' && sig[1] == 'P' && sig[2] == '_'
-	&& sig[3] == 'C' && sig[4] == 'A' && sig[5] == 'P')
-		return "image/x-ibm-cap";
-	if (nread > 5 && sig[1] == 0x84 && sig[2] == 0xC1 && sig[4] == 0x00
-	&& (sig[3] == 1 || sig[3] == 3 || sig[3] == 7 || sig[3] == 8
-	|| sig[3] == 10 || sig[3] == 11))
-		return "image/x-ibm-cap";
-
 	/* http://fileformats.archiveteam.org/wiki/Dir_Logo_Maker */
 	if (file_size == 256 && nread > 3 && sig[0] == 'B' && sig[16] == 'B'
 	&& sig[32] == 'B' && sig[48] == 'B')
@@ -5956,15 +6251,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& is_atari_hip_image(sig, nread, file_size) == 1)
 		return "image/x-atari-hip";
 
-	/* RECOIL: recoil.c:REOCIL_DecodeWin */
-	if ((size_t)file_size < BYTES_TO_READ) {
-		const size_t W = (size_t)LE_U16(sig + file_size - 4);
-		const size_t H = (size_t)sig[file_size - 2];
-		if (W > 0 && W <= 640 && H > 0 && H <= 200
-		&& is_art_studio(sig, W, H, file_size) == 1)
-			return "image/x-amstrad-art-studio"; /* .win */
-	}
-
 	/* RECOIL: recoil.c:REOCIL_DecodeGhg */
 	/* With a max dimension of 320x200, max size is 8003 */
 	if (nread > 4 && file_size <= 8003) {
@@ -5979,10 +6265,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 47 && IS_DIGIT(sig[32]) && IS_DIGIT(sig[33])
 	&& is_dali_compressed(sig, nread, file_size) == 1)
 		return "image/x-atari-dali";
-
-	/* http://fileformats.archiveteam.org/wiki/Oric_HIRES_screen */
-	if (nread >= 26 && BE_U32(sig) == 0x16161624 && !sig[4] && !sig[12])
-		return "image/x-oric-hrs";
 
 	/* http://fileformats.archiveteam.org/wiki/Psion_PIC */
 	/* http://fileformats.archiveteam.org/wiki/PIC_(Yanagisawa) */
@@ -6074,6 +6356,13 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 44 && BE_U16(sig + 42) == 0x04 && is_animaster(sig, nread) == 1)
 		return "video/x-atari-animaster"; /* .asb, .msk */
 
+	/* RECOIL: recoil.c:RECOIL_DecodeGraphicsProcessor */
+	if (file_size == 32331 && BE_U16(sig) <= 0x0002)
+		return "image/x-atari-graphics-processor";
+	if (file_size >= 493 && !sig[0] && sig[1] >= 10 && sig[1] <= 12
+	&& is_graphics_processor(sig, nread) == 1)
+		return "image/x-atari-graphics-processor";
+
 	/* http://fileformats.archiveteam.org/wiki/Picture_Publisher */
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'I' && sig[2] == 0x02
 	&& sig[3] == 0x01 && sig[4] == 0x01 && !sig[5] && sig[6] == 0x26 && !sig[7])
@@ -6086,17 +6375,31 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'F' && sig[4] == 'a' && sig[5] == 'x')
 		return "image/x-perfect-fax";
 
-	/* RECOIL: recoil.c:RECOIL_DecodeGraphicsProcessor */
-	if (file_size == 32331 && BE_U16(sig) <= 0x0002)
-		return "image/x-atari-graphics-processor";
-	if (file_size >= 493 && !sig[0] && sig[1] >= 10 && sig[1] <= 12
-	&& is_graphics_processor(sig, nread) == 1)
-		return "image/x-atari-graphics-processor";
-
 	/* https://moddingwiki.shikadi.net/wiki/JAM_Format */
 	if (nread > 14 && sig[0] == 'X' && sig[1] == 'C' && sig[2] == 'O'
 	&& sig[3] == 'M' && LE_U16(sig + 12) == 0x08)
 		return "image/x-jam";
+
+	if (nread > 34 && sig[0] == 0x3D && (sig[1] == 0x3D || sig[1] == 0x02)
+	&& BE_U16(sig + 4) <= 0x01 && BE_U16(sig + 10) <= 0x07
+	&& BE_U16(sig + 2) <= (sig[1] == 0x3D ? 20 : 40))
+		return "model/x-cad-3d";
+
+	/* libmagic: magic/Magdir/epoc */
+	/* https://frodo.looijaard.name/psifiles/Index */
+	if (nread > 12 && LE_U32(sig) == 0x10000037)
+		return check_epoc5(sig, nread);
+	if (nread > 4 && LE_U32(sig) == 0x10000041)
+		return "image/x-epoc-mbm";
+	if (nread > 12 && LE_U32(sig) == 0x10000050)
+		return check_epoc5_2(sig, nread);
+	if (nread > 8 && LE_U32(sig) == 0x10000079)
+		return check_epoc5_binary(sig, nread);
+	if (nread > 4 && LE_U32(sig) == 0x1000007A)
+		return "image/x-epoc-exec";
+	if (nread > 12 && LE_U32(sig + 4) == 0x1000006D
+	&& LE_U32(sig + 8) == 0x10000419)
+		return "application/x-epoc-sis";
 
 	/* =================================
 	 * WEAK MAGIC! Only 2-3 conditions
