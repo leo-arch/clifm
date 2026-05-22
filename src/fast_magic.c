@@ -192,7 +192,11 @@ check_zip_magic(const uint8_t *str, const size_t str_len)
 			return "model/3mf";
 	}
 
+#ifdef FMAGIC_NO_NULL
+	return "application/zip";
+#else
 	return NULL;
+#endif
 }
 
 static const char *
@@ -287,7 +291,11 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 	|| xmemmem(s, l, "_\0P\0P\0T\0", 8)))
 		return "application/vnd.ms-powerpoint";
 
+#ifdef FMAGIC_NO_NULL
+	return "application/x-ole-storage";
+#else
 	return NULL;
+#endif
 }
 
 static const char *
@@ -444,7 +452,11 @@ check_ogg_magic(const uint8_t *s, const size_t slen)
 	if (l >= 9 && *name == 0200 && memcmp(name, "\200kate\0\0\0\0", 9) == 0)
 		return "application/ogg";
 
+#ifdef FMAGIC_NO_NULL
+	return "application/ogg";
+#else
 	return NULL;
+#endif
 }
 
 static size_t
@@ -594,7 +606,11 @@ check_riff_magic(const uint8_t *buf, const size_t buf_len)
 	&& memcmp(buf + 24, "wave\xF3\xAC\xD3\x11\x8C\xD1\x00\xC0\x4F\x8E\xDB\x8A", 16) == 0)
 		return "audio/x-w64";
 
+#ifdef FMAGIC_NO_NULL
+	return "application/x-riff";
+#else
 	return NULL;
+#endif
 }
 
 static const char *
@@ -853,7 +869,11 @@ check_iff_magic(const uint8_t *s, const size_t slen)
 	&& p[4] == 'M' && p[5] == 'A' && p[6] == 'T' && p[7] == '1')
 		return "model/x-c4d";
 
+#ifdef FMAGIC_NO_NULL
+	return "application/x-iff";
+#else
 	return NULL;
+#endif
 }
 
 static const char *
@@ -6478,6 +6498,23 @@ skip_id3_tag(const uint8_t **sig, size_t *nread, const off_t file_size)
 	}
 }
 
+#ifdef FMAGIC_NO_NULL
+static const char *
+text_or_binary(const uint8_t *s, const size_t slen)
+{
+	if (!s)
+		return "application/octet-stream";
+
+	const size_t limit = slen > 1024 ? 1024 : slen;
+	for (size_t i = 0; i < limit; i++) {
+		if (s[i] < 0x20 && s[i] != 0x09 && s[i] != 0x0A && s[i] != 0x0D)
+			return "application/octet-stream";
+	}
+
+	return "text/plain";
+}
+#endif /* FMAGIC_NO_NULL */
+
 /* Read a few kilo bytes from the file FILE and attempt to find out an
  * appropiate MIME type based on the file's content.
  * Returns the found MIME type (as a constant string) or NULL if none is found.
@@ -6534,7 +6571,11 @@ fast_magic(const char *file)
 	if (nread > 512)
 		return detect_startcode_video_stream(sig, 512);
 
+#ifdef FMAGIC_NO_NULL
+	return text_or_binary(sig, nread);
+#else
 	return NULL;
+#endif
 }
 
 #else
