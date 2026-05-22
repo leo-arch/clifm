@@ -133,7 +133,7 @@ pf, profile@
 pg, pager@
 p, prop@
 prompt@
-q, quit, exit, Q@
+q, quit, exit@
 rl, reload@
 rf, refresh@
 rr @
