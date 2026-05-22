@@ -162,7 +162,7 @@ _colors="$(get_fzf_colors)"
 while [ -n "$a" ]; do
 	if [ "$filter" = "fzf" ]; then
 		# shellcheck disable=SC2154
-		a="$(printf "%s\n" "$CMDS" | sed 's/@//g' | fzf --prompt="$fzf_prompt" --header "Browse Clifm's manpage" --reverse --height="$fzf_height" --info=inline --color="$_colors")"
+		a="$(printf "%s\n" "$CMDS" | sed 's/@//g' | fzf --prompt="$fzf_prompt" --header "Browse Clifm's manpage (press Esc to exit)" --reverse --height="$fzf_height" --info=inline --color="$_colors")"
 	else
 		a="$(printf "%s\n" "$CMDS" | sed 's/@//g' | rofi -dmenu -p "clifm")"
 	fi
