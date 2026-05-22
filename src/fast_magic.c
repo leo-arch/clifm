@@ -5619,6 +5619,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		if (nread > 78 && !(BE_U32(sig + 70) & 0x001FFF00)
 		&& !(BE_U32(sig + 74) & 0xC0FFFFFF))
 			return "application/x-commodore-tape-image";
+		if (nread > 10 && (memcmp(sig, "C64 tape", 8) == 0
+		|| memcmp(sig, "C64S tape", 9) == 0))
+			return "application/x-commodore-tape-image";
 		if (nread > 72 && sig[3] == ' ' && memcmp(sig, "C64 CARTRIDGE", 12) == 0
 		&& BE_U32(sig + 68) > 0x10)
 			return "application/x-commodore-crt";
@@ -5700,17 +5703,21 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& is_compressed_printfox(sig, nread) == 1)
 		return "image/x-commodore-printfox";
 
-	/* http://fileformats.archiveteam.org/wiki/Picasso_64 */
-	if (file_size == 10050 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x18)
-		return "image/x-commodore-picasso64";
-
 	/* http://fileformats.archiveteam.org/wiki/KoalaPainter */
 	if ((file_size == 10003 || file_size == 10006) && nread > 1
 	&& sig[0] == 0x00 && (sig[1] == 0x60 || sig[1] == 0x20))
 		return "image/x-commodore-koalapaint";
 
-	if (file_size == 10050 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x78)
-		return "image/x-commodore-p4i";
+	/* http://fileformats.archiveteam.org/wiki/Picasso_64 */
+	if (file_size == 10050 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x18)
+		return "image/x-commodore-picasso64";
+
+	/* RECOIL: recoil.c:DecodeP4i */
+	if (file_size == 10050 && nread > 1024 && sig[1020] == 'M'
+	&& sig[1021] == 'U' && sig[1022] == 'L' && sig[1023] == 'T')
+		return "image/x-commodore-botticelli";
+	if (file_size == 2050 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x60)
+		return "image/x-commodore-botticelli";
 
 	if (file_size == 19434 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x9C)
 		return "image/x-commodore-truepaint";
@@ -5722,7 +5729,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (file_size == 4098 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x20)
 		return "image/x-commodore-mle";
 
-	if ((file_size == 10241 || file_size == 10242 || file_size == 10250)
+	if ((file_size == 10241 || file_size == 10242 || file_size == 10050)
 	&& nread > 1 && sig[0] == 0x00 && sig[1] == 0x58)
 		return "image/x-commodore-dol";
 
@@ -5737,14 +5744,15 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "image/x-commodore-pet";
 
 	/* http://fileformats.archiveteam.org/wiki/Doodle!_(C64) */
-	if (file_size == 9218 && nread > 1 && sig[0] == 0x00
-	&& (sig[1] == 0x1C || sig[1] == 0x5C))
+	if ((file_size == 9218 || file_size == 9026 || file_size == 9346)
+	&& nread > 1 && sig[0] == 0x00 && (sig[1] == 0x1C || sig[1] == 0x5C))
 		return "image/x-commodore-doodle";
 
 	if (file_size == 8170 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x40)
 		return "image/x-commodore-cfli";
 
-	if ((file_size == 17218 || file_size == 17409 || file_size == 17474)
+	if ((file_size == 17218 || file_size == 17409 || file_size == 17474
+	|| file_size == 17280 || file_size == 17666)
 	&& nread > 1 && !sig[0] && (sig[1] == 0x3B || sig[1] == 0x3C))
 		return "image/x-commodore-fli";
 
@@ -5775,6 +5783,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/Gunpaint */
 	if (file_size == 33603 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x40)
 		return "image/x-commodore-gunpaint";
+
+	if (file_size == 32770 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x40)
+		return "image/x-commodore-eci";
 
 	/* http://fileformats.archiveteam.org/wiki/Wigmore_Artist_64 */
 	if (file_size == 10242 && nread > 1 && sig[0] == 0x00 && sig[1] == 0x40)
@@ -6193,8 +6204,8 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'P')
 		return "image/x-atari-eggpaint";
 
-	if (nread > 8 && (sig[0] == 0x0F || (sig[0] >= 0x08 && sig[0] <= 0x0B))
-	&& !BE_U32(sig + 1) && sig[8] == 0x00)
+	if (nread > 8 && file_size == 7690 && (sig[0] == 0x0F
+	|| (sig[0] >= 0x08 && sig[0] <= 0x0B)) && BE_U32(sig + 1) == 0x00)
 		return "image/x-atari-tools-800";
 
 	if (file_size >= 3 && file_size <= 42
@@ -6291,6 +6302,11 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 32 && file_size == 32032
 	&& is_atari_16color_palette(sig, nread) == 1)
 		return "image/x-atari-gfa-artist";
+
+	/* http://fileformats.archiveteam.org/wiki/DUO */
+	if (nread > 32 && file_size == 113600
+	&& is_atari_16color_palette(sig, nread) == 1) /* Low resolution only */
+		return "image/x-atari-duo";
 
 	/* https://atarionline.pl/utils/2.%20Grafika/Interlace%20Graphics%20Editor/Interlace%20Graphics%20Editor%20-%20readme%20PL.txt */
 	if (nread > 7 && file_size == 6160 && sig[0] == 0xFF && sig[1] == 0xFF
