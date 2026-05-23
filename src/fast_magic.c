@@ -1717,6 +1717,28 @@ id3v2_tag_size(const uint8_t *buf, const size_t buflen, const off_t file_size)
 	return total;
 }
 
+/* See libmagic: magic/Magdir/fonts */
+static int
+is_ttf_tag(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen < 15)
+		return 0;
+
+	s += 12;
+
+	if (!IS_ALPHA_UP(s[0]) && !IS_ALPHA_LOW(s[0]))
+		return 0;
+	if (!IS_ALPHA_UP(s[1]) && !IS_ALPHA_LOW(s[1]) && s[1] != '2')
+		return 0;
+	if (!IS_ALPHA_UP(s[2]) && !IS_ALPHA_LOW(s[2]) && s[2] != '/')
+		return 0;
+	if (!IS_ALPHA_UP(s[3]) && !IS_ALPHA_LOW(s[3]) && s[3] != '2'
+	&& s[3] != ' ')
+		return 0;
+
+	return 1;
+}
+
 static const char *
 check_modern_formats(const uint8_t *sig, const size_t nread,
 	const off_t file_size)
@@ -1795,9 +1817,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'o' && sig[4] == 'c'))) /* SVG and HTML */
 		return check_doctype_magic(sig, nread);
 
-	if (nread > 3 && sig[0] == 'P' && sig[1] == 'K' && sig[2] == 0x03
-	&& sig[3] == 0x04) /* ZIP-based files (Mostly Office files) */
-		return check_zip_magic(sig, nread);
+	if (nread > 3 && sig[0] == 'P' && sig[1] == 'K') {
+		if (sig[2] == 0x03 && sig[3] == 0x04) /* ZIP-based files (Mostly Office files) */
+			return check_zip_magic(sig, nread);
+		if (sig[2] == 0x05 && sig[3] == 0x06)
+			return "application/zip";
+	}
 
 	if (nread > 3 && sig[0] == 'R' && sig[1] == 'I' && sig[2] == 'F'
 	&& (sig[3] == 'F' || sig[3] == 'X')) /* RIFF (mostly image/webp) */
@@ -2116,11 +2141,11 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& memcmp(sig + 1, "SIBELIUS", 8) == 0)
 		return "application/x-sibelius-score";
 
-	if (nread > 12 && ((sig[0] == 0x00 && sig[1] == 0x01 && sig[2] == 0x00
-	&& sig[3] == 0x00 && sig[4] < 48
-	&& sig[8] != 0x07) /* Avoid conflict with .PI2 (Atari Degas) */
-	|| (sig[0] == 't' && sig[1] == 't' && sig[2] == 'c' && sig[3] == 'f'
-	&& sig[4] == 0x00))) /* TrueType collection */
+	if (nread > 15 && sig[0] == 0x00 && sig[1] == 0x01 && sig[2] == 0x00
+	&& sig[3] == 0x00 && BE_U16(sig + 4) < 48 && is_ttf_tag(sig, nread) == 1)
+		return "font/ttf";
+	if (nread > 4 && sig[0] == 't' && sig[1] == 't' && sig[2] == 'c'
+	&& sig[3] == 'f' && sig[4] == 0x00) /* TrueType collection */
 		return "font/ttf";
 	if (nread > 3 && sig[0] == 'O' && sig[1] == 'T' && sig[2] == 'T'
 	&& sig[3] == 'O')
@@ -5554,6 +5579,11 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 4 && sig[0] == 'R' && sig[1] == 'N' && sig[2] == 'A'
 	&& sig[3] == 'M' && sig[4] == 0x00)
 		return "application/x-scumm-room";
+
+	/* FOund in Sherlock Holmes games folder (EA 1992, 1996) */
+	if (nread > 3 && sig[0] == 'L' && sig[1] == 'I' && sig[2] == 'B'
+	&& sig[3] == 0x1A)
+		return "application/x-lib";
 
 	/* file(1): magic/Magdir/windows */
 	if (nread > 6 && sig[0] == 'R' && sig[1] == 'E' && sig[2] == 'G'
