@@ -4431,8 +4431,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "image/x-blp";
 
 	if (nread > 19 && sig[0] == 'F' && sig[1] == 'I' && sig[2] == 'L'
-	&& sig[3] == 'M' && sig[16] == 'F' && sig[17] == 'D' && sig[18] == 'S'
-	&& sig[19] == 'C')
+	&& sig[3] == 'M')
 		return "video/x-sega-film";
 
 	/* https://multimedia.cx/mirror/idcin.html */
@@ -6213,8 +6212,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* RECOIL: recoil.c:RECOIL_DecodeMsl */
 	if (file_size >= 3 && file_size <= 36
 	&& (size_t)sig[0] + 2 == (size_t)file_size && is_msl_image(sig, nread) == 1)
-		return "image/x-atari-mad-studio"; /* .msl */
-
+		return "image/x-atari-mad-studio-msl"; /* .msl */
 	/* RECOIL: recoil.c:RECOIL_DecodeAn2/4 */
 	if (nread > 1 && nread <= 967 && sig[0] < 40 && sig[1] < 24) {
 		const uint8_t columns = sig[0] + 1;
@@ -6222,8 +6220,29 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		const size_t cr = (size_t)columns * (size_t)rows;
 		if ((size_t)file_size == 2 + cr /* ANTIC 2 (.an2) */
 		|| (size_t)file_size == 7 + cr) /* ANTIC 4-5 (.an4/5) */
-			return "image/x-atari-mad-studio";
+			return "image/x-atari-mad-studio-antic";
 	}
+	/* RECOIL: recoil.c:RECOIL_DecodeAtari8Spr */
+	if (file_size >= 3 && file_size <= 42
+	&& 2 + (size_t)sig[0] == (size_t)file_size)
+		return "image/x-atari-mad-studio-spr"; /* .spr */
+	/* RECOIL: recoil.c:RECOIL_DecodeMpl */
+	if (file_size >= 13 && sig[0] > 0 && sig[0] <= 40
+	&& (size_t)file_size > ((size_t)sig[0] << 2)) {
+		const uint8_t height = sig[0];
+		const size_t bitmap_offset = (size_t)file_size - ((size_t)height << 2);
+		if (bitmap_offset == 9 || bitmap_offset == 14)
+			return "image/x-atari-mad-studio-mpl"; /* .mpl */
+	}
+	/* RECOIL: recoil.c:RECOIL_DecodeTl4 */
+	if (nread > 4 && sig[0] > 0 && sig[0] <= 4 && sig[1] > 0 && sig[1] <= 5
+	&& (size_t)file_size == (2 + ((size_t)sig[0] * (size_t)sig[1] * 9)))
+		return "image/x-atari-mad-studio-tl4"; /* .tl4 */
+
+	/* RECOIL: recoil.c:RECOIL_DecodeApl */
+	if (file_size == 1677 && nread > 6 && sig[0] == 0x9A && sig[1] == 0xF8
+	&& sig[2] == 0x39 && sig[3] == 0x21 && sig[6] <= 8)
+		return "image/x-atari-player-editor"; /* .apl */
 
 	if (nread > 24 && sig[0] == 'B' && sig[9] == 'A' && sig[18] == 'P'
 	&& memcmp(sig, "BUGBITER_APAC239I_PICTURE", 25) == 0)
@@ -6241,20 +6260,11 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	|| (sig[0] >= 0x08 && sig[0] <= 0x0B)) && BE_U32(sig + 1) == 0x00)
 		return "image/x-atari-tools-800";
 
-	if (file_size >= 3 && file_size <= 42
-	&& 2 + (size_t)sig[0] == (size_t)file_size)
-		return "image/x-atari-spr";
-
 	/* http://fileformats.archiveteam.org/wiki/Rembrandt */
 	if (nread > 10 && sig[0] == 'T' && sig[1] == 'R' && sig[2] == 'U'
 	&& sig[3] == 'E' && sig[4] == 'C' && sig[5] == 'O' && sig[6] == 'L'
 	&& sig[7] == 'R')
 		return "image/x-atari-rembrandt";
-
-	/* RECOIL: recoil.c:RECOIL_DecodeTl4 */
-	if (nread > 4 && sig[0] > 0 && sig[0] <= 4 && sig[1] > 0 && sig[1] <= 5
-	&& (size_t)file_size == (2 + ((size_t)sig[0] * (size_t)sig[1] * 9)))
-		return "image/x-atari-tl4";
 
 	if (nread > 41 && file_size <= 32044 && sig[0] <= 0x03
 	&& is_tinystuff_image(sig, nread, file_size) == 1)
@@ -6324,7 +6334,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "image/x-atari-din";
 
 	/* RECOIL: recoil.c:RECOIL_DecodeMonoArt */
-	if (nread > 3 && sig[0] > 0 && sig[0] <= 30 && sig[1] > 0 && sig[1] <= 64
+	if (nread > 3 && sig[0] > 0 && sig[0] < 30 && sig[1] > 0 && sig[1] < 64
 	&& (size_t)file_size == (3 + (((size_t)sig[0] + 1) * ((size_t)sig[1] + 1))))
 		return "image/x-atari-art";
 
@@ -6543,7 +6553,8 @@ text_or_binary(const uint8_t *s, const size_t slen)
 
 	const size_t limit = slen > 1024 ? 1024 : slen;
 	for (size_t i = 0; i < limit; i++) {
-		if (s[i] < 0x20 && s[i] != 0x09 && s[i] != 0x0A && s[i] != 0x0D)
+		if (s[i] < 0x20 && (s[i] < 0x07 || s[i] > 0x0D) && s[i] != 0x1A
+		&& s[i] != 0x1B)
 			return "application/octet-stream";
 	}
 
