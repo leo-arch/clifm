@@ -3195,6 +3195,22 @@ is_atari_wnd(const uint8_t *s, const size_t slen)
 }
 
 static int
+is_spectrum_stl(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen < 3072)
+		return 0;
+
+	const size_t limit = 256;
+	size_t dup_count = 0;
+	for (size_t i = 0; i + 1 < limit; i++) {
+		if (s[i] > 0 && s[i + 1] > 0 && s[i] == s[i + 1])
+			dup_count++;
+	}
+
+	return (dup_count > 30);
+}
+
+static int
 is_atari_paintshop(const uint8_t *s, const size_t slen)
 {
 	if (!s || slen < 14)
@@ -3485,6 +3501,21 @@ is_quantum_paint(const uint8_t *s, const size_t slen)
 		return 1;
 
 	return 0;
+}
+
+static int
+is_spectrum_512(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen <= 160)
+		return 0;
+
+	/* First 160 bytes should be zero. */
+	const int is_enhanced = (s[0] == '5' && s[1] == 'B' && s[2] == 'I'
+		&& s[3] == 'T');
+	size_t i = is_enhanced ? 4 : 0;
+	for (; i <= 160 && s[i] == 0x00; i++);
+
+	return (i == 160);
 }
 
 /* See RECOIL: recoli.c:RECOIL_DecodeGraphicsProcessor */
@@ -5128,13 +5159,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 			return "image/x-spectrum-spc";
 	}
 	/*https://temlib.org/AtariForumWiki/index.php/Spectrum_512_file_format */
-	if (file_size == 51104 && nread > 161 && sig[4] == 0x00 && sig[8] == 0x00
-	&& sig[32] == 0x00) { /* First non-zero byte is at offset 160 */
-		size_t i = (sig[0] == '5' && sig[1] == 'B' && sig[2] == 'I'
-			&& sig[3] == 'T') ? 4 : 0;
-		for (; i <= 160 && sig[i] == 0x00; i++);
-		if (i == 160) return "image/x-spectrum-spu";
-	}
+	if (file_size == 51104 && nread > 1024 && sig[4] == 0x00 && sig[8] == 0x00
+	&& sig[32] == 0x00 && is_spectrum_512(sig, nread) == 1)
+		return "image/x-spectrum-spu";
 	/* http://fileformats.archiveteam.org/wiki/SXG_(ZX_Spectrum) */
 	if (nread > 3 && sig[0] == 0x7F && sig[1] == 'S' && sig[2] == 'X'
 	&& sig[3] == 'G')
@@ -5165,6 +5192,41 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread >= 23 && sig[0] == 'S' && sig[1] == 'e' && sig[2] == 'v'
 	&& sig[3] == 0x00 && sig[6] == 0x01 && sig[7] == 0x00)
 		return "image/x-spectrum-sevenup"; /* .sev */
+
+	if (nread > 8 && file_size == 49664 && BE_U16(sig) == 0x00
+	&& sig[5] == 0x01 && sig[7] == 0x01) /* Heuristic based on samples */
+		return "image/x-spectrum-nxi";
+	/* http://fileformats.archiveteam.org/wiki/MultiArtist */
+	if (nread > 2 && sig[0] == 'M' && sig[1] == 'G' && sig[2] == 'H'
+	&& (file_size == 19456 || file_size == 18688 || file_size == 15616
+	|| file_size == 14080))
+		return "image/x-spectrum-multiartist";
+
+	/* https://github.com/reyco2000/CoCo-Image-Viewer/blob/main/documentation/COCO-PICS-FORMATS.md#clp-format-max-10-clipboard */
+	if (nread > 25 && nread == (size_t)file_size && sig[file_size - 1] == 0x64) {
+		const size_t payload_len = (size_t)file_size - 0x19 - 1; /* Exclude final 0x64 */
+		const size_t expected_len = (size_t)BE_U16(sig + 20) * (size_t)sig[24];
+		if (payload_len == expected_len)
+			return "image/x-coco-clp";
+	}
+	/* RECOIL: recoil.c (RECOIL_DecodeCocoMax)
+	 * This is bad heuristic. Take a look at
+	 * https://github.com/reyco2000/CoCo-Image-Viewer/blob/main/documentation/COCO-PICS-FORMATS.md#max-format-cocomax-12 */
+	if (file_size == 6154 || file_size == 6155 || file_size == 6272
+	|| file_size == 7168) {
+		if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x18 && sig[2] <= 0x01
+		&& sig[3] == 0x0E && sig[4] == 0x00)
+			return "image/x-coco-max";
+	}
+	/* RECOIL: recoil.c (RECOIL_DecodeP11) */
+	if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x0C && sig[3] == 0x0E
+	&& sig[4] == 0x00 && (file_size == 3243 || file_size == 3083))
+		return "image/x-coco-p11";
+
+	if (nread > 9 && file_size == 30848 && !sig[0] && sig[1] == 2
+	&& sig[2] == 0xF0 && !sig[3] && sig[4] == 4 && !sig[5] && sig[6] == 0x80
+	&& !sig[7] && sig[8] == 1 && sig[9] == 0x13)
+		return "image/x-coco-grf";
 
 	if (nread > 7 && sig[0] == 'I' && sig[1] == 'T' && sig[2] == 'O'
 	&& sig[3] == 'L' && sig[4] == 'I' && sig[5] == 'T' && sig[6] == 'L'
@@ -5937,27 +5999,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& memcmp(sig, "Paint Shop Pro Image File", 25) == 0)
 		return "image/x-paintshop-pro";
 
-	/* https://github.com/reyco2000/CoCo-Image-Viewer/blob/main/documentation/COCO-PICS-FORMATS.md#clp-format-max-10-clipboard */
-	if (nread > 25 && nread == (size_t)file_size && sig[file_size - 1] == 0x64) {
-		const size_t payload_len = (size_t)file_size - 0x19 - 1; /* Exclude final 0x64 */
-		const size_t expected_len = (size_t)BE_U16(sig + 20) * (size_t)sig[24];
-		if (payload_len == expected_len)
-			return "image/x-coco-clp";
-	}
-	/* RECOIL: recoil.c (RECOIL_DecodeCocoMax)
-	 * This is bad heuristic. Take a look at
-	 * https://github.com/reyco2000/CoCo-Image-Viewer/blob/main/documentation/COCO-PICS-FORMATS.md#max-format-cocomax-12 */
-	if (file_size == 6154 || file_size == 6155 || file_size == 6272
-	|| file_size == 7168) {
-		if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x18 && sig[2] <= 0x01
-		&& sig[3] == 0x0E && sig[4] == 0x00)
-			return "image/x-coco-max";
-	}
-	/* RECOIL: recoil.c (RECOIL_DecodeP11) */
-	if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x0C && sig[3] == 0x0E
-	&& sig[4] == 0x00 && (file_size == 3243 || file_size == 3083))
-		return "image/x-coco-p11";
-
 	/* http://fileformats.archiveteam.org/wiki/PaperPort_(MAX) */
 	if (nread > 4 && sig[0] == 'V' && sig[1] == 'i' && sig[2] == 'G'
 	&& (sig[3] == 'A' || sig[3] == 'B' || sig[3] == 'C' || sig[3] == 'E'
@@ -6025,12 +6066,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 8 && sig[0] == 'P' && !sig[1] && !sig[2] && sig[3] == 'P'
 	&& !sig[4] && !sig[5] && sig[6] == 'R' && !sig[7] && !sig[8])
 		return "image/x-ppr";
-
-	/* http://fileformats.archiveteam.org/wiki/MultiArtist */
-	if (nread > 2 && sig[0] == 'M' && sig[1] == 'G' && sig[2] == 'H'
-	&& (file_size == 19456 || file_size == 18688 || file_size == 15616
-	|| file_size == 14080))
-		return "image/x-spectrum-multiartist";
 
 	/* http://fileformats.archiveteam.org/wiki/Pegasus_PIC */
 	if (nread > 34 && sig[0] == 'B' && sig[1] == 'M' && sig[14] == 0x44
@@ -6357,8 +6392,12 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[6] == 0xFF && sig[7] == 0x5F)
 		return "image/x-atari-ige";
 
-	if (file_size == 3072 && is_atari_wnd(sig, nread) == 1)
-		return "image/x-atari-blazing-paddles"; /*.wnd */
+	if (file_size == 3072) {
+		if (is_spectrum_stl(sig, nread) == 1)
+			return "image/x-spectrum-stellar"; /* .stl */
+		if (is_atari_wnd(sig, nread) == 1)
+			return "image/x-atari-blazing-paddles"; /*.wnd */
+	}
 
 	/* RECOIL: recoil.c:RECOIL_AsciiArtEditor */
 	/* Max: 64 bytes per row (plus 0x1b terminator) x 24 lines = 1560 */
