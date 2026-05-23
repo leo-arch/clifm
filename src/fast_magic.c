@@ -19,6 +19,12 @@
 /* How many bytes to read from the input file. */
 #define BYTES_TO_READ 8192
 
+#ifdef FMAGIC_NO_NULL
+# define FMAGIC_ERROR "application/x-unknown";
+#else
+# define FMAGIC_ERROR NULL;
+#endif
+
 /* See RFC-6838 (https://datatracker.ietf.org/doc/html/rfc6838#section-3)
  * for the naming requirements of a MIME-type string. */
 #define IS_VALID_MIMETYPE_CHAR(c, subtype)                  \
@@ -1159,29 +1165,6 @@ check_cafebabe(const uint8_t *s, const size_t slen)
 
 	if (v >= 1 && v < 20) return "application/x-mach-binary";
 	if (v > 30) return "application/x-java-applet";
-
-	return NULL;
-}
-
-static char *
-fs_type_check(const struct stat *a)
-{
-	if (!a)
-		return NULL;
-
-	if (a->st_size == 0 && S_ISREG(a->st_mode))
-		return "inode/x-empty";
-
-	switch (a->st_mode & S_IFMT) {
-	case S_IFDIR:  return "inode/directory";
-	case S_IFLNK:  return "inode/symlink";
-	case S_IFIFO:  return "inode/fifo";
-	case S_IFSOCK: return "inode/socket";
-	case S_IFBLK:  return "inode/blockdevice";
-	case S_IFCHR:  return "inode/chardevice";
-	/* Let non-standard file modes be handled by libmagic itself */
-	default: break;
-	}
 
 	return NULL;
 }
@@ -6470,11 +6453,34 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	return NULL;
 }
 
+static char *
+fs_type_check(const struct stat *a)
+{
+	if (!a)
+		return FMAGIC_ERROR;
+
+	if (a->st_size == 0 && S_ISREG(a->st_mode))
+		return "inode/x-empty";
+
+	switch (a->st_mode & S_IFMT) {
+	case S_IFDIR:  return "inode/directory";
+	case S_IFLNK:  return "inode/symlink";
+	case S_IFIFO:  return "inode/fifo";
+	case S_IFSOCK: return "inode/socket";
+	case S_IFBLK:  return "inode/blockdevice";
+	case S_IFCHR:  return "inode/chardevice";
+	/* Let non-standard file modes be handled by libmagic itself */
+	default: break;
+	}
+
+	return FMAGIC_ERROR;
+}
+
 static const char *
 open_error(const char *file, const int err_no)
 {
 	if (!file)
-		return NULL;
+		return FMAGIC_ERROR;
 
 	struct stat st;
 	if (lstat(file, &st) != -1) {
@@ -6485,7 +6491,7 @@ open_error(const char *file, const int err_no)
 		return fs_type_check(&st);
 	}
 
-	return NULL;
+	return FMAGIC_ERROR;
 }
 
 static void
@@ -6503,7 +6509,7 @@ static const char *
 text_or_binary(const uint8_t *s, const size_t slen)
 {
 	if (!s)
-		return "application/octet-stream";
+		return FMAGIC_ERROR;
 
 	const size_t limit = slen > 1024 ? 1024 : slen;
 	for (size_t i = 0; i < limit; i++) {
@@ -6528,7 +6534,7 @@ const char *
 fast_magic(const char *file)
 {
 	if (!file || !*file)
-		return NULL;
+		return FMAGIC_ERROR;
 
 	int fd = open(file, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
 	if (fd == -1)
@@ -6537,7 +6543,7 @@ fast_magic(const char *file)
 	struct stat st;
 	if (fstat(fd, &st) == -1) {
 		close(fd);
-		return NULL;
+		return FMAGIC_ERROR;
 	}
 
 	/* Ignore non-regular files and empty regular files. */
@@ -6551,7 +6557,7 @@ fast_magic(const char *file)
 	close(fd);
 
 	if (bytes <= 0)
-		return NULL;
+		return FMAGIC_ERROR;
 
 	size_t nread = (size_t)bytes;
 	const uint8_t *sig = buf;
@@ -6568,8 +6574,9 @@ fast_magic(const char *file)
 	if (mimetype)
 		return mimetype;
 
-	if (nread > 512)
-		return detect_startcode_video_stream(sig, 512);
+	mimetype = nread > 512 ? detect_startcode_video_stream(sig, 512) : NULL;
+	if (mimetype)
+		return mimetype;
 
 #ifdef FMAGIC_NO_NULL
 	return text_or_binary(sig, nread);
