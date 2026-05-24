@@ -3243,21 +3243,32 @@ is_atari_pmg(const uint8_t *s, const size_t slen, const off_t file_size)
 }
 
 static int
-is_compressed_printfox(const uint8_t *s, const size_t slen)
+is_rle_encoded(const uint8_t *s, const size_t slen, const size_t offset,
+	const uint8_t escape, const size_t max_bytes, const size_t min_count)
 {
-	if (!s || slen < 36)
+	if (!s || slen < offset + 2)
 		return 0;
 
-	/* Printfox files are RLE-compressed. Ten or more 0x9b bytes in the
-	 * first 512 bytes are a strong evidence of an RLE-compressed file. */
+	const uint8_t min_run_len = 3;
+	const size_t limit = slen > max_bytes ? max_bytes : slen;
+	size_t i = offset;
 	size_t count = 0;
-	/* Read up to LIMIT bytes */
-	const size_t limit = slen > 512 ? 512 : slen;
 
-	for (size_t i = 6; i + 2 < limit && count < 10; i++)
-		count += (s[i] == 0x9B);
+	while (i + 2 < limit && count < min_count) {
+		/* 1. Current byte is an escape byte
+		 * 2. Run length is at least 3 (a smaller value is a waste of space)
+		 * 3. The byte previous to the escape byte is not the value to be
+		 * repeated in the current run (again, it is a waste of space). */
+		if (s[i] == escape && s[i + 1] >= min_run_len
+		&& i > offset && s[i - 1] != s[i + 2]) {
+			count++;
+			i += 3;
+		} else {
+			i++;
+		}
+	}
 
-	return (count >= 10);
+	return (count >= min_count);
 }
 
 /* See RECOIL: recoil.c:RECOIL_DecodeC64Shp */
@@ -5290,7 +5301,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& !sig[2] && !sig[3] && is_spectrum_512_comp(sig, nread, file_size) == 1)
 		return "image/x-atari-spectrum-512"; /* .spc, .sps */
 	/*https://temlib.org/AtariForumWiki/index.php/Spectrum_512_file_format */
-	if (file_size == 51104 && nread > 1024 && sig[4] == 0x00 && sig[8] == 0x00
+	if (file_size == 51104 && nread > 160 && sig[4] == 0x00 && sig[8] == 0x00
 	&& sig[32] == 0x00 && is_spectrum_512(sig, nread) == 1)
 		return "image/x-atari-spectrum-512"; /* .spu */
 
@@ -5803,14 +5814,13 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "image/x-commodore-funpaint";
 
 	/* http://justsolve.archiveteam.org/wiki/Vidcom_64 */
-	if (nread == BYTES_TO_READ && file_size == 10050 && sig[0] == 0x00
-	&& sig[1] == 0x58)
+	if (nread > 1 && file_size == 10050 && sig[0] == 0x00 && sig[1] == 0x58)
 		return "image/x-commodore-vidcom64";
 
 	/* https://www.c64-wiki.de/wiki/Printfox
 	 * .gb and .bs in compressed form (.pg is undocumented). */
 	if (nread > 36 && (sig[0] == 'B' || sig[0] == 'G') && sig[1] == 0x9B
-	&& is_compressed_printfox(sig, nread) == 1)
+	&& is_rle_encoded(sig, nread, 6, sig[1], 512, 10) == 1)
 		return "image/x-commodore-printfox";
 
 	/* http://fileformats.archiveteam.org/wiki/KoalaPainter */
@@ -6000,6 +6010,13 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (file_size == 8002 && nread > 1 && !sig[0]
 	&& (sig[1] == 0x20 || sig[1] == 0x60))
 		return "image/x-commodore-hires";
+
+	/* https://csdb.dk/release/?id=57070&show=notes */
+	if (file_size == 33602 && nread > 1 && !sig[0] && sig[1] == 0x3C)
+		return "image/x-commodore-pixel-perfect"; /* .pp (UNPACKED) */
+	if (nread > 6 && sig[2] == 0x10 && sig[3] == 0x10 && sig[4] == 0x10
+	&& is_rle_encoded(sig, nread, 6, sig[5], 512, 10) == 1)
+		return "image/x-commodore-pixel-perfect"; /* .ppp (PACKED)*/
 
 	if (nread > 512 && sig[2] == 0xFE && (BE_U16(sig) & 0x3F73) == 0x0801
 	&& !(BE_U32(sig + 508) & 0xFFFFFF00) && BE_U16(sig) == 0x0809) {
