@@ -6,7 +6,8 @@
 */
 
 /* fast_magic.c -- fast MIME-type detection using magic bytes */
-/* Note: For the time being, this module handles only binary files. */
+/* Note: For the time being, this module handles only binary files.
+ * If FMAGIC_NO_NULL is set, it will return a generic "text/plain". */
 
 #ifndef NO_FAST_MAGIC
 
@@ -22,6 +23,7 @@
 #ifdef FMAGIC_NO_NULL
 # define FMAGIC_ERROR "application/x-unknown";
 #else
+/* Allow falling back to another file-type identification tool. */
 # define FMAGIC_ERROR NULL;
 #endif
 
@@ -155,6 +157,10 @@ check_zip_magic(const uint8_t *str, const size_t str_len)
 	&& str[33] == 'e' && str[34] == 't' && str[35] == 'y' && str[36] == 'p'
 	&& str[37] == 'e')
 		return extract_mimetype_from_zip(str, str_len, 38);
+
+	if (str_len > 166 && str[30] == 'P' && str[31] == 'a' && str[32] == 'y'
+	&& memcmp(str + 30, "Payload", 7) == 0 && xmemmem(str + 38, 128, ".app/", 5))
+		return "application/x-ios-app";
 
 	/* STR starts with "PK\x03\x04" (4 bytes). Let's skip these bytes. */
 	const uint8_t *s = str + 4;
@@ -1081,17 +1087,17 @@ check_pre_ole2_office_docs(const uint8_t *s, const size_t slen)
 		return "application/msword";
 	}
 
-	if (slen > 3 && s[0] == 0xDB && s[1] == 0xA5 && s[2] == 0x2D
-	&& s[3] == 0x00)
+	if (slen > 5 && s[0] == 0xDB && s[1] == 0xA5 && s[2] == 0x2D
+	&& !s[3] && !s[4] && !s[5])
 		return "application/msword"; /* WinWord 2 (pre OLE2) */
 
 	if (slen > 5 && s[0] == 'P' && s[1] == 'O' && s[2] == '^'
 	&& s[3] == 'Q' && s[4] == '`' && s[5] <= 0x04)
 		return "application/msword"; /* Word 6 (pre OLE2) */
 
-	if (slen > 3 && s[0] == 0xFE && s[2] == 0x00) { /* Mac Word */
+	if (slen > 8 && s[0] == 0xFE && s[2] == 0x00 && !BE_U32(s + 4)) { /* Mac Word */
 		if ((s[3] == 0x00 && (s[1] == 0x32 || s[1] == 0x34)) /* vers 1/3 */
-		|| (s[1] == 0x37 && (s[3] == 0x1c || s[3] == 0x23))) /* vers 4/5 */
+		|| (s[1] == 0x37 && (s[3] == 0x1C || s[3] == 0x23))) /* vers 4/5 */
 			return "application/msword";
 	}
 
@@ -1740,6 +1746,24 @@ is_ttf_tag(const uint8_t *s, const size_t slen)
 }
 
 static const char *
+check_moss_archive(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen < 28)
+		return NULL;
+
+	const uint8_t v = s[27];
+	switch (v) {
+	case 1: return "application/x-stone-binary";
+	case 2: return "application/x-stone-delta";
+	case 3: return "application/x-stone-repository";
+	case 4: return "application/x-stone-manifest";
+	default: break;
+	}
+
+	return NULL;
+}
+
+static const char *
 check_modern_formats(const uint8_t *sig, const size_t nread,
 	const off_t file_size)
 {
@@ -1822,6 +1846,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 			return check_zip_magic(sig, nread);
 		if (sig[2] == 0x05 && sig[3] == 0x06)
 			return "application/zip";
+		if (nread > 7 && sig[2] == 0x07 && sig[3] == 0x08 && sig[4] == 'P'
+		&& sig[5] == 'K' && sig[6] == 0x03 && sig[7] == 0x04)
+			return "application/zip"; /* PKZIP multi-volume archive */
+		if (nread > 7 && sig[2] == '0' && sig[3] == '0' && sig[4] == 'P'
+		&& sig[5] == 'K' && sig[6] == 0x03 && sig[7] == 0x04)
+			return "application/zip"; /* Alternate ZIP string */
 	}
 
 	if (nread > 3 && sig[0] == 'R' && sig[1] == 'I' && sig[2] == 'F'
@@ -2381,12 +2411,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 36 && BE_U32(sig) == 0x000000028 && BE_U32(sig + 4) == 6)
 		return "image/x-xwindowdump";
 
-	if (nread >= 8 &&
-	((sig[0] == 'R' && sig[1] == 'a' && sig[2] == 'r'
+	if (nread >= 8 && sig[0] == 'R' && sig[1] == 'a' && sig[2] == 'r'
 	&& sig[3] == '!' && sig[4] == 0x1A && sig[5] == 0x07
 	&& (sig[6] == 0x00 || (sig[6] == 0x01 && sig[7] == 0x00)))
-		/* pre 1.50 */
-	|| (sig[0] == 'R' && sig[1] == 'E' && sig[2] == 0x7E && sig[3] == 0x5E)))
+		return "application/vnd.rar";
+	if (nread > 3 && sig[0] == 'R' && sig[1] == 'E' && sig[2] == 0x7E
+	&& sig[3] == 0x5E) /* Old RAR, pre 1.50 */
 		return "application/vnd.rar";
 
 	if (nread > 7 && sig[4] == 'M' && sig[5] == 0x00 && sig[6] == 0x00
@@ -2625,6 +2655,11 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread >= 15 && sig[0] == 0x0E && sig[1] == 'S' && sig[7] == 'U'
 	&& memcmp(sig + 1, "SketchUp Model", 14) == 0)
 		return "application/vnd.sketchup.skp";
+
+	/* file(1): magic/Magdir/archive (SerpentOS - rebranded AerynOS) */
+	if (nread > 32 && !sig[0] && sig[1] == 'm' && sig[2] == 'o'
+	&& sig[3] == 's' && BE_U32(sig + 28) == 1)
+		return check_moss_archive(sig, nread);
 
 	/* file(1): magic/Magdir/console */
 	if (nread > 3 && sig[0] == 'N' && sig[1] == 'E' && sig[2] == 'S'
@@ -3819,8 +3854,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 't' && sig[4] == 'f')
 		return "text/rtf"; /* application/rtf (MIME-info) */
 
-	if (nread > 3 && sig[0] == 'M' && sig[1] == 'Z' && (sig[3] == 0x00
-	|| sig[3] == 0x01))
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'Z' && sig[2] <= 0x06)
 		return get_ms_exec_type(sig, nread); /* .exe */
 
 	if (nread > 384 && sig[369] == 'M'
@@ -4245,6 +4279,23 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == 0x00 && sig[1] == 0x50 && sig[2] == 0x00
 	&& (sig[3] == 0x14 || sig[3] == 0x1E))
 		return "application/x-packer";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 24 && sig[24] == 0x1A && sig[0] == 'P' && sig[7] == 'F'
+	&& memcmp(sig, "Packed File ", 12) == 0)
+		return "application/x-novell-compress";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 4 && BE_U32(sig) == 0x1EE7FF00)
+		return "application/x-eet";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 8 && BE_U32(sig) == 0x25067819 && BE_U32(sig + 4) == 0x01010000)
+		return "application/x-fzip";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 8 && BE_U32(sig) == 0xce24b9a2 && BE_U32(sig + 4) == 0x20000000)
+		return "application/x-acronis-tib";
+	/* file(1): magic/Magdir/archives */
+	if (nread > 264 && sig[0] == 'X' && sig[1] == 'B' && sig[2] == 'T'
+	&& sig[3] == 'F' && sig[264] == 0x00)
+		return "application/x-xbmc-xbt";
 	if (nread > 4) {
 		/* file(1): magic/Magdir/archives */
 		const uint32_t v = LE_U32(sig) & 0x8080FFFF;
@@ -5748,6 +5799,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 			return "application/x-commodore-crt";
 	}
 	/* Commodore-64 */
+	if (nread > 86 && sig[56] == 'U' && sig[59] == ' ' && sig[60] == 'L'
+	&& memcmp(sig + 56, "USE LYNX TO DISSOLVE THIS FILE", 30) == 0)
+		return "application/x-commodore-lnx";
+
 	if (nread > 6 && sig[0] == 0x01 && (sig[1] == 0x08 || sig[1] == 0x12)) {
 		if (nread >= 11 && sig[1] == 0x08 && sig[4] == 0xEF && sig[6] == 0x9E
 		&& memcmp(sig, "\x01\x08\x0b\x08\xef\x00\x9e\x32\x30\x36\x31", 11) == 0)
