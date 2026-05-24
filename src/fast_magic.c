@@ -3518,6 +3518,25 @@ is_spectrum_512(const uint8_t *s, const size_t slen)
 	return (i == 160);
 }
 
+static int
+is_spectrum_512_comp(const uint8_t *s, const size_t slen, const off_t file_size)
+{
+	if (!s || slen <= 12)
+		return 0;
+
+	const size_t header_len = 2 + 2 + 4 + 4;
+	const size_t data_len = (size_t)BE_U32(s + 4);
+	const size_t color_len = (size_t)BE_U32(s + 8);
+
+	if (data_len > 32092 || color_len > 17910)
+		return 0;
+
+	if (data_len + color_len + header_len == (size_t)file_size)
+		return 1;
+
+	return 0;
+}
+
 /* See RECOIL: recoli.c:RECOIL_DecodeGraphicsProcessor */
 static int
 is_graphics_processor(const uint8_t *s, const size_t slen)
@@ -5021,35 +5040,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0x00 && sig[12] == 0x01)
 		return "image/x-ms-bmp"; /* Or image/x-dib (Shared MIME-info) */
 
-	if (nread > 5 && sig[0] == 0xFF && sig[1] == 0xFF && sig[2] == '0'
-	&& sig[3] == 'S' && sig[4] == 'O' && sig[5] == 0x7f)
-		return "image/x-atari-ged";
-	/* http://fileformats.archiveteam.org/wiki/XL-Paint */
-	if (nread > 3 && sig[0] == 'X' && sig[1] == 'L' && sig[2] == 'P') {
-		if (sig[3] == 'B' && (file_size == 792 || file_size == 15372))
-			return "image/x-atari-xl-paint";
-		if (sig[3] == 'C' || sig[3] == 'M') return "image/x-atari-xl-paint";
-	}
-	/* http://fileformats.archiveteam.org/wiki/ColorViewSquash */
-	if (nread > 3 && sig[0] == 'R' && sig[1] == 'G' && sig[2] == 'B'
-	&& sig[3] == '1')
-		return "image/x-atari-rgb";
-	/* https://codeberg.org/zerkman/mpp#the-mpp-file-format */
-	if (nread > 12 && sig[0] == 'M' && sig[1] == 'P' && sig[2] == 'P'
-	&& sig[3] <= 0x03 && sig[5] + sig[6] + sig[7] == 0x00)
-		return "image/x-atari-mpp";
-
-	/* https://temlib.org/AtariForumWiki/index.php/QuantumPaint_file_format */
-	if (nread > 128 && !sig[0] && !BE_U16(sig + 1)
-	&& (sig[3] == 0x00 || sig[3] == 0x01 || sig[3] == 0x80 || sig[3] == 0x81)
-	&& is_quantum_paint(sig, nread) == 1)
-		return "image/x-atari-quantum-paint"; /* .pbx */
-
-	/* http://fileformats.archiveteam.org/wiki/Graph2Font */
-	if (nread > 6 && sig[0] == 'G' && sig[1] == '2' && sig[2] == 'F'
-	&& sig[3] == 'Z' && sig[4] == 'L' && sig[5] == 'I' && sig[6] == 'B')
-		return "image/x-atari-graph2font";
-
 	/* http://fileformats.archiveteam.org/wiki/MAKIchan_Graphics */
 	if (nread > 12 && sig[0] == 'M' && sig[1] == 'A' && sig[2] == 'K'
 	&& sig[3] == 'I' && sig[4] == '0' && (sig[5] == '1' || sig[5] == '2')
@@ -5150,18 +5140,6 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == '2' && sig[4] == '5' && sig[5] == '6')
 		return "image/x-ilab";
 
-	/* https://temlib.org/AtariForumWiki/index.php/Spectrum_512_Compressed_file_format */
-	if (nread > 24 && sig[0] == 'S' && sig[1] == 'P' && sig[2] == 0x00
-	&& sig[3] == 0x00) {
-		const uint32_t data_len = BE_U32(sig + 4);
-		const uint32_t color_len = BE_U32(sig + 8);
-		if (data_len + color_len + 4 + 4 + 2 + 2 == file_size)
-			return "image/x-spectrum-spc";
-	}
-	/*https://temlib.org/AtariForumWiki/index.php/Spectrum_512_file_format */
-	if (file_size == 51104 && nread > 1024 && sig[4] == 0x00 && sig[8] == 0x00
-	&& sig[32] == 0x00 && is_spectrum_512(sig, nread) == 1)
-		return "image/x-spectrum-spu";
 	/* http://fileformats.archiveteam.org/wiki/SXG_(ZX_Spectrum) */
 	if (nread > 3 && sig[0] == 0x7F && sig[1] == 'S' && sig[2] == 'X'
 	&& sig[3] == 'G')
@@ -5277,6 +5255,44 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 			return "video/x-atari-neochrome"; /* Animation (.ani) */
 	if (file_size == 128128 && nread > 1 && sig[0] == 0xBA && sig[1] == 0xBE)
 		return "image/x-atari-neochrome"; /* Virtual canvas */
+
+	if (nread > 5 && sig[0] == 0xFF && sig[1] == 0xFF && sig[2] == '0'
+	&& sig[3] == 'S' && sig[4] == 'O' && sig[5] == 0x7f)
+		return "image/x-atari-ged";
+	/* http://fileformats.archiveteam.org/wiki/XL-Paint */
+	if (nread > 3 && sig[0] == 'X' && sig[1] == 'L' && sig[2] == 'P') {
+		if (sig[3] == 'B' && (file_size == 792 || file_size == 15372))
+			return "image/x-atari-xl-paint";
+		if (sig[3] == 'C' || sig[3] == 'M') return "image/x-atari-xl-paint";
+	}
+	/* http://fileformats.archiveteam.org/wiki/ColorViewSquash */
+	if (nread > 3 && sig[0] == 'R' && sig[1] == 'G' && sig[2] == 'B'
+	&& sig[3] == '1')
+		return "image/x-atari-rgb";
+	/* https://codeberg.org/zerkman/mpp#the-mpp-file-format */
+	if (nread > 12 && sig[0] == 'M' && sig[1] == 'P' && sig[2] == 'P'
+	&& sig[3] <= 0x03 && sig[5] + sig[6] + sig[7] == 0x00)
+		return "image/x-atari-mpp";
+
+	/* https://temlib.org/AtariForumWiki/index.php/QuantumPaint_file_format */
+	if (nread > 128 && !sig[0] && !BE_U16(sig + 1)
+	&& (sig[3] == 0x00 || sig[3] == 0x01 || sig[3] == 0x80 || sig[3] == 0x81)
+	&& is_quantum_paint(sig, nread) == 1)
+		return "image/x-atari-quantum-paint"; /* .pbx */
+
+	/* http://fileformats.archiveteam.org/wiki/Graph2Font */
+	if (nread > 6 && sig[0] == 'G' && sig[1] == '2' && sig[2] == 'F'
+	&& sig[3] == 'Z' && sig[4] == 'L' && sig[5] == 'I' && sig[6] == 'B')
+		return "image/x-atari-graph2font";
+
+	/* https://temlib.org/AtariForumWiki/index.php/Spectrum_512_Compressed_file_format */
+	if (nread > 24 && nread <= 50014 && sig[0] == 'S' && sig[1] == 'P'
+	&& !sig[2] && !sig[3] && is_spectrum_512_comp(sig, nread, file_size) == 1)
+		return "image/x-atari-spectrum-512"; /* .spc, .sps */
+	/*https://temlib.org/AtariForumWiki/index.php/Spectrum_512_file_format */
+	if (file_size == 51104 && nread > 1024 && sig[4] == 0x00 && sig[8] == 0x00
+	&& sig[32] == 0x00 && is_spectrum_512(sig, nread) == 1)
+		return "image/x-atari-spectrum-512"; /* .spu */
 
 	/* http://fileformats.archiveteam.org/wiki/ComputerEyes */
 	if (nread > 4 && (file_size == 192022 || file_size == 256022)
