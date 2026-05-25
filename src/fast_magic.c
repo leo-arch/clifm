@@ -199,6 +199,10 @@ check_zip_magic(const uint8_t *str, const size_t str_len)
 		&& memcmp(s + i, "META-INF/MANIFEST.MF", 20) == 0)
 			return "application/java-archive";
 
+		if (rem >= 7 && s[i] == '.' && s[i + 1] == 'n' && s[i + 2] == 'u'
+		&& memcmp(s + i, ".nuspec", 7) == 0)
+			return "application/vnd.nuget.package";
+
 		if (rem >= 16 && s[i] == '3' && s[i + 1] == 'D' && s[i + 2] == '/'
 		&& memcmp(s + i, "3D/3dmodel.model", 16) == 0)
 			return "model/3mf";
@@ -209,6 +213,21 @@ check_zip_magic(const uint8_t *str, const size_t str_len)
 #else
 	return NULL;
 #endif
+}
+
+static int
+utf16le_cmp(const uint8_t *a, const size_t alen, const char *b,
+	const size_t blen)
+{
+	if (!a || !b || blen > SIZE_MAX / 2 || alen < blen * 2)
+		return 0;
+
+	for (size_t i = 0, j = 0; j < blen; j++, i += 2) {
+		if (a[i] != (uint8_t)b[j] || a[i + 1] != 0x00)
+			return 0;
+	}
+
+	return 1;
 }
 
 static const char *
@@ -255,7 +274,7 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 	&& memcmp(str + offset, "Microsoft Excel", 15) == 0)
 		return "application/vnd.ms-excel";
 
-	/* Check for "0x00 Calc " at offset 2090 (XLS created with LibreOffice) */
+	/* Check for "\0Calc " at offset 2090 (XLS created with LibreOffice) */
 	if (str_len > offset + 16 && str[offset + 11] == 'C'
 	&& str[offset + 14] == 'c' && memcmp(str + offset + 10, "\0Calc ", 6) == 0)
 		return "application/vnd.ms-excel";
@@ -270,6 +289,26 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 	if (str_len > offset + 16 && str[offset] == 'W' && str[offset + 6] == 'k'
 	&& memcmp(str + offset, "W\0o\0r\0k\0b\0o\0o\0k\0", 16) == 0)
 		return "application/vnd.ms-excel";
+
+	offset = 512;
+	if (str_len > offset + 9 && str[offset + 1] == 0xA5
+	&& (str[offset + 6] == 0x10 || str[offset + 6] == 0x09)
+	&& str[offset + 7] == 0x04 && !str[offset + 8] && !str[offset + 9])
+		return "application/msword";
+
+	offset = 3200; /* 0xC80 */
+	if (str_len > offset + 20 && str[offset] == 'S'
+	&& utf16le_cmp(str + offset, str_len - offset, "StarWriter", 10) == 1)
+		return "application/vnd.stardivision.writer";
+	if (str_len > offset + 20 && str[offset] == 'S'
+	&& utf16le_cmp(str + offset, str_len - offset, "StarCalc", 8) == 1)
+		return "application/vnd.stardivision.calc";
+	if (str_len > offset + 20 && str[offset] == 'S'
+	&& utf16le_cmp(str + offset, str_len - offset, "StarDraw", 8) == 1)
+		return "application/vnd.stardivision.draw";
+	if (str_len > offset + 20 && str[offset] == 'S'
+	&& utf16le_cmp(str + offset, str_len - offset, "StarImpress", 11) == 1)
+		return "application/vnd.stardivision.impress";
 
 	if (str_len <= 8)
 		return NULL;
@@ -297,11 +336,59 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 			(type == 0x0005 || type == 0x0010 || type == 0x0020))
 				return "application/vnd.ms-excel";
 		}
-	}
 
-	if (l >= 10 && (xmemmem(s, l, "PowerPoint", 10)
-	|| xmemmem(s, l, "_\0P\0P\0T\0", 8)))
-		return "application/vnd.ms-powerpoint";
+		if (s[i] == 'W' && s[i + 2] == 'o'
+		&& utf16le_cmp(s + i, l - i, "WordDocument", 12) == 1)
+			return "application/msword";
+
+		if (s[i] == 'C' && s[i + 2] == 'u'
+		&& utf16le_cmp(s + i, l - i, "Current User", 12) == 1)
+			return "application/vnd.ms-powerpoint";
+		if (s[i] == 'O' && s[i + 2] == 'b'
+		&& utf16le_cmp(s + i, l - i, "Object1", 7) == 1)
+			return "application/vnd.ms-powerpoint";
+		if (s[i] == 'P') {
+			if (s[i + 1] == 'o' && memcmp(s + i, "PowerPoint", 10) == 0)
+				return "application/vnd.ms-powerpoint";
+			if (s[i + 2] == 'o'
+			&& utf16le_cmp(s + i, l - i, "PowerPoint", 10) == 1)
+				return "application/vnd.ms-powerpoint";
+			if (s[i + 4] == 'T' && utf16le_cmp(s + i, l - i, "PPT", 3) == 1)
+				return "application/vnd.ms-powerpoint";
+			if (s[i + 4] == '4' && utf16le_cmp(s + i, l - i, "PP4", 3) == 1)
+				return "application/vnd.ms-powerpoint";
+		}
+
+		if (s[i] == 'V' && s[i + 2] == 'i'
+		&& utf16le_cmp(s + i, l - i, "VisioDocument", 13) == 1)
+			return "application/vnd.visio";
+
+		if (s[i] == 0xFF && s[i + 1] == 'W' && s[i + 2] == 'P'
+		&& s[i + 3] == 'C')
+			return "application/vnd.wordperfect";
+
+		if (l - i > 11 && s[i] == 'S' && s[i + 1] == 't'
+		&& i >= 0x820 && i < 0x840) {
+			if (s[i + 4] == 'D' && memcmp(s + i, "StarDraw", 8) == 0)
+				return "application/vnd.stardivision.draw";
+			if (s[i + 4] == 'C' && memcmp(s + i, "StarCalc", 8) == 0)
+				return "application/vnd.stardivision.calc";
+			if (s[i + 4] == 'W' && memcmp(s + i, "StarWriter", 10) == 0)
+				return "application/vnd.stardivision.writer";
+			if (s[i + 4] == 'I' && memcmp(s + i, "StarImpress", 11) == 0)
+				return "application/vnd.stardivision.impress";
+		}
+		if (s[i] == 'S' && !s[i + 1] && s[i + 2] == 't') {
+			if (s[i + 8] == 'D' && utf16le_cmp(s + i, l - i, "StarDraw", 8) == 1)
+				return "application/vnd.stardivision.draw";
+			if (s[i + 8] == 'C' && utf16le_cmp(s + i, l - i, "StarCalc", 8) == 1)
+				return "application/vnd.stardivision.calc";
+			if (s[i + 8] == 'W' && utf16le_cmp(s + i, l - i, "StarWriter", 10) == 1)
+				return "application/vnd.stardivision.writer";
+			if (s[i + 8] == 'I' && utf16le_cmp(s + i, l - i, "StarImpress", 11) == 1)
+				return "application/vnd.stardivision.impress";
+		}
+	}
 
 #ifdef FMAGIC_NO_NULL
 	return "application/x-ole-storage";
@@ -1045,8 +1132,9 @@ is_msdos_excel(const uint8_t *s, const size_t slen)
 	const uint16_t type = LE_U16(s + 6);
 
 	/* Excel 2 BIFF 2 */
-	if (s[1] == 0x00 && len == 4 && (version == 0 || version == 2)
-	&& (type == 0x0010 || type == 0x0020 || type == 0x0040))
+	if (s[1] == 0x00 && len == 4 && (version == 0 || version == 2
+	|| version == 3 || version == 7) && (type == 0x0010 || type == 0x0020
+	|| type == 0x0040))
 		return 1;
 	/* Excel 3 BIFF 3 */
 	if (s[1] == 0x02 && len == 6 && (version == 0 || version == 3)
@@ -1088,7 +1176,7 @@ check_pre_ole2_office_docs(const uint8_t *s, const size_t slen)
 	}
 
 	if (slen > 5 && s[0] == 0xDB && s[1] == 0xA5 && s[2] == 0x2D
-	&& !s[3] && !s[4] && !s[5])
+	&& s[3] == 0x00)
 		return "application/msword"; /* WinWord 2 (pre OLE2) */
 
 	if (slen > 5 && s[0] == 'P' && s[1] == 'O' && s[2] == '^'
@@ -1105,6 +1193,14 @@ check_pre_ole2_office_docs(const uint8_t *s, const size_t slen)
 	if (slen > 8 && s[0] == 0x09 && (s[1] == 0x00 || s[1] == 0x02
 	|| s[1] == 0x04 || s[1] == 0x08) && is_msdos_excel(s, slen) == 1)
 		return "application/vnd.ms-excel";
+
+	/* PowerPoint 2/3 */
+	if (slen > 8 && BE_U32(s) == 0xEDDEAD0B && (s[4] == 0x02 || s[4] == 0x03)
+	&& !s[5] && !s[6] && !s[7])
+		return "application/vnd.ms-powerpoint";
+	if (slen > 8 && LE_U32(s) == 0xEDDEAD0B && !s[4] && !s[5] && !s[6]
+	&& (s[7] == 0x02 || s[7] == 0x03))
+		return "application/vnd.ms-powerpoint";
 
 	if (slen >= 19 && s[4] == 'S' && s[7] == 'n'
 	&& (memcmp(s + 4, "Standard Jet DB", 15) == 0
@@ -3854,7 +3950,8 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 't' && sig[4] == 'f')
 		return "text/rtf"; /* application/rtf (MIME-info) */
 
-	if (nread > 3 && sig[0] == 'M' && sig[1] == 'Z' && sig[2] <= 0x06)
+	if (nread > 3 && sig[0] == 'M' && sig[1] == 'Z' && (sig[2] <= 0x06
+	|| sig[3] <= 0x01))
 		return get_ms_exec_type(sig, nread); /* .exe */
 
 	if (nread > 384 && sig[369] == 'M'
