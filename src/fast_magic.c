@@ -3760,18 +3760,22 @@ is_dbf_file(const uint8_t *s, const size_t slen, const off_t file_size)
 	|| v == 0xF5 || v == 0xFB))
 		return 0;
 
-	/* Last modification time */
-	const size_t year = (size_t)s[1] + 1900;
+	/* Last modification time (s[1] + 1900 is year) */
 	const uint8_t month = s[2];
 	const uint8_t day = s[3];
-	if (year < 1970 || month == 0 || month > 12 || day == 0 || day > 31)
+	if (month == 0 || month > 12 || day == 0 || day > 31)
 		return 0;
 
 	/* File size */
+	const size_t fsize = (size_t)file_size;
 	const size_t rec_num = (size_t)LE_U32(s + 4);
 	const size_t header_len = (size_t)LE_U16(s + 8);
 	const size_t rec_len = (size_t)LE_U16(s + 10);
-	const size_t fsize = (size_t)file_size;
+	const uint8_t incomplete_trans = s[14];
+	const uint8_t encrypted = s[15];
+
+	if (incomplete_trans > 1 || encrypted > 1)
+		return 0;
 
 	if (header_len < 32 || header_len > fsize || rec_len > fsize)
 		return 0;
@@ -4064,8 +4068,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 
 	/* http://fileformats.archiveteam.org/wiki/DBF */
 	if (nread > 32 && (sig[0] == 0x03 || sig[0] == 0xF5 || sig[0] == 0x83)
-	&& sig[1] >= 70 && sig[2] > 0 && sig[2] <= 12 && sig[3] > 0 && sig[3] <= 31
-	&& is_dbf_file(sig, nread, file_size) == 1)
+	&& sig[2] > 0 && sig[2] <= 12 && sig[3] > 0 && sig[3] <= 31
+	&& LE_U16(sig + 8) >= 32 && (size_t)LE_U16(sig + 8) < (size_t)file_size
+	&& sig[14] <= 1 && sig[15] <= 1 && is_dbf_file(sig, nread, file_size) == 1)
 		return "application/x-dbf";
 
 	if (nread > 44 && sig[0] == 0x01 && sig[1] == 0x00 && sig[40] == ' '
