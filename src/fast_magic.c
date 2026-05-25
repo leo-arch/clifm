@@ -337,37 +337,45 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 				return "application/vnd.ms-excel";
 		}
 
+		const size_t rem = l - i;
 		if (s[i] == 'W' && s[i + 2] == 'o'
-		&& utf16le_cmp(s + i, l - i, "WordDocument", 12) == 1)
+		&& utf16le_cmp(s + i, rem, "WordDocument", 12) == 1)
 			return "application/msword";
 
 		if (s[i] == 'C' && s[i + 2] == 'u'
-		&& utf16le_cmp(s + i, l - i, "Current User", 12) == 1)
+		&& utf16le_cmp(s + i, rem, "Current User", 12) == 1)
 			return "application/vnd.ms-powerpoint";
 		if (s[i] == 'O' && s[i + 2] == 'b'
-		&& utf16le_cmp(s + i, l - i, "Object1", 7) == 1)
+		&& utf16le_cmp(s + i, rem, "Object1", 7) == 1)
 			return "application/vnd.ms-powerpoint";
 		if (s[i] == 'P') {
 			if (s[i + 1] == 'o' && memcmp(s + i, "PowerPoint", 10) == 0)
 				return "application/vnd.ms-powerpoint";
 			if (s[i + 2] == 'o'
-			&& utf16le_cmp(s + i, l - i, "PowerPoint", 10) == 1)
+			&& utf16le_cmp(s + i, rem, "PowerPoint", 10) == 1)
 				return "application/vnd.ms-powerpoint";
-			if (s[i + 4] == 'T' && utf16le_cmp(s + i, l - i, "PPT", 3) == 1)
+			if (s[i + 4] == 'T' && utf16le_cmp(s + i, rem, "PPT", 3) == 1)
 				return "application/vnd.ms-powerpoint";
-			if (s[i + 4] == '4' && utf16le_cmp(s + i, l - i, "PP4", 3) == 1)
+			if (s[i + 4] == '4' && utf16le_cmp(s + i, rem, "PP4", 3) == 1)
 				return "application/vnd.ms-powerpoint";
 		}
 
 		if (s[i] == 'V' && s[i + 2] == 'i'
-		&& utf16le_cmp(s + i, l - i, "VisioDocument", 13) == 1)
+		&& utf16le_cmp(s + i, rem, "VisioDocument", 13) == 1)
 			return "application/vnd.visio";
 
 		if (s[i] == 0xFF && s[i + 1] == 'W' && s[i + 2] == 'P'
 		&& s[i + 3] == 'C')
 			return "application/vnd.wordperfect";
 
-		if (l - i > 11 && s[i] == 'S' && s[i + 1] == 't'
+		if (rem > 11 && s[i] == 'M' && s[i + 1] == 'S' && s[i + 2] == 'P'
+		&& memcmp(s + i, "MSPublisher", 11) == 0)
+			return "application/vnd.ms-publisher";
+		if (s[i] == 'Q' && s[i + 2] == 'u'
+		&& utf16le_cmp(s + i, rem, "Quill", 5) == 1)
+			return "application/vnd.ms-publisher";
+
+		if (rem > 11 && s[i] == 'S' && s[i + 1] == 't' && s[i + 2] == 'a'
 		&& i >= 0x820 && i < 0x840) {
 			if (s[i + 4] == 'D' && memcmp(s + i, "StarDraw", 8) == 0)
 				return "application/vnd.stardivision.draw";
@@ -378,14 +386,14 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 			if (s[i + 4] == 'I' && memcmp(s + i, "StarImpress", 11) == 0)
 				return "application/vnd.stardivision.impress";
 		}
-		if (s[i] == 'S' && !s[i + 1] && s[i + 2] == 't') {
-			if (s[i + 8] == 'D' && utf16le_cmp(s + i, l - i, "StarDraw", 8) == 1)
+		if (rem > 22 && s[i] == 'S' && !s[i + 1] && s[i + 2] == 't') {
+			if (s[i + 8] == 'D' && utf16le_cmp(s + i, rem, "StarDraw", 8) == 1)
 				return "application/vnd.stardivision.draw";
-			if (s[i + 8] == 'C' && utf16le_cmp(s + i, l - i, "StarCalc", 8) == 1)
+			if (s[i + 8] == 'C' && utf16le_cmp(s + i, rem, "StarCalc", 8) == 1)
 				return "application/vnd.stardivision.calc";
-			if (s[i + 8] == 'W' && utf16le_cmp(s + i, l - i, "StarWriter", 10) == 1)
+			if (s[i + 8] == 'W' && utf16le_cmp(s + i, rem, "StarWriter", 10) == 1)
 				return "application/vnd.stardivision.writer";
-			if (s[i + 8] == 'I' && utf16le_cmp(s + i, l - i, "StarImpress", 11) == 1)
+			if (s[i + 8] == 'I' && utf16le_cmp(s + i, rem, "StarImpress", 11) == 1)
 				return "application/vnd.stardivision.impress";
 		}
 	}
@@ -3737,6 +3745,47 @@ is_atari_16color_palette(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
+/* See https://www.clicketyclick.dk/databases/xbase/format/dbf.html#DBF_NOTE_21_TARGET */
+static int
+is_dbf_file(const uint8_t *s, const size_t slen, const off_t file_size)
+{
+	if (!s || slen < 32)
+		return 0;
+
+	/* Version info */
+	const uint8_t v = s[0];
+	if (!(v == 0x02 || v == 0x03 || v == 0x04 || v == 0x05 || v == 0x07
+	|| v == 0x30 || v == 0x31 || v == 0x43 || v == 0x7B || v == 0x83
+	|| v == 0x87 || v == 0x8B || v == 0x8E || v == 0xB3 || v == 0xE5
+	|| v == 0xF5 || v == 0xFB))
+		return 0;
+
+	/* Last modification time */
+	const size_t year = (size_t)s[1] + 1900;
+	const uint8_t month = s[2];
+	const uint8_t day = s[3];
+	if (year < 1970 || month == 0 || month > 12 || day == 0 || day > 31)
+		return 0;
+
+	/* File size */
+	const size_t rec_num = (size_t)LE_U32(s + 4);
+	const size_t header_len = (size_t)LE_U16(s + 8);
+	const size_t rec_len = (size_t)LE_U16(s + 10);
+	const size_t fsize = (size_t)file_size;
+
+	if (header_len < 32 || header_len > fsize || rec_len > fsize)
+		return 0;
+
+	if (rec_num > 0 && rec_len > SIZE_MAX / rec_num)
+		return 0;
+
+	const size_t expected = rec_num * rec_len + header_len;
+	if (expected == fsize || expected + 1 == fsize)
+		return 1;
+
+	return 0;
+}
+
 static const char *
 check_epoc5(const uint8_t *s, const size_t slen)
 {
@@ -3938,6 +3987,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[91] == 'T') /* Softimage PIC (discontinuated in 2015) */
 		return "image/x-softimage-pic";
 
+
 	if (nread >= 16 && sig[0] == 0x30 && sig[1] == 0x26
 	&& memcmp(sig, "\x30\x26\xB2\x75\x8E\x66\xCF\x11\xA6\xD9\x00\xAA\x00\x62\xCE\x6C", 16) == 0)
 		return "video/x-ms-asf"; /* asf, wma, wmv */
@@ -4011,6 +4061,12 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'P' && sig[4] > 0 && sig[5] > 0 && sig[6] > 0
 	&& sig[7] > 0)
 		return "application/x-sylk";
+
+	/* http://fileformats.archiveteam.org/wiki/DBF */
+	if (nread > 32 && (sig[0] == 0x03 || sig[0] == 0xF5 || sig[0] == 0x83)
+	&& sig[1] >= 70 && sig[2] > 0 && sig[2] <= 12 && sig[3] > 0 && sig[3] <= 31
+	&& is_dbf_file(sig, nread, file_size) == 1)
+		return "application/x-dbf";
 
 	if (nread > 44 && sig[0] == 0x01 && sig[1] == 0x00 && sig[40] == ' '
 	&& sig[41] == 'E' && sig[42] == 'M' && sig[43] == 'F' && sig[44] == 0x00)
@@ -4727,9 +4783,13 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[113] == 0x00)
 		return "application/vnd.ms-works";
 
+	/* StarOffice */
 	if (nread > 3 && sig[0] == 'S' && sig[1] == 'G' && sig[2] == 'A'
 	&& sig[3] == '3')
-		return "application/x-stargallery-sdg";
+		return "application/x-stargallery-sdg"; /* .sdg (Gallery) */
+	if (nread > 3 && sig[0] == 'S' && sig[1] == 'W' && sig[2] == 'G'
+	&& sig[3] == '2') /* .sdw (Writer, old binary format) */
+		return "application/vnd.stardivision.writer";
 
 	if (nread > 19 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x01
 	&& sig[3] == 0x00 && sig[4] == 0x00
