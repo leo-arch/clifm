@@ -3857,6 +3857,20 @@ check_epoc5_binary(const uint8_t *s, const size_t slen)
 	return NULL;
 }
 
+static int
+is_ascii_string(const uint8_t *s, const size_t slen)
+{
+	if (!s)
+		return 0;
+
+	for (size_t i = 0; i < slen; i++) {
+		if (s[i] < 0x20 || s[i] > 0x7E)
+			return 0;
+	}
+
+	return 1;
+}
+
 struct companion_t {
 	const char *ext1;       /* Original file extension */
 	const size_t ext1_len;  /* Length of the original extension */
@@ -4065,6 +4079,16 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'P' && sig[4] > 0 && sig[5] > 0 && sig[6] > 0
 	&& sig[7] > 0)
 		return "application/x-sylk";
+
+	/* file(1): magic/Magdir/tex */
+	if (nread > 15 && sig[0] == 0xF7 && sig[1] == 0x02 && sig[14] > 0
+	&& (size_t)sig[14] + 15 < nread && sig[sig[14] + 15] == 0x8B
+	&& is_ascii_string(sig + 15, (size_t)sig[14]) == 1)
+		return "application/x-dvi";
+	if (nread > 33 && !sig[2] && (sig[3] == 0x11 || sig[3] == 0x12)
+	&& sig[32] > 0 && (size_t)sig[32] + 33 < nread && sig[sig[32] + 33] == 0x00
+	&& is_ascii_string(sig + 33, (size_t)sig[32]) == 1)
+		return "application/x-tex-tfm";
 
 	/* http://fileformats.archiveteam.org/wiki/DBF */
 	if (nread > 32 && (sig[0] == 0x03 || sig[0] == 0xF5 || sig[0] == 0x83)
@@ -5782,7 +5806,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/FONTEDIT_font */
 	if (nread > 96 && sig[0] == 0xEB && (sig[1] == 0x32 || sig[1] == 0x33)
 	&& memcmp(sig + 41 + sig[1], "\xb8\x10\x11\xcd\x10", 5) == 0)
-		return "application/x-fontedit";
+		return "font/x-fontedit";
 
 	if (nread > 63 && (sig[60] == 0x01 || sig[60] == 0x02 || sig[60] == 0x04)
 	&& sig[59] == 0x00 && sig[61] == 0x00 && sig[62] == 'U' && sig[63] == 'U')
@@ -5791,7 +5815,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/TexFont */
 	if (nread > 8 && sig[0] == 0xff && sig[1] == 't' && sig[2] == 'x'
 	&& sig[3] == 'f')
-		return "application/x-font-tex";
+		return "font/x-tex";
 
 	/* http://fileformats.archiveteam.org/wiki/PFF2 */
 	if (nread > 12 && sig[8] == 'P' && sig[9] == 'F' && sig[10] == 'F'
@@ -5801,27 +5825,32 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* http://fileformats.archiveteam.org/wiki/PFR */
 	if (nread > 3 && sig[0] == 'P' && sig[1] == 'F' && sig[2] == 'R'
 	&& (sig[3] == '0' || sig[3] == '1') && sig[4] == 0x00)
-		return "application/x-font-pfr";
+		return "font/x-pfr";
 
 	/* http://fileformats.archiveteam.org/wiki/PK_font */
-	/* Partial detection */
-	if (nread > 2 && nread == (size_t)file_size && sig[0] == 0xf7
-	&& sig[1] == 0x59 && (sig[nread - 1] == 0xf5 || sig[nread - 1] == 0xf6))
-		return "application/x-pkfont";
+	if (nread > 3 && sig[0] == 0xf7 && sig[1] == 0x59 && sig[2] + 3 < nread
+	&& !sig[sig[2] + 3] && is_ascii_string(sig + 3, (size_t)sig[2]) == 1)
+		return "font/x-pkfont";
 
 	/* http://fileformats.archiveteam.org/wiki/Speedo */
 	if (nread > 5 && sig[0] == 'D' && sig[1] == '1' && sig[2] == '.'
 	&& sig[3] == '0' && sig[4] == 0x0D && sig[5] == 0x0A)
-		return "application/x-font-speedo";
+		return "font/x-speedo";
 
 	/* http://fileformats.archiveteam.org/wiki/Fontographer */
 	if (nread > 3 && sig[0] == 'C' && sig[1] == 'f' && sig[2] == 'f'
 	&& (sig[3] == '1' || sig[3] == '2'))
-		return "application/x-font-fog";
+		return "font/x-fog";
 
 	/* http://fileformats.archiveteam.org/wiki/Raw_Bitmap_Font */
 	if (nread > 8 && BE_U32(sig) == 0xE00EF00D && BE_U32(sig + 4) == 0x03000000)
-		return "application/x-font-rbf";
+		return "font/x-rbf";
+
+	/* https://www.fileformat.info/format/bdf/egff.htm */
+	if (nread > 9 && sig[0] == 'S' && sig[1] == 'T' && sig[2] == 'A'
+	&& sig[3] == 'R' && sig[4] == 'T' && sig[5] == 'F' && sig[6] == 'O'
+	&& sig[7] == 'N' && sig[8] == 'T' && sig[9] == ' ')
+		return "font/x-bdf";
 
 	if (nread > 18 && sig[0] == 'D' && sig[5] == '-' && sig[12] == 'Q'
 	&& memcmp(sig, "DAISY-DOT NLQ FONT", 18) == 0)
