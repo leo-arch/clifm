@@ -1849,6 +1849,29 @@ is_ttf_tag(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
+static int
+is_shebang(const uint8_t *s, const size_t slen)
+{
+	const size_t limit = slen > 128 ? 128 : slen;
+	if (!s || slen < 2 || s[0] != '#' || s[1] != '!')
+		return 0;
+
+	size_t path_sep = 0;
+	size_t token_end = 0;
+	for (size_t i = 2; i + 1 < limit; i++) {
+		if (s[i] == '/' && IS_ALNUM(s[i + 1]))
+			path_sep++;
+		if (path_sep >= 2 && (s[i] == 0x20 || s[i] == 0x09))
+			{token_end++; break;}
+		if (s[i] == 0x0A || s[i] == 0x0D)
+			{token_end++; break;}
+		if ((s[i] < 0x20 || s[i] > 0x7E) && s[i] != 0x09)
+			return 0;
+	}
+
+	return (path_sep >= 2 && token_end > 0);
+}
+
 static const char *
 check_moss_archive(const uint8_t *s, const size_t slen)
 {
@@ -1908,6 +1931,10 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		if (sig[1] == 'F') return "application/vnd.fdf";
 		return "application/pdf";
 	}
+
+	if (nread > 3 && sig[0] == '#' && sig[1] == '!' && sig[2] >= 0x20
+	&& is_shebang(sig, nread) == 1)
+		return "text/x-shellscript";
 
 	if (nread > 2 && sig[0] == 0x1F && sig[1] == 0x8B && sig[2] == 0x08) {
 		if (nread > 12 && sig[10] == 'K' && sig[11] == 'O' && sig[12] == 'f')
@@ -2288,6 +2315,14 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		if (sig[3] == 'F') return "font/woff";
 		if (sig[3] == '2') return "font/woff2";
 	}
+	/* https://github.com/lukesampson/figlet/blob/master/figfont.txt */
+	if (nread > 16 && sig[0] == 'f' && sig[1] == 'l' && sig[3] == '2'
+	&& IS_ALNUM(sig[4])) {
+		if (sig[2] == 'f' && sig[5] != 0x00 && sig[5] != 0x20
+		&& sig[5] != 0x0A && sig[5] != 0x0D)
+			return "font/x-figlet";
+		if (sig[2] == 'c') return "application/x-figlet-control";
+	}
 
 	if (nread > 67 && ((sig[60] == 'M' && sig[61] == 'O' && sig[62] == 'B'
 	&& sig[63] == 'I')
@@ -2404,7 +2439,7 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[8] == 0x0A)
 		return "image/x-3ds";
 
-	if (nread >= 4 && sig[0] == 'F' && sig[1] == 'O' && sig[2] == 'V'
+	if (nread > 3 && sig[0] == 'F' && sig[1] == 'O' && sig[2] == 'V'
 	&& sig[3] == 'b')
 		return "image/x-x3f"; /* image/x-sigma-x3f (Shared MIME-info) */
 
@@ -2412,7 +2447,7 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'h' && sig[4] == ' ' && is_imagemagick_mvg(sig, nread) == 1)
 		return "image/x-mvg";
 
-	if (nread >= 4 && sig[0] == 'q' && sig[1] == 'o' && sig[3] == 'f'
+	if (nread > 4 && sig[0] == 'q' && sig[1] == 'o' && sig[3] == 'f'
 	&& sig[4] == 0x00) {
 		if (sig[2] == 'i') return "image/x-qoi";
 		if (sig[2] == 'a') return "audio/x-qoa";
@@ -5865,6 +5900,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& (size_t)file_size == 3 + ((size_t)sig[2] << 8))
 		return "font/x-image72";
 
+	if (nread > 4 && sig[0] == 0xAB && sig[1] == 0xCD && sig[2] == 0x00
+	&& sig[3] == 0x05 && sig[4] <= 0x0A)
+		return "font/x-banner-mania"; /* .fnt (MSDOS Banner Mania) */
+
 	if (nread > 66 && sig[64] == sig[24] && sig[65] == sig[25] && !sig[66]) {
 		const size_t len = get_amstrad_header_len(sig, file_size);
 		if (file_size == 896 && len > 0)
@@ -6804,6 +6843,17 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (file_size == 3206 && sig[0] == 0x07)
 		return "image/x-atari-artist";
 
+	/* http://fileformats.archiveteam.org/wiki/Vfont */
+	if (nread > 2 && ((sig[0] == 0x1E && sig[1] == 0x01)
+	|| (sig[0] == 0x01 && sig[1] == 0x1E)))
+		return "font/x-vfont";
+
+	/* http://fileformats.archiveteam.org/wiki/PC_Screen_Font */
+	if (nread > 3 && ((sig[0] == 0x36 && sig[1] == 0x04)
+	|| (sig[0] == 0x72 && sig[1] == 0xB5 && sig[2] == 0x4A
+	&& sig[3] == 0x86)))
+		return "font/x-psf";
+
 	const char *mimetype = get_mimetype_from_companion_file(file);
 	if (mimetype)
 		return mimetype;
@@ -6906,7 +6956,7 @@ fast_magic(const char *file)
 	}
 
 	/* Ignore non-regular files and empty regular files. */
-	if (!S_ISREG(st.st_mode) || st.st_size == 0) {
+	if (!S_ISREG(st.st_mode) || st.st_size <= 0) {
 		close(fd);
 		return fs_type_check(&st);
 	}
@@ -6936,6 +6986,14 @@ fast_magic(const char *file)
 	mimetype = nread > 512 ? detect_startcode_video_stream(sig, 512) : NULL;
 	if (mimetype)
 		return mimetype;
+
+	/* CDROM images (size is divisible by 2048 - ISO-9660 sector size) */
+	if (st.st_size > 32774 && (st.st_size & 0x7FF) == 0 && BYTES_TO_READ > 7) {
+		const ssize_t read = read_file_at(file, 32768, buf, 7);
+		if (read > 0 &&  buf[0] == 0x01 && buf[1] == 'C' && buf[2] == 'D'
+		&& buf[3] == '0' && buf[4] == '0' && buf[5] == '1' && buf[6] == 0x01)
+			return "application/x-iso9660-image";
+	}
 
 #ifdef FMAGIC_NO_NULL
 	return text_or_binary(sig, nread);
