@@ -1849,28 +1849,106 @@ is_ttf_tag(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
-static int
-is_shebang(const uint8_t *s, const size_t slen)
+#define CMP(b, s, n) ((b)[0] == (s)[0] && memcmp((b), (s), (n)) == 0 \
+	&& (b)[(n)] <= 0x20)
+
+static const char *
+check_shebang(const uint8_t *s, const size_t slen)
 {
 	const size_t limit = slen > 128 ? 128 : slen;
 	if (!s || slen < 2 || s[0] != '#' || s[1] != '!')
-		return 0;
+		return NULL;
 
 	size_t path_sep = 0;
 	size_t token_end = 0;
-	for (size_t i = 2; i + 1 < limit; i++) {
-		if (s[i] == '/' && IS_ALNUM(s[i + 1]))
+	const uint8_t *basename = NULL;
+	for (size_t i = 2; i < limit; i++) {
+		if (s[i] == '/' && i + 1 < limit && IS_ALNUM(s[i + 1])) {
 			path_sep++;
+			basename = s + i + 1;
+		}
 		if (path_sep >= 2 && (s[i] == 0x20 || s[i] == 0x09))
 			{token_end++; break;}
 		if (s[i] == 0x0A || s[i] == 0x0D)
 			{token_end++; break;}
 		if ((s[i] < 0x20 || s[i] > 0x7E) && s[i] != 0x09)
-			return 0;
+			return NULL;
 	}
 
-	return (path_sep >= 2 && token_end > 0);
+	if (path_sep < 2 || token_end == 0 || !basename)
+		return NULL;
+	/* At this point we know the buffer contains at least "#!/x/xx" (7 bytes),
+	 * where the last 'x' is either SP, CR, LF, or HT, and that BASENAME
+	 * points to the first character of the path basename. */
+
+	/* Remaining space excluding the trailing byte. */
+	size_t rem = slen - (size_t)(basename - s) - 1;
+	const uint8_t *b = basename;
+
+	if (rem >= 4 && b[0] == 'e' && b[1] == 'n' && b[2] == 'v') {
+		b += 4; /* Jump to the beginning of the first parameter. */
+		rem -= 4;
+	}
+
+	/* We assume no command name starts with an uppercase character. */
+	if (rem <= 1 || b[0] < 'a' || b[0] > 'z')
+		return NULL;
+
+	if (rem >= 3 && CMP(b, "ash", 3)) return "text/x-shellscript";
+	if (rem >= 4 && CMP(b, "bash", 4)) return "text/x-shellscript";
+	if (rem >= 3 && CMP(b, "csh", 3)) return "text/x-shellscript";
+	if (rem >= 4 && CMP(b, "dash", 4)) return "text/x-shellscript";
+	if (rem >= 4 && CMP(b, "fish", 4)) return "text/x-shellscript";
+	if (rem >= 3 && CMP(b, "ksh", 3)) return "text/x-shellscript";
+	if (rem >= 10 && CMP(b, "openrc-run", 10)) return "text/x-shellscript";
+	if (rem >= 2 && CMP(b, "sh", 2)) return "text/x-shellscript";
+	if (rem >= 4 && CMP(b, "tcsh", 4)) return "text/x-shellscript";
+	if (rem >= 3 && CMP(b, "zsh", 3)) return "text/x-shellscript";
+
+	if (rem >= 3 && CMP(b, "awk", 3)) return "text/x-awk";
+	if (rem >= 3 && CMP(b, "clj", 3)) return "text/x-clojure";
+	if (rem >= 7 && CMP(b, "clojure", 7)) return "text/x-clojure";
+	if (rem >= 4 && CMP(b, "deno", 4)) return "application/javascript";
+	if (rem >= 3 && CMP(b, "duk", 3)) return "application/javascript";
+	if (rem >= 7 && CMP(b, "duktape", 7)) return "application/javascript";
+	if (rem >= 6 && CMP(b, "elixir", 6)) return "text/x-elixir";
+	if (rem >= 7 && CMP(b, "escript", 7)) return "text/x-erlang";
+	if (rem >= 9 && CMP(b, "execlineb", 9)) return "text/x-execline";
+	if (rem >= 4 && CMP(b, "gawk", 4)) return "text/x-gawk";
+	if (rem >= 3 && CMP(b, "gjs", 3)) return "application/javascript";
+	if (rem >= 6 && CMP(b, "groovy", 6)) return "text/x-groovy";
+	if (rem >= 3 && CMP(b, "jjs", 3)) return "application/javascript";
+	if (rem >= 5 && CMP(b, "jruby", 5)) return "text/x-ruby";
+	if (rem >= 5 && CMP(b, "julia", 5)) return "text/x-julia";
+	if (rem >= 3 && CMP(b, "lua", 3)) return "text/x-lua";
+	if (rem >= 6 && CMP(b, "luatex", 6)) return "text/x-luatex";
+	if (rem >= 4 && CMP(b, "make", 4)) return "text/x-makefile";
+	if (rem >= 4 && CMP(b, "nawk", 4)) return "text/x-nawk";
+	if (rem >= 4 && CMP(b, "node", 4)) return "application/javascript";
+	if (rem >= 6 && CMP(b, "nodejs", 6)) return "application/javascript";
+	if (rem >= 2 && CMP(b, "nu", 2)) return "text/x-nuscript";
+	if (rem >= 4 && CMP(b, "perl", 4)) return "text/x-perl";
+	if (rem >= 5 && CMP(b, "perl5", 5)) return "text/x-perl";
+	if (rem >= 3 && CMP(b, "php", 3)) return "text/x-php";
+	if (rem >= 4 && CMP(b, "php5", 4)) return "text/x-php";
+	if (rem >= 4 && CMP(b, "php7", 4)) return "text/x-php";
+	if (rem >= 7 && CMP(b, "php-cgi", 7)) return "text/x-php";
+	if (rem >= 6 && CMP(b, "python", 6)) return "text/x-python";
+	if (rem >= 7 && CMP(b, "python2", 7)) return "text/x-python";
+	if (rem >= 7 && CMP(b, "python3", 7)) return "text/x-python";
+	if (rem >= 4 && CMP(b, "raku", 4)) return "text/x-raku";
+	if (rem >= 4 && CMP(b, "ruby", 4)) return "text/x-ruby";
+	if (rem >= 7 && CMP(b, "rscript", 7)) return "text/x-r-script";
+	if (rem >= 4 && CMP(b, "stap", 4)) return "text/x-systemtap";
+	if (rem >= 3 && CMP(b, "tcl", 3)) return "text/x-tcl";
+	if (rem >= 5 && CMP(b, "tclsh", 5)) return "text/x-tcl";
+	if (rem >= 6 && CMP(b, "texlua", 6)) return "text/x-luatex";
+	if (rem >= 7 && CMP(b, "ts-node", 7)) return "application/javascript";
+	if (rem >= 4 && CMP(b, "wish", 4)) return "text/x-tcl";
+
+	return NULL;
 }
+#undef CMP
 
 static const char *
 check_moss_archive(const uint8_t *s, const size_t slen)
@@ -1932,9 +2010,11 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		return "application/pdf";
 	}
 
-	if (nread > 3 && sig[0] == '#' && sig[1] == '!' && sig[2] >= 0x20
-	&& is_shebang(sig, nread) == 1)
-		return "text/x-shellscript";
+	if (nread > 4 && sig[0] == '#' && sig[1] == '!' && sig[2] >= 0x20) {
+		const char *mimetype = check_shebang(sig, nread);
+		if (mimetype)
+			return mimetype;
+	}
 
 	if (nread > 2 && sig[0] == 0x1F && sig[1] == 0x8B && sig[2] == 0x08) {
 		if (nread > 12 && sig[10] == 'K' && sig[11] == 'O' && sig[12] == 'f')
