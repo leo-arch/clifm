@@ -5944,8 +5944,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "font/x-pfr";
 
 	/* http://fileformats.archiveteam.org/wiki/PK_font */
-	if (nread > 3 && sig[0] == 0xf7 && sig[1] == 0x59 && sig[2] + 3 < nread
-	&& !sig[sig[2] + 3] && is_ascii_string(sig + 3, (size_t)sig[2]) == 1)
+	if (nread > 3 && sig[0] == 0xf7 && sig[1] == 0x59
+	&& (size_t)sig[2] + 3 < nread && !sig[sig[2] + 3]
+	&& is_ascii_string(sig + 3, (size_t)sig[2]) == 1)
 		return "font/x-pkfont";
 
 	/* http://fileformats.archiveteam.org/wiki/Speedo */
