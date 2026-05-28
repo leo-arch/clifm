@@ -1894,6 +1894,7 @@ check_shebang(const uint8_t *s, const size_t slen)
 	if (rem <= 1 || b[0] < 'a' || b[0] > 'z')
 		return NULL;
 
+	if (rem >= 2 && CMP(b, "ae", 2)) return "text/x-shellscript";
 	if (rem >= 3 && CMP(b, "ash", 3)) return "text/x-shellscript";
 	if (rem >= 4 && CMP(b, "bash", 4)) return "text/x-shellscript";
 	if (rem >= 3 && CMP(b, "csh", 3)) return "text/x-shellscript";
@@ -6999,7 +7000,21 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	if (!s)
 		return FMAGIC_ERROR;
 
-	const size_t limit = slen > 1024 ? 1024 : slen;
+	size_t len = slen;
+
+	/* Skip BOM bytes */
+	if (len > 3 && s[0] == 0xEF && s[1] == 0xBB && s[2] == 0xBF) /* UTF8 */
+		{s += 3; len -= 3;}
+	else if (len > 4 && s[0] == 0xFF && s[1] == 0xFE && !s[2] && !s[3]) /* UTF32 LE */
+		{s += 4; len -= 4;}
+	else if (len > 4 && !s[0] && !s[1] && s[2] == 0xFE && s[3] == 0xFF) /* UTF32 BE */
+		{s += 4; len -= 4;}
+	else if (len > 2 && s[0] == 0xFF && s[1] == 0xFE) /* UTF16 LE */
+		{s += 2; len -= 2;}
+	else if (len > 2 && s[0] == 0xFE && s[1] == 0xFF) /* UTF16 BE */
+		{s += 2; len -= 2;}
+
+	const size_t limit = len > 1024 ? 1024 : len;
 	for (size_t i = 0; i < limit; i++) {
 		if (s[i] < 0x20 && (s[i] < 0x07 || s[i] > 0x0D) && s[i] != 0x1A
 		&& s[i] != 0x1B)
