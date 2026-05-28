@@ -1,3 +1,65 @@
+1.28 (Rubber Chicken)
+
+BUG FIXES
+* When mounting a remote, a directory named '"' is created in the current directory if 'Mountpoint' is set to the empty string ("").
+* Purged entries ('j --purge') are not removed from the jump database.
+* File list refreshed after command execution without any reason.
+* If compiled without 'libmagic' support (_NO_MAGIC), MIME type detection fails in stealth-mode.
+* Terminal title not set in some terminals (e.g., wezterm).
+* 'FILE APP' fails with message "Success".
+* Success error message when trash files exist but are not directories in stealth-mode.
+* Cannot unmount device with the 'media' command when the user is in the mountpoint.
+* ac: Cannot create hidden archive (starting with dot) if no extension is provided
+* 'DirIconColor', in the color scheme file, does not support short color sequences (including hex).
+* 'DirIconColor' is ignored for directories with special icons.
+* The 'c' key in the file pager stopped working.
+* 'Alt+w' (in virtual directories) toggles to the current mode the first time it is pressed.
+* 'MaxNameLen' ignored when running without ELNs in long view.
+* When not sorting by time (and TimeFollowsSort is enabled), the long view always shows modification time, ignoring the value set for the time field in PropFields.
+* 'p'/'pp' command: Key values for extended attributes are never printed (only the key itself).
+* Duplicated entries when listing keybindings ('kb' command). 
+* '~/dir/query<TAB>' fails to display previews.
+* '~/.config/clifm/mime.types' file ignored when running with '--open' or '--preview'.
+* Not prolerly handling '.' and '..' as starting paths (e.g. 'clifm .').
+
+NEW FEATURES/IMPROVEMENTS:
+* When creating an archive using zstandard ('ac FILES' and then 'archive.zst' as archive name), archive files first with tar(1) and then compress the archive with zstandard, generating thus a '.tar.zst' compressed archive (instead of multiple compressed '.zst' files, like before).
+* Add a counter for total entries at the end of the jump table ('j' command).
+* Colorize entries according to file type/state in the dirhist screen ('dh' command).
+* p/pp: do not display size for special devices (character/block), and place 'Device type' on its own line.
+* Automatically open .a, .ace, .ar, .arc, .cpio, .Z, .lrz files with 'ad' (our built-in archiver command). Update your 'mimelist.clifm' file (https://github.com/leo-arch/clifm/blob/master/misc/mimelist.clifm).
+* More accurate MIME-type detection: Fallback to mimetype(1)/xdg-mime(1), if available (and in this precedence order), when 'libmagic' does not get conclusive results (i.e., it returns 'application/octet-stream').
+* Use the built-in file type identification check ('Moira') before falling back to 'libmagic' (very useful to improve detection speed of common file types such as PDF, PNG, MP4, etc). Disable with FastMagic=false in the config file.
+* When importing MIME associations ('mm import'), check 'mimeinfo.cache' files as well.
+* Support Shared MIME-info XML files as MIME associations file (via $CLIFM_MIMETYPES_FILE). Example: 'CLIFM_MIMETYPES_FILE=/usr/share/mime/packages/freedesktop.org.xml clifm'.
+* Add preview support for extra archive formats. Update your 'preview.clifm' file (https://github.com/leo-arch/clifm/blob/master/misc/preview.clifm).
+* Allow auto-opening multiple files at once (provided all files to be opened are associated to the same opening application: e.g., "*.jpg").
+* Improved confirmation prompt when overwriting files: includes 'yes', 'no', 'all', 'none', and 'quit'.
+* Add support for the 'overline' attribute to the prompt color syntax. Use the 'o' prefix or the 'overline' keyword. For example, "%{o:red}" or "%{overline}%{red}". Use the 'O' prefix and the 'nounderline' keyword to disable.
+* Change 'LinkCreationMode' default value to 'relative'. The literal mode easily breaks user expectations: for example, 'l file dir/link' makes 'dir/link' point to 'file', which does not exist (or is not the file intended by the user). In relative mode, the same command makes 'dir/link' point to '../file'.
+* New config file option: FollowSymlinks (defaults to 'true').
+* The keybinding 'Alt+Plus' has been changed to 'toggle-follow-symlinks' ('toggle-follow-symlinks-long', the old binding, has been removed). Update your keybindings by running 'kb bind toggle-follow-symlinks' and then pressing 'Alt+Plus'.
+* Improved consistency between long view and FollowSymlinks: In prior versions, where FollowSymlinks was implicitly the default behavior, we were nonetheless showing metadata of the link itself in long view (i.e. we were not following symlinks). Now, if FollowSymlinks is enabled (still the default), the long view consistently shows the target's metadata. To display the link's own metadata, toggle follow-symbolic-links with the 'k' command (or Alt+Plus). 
+* Allow reading mime.types file from a clifm-specific location: '~/.config/clifm/mime.types' (besides '~/.mime.types').
+* The 'fz' command toggles recursive-dir-size when no parameter is provided to match other commands.
+* Added three new commands: 'ci' (toggle case-sensitive-sort), and 'od' (toggle list-only-directories).
+* Introduced a series of command aliases following the vi/Vim convention ('z' prefix) to provide consistent, mnemonic access to common display toggles and actions. Press 'z<TAB>' to get the list of command aliases.
+* Added two new bindable actions: 'toggle-case-sensitive-sort' (unset) and 'sort-reverse' (Alt+r).
+* 'Alt+r' defaults now to 'sort-reverse' (update your keybindings file or enter 'kb bind sort-reverse' and then press 'Alt+r').
+* Make Ctrl+c behave like Alt+c (clear command line) (by zouyonghe).
+* Allow the 'view' command to preview only files specified in the command line (e.g., 'view *.pdf').
+* Allow running 'mm info' on multiple files (e.g. 'mm info 12 24-27').
+* Abbreviate names when listing files to be removed.
+* Allow TAB multi-selection for 'c' and 'm' commands.
+
+MISC:
+* --cwd-in-title is deprecated. Use TermTitle in the config file instead. Supported values: 'auto' (if support is detected; default), 'true' (always), 'false' (never).
+* Date suffixes are not appended anymore to trashed file names: it only adds confusion by deviating from what other trash implementations do (Gnome GVFS and Dolphin, for example).
+* The function of the '-L' command line switch has been changed to --no-follow-symlinks (replacing --follow-symlinks-long, now deprecated and whitout effect).
+* '--color-links-as-target' renamed to '--colorize-symlinks-as-target', and 'ColorLinksAsTarget' (in the config file) to 'ColorizeSymlinksAsTarget'. The old names still work, but are deprecated.
+* Remove 'cwd' and 'path' commands (deprecated since 1.12.3).
+* Lots of code improvement.
+
 1.27.1 - Jan 9, 2026
 
 BUG FIXES
