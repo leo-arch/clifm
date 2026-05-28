@@ -5995,11 +5995,15 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	}
 
 	/* https://web.archive.org/web/20050305044255/http://www.lazerware.com:80/formats/macbinary/macbinary_iii.html */
-	if (nread > 123 && !sig[0] && !sig[74] && !sig[82] && sig[1]
-	&& sig[102] == 'm' && sig[103] == 'B' && sig[104] == 'I' && sig[105] == 'N'
-	&& (sig[122] == 0x81 || sig[122] == 0x82) && sig[123] == 0x81)
-		/* MacBinary III (version I and II produce false positives) */
-		return "application/x-macbinary";
+	if (nread > 123 && !sig[0] && sig[1] > 0 && sig[1] < 64
+	&& !sig[74] && !sig[82] && (sig[122] == 0x81 || sig[122] == 0x82)
+	&& sig[123] == 0x81) {
+		if (sig[102] == 'm' && memcmp(sig + 102, "mBIN", 4) == 0)
+			return "application/x-macbinary"; /* MacBinary III */
+		if (BE_U32(sig + 91) && BE_U32(sig + 95)
+		&& is_ascii_string(sig + 65, 8)) /* File type + creator */
+			return "application/x-macbinary"; /* MacBinary II */
+	}
 
 	if (nread > 5 && sig[0] == 'H' && sig[1] == 'S' && sig[2] == 'P'
 	&& sig[4] == 0x9B && sig[5] == 0x00) {
