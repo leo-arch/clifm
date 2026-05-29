@@ -4188,8 +4188,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "application/x-dosexec"; /* .pif */
 
 	/* libmagic: magic/Magdir/msdos */
-	if (nread > 8 && (LE_U32(sig) & 0xFFFFFFFF) == 0xFFFFFFFF
-	&& (LE_U32(sig + 4) & 0x000007A0) == 0x00000000)
+	if (nread > 18 && (LE_U32(sig) & 0xFFFFFFFF) == 0xFFFFFFFF
+	&& (LE_U32(sig + 4) & 0x000007A0) == 0x00000000
+	&& BE_U32(sig + 4) != 0x14000000 && (BE_U32(sig + 10) || BE_U32(sig + 14)))
 		return "application/x-dosdriver";
 
 	if (nread > 7 && sig[0] == 'M' && sig[1] == 'S' && sig[2] == 'C'
