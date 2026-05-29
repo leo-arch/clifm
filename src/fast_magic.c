@@ -375,8 +375,8 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 		&& utf16le_cmp(s + i, rem, "Quill", 5) == 1)
 			return "application/vnd.ms-publisher";
 
-		if (rem > 11 && s[i] == 'S' && s[i + 1] == 't' && s[i + 2] == 'a'
-		&& i >= 0x820 && i < 0x840) {
+		if (rem > 11 && i >= 0x820 && i < 0x840 && s[i] == 'S'
+		&& s[i + 1] == 't' && s[i + 2] == 'a') {
 			if (s[i + 4] == 'D' && memcmp(s + i, "StarDraw", 8) == 0)
 				return "application/vnd.stardivision.draw";
 			if (s[i + 4] == 'C' && memcmp(s + i, "StarCalc", 8) == 0)
@@ -1951,6 +1951,43 @@ check_shebang(const uint8_t *s, const size_t slen)
 }
 #undef CMP
 
+static int
+is_python_bytecode(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen < 4)
+		return 0;
+
+	const uint32_t v = BE_U32(s);
+
+	switch (v) {
+	case 0x892e0d0a: case 0x04170d0a: case 0x994e0d0a: case 0xfcc40d0a:
+	case 0xfdc40d0a: case 0x87c60d0a: case 0x88c60d0a: case 0x2aeb0d0a:
+	case 0x2beb0d0a: case 0x2ded0d0a: case 0x2eed0d0a: case 0x3bf20d0a:
+	case 0x3cf20d0a: case 0x45f20d0a: case 0x59f20d0a: case 0x63f20d0a:
+	case 0x6df20d0a: case 0x6ef20d0a: case 0x77f20d0a: case 0x81f20d0a:
+	case 0x8bf20d0a: case 0x8cf20d0a: case 0x95f20d0a: case 0x9ff20d0a:
+	case 0xa9f20d0a: case 0xb3f20d0a: case 0xb4f20d0a: case 0xc7f20d0a:
+	case 0xd1f20d0a: case 0xd2f20d0a: case 0xdbf20d0a: case 0xe5f20d0a:
+	case 0xeff20d0a: case 0xf9f20d0a: case 0x03f30d0a: case 0x04f30d0a:
+	case 0x0af30d0a: case 0xb80b0d0a: case 0xc20b0d0a: case 0xcc0b0d0a:
+	case 0xd60b0d0a: case 0xe00b0d0a: case 0xea0b0d0a: case 0xf40b0d0a:
+	case 0xf50b0d0a: case 0xff0b0d0a: case 0x090c0d0a: case 0x130c0d0a:
+	case 0x1d0c0d0a: case 0x1f0c0d0a: case 0x270c0d0a: case 0x3b0c0d0a:
+	case 0x450c0d0a: case 0x4f0c0d0a: case 0x580c0d0a: case 0x620c0d0a:
+	case 0x6c0c0d0a: case 0x760c0d0a: case 0x800c0d0a: case 0x8a0c0d0a:
+	case 0x940c0d0a: case 0x9e0c0d0a: case 0xb20c0d0a: case 0xbc0c0d0a:
+	case 0xc60c0d0a: case 0xd00c0d0a: case 0xda0c0d0a: case 0xe40c0d0a:
+	case 0xee0c0d0a: case 0xf80c0d0a: case 0x020d0d0a: case 0x0c0d0d0a:
+	case 0x160d0d0a: case 0x170d0d0a: case 0x200d0d0a: case 0x210d0d0a:
+	case 0x2a0d0d0a: case 0x2b0d0d0a: case 0x2c0d0d0a: case 0x2d0d0d0a:
+	case 0x2f0d0d0a: case 0x300d0d0a: case 0x310d0d0a: case 0x320d0d0a:
+	case 0x330d0d0a: case 0x3e0d0d0a: case 0x3f0d0d0a:
+	default: return 1;
+	}
+
+	return 0;
+}
+
 static const char *
 check_moss_archive(const uint8_t *s, const size_t slen)
 {
@@ -2236,6 +2273,14 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == 'S' && sig[1] == 'M' && sig[2] == 'K'
 	&& (sig[3] == '2' || sig[3] == '4'))
 			return "video/vnd.radgametools.smacker";
+
+	/* libmagic: magic/Magdir/python */
+	if (nread > 4 && (sig[0] == 0x02 || sig[0] == 0x03) && sig[1] == 0x09
+	&& sig[2] == 0x99 && sig[3] == 0x00)
+		return "application/x-bytecode.python";
+	if (nread > 4 && sig[0] > 0 && sig[1] > 0 && sig[2] == 0x0D
+	&& sig[3] == 0x0A && is_python_bytecode(sig, nread) == 1)
+		return "application/x-bytecode.python";
 
 	if (nread >= 132 && sig[128] == 'D' && sig[129] == 'I' && sig[130] == 'C'
 	&& sig[131] == 'M')
@@ -4141,6 +4186,11 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 384 && sig[369] == 'M'
 	&& memcmp(sig + 369, "MICROSOFT PIFEX\0", 16) == 0)
 		return "application/x-dosexec"; /* .pif */
+
+	/* libmagic: magic/Magdir/msdos */
+	if (nread > 8 && (LE_U32(sig) & 0xFFFFFFFF) == 0xFFFFFFFF
+	&& (LE_U32(sig + 4) & 0x000007A0) == 0x00000000)
+		return "application/x-dosdriver";
 
 	if (nread > 7 && sig[0] == 'M' && sig[1] == 'S' && sig[2] == 'C'
 	&& sig[3] == 'F' && sig[4] == 0x00 && sig[5] == 0x00 && sig[6] == 0x00
