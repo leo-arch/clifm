@@ -4032,6 +4032,23 @@ is_ascii_string(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
+static int
+is_ibm_dsk(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen < 40)
+		return 0;
+
+	const uint16_t cylinders = LE_U16(s + 24);
+	const uint16_t heads = LE_U16(s + 26);
+	const uint16_t sectors = LE_U16(s + 28);
+
+	if ((cylinders == 40 || cylinders == 80) && (heads == 1 || heads == 2)
+	&& (sectors == 8 || sectors == 9 || sectors == 15 || sectors == 18))
+		return 1;
+
+	return 0;
+}
+
 struct companion_t {
 	const char *ext1;       /* Original file extension */
 	const size_t ext1_len;  /* Length of the original extension */
@@ -4192,6 +4209,16 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& (LE_U32(sig + 4) & 0x000007A0) == 0x00000000
 	&& BE_U32(sig + 4) != 0x14000000 && (BE_U32(sig + 10) || BE_U32(sig + 14)))
 		return "application/x-dosdriver";
+
+	/* libmagic: magic/Magdir/msvc */
+	if (nread > 4 && (BE_U32(sig) & 0xFF0F80FF) == 0xF00D0000
+	&& sig[1] + 3 < nread && (sig[sig[1] + 3] & 0xFD) == 0x80)
+		return "application/x-omf-lib";
+
+	/* http://fileformats.archiveteam.org/wiki/LoadDskF/SaveDskF */
+	if (nread > 40 && sig[0] == 0xAA && (sig[1] == 0x58 || sig[1] == 0x59
+	|| sig[1] == 0x5A) && !LE_U32(sig + 30) && is_ibm_dsk(sig, nread) == 1)
+		return "application/x-ibm-dsk";
 
 	if (nread > 7 && sig[0] == 'M' && sig[1] == 'S' && sig[2] == 'C'
 	&& sig[3] == 'F' && sig[4] == 0x00 && sig[5] == 0x00 && sig[6] == 0x00
