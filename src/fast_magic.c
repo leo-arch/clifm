@@ -1939,6 +1939,8 @@ check_shebang(const uint8_t *s, const size_t slen)
 	if (rem >= 7 && CMP(b, "python3", 7)) return "text/x-python";
 	if (rem >= 4 && CMP(b, "raku", 4)) return "text/x-raku";
 	if (rem >= 4 && CMP(b, "ruby", 4)) return "text/x-ruby";
+	if (rem >= 6 && CMP(b, "runghc", 6)) return "text/x-haskell";
+	if (rem >= 10 && CMP(b, "runhaskell", 10)) return "text/x-haskell";
 	if (rem >= 7 && CMP(b, "rscript", 7)) return "text/x-r-script";
 	if (rem >= 4 && CMP(b, "stap", 4)) return "text/x-systemtap";
 	if (rem >= 3 && CMP(b, "tcl", 3)) return "text/x-tcl";
@@ -1982,7 +1984,8 @@ is_python_bytecode(const uint8_t *s, const size_t slen)
 	case 0x2a0d0d0a: case 0x2b0d0d0a: case 0x2c0d0d0a: case 0x2d0d0d0a:
 	case 0x2f0d0d0a: case 0x300d0d0a: case 0x310d0d0a: case 0x320d0d0a:
 	case 0x330d0d0a: case 0x3e0d0d0a: case 0x3f0d0d0a:
-	default: return 1;
+		return 1;
+	default: return 0;
 	}
 
 	return 0;
