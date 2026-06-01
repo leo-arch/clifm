@@ -2766,8 +2766,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		return "image/x-aai";
 
 	if (nread > 2 && ((sig[0] == '%' && sig[1] == '!')
-	|| (sig[0] == 0x04 && sig[1] == '%' && sig[2] == '!')))
+	|| (sig[0] == 0x04 && sig[1] == '%' && sig[2] == '!'))) {
+		if (nread >= 10 && ((sig[6] == 'p' && memcmp(sig, "%!postproc", 10) == 0)
+		|| (sig[2] == 'e' && memcmp(sig, "%!encoding", 10) == 0)))
+			return "text/x-txt2tags"; /* MIME-info */
 		return "application/postscript";
+	}
 
 	if (nread > 32 && is_sixel_image(sig, nread) == 1)
 		return "image/x-sixel";
@@ -2844,6 +2848,22 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'V' && sig[4] == 'T' && sig[5] == 'T'
 	&& (sig[6] == '\n' || sig[6] == '\t' || sig[6] == ' ' || sig[6] == '\r'))
 		return "text/vtt";
+
+	if (nread > 5 && sig[0] == '<' && sig[1] == 'm' && sig[2] == 'r'
+	&& sig[3] == 'm' && sig[4] == 'l' && sig[5] == ' ')
+		return "text/x-mrml"; /* MIME-info */
+
+	if (nread >= 13 && sig[0] == 'B' && sig[5] == ':'
+	&& memcmp(sig, "BEGIN:IMELODY", 13) == 0)
+		return "text/x-iMelody"; /* MIME-info */
+
+	if (nread >= 14 && sig[1] == 'd' && sig[2] == 'o'
+	&& memcmp(sig + 1, "documentclass", 13) == 0)
+		return "text/x-tex"; /* MIME-info */
+
+	if (nread >= 10 && sig[0] == 'x' && sig[7] == '1' && sig[8] == '.'
+	&& memcmp(sig, "xgcode 1.0", 10) == 0)
+		return "text/x-gcode-gx"; /* MIME-info */
 
 	if (nread > 5 && sig[0] == '#' && sig[1] == 'V' && sig[2] == 'R'
 	&& sig[3] == 'M' && sig[4] == 'L' && sig[5] == ' ')
