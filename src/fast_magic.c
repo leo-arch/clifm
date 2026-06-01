@@ -1901,7 +1901,9 @@ check_shebang(const uint8_t *s, const size_t slen)
 	if (rem >= 4 && CMP(b, "dash", 4)) return "text/x-shellscript";
 	if (rem >= 4 && CMP(b, "fish", 4)) return "text/x-shellscript";
 	if (rem >= 3 && CMP(b, "ksh", 3)) return "text/x-shellscript";
+	if (rem >= 4 && CMP(b, "mksh", 4)) return "text/x-shellscript";
 	if (rem >= 10 && CMP(b, "openrc-run", 10)) return "text/x-shellscript";
+	if (rem >= 5 && CMP(b, "pdksh", 5)) return "text/x-shellscript";
 	if (rem >= 2 && CMP(b, "sh", 2)) return "text/x-shellscript";
 	if (rem >= 4 && CMP(b, "tcsh", 4)) return "text/x-shellscript";
 	if (rem >= 3 && CMP(b, "zsh", 3)) return "text/x-shellscript";
@@ -2864,6 +2866,13 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread >= 10 && sig[0] == 'x' && sig[7] == '1' && sig[8] == '.'
 	&& memcmp(sig, "xgcode 1.0", 10) == 0)
 		return "text/x-gcode-gx"; /* MIME-info */
+
+	/* http://fileformats.archiveteam.org/wiki/ICalendar */
+	if (nread > 24 && sig[0] == 'B' && sig[5] == ':' && sig[6] == 'V'
+	&& memcmp(sig, "BEGIN:VCALENDAR", 15) == 0) {
+		if (sig[24] == '2') return "text/calendar";
+		return "text/x-vcalendar";
+	}
 
 	if (nread > 5 && sig[0] == '#' && sig[1] == 'V' && sig[2] == 'R'
 	&& sig[3] == 'M' && sig[4] == 'L' && sig[5] == ' ')
