@@ -7109,6 +7109,274 @@ skip_id3_tag(const uint8_t **sig, size_t *nread, const off_t file_size)
 }
 
 #ifdef FMAGIC_NO_NULL
+static int
+is_ini_file(const uint8_t *s, const size_t slen)
+{
+	if (!s || s[0] != '[' || s[1] == '[')
+		return 0;
+
+	const size_t limit = slen > 64 ? 64 : slen;
+
+	size_t i;
+	for (i = 1; i + 1 < limit; i++) {
+		if (s[i] < 0x20 || s[i] > 0x7E)
+			return 0;
+		if (s[i] == ']' && (s[i + 1] == 0x0A || s[i + 1] == 0x0D))
+			return 1;
+	}
+
+	return 0;
+}
+
+static int
+check_ini_file(const uint8_t *s, const size_t slen)
+{
+	if (!s || (s[0] != ';' && s[0] != '#'))
+		return 0;
+
+	const size_t limit = slen > 2048 ? 2048 : slen;
+	for (size_t i = 1; i + 1 < limit; i++) {
+		if (s[i] != '[' || (s[i - 1] != 0x0A && s[i - 1] != 0x0D))
+			continue;
+		if (s[i + 1] >= 0x20 && s[i + 1] <= 0x7E && s[i + 1] != ']'
+		&& s[i + 1] != '[')
+			return is_ini_file(s + i, slen - i);
+	}
+
+	return 0;
+}
+
+#define MAX_SCORE ((size_t)-1)
+#define MIN_REQUIRED_SCORE 7
+
+#define CLANG      0x01
+#define CPLUS      0x02
+#define OBJC       0x04
+#define PYTHON     0x08
+#define RUBY       0x10
+#define LISP       0x20
+#define BCPL       0x40
+#define AWK        0x80
+#define VERILOG    0x100
+#define JAVA       0x200
+#define JAVASCRIPT 0x400
+#define GOLANG     0x800
+#define HASKELL    0x1000
+#define RUST       0x2000
+#define PASCAL     0x4000
+#define CLOJURE    0x8000
+#define PERL       0x10000
+#define ERLANG     0x20000
+#define ELIXIR     0x40000
+#define BASIC      0x80000
+#define LANG_NUM 20 // Update this value after adding a new language
+// Note: at most 31 languages on 32-bit systems, and 63 on 64-bit machines.
+
+struct tokens_t {
+	const char *token;
+	const size_t token_len;
+	const size_t lang;
+	const size_t score;
+};
+
+struct tokens_t tokens[] = {
+	{"#include ", 9, CLANG | CPLUS, 5},
+	{"#if ", 4, CLANG | CPLUS | OBJC, 5},
+	{"#ifdef ", 7, CLANG | CPLUS | OBJC, 5},
+	{"#ifndef ", 8, CLANG | CPLUS | OBJC, 5},
+	{"#else", 5, CLANG | CPLUS | OBJC, 2},
+	{"#endif", 6, CLANG | CPLUS | OBJC, 2},
+	{"#define ", 8, CLANG | CPLUS | OBJC, 5},
+	{"#pragma ", 8, CLANG | CPLUS | OBJC, 5},
+	{"extern ", 7, CLANG | CPLUS, 5},
+	{"int main(", 9, CLANG | CPLUS, 5},
+	{"void main(", 10, CLANG | CPLUS, 5}, // Old invocation
+	{"main(", 5, CLANG | CPLUS, 2},
+	{"char ", 5, CLANG | CPLUS, 1},
+	{"float ", 6, CLANG | CPLUS | OBJC, 1},
+	{"static ", 7, CLANG | CPLUS | OBJC, 1},
+	{"struct ", 7, CLANG | CPLUS, 1},
+	{"typedef ", 8, CLANG | CPLUS | OBJC, 2},
+	{"int ", 4, CLANG | CPLUS | JAVA, 1},
+	{"void ", 5, CLANG | CPLUS | JAVA, 1},
+	{"const ", 6, CLANG | CPLUS | OBJC | JAVASCRIPT | GOLANG | RUST | PASCAL, 1},
+	{"enum ", 5, CLANG | CPLUS | RUST, 1},
+	{"register ", 9, CLANG, 5},
+	{"union ", 6, CLANG, 2},
+
+	{"namespace", 9, CPLUS, MAX_SCORE},
+	{"using namespace ", 16, CPLUS, MAX_SCORE},
+	{"std::", 5, CPLUS, MAX_SCORE},
+	{"static std::", 12, CPLUS, MAX_SCORE},
+	{"constexpr ", 10, CPLUS, MAX_SCORE},
+	{"template ", 9, CPLUS, 2},
+	{"concept ", 8, CPLUS, 2},
+	{"new ", 4, CPLUS | JAVA | JAVASCRIPT, 2},
+	{"delete ", 7, CPLUS | JAVASCRIPT, 2}, // Also C#
+	{"using ", 6, CPLUS, 2},
+	{"virtual ", 8, CPLUS, 2},
+	{"protected ", 10, CPLUS, 2},
+	{"explicit ", 9, CPLUS, 2},
+	{"public ", 7, CPLUS | JAVA | PASCAL, 1},
+	{"private ", 8, CPLUS | JAVA | PASCAL, 1},
+	{"class ", 6, CPLUS | RUBY | PYTHON | JAVA | JAVASCRIPT | HASKELL | PASCAL, 1},
+
+	{"#import ", 8, OBJC, 10},
+	{"@interface ", 11, OBJC, 5},
+	{"@implementation ", 16, OBJC, 5},
+	{"@protocol ", 10, OBJC, 5},
+	{"@property ", 10, OBJC, 5},
+	{"@synthesize ", 12, OBJC, 5},
+	{"@synchronized ", 14, OBJC, 5},
+	{"@end", 4, OBJC, 5},
+	{"[self", 5, OBJC, 4},
+
+	{"use crate::", 11, RUST, 4},
+	{"use std::", 9, RUST, 4},
+	{"pub fn ", 7, RUST, 4},
+	{"pub crate::", 11, RUST, 4},
+	{"async fn ", 9, RUST, 4},
+	{"impl ", 5, RUST, 1},
+	{"pub ", 4, RUST, 1},
+	{"match ", 6, RUST, 1},
+	{"use ", 4, RUST | PERL, 1},
+	{"mod ", 4, RUST, 1},
+	{"unsafe ", 7, RUST, 1},
+	{"fn ", 3, RUST, 1},
+
+	{"require '", 9, RUBY, MAX_SCORE},
+	{"require \"", 9, RUBY, 10},
+	{"elsif", 5, RUBY | PERL, 10},
+	{"include ", 8, RUBY, 2},
+	{"rescue ", 7, RUBY, 2},
+	{"unless ", 7, RUBY, 2},
+	{"def ", 4, RUBY | PYTHON | ELIXIR, 1},
+	{"module ", 7, RUBY | HASKELL | VERILOG, 2},
+	{"end\n", 4, RUBY | VERILOG | ELIXIR, 10},
+
+	{"if __name__ ", 12, PYTHON, 10},
+	{"def __init__", 12, PYTHON, 10},
+	{"else:", 5, PYTHON, 2},
+	{"try:", 4, PYTHON, 2},
+	{"except:", 7, PYTHON, 2},
+	{"except ", 7, PYTHON, 2},
+	{"finally:", 8, PYTHON, 2},
+	{"elif:", 5, PYTHON, 2},
+	{"raise ", 6, PYTHON, 1},
+	{"self.", 5, PYTHON | RUBY | OBJC | RUST, 1},
+	{"import ", 7, PYTHON | JAVA | JAVASCRIPT | GOLANG | HASKELL, 3},
+
+	{"(:require", 4, CLOJURE, 5},
+	{"(ns ", 4, CLOJURE, 2},
+	{"(def ", 5, CLOJURE, 2},
+	{"(defn", 5, CLOJURE, 2},
+	{"(let ", 5, CLOJURE, 2},
+
+	{"-module(", 8, ERLANG, MAX_SCORE},
+	{"-export(", 8, ERLANG, 4},
+	{"-include(", 9, ERLANG, 4},
+	{"-define(", 8, ERLANG, 4},
+	// Add -import( and -record(
+
+	{"defmodule ", 10, ELIXIR, MAX_SCORE},
+
+	{"(defun ", 6, LISP, MAX_SCORE},
+	{"(defvar ", 8, LISP, MAX_SCORE},
+	{"(defparam ", 10, LISP, MAX_SCORE},
+	{"(setq ", 6, LISP, MAX_SCORE},
+
+	{"GET \"LIBHDR\"", 12, BCPL, MAX_SCORE},
+
+	{"BEGIN {", 7, AWK, MAX_SCORE},
+
+	{"public class", 12, JAVA, 10},
+	{"@Override", 9, JAVA, 10},
+	{"@Deprecated", 11, JAVA, 10},
+	{"package ", 8, JAVA | GOLANG | PERL, 2},
+	{"byte ", 5, JAVA | GOLANG, 1}, // Also C#
+	{"this.", 5, JAVA | JAVASCRIPT, 1}, // Also C# and TypeScript
+
+	{"export ", 7, JAVASCRIPT, 2},
+	{"async ", 6, JAVASCRIPT, 2},
+	{"function ", 9, JAVASCRIPT | PASCAL, 1},
+	{"let ", 4, JAVASCRIPT | HASKELL | RUST, 1},
+
+	{"var ", 4, GOLANG | JAVASCRIPT, 1},
+	{"func ", 5, GOLANG, 2},
+	{"chan ", 5, GOLANG, 2},
+	{"defer ", 6, GOLANG, 1},
+	{"return nil", 10, GOLANG | OBJC, 1},
+	{"select {", 8, GOLANG, 5},
+	{"type ", 5, GOLANG | HASKELL | RUST | PASCAL, 1},
+
+	{"where ", 6, HASKELL, 1},
+	{"instance ", 9, HASKELL, 1},
+	{"-- ", 3, HASKELL, 1}, // Haskell comment
+
+	{"{$MODE ", 7, PASCAL, 3},
+	{"unit ", 5, PASCAL, 2},
+	{"program ", 8, PASCAL, 2},
+	{"procedure ", 10, PASCAL, 1},
+	{"interface", 9, PASCAL, 1},
+	{"uses ", 5, PASCAL, 1},
+	{"begin", 5, PASCAL, 1},
+	{"end;", 4, PASCAL | ERLANG, 1},
+	{"end.", 4, PASCAL | ERLANG, 1},
+
+	{"sub ", 4, PERL, 1},
+	{"require ", 8, PERL, 4},
+	{"local(", 6, PERL, 2},
+	{"my ", 3, PERL, 1},
+	{"our ", 4, PERL, 1},
+
+	{"assign ", 7, VERILOG, 2},
+	{"always @", 8, VERILOG, 10},
+	{"endmodule", 9, VERILOG, 10},
+
+	{"PRINT ", 6, BASIC, 5},
+	{"GOTO ", 5, BASIC, 5},
+	{"GOSUB ", 6, BASIC, 3},
+	{"RETURN ", 7, BASIC, 3},
+	{"FOR ", 4, BASIC, 3},
+	{"WHILE ", 6, BASIC, 3},
+	{"IF ", 3, BASIC, 2},
+	{"ELSE ", 5, BASIC, 3},
+	{"LOCATE ", 7, BASIC, 3},
+	{"COLOR ", 6, BASIC, 3},
+	{"CLS ", 4, BASIC, 2},
+	{"LET ", 4, BASIC, 2},
+	{"END ", 4, BASIC, 2},
+
+	{NULL, 0, 0, 0}
+};
+
+static const char *
+best_scored_mimetype(const size_t lang)
+{
+	if (lang == AWK) return "text/x-awk";
+	if (lang == BASIC) return "text/x-basic";
+	if (lang == BCPL) return "text/x-bcpl";
+	if (lang == CLANG) return "text/x-c";
+	if (lang == CLOJURE) return "text/x-clojure";
+	if (lang == CPLUS) return "text/x-c++";
+	if (lang == ELIXIR) return "text/x-elixir";
+	if (lang == ERLANG) return "text/x-erlang";
+	if (lang == GOLANG) return "text/x-golang";
+	if (lang == HASKELL) return "text/x-haskell";
+	if (lang == JAVA) return "text/x-java";
+	if (lang == JAVASCRIPT) return "text/x-javascript";
+	if (lang == LISP) return "text/x-lisp";
+	if (lang == OBJC) return "text/x-objective-c";
+	if (lang == PASCAL) return "text/x-pascal";
+	if (lang == PERL) return "text/x-perl";
+	if (lang == PYTHON) return "text/x-python";
+	if (lang == RUBY) return "text/x-ruby";
+	if (lang == RUST) return "text/x-rust";
+	if (lang == VERILOG) return "text/x-verilog";
+
+	return "text/plain";
+}
+
 static const char *
 text_or_binary(const uint8_t *s, const size_t slen)
 {
@@ -7135,6 +7403,67 @@ text_or_binary(const uint8_t *s, const size_t slen)
 		&& s[i] != 0x1B)
 			return "application/octet-stream";
 	}
+
+	/* Skip blanks */
+	while (len > 1 && (*s == ' ' || *s == 0x0A || *s == 0x0D || *s == 0x09)) {
+		s++;
+		len--;
+	}
+
+	size_t matches[LANG_NUM] = {0};
+	size_t best_score = 0;
+	size_t best_scored_lang = (size_t)-1;
+
+	const size_t max = len > 4096 ? 4096 : len;
+	size_t newline = 1;
+	for (size_t i = 0; i < max; i++) {
+		if (s[i] == 0x0A || s[i] == 0x0D)
+			{newline = 1; continue;}
+		if (newline == 0 || s[i] <= 0x20 || IS_DIGIT(s[i]))
+			continue;
+
+		newline = 0;
+		const size_t rem = max - i;
+		int override = 0;
+
+		for (size_t j = 0; tokens[j].token; j++) {
+			if (rem < tokens[j].token_len || s[i] != tokens[j].token[0]
+			|| memcmp(s + i, tokens[j].token, tokens[j].token_len) != 0)
+				continue;
+
+			if (tokens[j].score == MAX_SCORE) { // Always a single language
+				best_score = MIN_REQUIRED_SCORE;
+				best_scored_lang = tokens[j].lang;
+				override = 1;
+				break;
+			}
+
+			/* Distribute score to all languages in the bitmask */
+			for (size_t k = 0; k < LANG_NUM; k++) {
+				size_t lang_bit = 1 << k; // Generate 0x01, 0x02, 0x04, etc.
+				if (!(tokens[j].lang & lang_bit))
+					continue;
+				matches[k] += tokens[j].score;
+				if (matches[k] > best_score) {
+					best_score = matches[k];
+					best_scored_lang = lang_bit;
+				}
+			}
+		}
+
+		if (override == 1)
+			break;
+	}
+
+	if (best_score >= MIN_REQUIRED_SCORE)
+		return best_scored_mimetype(best_scored_lang);
+
+	if (len > 4 && s[0] == '[' && s[1] >= 0x20 && s[1] <= 0x7E
+	&& is_ini_file(s, len) == 1)
+		return "text/x-ini";
+	if (len > 4 && (s[0] == ';' || s[0] == '#')
+	&& s[1] >= 0x20 && s[1] <= 0x7E && check_ini_file(s, len) == 1)
+		return "text/x-ini";
 
 	return "text/plain";
 }
