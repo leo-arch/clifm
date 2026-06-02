@@ -7108,7 +7108,6 @@ skip_id3_tag(const uint8_t **sig, size_t *nread, const off_t file_size)
 	}
 }
 
-#ifdef FMAGIC_NO_NULL
 static int
 is_ini_file(const uint8_t *s, const size_t slen)
 {
@@ -7401,7 +7400,11 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	for (size_t i = 0; i < limit; i++) {
 		if (s[i] < 0x20 && (s[i] < 0x07 || s[i] > 0x0D) && s[i] != 0x1A
 		&& s[i] != 0x1B)
+#ifdef FMAGIC_NO_NULL
 			return "application/octet-stream";
+#else
+			return NULL;
+#endif
 	}
 
 	/* Skip blanks */
@@ -7465,9 +7468,12 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	&& s[1] >= 0x20 && s[1] <= 0x7E && check_ini_file(s, len) == 1)
 		return "text/x-ini";
 
+#ifdef FMAGIC_NO_NULL
 	return "text/plain";
+#else
+	return NULL;
+#endif
 }
-#endif /* FMAGIC_NO_NULL */
 
 /* Read a few kilo bytes from the file FILE and attempt to find out an
  * appropiate MIME type based on the file's content.
@@ -7534,11 +7540,7 @@ fast_magic(const char *file)
 			return "application/x-iso9660-image";
 	}
 
-#ifdef FMAGIC_NO_NULL
 	return text_or_binary(sig, nread);
-#else
-	return NULL;
-#endif
 }
 
 #else
