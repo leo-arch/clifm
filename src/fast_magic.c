@@ -7352,28 +7352,29 @@ struct tokens_t tokens[] = {
 static const char *
 best_scored_mimetype(const size_t lang)
 {
-	if (lang == AWK) return "text/x-awk";
-	if (lang == BASIC) return "text/x-basic";
-	if (lang == BCPL) return "text/x-bcpl";
-	if (lang == CLANG) return "text/x-c";
-	if (lang == CLOJURE) return "text/x-clojure";
-	if (lang == CPLUS) return "text/x-c++";
-	if (lang == ELIXIR) return "text/x-elixir";
-	if (lang == ERLANG) return "text/x-erlang";
-	if (lang == GOLANG) return "text/x-golang";
-	if (lang == HASKELL) return "text/x-haskell";
-	if (lang == JAVA) return "text/x-java";
-	if (lang == JAVASCRIPT) return "text/x-javascript";
-	if (lang == LISP) return "text/x-lisp";
-	if (lang == OBJC) return "text/x-objective-c";
-	if (lang == PASCAL) return "text/x-pascal";
-	if (lang == PERL) return "text/x-perl";
-	if (lang == PYTHON) return "text/x-python";
-	if (lang == RUBY) return "text/x-ruby";
-	if (lang == RUST) return "text/x-rust";
-	if (lang == VERILOG) return "text/x-verilog";
-
-	return "text/plain";
+	switch (lang) {
+	case AWK: return "text/x-awk";
+	case BASIC: return "text/x-basic";
+	case BCPL: return "text/x-bcpl";
+	case CLANG: return "text/x-c";
+	case CLOJURE: return "text/x-clojure";
+	case CPLUS: return "text/x-c++";
+	case ELIXIR: return "text/x-elixir";
+	case ERLANG: return "text/x-erlang";
+	case GOLANG: return "text/x-golang";
+	case HASKELL: return "text/x-haskell";
+	case JAVA: return "text/x-java";
+	case JAVASCRIPT: return "text/x-javascript";
+	case LISP: return "text/x-lisp";
+	case OBJC: return "text/x-objective-c";
+	case PASCAL: return "text/x-pascal";
+	case PERL: return "text/x-perl";
+	case PYTHON: return "text/x-python";
+	case RUBY: return "text/x-ruby";
+	case RUST: return "text/x-rust";
+	case VERILOG: return "text/x-verilog";
+	default: return "text/plain";
+	};
 }
 
 static const char *
