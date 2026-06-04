@@ -7516,7 +7516,6 @@ text_or_binary(const uint8_t *s, const size_t slen)
 			if (tokens[j].token[0] == 0x00) { // glob
 				if (xglob(s + i, tokens[j].token + 1, rem) == 0)
 					continue;
-				printf("Yes: %s\n", tokens[j].token + 1); fflush(stdout);
 			} else if (rem < tokens[j].token_len || s[i] != tokens[j].token[0]
 			|| memcmp(s + i, tokens[j].token, tokens[j].token_len) != 0) {
 				continue;
