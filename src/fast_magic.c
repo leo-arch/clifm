@@ -7173,8 +7173,12 @@ check_ini_file(const uint8_t *s, const size_t slen)
 #define PHP        0x200000
 #define SQL        0x400000
 #define CSHARP     0x800000
-#define LANG_NUM 24 // Update this value after adding a new language
-// Note: at most 31 languages on 32-bit systems, and 63 on 64-bit machines.
+#define SWIFT      0x1000000
+#define KOTLIN     0x2000000
+#define SCALA      0x4000000
+#define GROOVY     0x8000000
+#define LANG_NUM 28 /* Update this value after adding a new language */
+/* NOTE: at most 31 languages on 32-bit systems, and 63 on 64-bit machines. */
 
 struct tokens_t {
 	const char *token;
@@ -7199,17 +7203,17 @@ struct tokens_t tokens[] = {
 	{"main(", 5, CLANG | CPLUS, 2},
 	{"char ", 5, CLANG | CPLUS, 2},
 	{"float ", 6, CLANG | CPLUS | OBJC, 2},
-	{"static ", 7, CLANG | CPLUS | OBJC | CSHARP, 2},
+	{"static ", 7, CLANG | CPLUS | OBJC | CSHARP | SWIFT | GROOVY, 2},
 	{"struct ", 7, CLANG | CPLUS | RUST, 2},
 	{"typedef ", 8, CLANG | CPLUS | OBJC, 2},
-	{"int ", 4, CLANG | CPLUS | JAVA, 2},
-	{"void ", 5, CLANG | CPLUS | JAVA, 2},
+	{"int ", 4, CLANG | CPLUS | JAVA | GROOVY, 2},
+	{"void ", 5, CLANG | CPLUS | JAVA | GROOVY, 2},
 //	{"const ", 6, CLANG | CPLUS | OBJC | JAVASCRIPT | GOLANG | RUST | PASCAL, 2},
-	{"enum ", 5, CLANG | CPLUS | RUST, 2},
+	{"enum ", 5, CLANG | CPLUS | RUST | SWIFT | GROOVY, 2},
 	{"register ", 9, CLANG, 5},
 	{"union ", 6, CLANG, 3},
-	{"// ", 3, CLANG|CPLUS|CSHARP|OBJC|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP, 1}, // also Kotlin, Swift, and Scala
-	{"/* ", 3, CLANG|CPLUS|CSHARP|OBJC|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SQL, 1}, // also Kotlin, Swift, and Scala
+	{"// ", 3, CLANG|CPLUS|CSHARP|OBJC|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SWIFT|KOTLIN|SCALA, 1}, // also Kotlin, Swift, and Scala
+	{"/* ", 3, CLANG|CPLUS|CSHARP|OBJC|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SQL|KOTLIN|GROOVY, 1}, // also Kotlin, Swift, and Scala
 
 	{"namespace", 9, CPLUS | CSHARP, 10},
 	{"using namespace ", 16, CPLUS, MAX_SCORE},
@@ -7222,11 +7226,11 @@ struct tokens_t tokens[] = {
 	{"delete ", 7, CPLUS | JAVASCRIPT, 2}, // Also C#
 	{"using ", 6, CPLUS, 2},
 	{"virtual ", 8, CPLUS, 2},
-	{"protected ", 10, CPLUS | CSHARP, 2},
+	{"protected ", 10, CPLUS | CSHARP | KOTLIN, 2},
 	{"explicit ", 9, CPLUS, 2},
-	{"public ", 7, CPLUS | CSHARP | JAVA | PASCAL, 2},
-	{"private ", 8, CPLUS | CSHARP | JAVA | PASCAL, 2},
-	{"class ", 6, CPLUS|CSHARP|RUBY|PYTHON|JAVA|JAVASCRIPT|HASKELL|PASCAL, 3},
+	{"public ", 7, CPLUS | CSHARP | JAVA | PASCAL | GROOVY, 2},
+	{"private ", 8, CPLUS|CSHARP|JAVA|PASCAL|SWIFT|KOTLIN|SCALA|GROOVY, 2},
+	{"class ", 6, CPLUS|CSHARP|RUBY|PYTHON|JAVA|JAVASCRIPT|HASKELL|PASCAL|SWIFT|KOTLIN|GROOVY, 3},
 
 	{"#import ", 8, OBJC, 10},
 	{"@interface ", 11, OBJC, 5},
@@ -7240,7 +7244,7 @@ struct tokens_t tokens[] = {
 
 	{"using System", 12, CSHARP, MAX_SCORE},
 	{"System.", 7, CSHARP, 2},
-	{"catch ", 6, CSHARP, 2},
+	{"catch ", 6, CSHARP | KOTLIN, 2},
 
 	{"use crate::", 11, RUST, 5},
 	{"use std::", 9, RUST, 5},
@@ -7263,7 +7267,7 @@ struct tokens_t tokens[] = {
 	{"include ", 8, RUBY, 2},
 	{"rescue ", 7, RUBY, 2},
 	{"unless ", 7, RUBY, 2},
-	{"def ", 4, RUBY | PYTHON | ELIXIR, 2},
+	{"def ", 4, RUBY | PYTHON | ELIXIR | SCALA | GROOVY, 2},
 	{"module ", 7, RUBY | HASKELL | VERILOG | JAVASCRIPT, 3},
 	{"end\n", 4, RUBY | VERILOG | ELIXIR | PASCAL, 2},
 
@@ -7271,16 +7275,17 @@ struct tokens_t tokens[] = {
 	{"def __init__", 12, PYTHON, 10},
 	{"\0from * import *", 0, PYTHON, 10},
 	{"\0import * as *", 0, PYTHON, 10},
-	{"import ", 7, PYTHON | JAVA | GOLANG | HASKELL, 3},
+	{"import ", 7, PYTHON|JAVA|GOLANG|HASKELL|SWIFT|SCALA|GROOVY, 3},
 	{"if not ", 7, PYTHON | HASKELL, 2},
 	{"else:", 5, PYTHON, 2},
 	{"try:", 4, PYTHON, 2},
+	{"try ", 4, PYTHON | GROOVY, 2},
 	{"except:", 7, PYTHON, 2},
 	{"except ", 7, PYTHON, 2},
 	{"finally:", 8, PYTHON, 2},
 	{"elif:", 5, PYTHON, 2},
 	{"raise ", 6, PYTHON, 2},
-	{"self.", 5, PYTHON | RUBY | OBJC | RUST, 1},
+	{"self.", 5, PYTHON | RUBY | OBJC | RUST | SWIFT, 1},
 	{"\"\"\" ", 4, PYTHON, 2},
 	{"# ", 2, PYTHON | PERL | ELIXIR | PHP, 1},
 
@@ -7311,31 +7316,65 @@ struct tokens_t tokens[] = {
 	{"BEGIN {", 7, AWK, MAX_SCORE},
 
 	{"public class", 12, JAVA, 10},
-	{"@Override", 9, JAVA, 10},
+	{"@Override", 9, JAVA | GROOVY, 5},
 	{"@Deprecated", 11, JAVA, 10},
-	{"package ", 8, JAVA | GOLANG | PERL, 2},
+	{"package ", 8, JAVA | GOLANG | PERL | KOTLIN | SCALA | GROOVY, 2},
 	{"byte ", 5, JAVA | GOLANG, 1}, // Also C#
-	{"this.", 5, JAVA | JAVASCRIPT, 1}, // Also C# and TypeScript
+	{"this.", 5, JAVA | JAVASCRIPT | GROOVY, 1}, // Also C# and TypeScript
 
 	{"\0import * from *", 0, JAVASCRIPT, 10},
 	{"'use strict'", 12, JAVASCRIPT, 10},
 	{"\"use strict\"", 12, JAVASCRIPT, 10},
 	{"(function(", 10, JAVASCRIPT, 10}, // IIFE
 	{"module.exports = ", 17, JAVASCRIPT, 5},
-	{"export ", 7, JAVASCRIPT, 2},
+	{"export ", 7, JAVASCRIPT | SCALA, 2},
 	{"async ", 6, JAVASCRIPT, 2},
 	{"function ", 9, JAVASCRIPT | PASCAL, 1},
-	{"let ", 4, JAVASCRIPT | HASKELL | RUST, 1},
+	{"let ", 4, JAVASCRIPT | HASKELL | RUST | SWIFT, 1},
 	{"})\n", 3, JAVASCRIPT, 1}, {"});\n", 4, JAVASCRIPT, 2},
 	{"})();\n", 6, JAVASCRIPT, 5}, {"})()\n", 5, JAVASCRIPT, 5},
 
-	{"var ", 4, GOLANG | JAVASCRIPT, 1},
-	{"func ", 5, GOLANG, 2},
+	{"var ", 4, GOLANG | JAVASCRIPT | SWIFT, 1},
+	{"func ", 5, GOLANG | SWIFT, 2},
 	{"chan ", 5, GOLANG, 2},
 	{"defer ", 6, GOLANG, 1},
-	{"return nil", 10, GOLANG | OBJC, 1},
+	{"return nil", 10, GOLANG | OBJC | SWIFT, 1},
 	{"select {", 8, GOLANG, 5},
 	{"type ", 5, GOLANG | HASKELL | RUST | PASCAL, 1},
+
+	{"override ", 9, SWIFT | KOTLIN, 2},
+	{"protocol ", 9, SWIFT, 2},
+	{"guard ", 6, SWIFT, 2},
+	{"guard let", 9, SWIFT, 3},
+	{"typealias ", 10, SWIFT, 3},
+	{"unowned ", 8, SWIFT, 3},
+	{"@objc ", 6, SWIFT, 4},
+	{"@IBOutlet ", 10, SWIFT, 5},
+	{"@IBAction ", 10, SWIFT, 5},
+
+	{"override fun ", 13, KOTLIN, 5},
+	{"data class ", 11, KOTLIN, 4},
+	{"interface ", 10, KOTLIN | GROOVY, 3},
+	{"object ", 7, KOTLIN | SCALA, 3},
+	{"abstract ", 9, KOTLIN, 3},
+	{"fun ", 4, KOTLIN, 2},
+	{"val ", 4, KOTLIN | SCALA, 2},
+
+	{"case class ", 11, SCALA, 4},
+	{"final class ", 12, SCALA, 4},
+	{"opaque ", 7, SCALA, 3},
+	{"given ", 6, SCALA, 2},
+	{"lazy ", 5, SCALA, 2},
+
+	{"@Compile", 8, GROOVY, 5},
+	{"@Immutable", 10, GROOVY, 5},
+	{"@Singleton", 10, GROOVY, 5},
+	{"@Delegate", 9, GROOVY, 5},
+	{"@Schema", 7, GROOVY, 5},
+	{"@Grab", 5, GROOVY, 5},
+	{"char[] ", 6, GROOVY, 2},
+	{"String ", 7, GROOVY, 2},
+	{"final ", 6, GROOVY, 1},
 
 	{"main :: IO ()", 13, HASKELL, MAX_SCORE},
 	{"import qualified ", 17, HASKELL, 5},
@@ -7414,10 +7453,12 @@ best_scored_mimetype(const size_t lang)
 	case ELIXIR: return "text/x-elixir";
 	case ERLANG: return "text/x-erlang";
 	case GOLANG: return "text/x-golang";
+	case GROOVY: return "text/x-groovy";
 	case HASKELL: return "text/x-haskell";
 	case HTML: return "text/html";
 	case JAVA: return "text/x-java";
 	case JAVASCRIPT: return "text/javascript";
+	case KOTLIN: return "text/x-kotlin";
 	case LISP: return "text/x-lisp";
 	case OBJC: return "text/x-objective-c";
 	case PASCAL: return "text/x-pascal";
@@ -7426,7 +7467,9 @@ best_scored_mimetype(const size_t lang)
 	case PYTHON: return "text/x-python";
 	case RUBY: return "text/x-ruby";
 	case RUST: return "text/x-rust";
+	case SCALA: return "text/x-scala";
 	case SQL: return "text/x-sql";
+	case SWIFT: return "text/x-swift";
 	case VERILOG: return "text/x-verilog";
 	default: return "text/plain";
 	};
@@ -7510,10 +7553,10 @@ text_or_binary(const uint8_t *s, const size_t slen)
 		int override = 0;
 
 		for (size_t j = 0; tokens[j].token; j++) {
-			if (used_tokens[j] == 1) // Let's count each token only once
+			if (used_tokens[j] == 1) /* Let's count each token only once */
 				continue;
 
-			if (tokens[j].token[0] == 0x00) { // glob
+			if (tokens[j].token[0] == 0x00) { /* Glob pattern */
 				if (xglob(s + i, tokens[j].token + 1, rem) == 0)
 					continue;
 			} else if (rem < tokens[j].token_len || s[i] != tokens[j].token[0]
@@ -7522,11 +7565,11 @@ text_or_binary(const uint8_t *s, const size_t slen)
 			}
 
 			if (s[i + tokens[j].token_len] == '=')
-				continue; // Exclude assignments
+				continue; /* Exclude assignments */
 
 			used_tokens[j] = 1;
 
-			if (tokens[j].score == MAX_SCORE) { // Always a single language
+			if (tokens[j].score == MAX_SCORE) { /* Always a single language */
 				best_score = MIN_REQUIRED_SCORE;
 				best_scored_lang = tokens[j].lang;
 				override = 1;
@@ -7535,7 +7578,7 @@ text_or_binary(const uint8_t *s, const size_t slen)
 
 			/* Distribute score to all languages in the bitmask */
 			for (size_t k = 0; k < LANG_NUM; k++) {
-				size_t lang_bit = 1 << k; // Generate 0x01, 0x02, 0x04, etc.
+				size_t lang_bit = 1 << k; /* Generate 0x01, 0x02, 0x04, etc. */
 				if (!(tokens[j].lang & lang_bit))
 					continue;
 
