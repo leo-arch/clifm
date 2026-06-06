@@ -22,7 +22,7 @@
 #define BYTES_TO_READ 8192
 
 #ifdef FMAGIC_NO_NULL
-# define FMAGIC_ERROR "application/x-unknown";
+# define FMAGIC_ERROR "application/octet-stream";
 #else
 /* Allow falling back to another file-type identification tool. */
 # define FMAGIC_ERROR NULL;
@@ -7074,7 +7074,18 @@ fs_type_check(const struct stat *a)
 	case S_IFSOCK: return "inode/socket";
 	case S_IFBLK:  return "inode/blockdevice";
 	case S_IFCHR:  return "inode/chardevice";
-	/* Let non-standard file modes be handled by libmagic itself */
+#ifdef S_IFDOOR
+	case S_IFDOOR:  return "inode/door";
+#endif
+#ifdef S_ARCH1
+	case S_ARCH1: return "inode/arch1";
+#endif
+#ifdef S_ARCH2
+	case S_ARCH2: return "inode/arch2";
+#endif
+#ifdef S_IFWHT
+	case S_IFWHT: return "inode/whiteout";
+#endif
 	default: break;
 	}
 
