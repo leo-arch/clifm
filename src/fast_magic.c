@@ -7177,7 +7177,8 @@ check_ini_file(const uint8_t *s, const size_t slen)
 #define KOTLIN     0x2000000
 #define SCALA      0x4000000
 #define GROOVY     0x8000000
-#define LANG_NUM 28 /* Update this value after adding a new language */
+#define FORTRAN    0x10000000
+#define LANG_NUM 29 /* Update this value after adding a new language */
 /* NOTE: at most 31 languages on 32-bit systems, and 63 on 64-bit machines. */
 
 struct tokens_t {
@@ -7189,46 +7190,47 @@ struct tokens_t {
 
 struct tokens_t tokens[] = {
 	/* A token starting with a NUL byte is a glob pattern. */
-	{"#include ", 9, CLANG | CPLUS, 5},
-	{"#if ", 4, CLANG | CPLUS | OBJC, 1},
-	{"#ifdef ", 7, CLANG | CPLUS | OBJC, 5},
-	{"#ifndef ", 8, CLANG | CPLUS | OBJC, 5},
-	{"#else", 5, CLANG | CPLUS | OBJC, 1},
-	{"#endif", 6, CLANG | CPLUS | OBJC, 1},
-	{"#define ", 8, CLANG | CPLUS | OBJC, 5},
-	{"#pragma ", 8, CLANG | CPLUS | OBJC, 5},
-	{"extern ", 7, CLANG | CPLUS | RUST, 5},
-	{"int main(", 9, CLANG | CPLUS, 5},
-	{"void main(", 10, CLANG | CPLUS, 5}, // Old invocation
-	{"main(", 5, CLANG | CPLUS, 2},
-	{"char ", 5, CLANG | CPLUS, 2},
-	{"float ", 6, CLANG | CPLUS | OBJC, 2},
-	{"static ", 7, CLANG | CPLUS | OBJC | CSHARP | SWIFT | GROOVY, 2},
-	{"struct ", 7, CLANG | CPLUS | RUST, 2},
-	{"typedef ", 8, CLANG | CPLUS | OBJC, 2},
-	{"int ", 4, CLANG | CPLUS | JAVA | GROOVY, 2},
-	{"void ", 5, CLANG | CPLUS | JAVA | GROOVY, 2},
-//	{"const ", 6, CLANG | CPLUS | OBJC | JAVASCRIPT | GOLANG | RUST | PASCAL, 2},
-	{"enum ", 5, CLANG | CPLUS | RUST | SWIFT | GROOVY, 2},
+	{"#include ", 9, CLANG|CPLUS, 5},
+	{"#if ", 4, CLANG|CPLUS|OBJC, 1},
+	{"#ifdef ", 7, CLANG|CPLUS|OBJC, 5},
+	{"#ifndef ", 8, CLANG|CPLUS|OBJC, 5},
+	{"#else", 5, CLANG|CPLUS|OBJC, 1},
+	{"#endif", 6, CLANG|CPLUS|OBJC, 1},
+	{"#define ", 8, CLANG|CPLUS|OBJC, 5},
+	{"#pragma ", 8, CLANG|CPLUS|OBJC, 5},
+	{"extern ", 7, CLANG|CPLUS|RUST, 5},
+	{"int main(", 9, CLANG|CPLUS, 5},
+	{"void main(", 10, CLANG|CPLUS, 5}, // Old invocation
+	{"main(", 5, CLANG|CPLUS, 2},
+	{"char ", 5, CLANG|CPLUS, 2},
+	{"float ", 6, CLANG|CPLUS|OBJC, 2},
+	{"static ", 7, CLANG|CPLUS|OBJC|CSHARP|SWIFT|GROOVY, 2},
+	{"struct ", 7, CLANG|CPLUS|RUST, 2},
+	{"typedef ", 8, CLANG|CPLUS|OBJC, 2},
+	{"int ", 4, CLANG|CPLUS|JAVA|GROOVY, 2},
+	{"void ", 5, CLANG|CPLUS|JAVA|GROOVY, 2},
+//	{"const ", 6, CLANG|CPLUS|OBJC|JAVASCRIPT|GOLANG|RUST|PASCAL, 2},
+	{"enum ", 5, CLANG|CPLUS|RUST|SWIFT|GROOVY, 2},
 	{"register ", 9, CLANG, 5},
 	{"union ", 6, CLANG, 3},
 	{"// ", 3, CLANG|CPLUS|CSHARP|OBJC|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SWIFT|KOTLIN|SCALA, 1}, // also Kotlin, Swift, and Scala
 	{"/* ", 3, CLANG|CPLUS|CSHARP|OBJC|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SQL|KOTLIN|GROOVY, 1}, // also Kotlin, Swift, and Scala
 
-	{"namespace", 9, CPLUS | CSHARP, 10},
+	{"namespace", 9, CPLUS|CSHARP, 10},
 	{"using namespace ", 16, CPLUS, MAX_SCORE},
 	{"std::", 5, CPLUS, MAX_SCORE},
 	{"static std::", 12, CPLUS, MAX_SCORE},
 	{"constexpr ", 10, CPLUS, MAX_SCORE},
 	{"template ", 9, CPLUS, 2},
 	{"concept ", 8, CPLUS, 2},
-	{"new ", 4, CPLUS | JAVA | JAVASCRIPT, 2},
-	{"delete ", 7, CPLUS | JAVASCRIPT, 2}, // Also C#
+	{"new ", 4, CPLUS|CSHARP|JAVA|JAVASCRIPT, 2},
+	{"delete ", 7, CPLUS|JAVASCRIPT, 2}, // Also C#
 	{"using ", 6, CPLUS, 2},
 	{"virtual ", 8, CPLUS, 2},
-	{"protected ", 10, CPLUS | CSHARP | KOTLIN, 2},
+	{"protected ", 10, CPLUS|CSHARP|KOTLIN|SCALA, 2},
 	{"explicit ", 9, CPLUS, 2},
-	{"public ", 7, CPLUS | CSHARP | JAVA | PASCAL | GROOVY, 2},
+	{"throw ", 6, CPLUS, 1},
+	{"public ", 7, CPLUS|CSHARP|JAVA|PASCAL|SWIFT|KOTLIN|GROOVY, 2},
 	{"private ", 8, CPLUS|CSHARP|JAVA|PASCAL|SWIFT|KOTLIN|SCALA|GROOVY, 2},
 	{"class ", 6, CPLUS|CSHARP|RUBY|PYTHON|JAVA|JAVASCRIPT|HASKELL|PASCAL|SWIFT|KOTLIN|GROOVY, 3},
 
@@ -7244,7 +7246,7 @@ struct tokens_t tokens[] = {
 
 	{"using System", 12, CSHARP, MAX_SCORE},
 	{"System.", 7, CSHARP, 2},
-	{"catch ", 6, CSHARP | KOTLIN, 2},
+	{"catch ", 6, CPLUS|CSHARP|KOTLIN, 2},
 
 	{"use crate::", 11, RUST, 5},
 	{"use std::", 9, RUST, 5},
@@ -7259,35 +7261,35 @@ struct tokens_t tokens[] = {
 	{"mut ", 4, RUST, 1},
 	{"unsafe ", 7, RUST, 1},
 	{"fn ", 3, RUST, 1},
-	{"use ", 4, RUST | PERL, 1},
+	{"use ", 4, RUST|PERL, 1},
 
 	{"require '", 9, RUBY, MAX_SCORE},
 	{"require \"", 9, RUBY, 10},
-	{"elsif", 5, RUBY | PERL, 10},
+	{"elsif", 5, RUBY|PERL, 10},
 	{"include ", 8, RUBY, 2},
 	{"rescue ", 7, RUBY, 2},
 	{"unless ", 7, RUBY, 2},
-	{"def ", 4, RUBY | PYTHON | ELIXIR | SCALA | GROOVY, 2},
-	{"module ", 7, RUBY | HASKELL | VERILOG | JAVASCRIPT, 3},
-	{"end\n", 4, RUBY | VERILOG | ELIXIR | PASCAL, 2},
+	{"def ", 4, RUBY|PYTHON|ELIXIR|SCALA|GROOVY, 2},
+	{"module ", 7, RUBY|HASKELL|VERILOG|JAVASCRIPT, 3},
+	{"end\n", 4, RUBY|VERILOG|ELIXIR|PASCAL, 2},
 
 	{"if __name__ ", 12, PYTHON, 10},
 	{"def __init__", 12, PYTHON, 10},
 	{"\0from * import *", 0, PYTHON, 10},
 	{"\0import * as *", 0, PYTHON, 10},
 	{"import ", 7, PYTHON|JAVA|GOLANG|HASKELL|SWIFT|SCALA|GROOVY, 3},
-	{"if not ", 7, PYTHON | HASKELL, 2},
+	{"if not ", 7, PYTHON|HASKELL, 2},
 	{"else:", 5, PYTHON, 2},
 	{"try:", 4, PYTHON, 2},
-	{"try ", 4, PYTHON | GROOVY, 2},
+	{"try ", 4, PYTHON|CPLUS|GROOVY, 2},
 	{"except:", 7, PYTHON, 2},
 	{"except ", 7, PYTHON, 2},
 	{"finally:", 8, PYTHON, 2},
 	{"elif:", 5, PYTHON, 2},
 	{"raise ", 6, PYTHON, 2},
-	{"self.", 5, PYTHON | RUBY | OBJC | RUST | SWIFT, 1},
+	{"self.", 5, PYTHON|RUBY|OBJC|RUST|SWIFT, 1},
 	{"\"\"\" ", 4, PYTHON, 2},
-	{"# ", 2, PYTHON | PERL | ELIXIR | PHP, 1},
+	{"# ", 2, PYTHON|PERL|ELIXIR|PHP, 1},
 
 	{"(:require", 4, CLOJURE, 5},
 	{"(defn", 5, CLOJURE, 5},
@@ -7316,33 +7318,33 @@ struct tokens_t tokens[] = {
 	{"BEGIN {", 7, AWK, MAX_SCORE},
 
 	{"public class", 12, JAVA, 10},
-	{"@Override", 9, JAVA | GROOVY, 5},
+	{"@Override", 9, JAVA|GROOVY, 5},
 	{"@Deprecated", 11, JAVA, 10},
-	{"package ", 8, JAVA | GOLANG | PERL | KOTLIN | SCALA | GROOVY, 2},
-	{"byte ", 5, JAVA | GOLANG, 1}, // Also C#
-	{"this.", 5, JAVA | JAVASCRIPT | GROOVY, 1}, // Also C# and TypeScript
+	{"package ", 8, JAVA|GOLANG|PERL|KOTLIN|SCALA|GROOVY, 2},
+	{"byte ", 5, JAVA|GOLANG, 1}, // Also C#
+	{"this.", 5, JAVA|JAVASCRIPT|GROOVY, 1}, // Also C# and TypeScript
 
 	{"\0import * from *", 0, JAVASCRIPT, 10},
 	{"'use strict'", 12, JAVASCRIPT, 10},
 	{"\"use strict\"", 12, JAVASCRIPT, 10},
 	{"(function(", 10, JAVASCRIPT, 10}, // IIFE
 	{"module.exports = ", 17, JAVASCRIPT, 5},
-	{"export ", 7, JAVASCRIPT | SCALA, 2},
+	{"export ", 7, JAVASCRIPT|SCALA, 2},
 	{"async ", 6, JAVASCRIPT, 2},
-	{"function ", 9, JAVASCRIPT | PASCAL, 1},
-	{"let ", 4, JAVASCRIPT | HASKELL | RUST | SWIFT, 1},
+	{"function ", 9, JAVASCRIPT|PASCAL, 1},
+	{"let ", 4, JAVASCRIPT|HASKELL|RUST|SWIFT, 1},
 	{"})\n", 3, JAVASCRIPT, 1}, {"});\n", 4, JAVASCRIPT, 2},
 	{"})();\n", 6, JAVASCRIPT, 5}, {"})()\n", 5, JAVASCRIPT, 5},
 
-	{"var ", 4, GOLANG | JAVASCRIPT | SWIFT, 1},
-	{"func ", 5, GOLANG | SWIFT, 2},
+	{"var ", 4, GOLANG|JAVASCRIPT|SWIFT, 1},
+	{"func ", 5, GOLANG|SWIFT, 2},
 	{"chan ", 5, GOLANG, 2},
 	{"defer ", 6, GOLANG, 1},
-	{"return nil", 10, GOLANG | OBJC | SWIFT, 1},
+	{"return nil", 10, GOLANG|OBJC|SWIFT, 1},
 	{"select {", 8, GOLANG, 5},
-	{"type ", 5, GOLANG | HASKELL | RUST | PASCAL, 1},
+	{"type ", 5, GOLANG|HASKELL|RUST|PASCAL, 1},
 
-	{"override ", 9, SWIFT | KOTLIN, 2},
+	{"override ", 9, SWIFT|KOTLIN, 2},
 	{"protocol ", 9, SWIFT, 2},
 	{"guard ", 6, SWIFT, 2},
 	{"guard let", 9, SWIFT, 3},
@@ -7354,11 +7356,11 @@ struct tokens_t tokens[] = {
 
 	{"override fun ", 13, KOTLIN, 5},
 	{"data class ", 11, KOTLIN, 4},
-	{"interface ", 10, KOTLIN | GROOVY, 3},
-	{"object ", 7, KOTLIN | SCALA, 3},
+	{"interface ", 10, KOTLIN|GROOVY, 3},
+	{"object ", 7, KOTLIN|SCALA, 3},
 	{"abstract ", 9, KOTLIN, 3},
 	{"fun ", 4, KOTLIN, 2},
-	{"val ", 4, KOTLIN | SCALA, 2},
+	{"val ", 4, KOTLIN|SCALA, 2},
 
 	{"case class ", 11, SCALA, 4},
 	{"final class ", 12, SCALA, 4},
@@ -7382,7 +7384,7 @@ struct tokens_t tokens[] = {
 	{"where ", 6, HASKELL, 2},
 	{"instance ", 9, HASKELL, 2},
 	{"{-\n", 3, HASKELL, 1}, // Haskell multi-line comment
-	{"-- ", 3, HASKELL | SQL, 1}, // Haskell/SQL/Lua single-line comment
+	{"-- ", 3, HASKELL|SQL, 1}, // Haskell/SQL/Lua single-line comment
 
 	{"{$MODE ", 7, PASCAL, 3},
 	{"unit ", 5, PASCAL, 2},
@@ -7391,8 +7393,8 @@ struct tokens_t tokens[] = {
 	{"interface", 9, PASCAL, 1},
 	{"uses ", 5, PASCAL, 1},
 	{"begin", 5, PASCAL, 1},
-	{"end;", 4, PASCAL | ERLANG, 1},
-	{"end.", 4, PASCAL | ERLANG, 1},
+	{"end;", 4, PASCAL|ERLANG, 1},
+	{"end.", 4, PASCAL|ERLANG, 1},
 
 	{"sub ", 4, PERL, 1},
 	{"require ", 8, PERL, 4},
@@ -7407,17 +7409,30 @@ struct tokens_t tokens[] = {
 	{"PRINT ", 6, BASIC, 5},
 	{"GOTO ", 5, BASIC, 5},
 	{"GOSUB ", 6, BASIC, 3},
-	{"RETURN ", 7, BASIC, 3},
+	{"RETURN\n", 7, BASIC|FORTRAN, 3},
 	{"FOR ", 4, BASIC, 3},
 	{"WHILE ", 6, BASIC, 3},
-	{"IF ", 3, BASIC, 2},
-	{"ELSE ", 5, BASIC, 3},
+	{"IF ", 3, BASIC|FORTRAN, 2},
+	{"ELSE ", 5, BASIC|FORTRAN, 3},
 	{"LOCATE ", 7, BASIC, 3},
 	{"COLOR ", 6, BASIC, 3},
 	{"CLS ", 4, BASIC, 2},
 	{"LET ", 4, BASIC, 2},
-	{"END ", 4, BASIC, 2},
+	{"END IF\n", 7, BASIC|FORTRAN, 3},
 	{"REM ", 4, BASIC, 2}, // Comment
+
+	{"IMPLICIT NONE\n", 14, FORTRAN, 10},
+	{"DOUBLE PRECISION ", 17, FORTRAN, 10},
+	{"SUBROUTINE ", 11, FORTRAN, 5},
+	{"INTRINSIC ", 10, FORTRAN, 5},
+	{"END DO\n", 7, FORTRAN, 5},
+	{"INTEGER ", 8, FORTRAN, 3},
+	{"CHARACTER ", 10, FORTRAN, 3},
+	{"PARAMETER ", 10, FORTRAN, 3},
+	{"EXTERNAL ", 9, FORTRAN, 3},
+	{"LOGICAL ", 8, FORTRAN, 3},
+	{"COMPLEX", 7, FORTRAN, 2},
+	{"REAL ", 5, FORTRAN, 2},
 
 	{"CREATE TABLE ", 13, SQL, 10},
 	{"INSERT INTO ", 12, SQL, 10},
@@ -7452,6 +7467,7 @@ best_scored_mimetype(const size_t lang)
 	case CSHARP: return "text/x-csharp";
 	case ELIXIR: return "text/x-elixir";
 	case ERLANG: return "text/x-erlang";
+	case FORTRAN: return "text/x-fortran";
 	case GOLANG: return "text/x-golang";
 	case GROOVY: return "text/x-groovy";
 	case HASKELL: return "text/x-haskell";
