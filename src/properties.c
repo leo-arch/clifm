@@ -1011,8 +1011,10 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 #ifndef _BE_POSIX
 # ifdef S_ARCH1
 	case S_ARCH1:  *file_type = ARCH1_PCHR; color = *ctype = fi_c; break;
-	case S_ARCH2:  *file_type = ARCH2_PCHR; color = *ctype = fi_c; break;
 # endif /* S_ARCH1 */
+# ifdef S_ARCH2
+	case S_ARCH2:  *file_type = ARCH2_PCHR; color = *ctype = fi_c; break;
+# endif /* S_ARCH2 */
 # ifdef SOLARIS_DOORS
 	case S_IFDOOR: *file_type = DOOR_PCHR; color = *ctype = oo_c; break;
 	case S_IFPORT: *file_type = PORT_PCHR; color = *ctype = oo_c; break;

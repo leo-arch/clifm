@@ -562,8 +562,10 @@ set_file_type_and_color(const struct fileinfo *props, char **color)
 #ifndef _BE_POSIX
 # ifdef S_ARCH1
 	case S_ARCH1:  type = ARCH1_PCHR; *color = fi_nb; break;
-	case S_ARCH2:  type = ARCH2_PCHR; *color = fi_nb; break;
 # endif /* S_ARCH1 */
+# ifdef S_ARCH2
+	case S_ARCH2:  type = ARCH2_PCHR; *color = fi_nb; break;
+# endif /* S_ARCH2 */
 # ifdef SOLARIS_DOORS
 	case S_IFDOOR: type = DOOR_PCHR; *color = oo_nb; break;
 	case S_IFPORT: type = PORT_PCHR; *color = oo_nb; break;

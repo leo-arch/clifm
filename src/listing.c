@@ -3027,8 +3027,10 @@ set_link_target_color(const char *name, const struct stat *attr,
 # endif /* SOLARIS_DOORS */
 # ifdef S_ARCH1
 	case S_ARCH1: file_info[i].color = fi_c; break;
-	case S_ARCH2: file_info[i].color = fi_c; break;
 # endif /* S_ARCH1 */
+# ifdef S_ARCH2
+	case S_ARCH2: file_info[i].color = fi_c; break;
+# endif /* S_ARCH2 */
 # ifdef S_IFWHT
 	case S_IFWHT: file_info[i].color = fi_c; break;
 # endif /* S_IFWHT */
@@ -3130,8 +3132,10 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 # endif /* SOLARIS_DOORS */
 # ifdef S_ARCH1
 	case S_ARCH1: file_info[n].type = DT_ARCH1; stats.arch1++; break;
-	case S_ARCH2: file_info[n].type = DT_ARCH2; stats.arch2++; break;
 # endif /* S_ARCH1 */
+# ifdef S_ARCH2
+	case S_ARCH2: file_info[n].type = DT_ARCH2; stats.arch2++; break;
+# endif /* S_ARCH2 */
 # ifdef S_IFWHT
 	case S_IFWHT: file_info[n].type = DT_WHT; stats.whiteout++; break;
 # endif /* S_IFWHT */
