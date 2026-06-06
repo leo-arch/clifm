@@ -7631,6 +7631,13 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	&& s[1] >= 0x20 && s[1] <= 0x7E && check_ini_file(s, len) == 1)
 		return "text/x-ini";
 
+	const uint8_t *p = (len > 1 && s[0] == '@') ? s + 1 : s;
+	if (len > 2 && p[0] == ' ') p++;
+	if (len > 8 && (p[0] == 'E' || p[0] == 'e') && p[4] == ' '
+	&& (memcmp(p, "ECHO OFF", 8) == 0 || memcmp(p, "echo off", 8) == 0
+	|| memcmp(p, "Echo Off", 8) == 0))
+		return "text/x-msdos-batch";
+
 #ifdef FMAGIC_NO_NULL
 	return "text/plain";
 #else
