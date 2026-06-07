@@ -7189,8 +7189,9 @@ check_ini_file(const uint8_t *s, const size_t slen)
 #define SCALA      0x4000000
 #define GROOVY     0x8000000
 #define FORTRAN    0x10000000
-#define LANG_NUM 29 /* Update this value after adding a new language */
-/* NOTE: at most 31 languages on 32-bit systems, and 63 on 64-bit machines. */
+#define NIM        0x20000000
+#define LANG_NUM 30 /* Update this value after adding a new language */
+/* NOTE: At most 32/64 languages on 32/64-bit systems. */
 
 struct tokens_t {
 	const char *token;
@@ -7232,7 +7233,7 @@ struct tokens_t tokens[] = {
 	{"std::", 5, CPLUS, MAX_SCORE},
 	{"static std::", 12, CPLUS, MAX_SCORE},
 	{"constexpr ", 10, CPLUS, MAX_SCORE},
-	{"template ", 9, CPLUS, 2},
+	{"template ", 9, CPLUS|NIM, 2},
 	{"concept ", 8, CPLUS, 2},
 	{"new ", 4, CPLUS|CSHARP|JAVA|JAVASCRIPT, 2},
 	{"delete ", 7, CPLUS|JAVASCRIPT, 2}, // Also C#
@@ -7286,21 +7287,21 @@ struct tokens_t tokens[] = {
 
 	{"if __name__ ", 12, PYTHON, 10},
 	{"def __init__", 12, PYTHON, 10},
-	{"\0from * import *", 0, PYTHON, 10},
-	{"\0import * as *", 0, PYTHON, 10},
-	{"import ", 7, PYTHON|JAVA|GOLANG|HASKELL|SWIFT|SCALA|GROOVY, 3},
-	{"if not ", 7, PYTHON|HASKELL, 2},
-	{"else:", 5, PYTHON, 2},
-	{"try:", 4, PYTHON, 2},
+	{"\0from * import *", 0, PYTHON|NIM, 10},
+	{"\0import * as *", 0, PYTHON|NIM, 10},
+	{"import ", 7, PYTHON|JAVA|GOLANG|HASKELL|SWIFT|SCALA|GROOVY|NIM, 3},
+	{"if not ", 7, PYTHON|HASKELL|NIM, 2},
+	{"else:", 5, PYTHON|NIM, 2},
+	{"try:", 4, PYTHON|NIM, 2},
 	{"try ", 4, PYTHON|CPLUS|GROOVY, 2},
-	{"except:", 7, PYTHON, 2},
-	{"except ", 7, PYTHON, 2},
-	{"finally:", 8, PYTHON, 2},
+	{"except:", 7, PYTHON|NIM, 2},
+	{"except ", 7, PYTHON|NIM, 2},
+	{"finally:", 8, PYTHON|NIM, 2},
 	{"elif:", 5, PYTHON, 2},
-	{"raise ", 6, PYTHON, 2},
+	{"raise ", 6, PYTHON|NIM, 2},
 	{"self.", 5, PYTHON|RUBY|OBJC|RUST|SWIFT, 1},
 	{"\"\"\" ", 4, PYTHON, 2},
-	{"# ", 2, PYTHON|PERL|ELIXIR|PHP, 1},
+	{"# ", 2, PYTHON|PERL|ELIXIR|PHP|NIM, 1},
 
 	{"(:require", 4, CLOJURE, 5},
 	{"(defn", 5, CLOJURE, 5},
@@ -7340,20 +7341,20 @@ struct tokens_t tokens[] = {
 	{"\"use strict\"", 12, JAVASCRIPT, 10},
 	{"(function(", 10, JAVASCRIPT, 10}, // IIFE
 	{"module.exports = ", 17, JAVASCRIPT, 5},
-	{"export ", 7, JAVASCRIPT|SCALA, 2},
+	{"export ", 7, JAVASCRIPT|SCALA|NIM, 2},
 	{"async ", 6, JAVASCRIPT, 2},
 	{"function ", 9, JAVASCRIPT|PASCAL, 1},
-	{"let ", 4, JAVASCRIPT|HASKELL|RUST|SWIFT, 1},
+	{"let ", 4, JAVASCRIPT|HASKELL|RUST|SWIFT|NIM, 1},
 	{"})\n", 3, JAVASCRIPT, 1}, {"});\n", 4, JAVASCRIPT, 2},
 	{"})();\n", 6, JAVASCRIPT, 5}, {"})()\n", 5, JAVASCRIPT, 5},
 
-	{"var ", 4, GOLANG|JAVASCRIPT|SWIFT, 1},
+	{"var ", 4, GOLANG|JAVASCRIPT|SWIFT|NIM, 1},
 	{"func ", 5, GOLANG|SWIFT, 2},
 	{"chan ", 5, GOLANG, 2},
 	{"defer ", 6, GOLANG, 1},
 	{"return nil", 10, GOLANG|OBJC|SWIFT, 1},
 	{"select {", 8, GOLANG, 5},
-	{"type ", 5, GOLANG|HASKELL|RUST|PASCAL, 1},
+	{"type ", 5, GOLANG|HASKELL|RUST|PASCAL|NIM, 1},
 
 	{"override ", 9, SWIFT|KOTLIN, 2},
 	{"protocol ", 9, SWIFT, 2},
@@ -7396,6 +7397,13 @@ struct tokens_t tokens[] = {
 	{"instance ", 9, HASKELL, 2},
 	{"{-\n", 3, HASKELL, 1}, // Haskell multi-line comment
 	{"-- ", 3, HASKELL|SQL, 1}, // Haskell/SQL/Lua single-line comment
+
+	{"fetchImpl ", 10, NIM, 5},
+	{"proc ", 5, NIM, 3},
+	{"discard\n", 6, NIM, 3},
+	{"retry:", 6, NIM, 3},
+	{"once:", 6, NIM, 2},
+	{"of ", 3, NIM, 1},
 
 	{"{$MODE ", 7, PASCAL, 3},
 	{"unit ", 5, PASCAL, 2},
@@ -7487,6 +7495,7 @@ best_scored_mimetype(const size_t lang)
 	case JAVASCRIPT: return "text/javascript";
 	case KOTLIN: return "text/x-kotlin";
 	case LISP: return "text/x-lisp";
+	case NIM: return "text/x-nim";
 	case OBJC: return "text/x-objective-c";
 	case PASCAL: return "text/x-pascal";
 	case PERL: return "text/x-perl";
