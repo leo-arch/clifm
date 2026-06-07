@@ -13,8 +13,10 @@
 
 #include "helpers.h" /* IS_DIGIT, IS_ALPHA_UP, IS_ALPHA_LOW, IS_ALNUM */
 
-#include <unistd.h> /* close() */
-#include <string.h> /* memcmp() */
+#include <unistd.h>  /* close() */
+#include <stdint.h>  /* UINTPTR_MAX */
+#include <string.h>  /* memcmp() */
+#include <strings.h> /* strncasecmp() */
 #include <fnmatch.h> /* fnmatch() */
 #include <errno.h>
 
@@ -7190,13 +7192,19 @@ check_ini_file(const uint8_t *s, const size_t slen)
 #define GROOVY     0x8000000
 #define FORTRAN    0x10000000
 #define NIM        0x20000000
-#define LANG_NUM 30 /* Update this value after adding a new language */
-/* NOTE: At most 32/64 languages on 32/64-bit systems. */
+/* Update this value after adding a new language (max 64) */
+#define LANG_NUM 30
+#if LANG_NUM > 64
+# error "LANG_NUM must be <= 64"
+#endif
 
 struct tokens_t {
 	const char *token;
 	const size_t token_len;
-	const size_t lang;
+#if UINTPTR_MAX == 0xFFFFFFFFUL /* 32-bit */
+	const size_t pad;
+#endif
+	const uint64_t lang;
 	const size_t score;
 };
 
@@ -7299,6 +7307,7 @@ struct tokens_t tokens[] = {
 	{"finally:", 8, PYTHON|NIM, 2},
 	{"elif:", 5, PYTHON, 2},
 	{"raise ", 6, PYTHON|NIM, 2},
+	{"await ", 6, PYTHON|NIM, 2},
 	{"self.", 5, PYTHON|RUBY|OBJC|RUST|SWIFT, 1},
 	{"\"\"\" ", 4, PYTHON, 2},
 	{"# ", 2, PYTHON|PERL|ELIXIR|PHP|NIM, 1},
@@ -7474,7 +7483,7 @@ struct tokens_t tokens[] = {
 };
 
 static const char *
-best_scored_mimetype(const size_t lang)
+best_scored_mimetype(const uint64_t lang)
 {
 	switch (lang) {
 	case AWK: return "text/x-awk";
@@ -7570,7 +7579,7 @@ text_or_binary(const uint8_t *s, const size_t slen)
 
 	size_t matches[LANG_NUM] = {0};
 	size_t best_score = 0;
-	size_t best_scored_lang = (size_t)-1;
+	uint64_t best_scored_lang = 0;
 
 #define TOKENS_NUM (sizeof(tokens) / sizeof(tokens[0]))
 	size_t used_tokens[TOKENS_NUM] = {0};
@@ -7614,7 +7623,7 @@ text_or_binary(const uint8_t *s, const size_t slen)
 
 			/* Distribute score to all languages in the bitmask */
 			for (size_t k = 0; k < LANG_NUM; k++) {
-				size_t lang_bit = 1 << k; /* Generate 0x01, 0x02, 0x04, etc. */
+				uint64_t lang_bit = 1 << k; /* Generate 0x01, 0x02, 0x04, etc. */
 				if (!(tokens[j].lang & lang_bit))
 					continue;
 
@@ -7640,11 +7649,11 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	&& s[1] >= 0x20 && s[1] <= 0x7E && check_ini_file(s, len) == 1)
 		return "text/x-ini";
 
-	const uint8_t *p = (len > 1 && s[0] == '@') ? s + 1 : s;
+	const char *p = (len > 1 && s[0] == '@')
+		? (const char *)s + 1 : (const char *)s;
 	if (len > 2 && p[0] == ' ') p++;
 	if (len > 8 && (p[0] == 'E' || p[0] == 'e') && p[4] == ' '
-	&& (memcmp(p, "ECHO OFF", 8) == 0 || memcmp(p, "echo off", 8) == 0
-	|| memcmp(p, "Echo Off", 8) == 0))
+	&& strncasecmp(p, "echo off", 8) == 0)
 		return "text/x-msdos-batch";
 
 #ifdef FMAGIC_NO_NULL
