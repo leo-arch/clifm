@@ -7276,8 +7276,8 @@ struct tokens_t tokens[] = {
 	{"foreach", 7, DLANG|PERL, 4},
 	{"nothrow ", 8, DLANG|PERL, 4},
 	{"immutable ", 6, DLANG, 3},
-	{"auto ", 5, DLANG, 3},
-	{"mixin ", 6, DLANG, 3},
+	{"auto ", 5, DLANG, 3}, // Also in C, but very rarely used
+	{"mixin ", 6, DLANG|DART, 3},
 	{"scope(", 6, DLANG, 3},
 	{"pragma(", 7, DLANG, 3},
 	{"this(", 5, DLANG, 3},
@@ -7380,15 +7380,16 @@ struct tokens_t tokens[] = {
 	{"select {", 8, GOLANG, 5},
 	{"type ", 5, GOLANG|HASKELL|RUST|KOTLIN|PASCAL|NIM|PYTHON|VERILOG|OCAML, 1},
 
-	{"override ", 9, SWIFT|KOTLIN|DLANG, 2},
-	{"protocol ", 9, SWIFT, 2},
-	{"guard ", 6, SWIFT, 2},
+	{"@IBOutlet ", 10, SWIFT, 5},
+	{"@IBAction ", 10, SWIFT, 5},
+	{"@objc ", 6, SWIFT, 4},
 	{"guard let", 9, SWIFT, 3},
 	{"typealias ", 10, SWIFT, 3},
 	{"unowned ", 8, SWIFT, 3},
-	{"@objc ", 6, SWIFT, 4},
-	{"@IBOutlet ", 10, SWIFT, 5},
-	{"@IBAction ", 10, SWIFT, 5},
+	{"override ", 9, SWIFT|KOTLIN|DLANG, 2},
+	{"protocol ", 9, SWIFT, 2},
+	{"guard ", 6, SWIFT, 2},
+	{"super.", 6, SWIFT|KOTLIN|SCALA|JAVA|DLANG, 2},
 
 	{"override fun ", 13, KOTLIN, 5},
 	{"data class ", 11, KOTLIN, 4},
@@ -7560,17 +7561,22 @@ best_scored_mimetype(const uint64_t lang)
 static int
 xglob(const uint8_t *s, const char *pattern, const size_t slen)
 {
-	if (!s || !pattern || slen == 0)
+	if (!s || !pattern || !pattern[0] || !pattern[1])
 		return 0;
 
-	if (pattern[0] != '?' && pattern[0] != '*' && s[0] != pattern[0])
-		return 0;
+	/* Compare the first 2 bytes before calling fnmatch(). */
+	if (pattern[0] != '?' && pattern[0] != '*') {
+		if (s[0] != pattern[0]
+		|| (pattern[1] != '?' && pattern[1] != '*' && pattern[1] != s[1]))
+			return 0;
+	}
 
+	/* 128 bytes to hold the current line (S). */
 	static char str[128];
 	size_t count = 0;
 	const char *ptr = (const char *)s;
 
-	while (count < sizeof(str) - 1 && *ptr != '\n')
+	while (count < sizeof(str) - 1 && count < slen && *ptr != '\n')
 		str[count++] = *ptr++;
 	str[count] = '\0';
 
