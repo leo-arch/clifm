@@ -7432,7 +7432,9 @@ struct tokens_t tokens[] = {
 	{"import 'dart:", 13, DART, MAX_SCORE},
 	{"\0import '*.dart';*", 0, DART, MAX_SCORE},
 
-	{"const std = @import(\"std\")", 26, ZIG, MAX_SCORE},
+	{"const std = @import(\"std\");\n", 28, ZIG, MAX_SCORE},
+	{"\0const * = @import(\"*\");*", 0, ZIG, MAX_SCORE},
+	{"@import(\"std\").", 15, ZIG, MAX_SCORE},
 
 	{"(* ", 3, OCAML, 3},
 	{"in\n", 3, OCAML, 2},
