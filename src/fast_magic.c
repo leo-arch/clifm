@@ -7432,8 +7432,8 @@ struct tokens_t tokens[] = {
 	{"local ", 6, LUA, 2},
 	{"return {", 8, LUA, 2},
 	{"require(", 8, LUA, 2},
-	{"--]]\n", 6, LUA, 2},
-	{"[\"\n", 2, LUA, 2},
+	{"--]]\n", 5, LUA, 2},
+	{"[\"\n", 3, LUA, 2},
 
 	{"fetchImpl ", 10, NIM, 5},
 	{"proc ", 5, NIM, 3},
