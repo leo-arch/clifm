@@ -6,8 +6,6 @@
 */
 
 /* fast_magic.c -- fast MIME-type detection using magic bytes */
-/* Note: For the time being, this module handles only binary files.
- * If FMAGIC_NO_NULL is set, it will return a generic "text/plain". */
 
 #ifndef NO_FAST_MAGIC
 
@@ -7079,6 +7077,9 @@ fs_type_check(const struct stat *a)
 #ifdef S_IFDOOR
 	case S_IFDOOR:  return "inode/door";
 #endif
+#ifdef S_IFPORT
+	case S_IFPORT:  return "inode/port";
+#endif
 #ifdef S_ARCH1
 	case S_ARCH1: return "inode/arch1";
 #endif
@@ -7196,8 +7197,9 @@ check_ini_file(const uint8_t *s, const size_t slen)
 #define OCAML      0x80000000
 #define DART       0x100000000
 #define ZIG        0x200000000
+#define LUA        0x400000000
 /* Update this value after adding a new language (max 64) */
-#define LANG_NUM 34
+#define LANG_NUM 35
 #if LANG_NUM > 64
 # error "LANG_NUM must be <= 64"
 #endif
@@ -7224,7 +7226,7 @@ struct tokens_t tokens[] = {
 	{"#pragma ", 8, CLANG|CPLUS|OBJC|DLANG, 5},
 	{"extern ", 7, CLANG|CPLUS|OBJC|CSHARP|DLANG|RUST|VERILOG, 2},
 	{"int main(", 9, CLANG|CPLUS|DLANG, 5},
-	{"void main(", 10, CLANG|CPLUS|DLANG, 5}, // Old invocation
+	{"void main(", 10, CLANG|CPLUS|DLANG, 5}, /* Old invocation */
 	{"main(", 5, CLANG|CPLUS|DLANG, 2},
 	{"char ", 5, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|SCALA, 2},
 	{"float ", 6, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|SCALA|PYTHON, 2},
@@ -7276,7 +7278,7 @@ struct tokens_t tokens[] = {
 	{"foreach", 7, DLANG|PERL, 4},
 	{"nothrow ", 8, DLANG|PERL, 4},
 	{"immutable ", 6, DLANG, 3},
-	{"auto ", 5, DLANG, 3}, // Also in C, but very rarely used
+	{"auto ", 5, DLANG, 3}, /* Also in C, but very rarely used */
 	{"mixin ", 6, DLANG|DART, 3},
 	{"scope(", 6, DLANG, 3},
 	{"pragma(", 7, DLANG, 3},
@@ -7299,21 +7301,21 @@ struct tokens_t tokens[] = {
 	{"use ", 4, RUST|PERL, 1},
 
 	{"require '", 9, RUBY, MAX_SCORE},
-	{"require \"", 9, RUBY, 10},
+	{"require \"", 9, RUBY|LUA, 10},
 	{"elsif", 5, RUBY|PERL, 10},
 	{"include ", 8, RUBY|OCAML, 2},
 	{"rescue ", 7, RUBY|ELIXIR, 2},
 	{"unless ", 7, RUBY|PERL, 2},
 	{"def ", 4, RUBY|PYTHON|ELIXIR|SCALA|GROOVY, 2},
 	{"module ", 7, RUBY|HASKELL|VERILOG|JAVASCRIPT|DLANG|OCAML, 3},
-	{"end\n", 4, RUBY|VERILOG|ELIXIR|PASCAL|OCAML, 2},
+	{"end\n", 4, RUBY|VERILOG|ELIXIR|PASCAL|OCAML|LUA, 2},
 
 	{"if __name__ ", 12, PYTHON, 10},
 	{"def __init__", 12, PYTHON, 10},
 	{"\0from * import *", 0, PYTHON|NIM, 10},
 	{"\0import * as *", 0, PYTHON|NIM, 10},
 	{"import ", 7, PYTHON|JAVA|JAVASCRIPT|GOLANG|HASKELL|SWIFT|SCALA|KOTLIN|GROOVY|NIM|DLANG, 3},
-	{"if not ", 7, PYTHON|HASKELL|NIM, 2},
+	{"if not ", 7, PYTHON|HASKELL|NIM|LUA, 2},
 	{"else:", 5, PYTHON|NIM, 2},
 	{"try:", 4, PYTHON|NIM|DLANG, 2},
 	{"try ", 4, PYTHON|CPLUS|DLANG|JAVA|GROOVY|OCAML, 2},
@@ -7332,7 +7334,7 @@ struct tokens_t tokens[] = {
 	{"(ns ", 4, CLOJURE, 2},
 	{"(def ", 5, CLOJURE, 2},
 	{"(let ", 5, CLOJURE, 2},
-	{";; ", 3, CLOJURE, 2}, // Comment
+	{";; ", 3, CLOJURE, 2}, /* Comment */
 
 	{"-module(", 8, ERLANG, MAX_SCORE},
 	{"-export(", 8, ERLANG, 4},
@@ -7347,7 +7349,7 @@ struct tokens_t tokens[] = {
 	{"(defvar ", 8, LISP, MAX_SCORE},
 	{"(defparam ", 10, LISP, MAX_SCORE},
 	{"(setq ", 6, LISP, MAX_SCORE},
-	{"; ", 2, LISP, 1}, // Comment
+	{"; ", 2, LISP, 1}, /* Comment */
 
 	{"GET \"LIBHDR\"", 12, BCPL, MAX_SCORE},
 
@@ -7363,11 +7365,11 @@ struct tokens_t tokens[] = {
 	{"\0import * from *", 0, JAVASCRIPT, 10},
 	{"'use strict'", 12, JAVASCRIPT, 10},
 	{"\"use strict\"", 12, JAVASCRIPT, 10},
-	{"(function(", 10, JAVASCRIPT, 10}, // IIFE
+	{"(function(", 10, JAVASCRIPT, 10}, /* IIFE */
 	{"module.exports = ", 17, JAVASCRIPT, 5},
 	{"export ", 7, JAVASCRIPT|SCALA|NIM|DLANG|VERILOG, 2},
 	{"async ", 6, JAVASCRIPT|CSHARP|PYTHON, 2},
-	{"function ", 9, JAVASCRIPT|PASCAL|DLANG|OCAML, 1},
+	{"function ", 9, JAVASCRIPT|PASCAL|DLANG|OCAML|LUA, 1},
 	{"let ", 4, JAVASCRIPT|HASKELL|RUST|SWIFT|NIM|OCAML, 1},
 	{"})\n", 3, JAVASCRIPT, 1}, {"});\n", 4, JAVASCRIPT, 2},
 	{"})();\n", 6, JAVASCRIPT, 5}, {"})()\n", 5, JAVASCRIPT, 5},
@@ -7376,7 +7378,7 @@ struct tokens_t tokens[] = {
 	{"func ", 5, GOLANG|SWIFT, 2},
 	{"chan ", 5, GOLANG, 2},
 	{"defer ", 6, GOLANG|JAVASCRIPT, 1},
-	{"return nil", 10, GOLANG|OBJC|SWIFT, 1},
+	{"return nil", 10, GOLANG|OBJC|SWIFT|LUA, 1},
 	{"select {", 8, GOLANG, 5},
 	{"type ", 5, GOLANG|HASKELL|RUST|KOTLIN|PASCAL|NIM|PYTHON|VERILOG|OCAML, 1},
 
@@ -7420,8 +7422,18 @@ struct tokens_t tokens[] = {
 	{"main = ", 6, HASKELL, 3},
 	{"where ", 6, HASKELL, 2},
 	{"instance ", 9, HASKELL, 2},
-	{"{-\n", 3, HASKELL, 1}, // Haskell multi-line comment
-	{"-- ", 3, HASKELL|SQL, 1}, // Haskell/SQL/Lua single-line comment
+	{"{-\n", 3, HASKELL, 1}, /* Haskell multi-line comment */
+	{"-- ", 3, HASKELL|SQL|LUA, 1}, /* Single-line comment */
+
+	{"local function ", 15, LUA, 4},
+	{"elseif ", 7, LUA, 3},
+	{"if type(", 8, LUA, 3},
+	{"self:", 5, LUA, 3},
+	{"local ", 6, LUA, 2},
+	{"return {", 8, LUA, 2},
+	{"require(", 8, LUA, 2},
+	{"--]]\n", 6, LUA, 2},
+	{"[\"\n", 2, LUA, 2},
 
 	{"fetchImpl ", 10, NIM, 5},
 	{"proc ", 5, NIM, 3},
@@ -7481,7 +7493,7 @@ struct tokens_t tokens[] = {
 	{"CLS ", 4, BASIC, 2},
 	{"LET ", 4, BASIC, 2},
 	{"END IF\n", 7, BASIC|FORTRAN, 3},
-	{"REM ", 4, BASIC, 2}, // Comment
+	{"REM ", 4, BASIC, 2},
 
 	{"IMPLICIT NONE\n", 14, FORTRAN, 10},
 	{"DOUBLE PRECISION ", 17, FORTRAN, 10},
@@ -7501,13 +7513,14 @@ struct tokens_t tokens[] = {
 	{"WHERE NOT ", 10, SQL, 5},
 	{"CREATE ", 7, SQL, 2},
 	{"SELECT ", 7, SQL, 2},
+	{"JOIN ", 5, SQL, 2},
 
 	{"<html", 5, HTML, 10}, {"<HTML", 5, HTML, 10},
 	{"<head", 5, HTML, 4}, {"<HEAD", 5, HTML, 4},
 	{"<body", 5, HTML, 4}, {"<BODY", 5, HTML, 4},
 	{"<meta", 5, HTML, 2}, {"<META", 5, HTML, 2},
 	{"<link", 5, HTML, 2}, {"<LINK", 5, HTML, 2},
-	{"<!-- ", 5, HTML, 2}, // Comment
+	{"<!-- ", 5, HTML, 2},
 
 	{"<?\n", 3, PHP, 4},
 	{"<?\r\n", 4, PHP, 4},
@@ -7540,6 +7553,7 @@ best_scored_mimetype(const uint64_t lang)
 	case JAVASCRIPT: return "text/javascript";
 	case KOTLIN: return "text/x-kotlin";
 	case LISP: return "text/x-lisp";
+	case LUA: return "text/x-lua";
 	case NIM: return "text/x-nim";
 	case OBJC: return "text/x-objective-c";
 	case OCAML: return "text/x-ocaml";
@@ -7699,7 +7713,7 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	const char *p = (len > 1 && s[0] == '@')
 		? (const char *)s + 1 : (const char *)s;
 	if (len > 2 && p[0] == ' ') p++;
-	if (len > 8 && (p[0] == 'E' || p[0] == 'e') && p[4] == ' '
+	if (len > 10 && (p[0] == 'E' || p[0] == 'e') && p[4] == ' '
 	&& strncasecmp(p, "echo off", 8) == 0)
 		return "text/x-msdos-batch";
 
