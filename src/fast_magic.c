@@ -1988,8 +1988,13 @@ is_python_bytecode(const uint8_t *s, const size_t slen)
 	case 0x2f0d0d0a: case 0x300d0d0a: case 0x310d0d0a: case 0x320d0d0a:
 	case 0x330d0d0a: case 0x3e0d0d0a: case 0x3f0d0d0a:
 		return 1;
-	default: return 0;
+	default: break;
 	}
+
+	const uint16_t n = LE_U16(s);
+	if (slen > 8 && LE_U32(s + 4) < 0x04 && (s[1] == 0x0D || s[1] == 0x0E
+	|| n == 240 || n == 256 || n == 336 || n == 384 || n == 416))
+		return 1;
 
 	return 0;
 }
@@ -7433,7 +7438,7 @@ struct tokens_t tokens[] = {
 	{"return {", 8, LUA, 2},
 	{"require(", 8, LUA, 2},
 	{"--]]\n", 5, LUA, 2},
-	{"[\"\n", 3, LUA, 2},
+	{"[\"", 2, LUA, 2},
 
 	{"fetchImpl ", 10, NIM, 5},
 	{"proc ", 5, NIM, 3},
