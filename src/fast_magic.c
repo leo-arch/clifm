@@ -2836,6 +2836,10 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		return "application/x-bplist";
 	}
 
+	if (nread > 8 && sig[0] == 'q' && sig[1] == 'v' && sig[2] == '4'
+	&& memcmp(sig, "qv4cdata", 8) == 0)
+		return "application/x-qml-bytecode";
+
 	/* Windows 32/64-bit crash dump (file(1)) */
 	if (nread > 7 && sig[0] == 'P' && sig[1] == 'A' && sig[2] == 'G'
 	&& sig[3] == 'E' && sig[4] == 'D' && sig[5] == 'U') {
@@ -4848,7 +4852,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread >= 17) {
 		const size_t columns = (size_t)sig[0];
 		const size_t rows = (size_t)sig[1];
-		if (columns <= 80 && rows <= 25
+		if (columns > 0 && columns <= 80 && rows > 0 && rows <= 25
 		&& (size_t)file_size == 2 + columns * rows * 15 + 70)
 			return "image/x-award-bioslogo";
 	}
@@ -6458,7 +6462,8 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 3 && file_size == 1026 && sig[0] == 0xB0 && sig[1] == 0xF0
 	&& !sig[3])
 		return "image/x-commodore-starpainter"; /* .zs */
-	if (nread > 1 && file_size == 2 + (sig[0] * (sig[1] << 3)))
+	if (nread >= 10 && sig[0] > 0 && sig[1] > 0
+	&& file_size == 2 + (sig[0] * (sig[1] << 3)))
 		return "image/x-commodore-starpainter"; /* .gr */
 
 	/* RECOIL: recoil.c (RECOIL_DecodeHim) */
