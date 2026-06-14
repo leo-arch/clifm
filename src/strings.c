@@ -2170,7 +2170,7 @@ expand_range(char *str, int listdir)
 
 	const filesn_t afirst = xatof(str);
 
-	++p;
+	p++;
 	filesn_t asecond = 0;
 	if (!*p) { /* No second field: assume last listed file */
 		asecond = g_files_num;
@@ -2185,7 +2185,7 @@ expand_range(char *str, int listdir)
 
 	if (listdir) {
 		if (afirst <= 0 || afirst > g_files_num || asecond <= 0
-		|| asecond > g_files_num || afirst >= asecond)
+		|| asecond > g_files_num || afirst > asecond)
 			return NULL;
 	} else {
 		if (afirst >= asecond) 
