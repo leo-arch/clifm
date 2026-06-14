@@ -7244,14 +7244,17 @@ struct tokens_t tokens[] = {
 	{"register ", 9, CLANG|CPLUS|OBJC, 5},
 	{"volatile ", 9, CLANG|CPLUS|OBJC|CSHARP|SCALA, 3},
 	{"union ", 6, CLANG|CPLUS|OBJC|DLANG|VERILOG, 3},
-	{"// ", 3, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SWIFT|KOTLIN|SCALA, 1}, // also Kotlin, Swift, and Scala
-	{"/* ", 3, CLANG|CPLUS|OBJC|CSHARP|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SQL|KOTLIN|GROOVY, 1}, // also Kotlin, Swift, and Scala
+
+	{"// ", 3, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SWIFT|KOTLIN|SCALA, 1},
+	{"/* ", 3, CLANG|CPLUS|OBJC|CSHARP|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SQL|KOTLIN|GROOVY, 1}, // also Swift and Scala
+	{"///", 3, CPLUS|CSHARP|DLANG|RUST|SCALA|SWIFT|PHP, 1},
+	{"/**", 3, CPLUS|KOTLIN|SCALA|PHP, 2},
 
 	{"using namespace ", 16, CPLUS, MAX_SCORE},
-	{"namespace", 9, CPLUS|CSHARP|KOTLIN, 10},
-	{"std::", 5, CPLUS, MAX_SCORE},
-	{"static std::", 12, CPLUS, MAX_SCORE},
 	{"constexpr ", 10, CPLUS, MAX_SCORE},
+	{"namespace", 9, CPLUS|CSHARP|KOTLIN, 10},
+	{"static std::", 12, CPLUS, MAX_SCORE},
+	{"std::", 5, CPLUS|RUST, 10},
 	{"template ", 9, CPLUS|NIM|DLANG, 2},
 	{"concept ", 8, CPLUS, 2},
 	{"new ", 4, CPLUS|CSHARP|JAVA|JAVASCRIPT, 2},
@@ -7291,11 +7294,18 @@ struct tokens_t tokens[] = {
 	{"ubyte ", 6, DLANG, 3},
 
 	{"use crate::", 11, RUST, 5},
+	{"extern crate ", 13, RUST, 5},
+	{"use super::", 11, RUST, 5},
 	{"use std::", 9, RUST, 5},
 	{"pub fn ", 7, RUST, 5},
 	{"pub crate::", 11, RUST, 5},
+	{"pub(crate) ", 11, RUST, 5},
 	{"async fn ", 9, RUST, 5},
+	{"macro_rules!", 12, RUST, 7},
+	{"let mut ", 8, RUST, 4},
+	{"impl<", 5, RUST, 4},
 	{"impl ", 5, RUST, 3},
+	{"#![", 3, RUST, 2},
 	{"pub ", 4, RUST, 1},
 	{"match ", 6, RUST|OCAML, 1},
 	{"mod ", 4, RUST, 1},
@@ -7304,6 +7314,7 @@ struct tokens_t tokens[] = {
 	{"unsafe ", 7, RUST|CSHARP, 1},
 	{"fn ", 3, RUST, 1},
 	{"use ", 4, RUST|PERL, 1},
+	{"/*!", 3, RUST|DLANG, 1},
 
 	{"require '", 9, RUBY, MAX_SCORE},
 	{"require \"", 9, RUBY|LUA, 10},
