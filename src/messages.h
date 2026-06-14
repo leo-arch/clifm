@@ -1260,8 +1260,10 @@ Note: If DIR does not exist, it will be created."
 - Preview files in the current directory\n\
     view (or Alt+-)\n\
   Note: Select files using the TAB key.\n\
-- Preview specified files\n\
-    view FILE... (e.g., 'view *.png' or 'view sel')\n\
+- Preview only PNG files\n\
+    view *.png\n\
+- Preview selected files\n\
+    view sel\n\
 - Edit the configuration file\n\
     view edit (or F7)\n\
 - Edit the configuration file using vi\n\

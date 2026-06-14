@@ -225,11 +225,12 @@ get_mimetype_fallback(const char *file)
  *
  * When querying MIME types (query_mime == 1), the check is made in three steps:
  * 1. Check associations in the mime.types file
- * 2. Consult the libmagic database
- * 3. If libmagic fails, or gets no conclusive result (application/octet-stream),
+ * 2. Consult the fast-magic module (Moira)
+ * 3. Consult the libmagic database
+ * 4. If libmagic fails, or gets no conclusive result (application/octet-stream),
  * consult the shared MIME-info database, using either mimetype(1) or
- * xdg-mime(1), in this order. If none is available, this third check is
- * skipped.*/
+ * xdg-mime(1), in this order. If none is available, this fourth check is
+ * skipped. */
 char *
 xmagic(const char *file, const int query_mime)
 {
