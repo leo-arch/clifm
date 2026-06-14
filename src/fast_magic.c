@@ -3948,6 +3948,26 @@ is_atari_16color_palette(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
+static int
+is_mad_studio_mpl(const uint8_t *s, const size_t slen, const off_t file_size)
+{
+	if (slen < 13)
+		return 0;
+
+	const uint8_t height = s[0];
+	const size_t bitmap_offset = (size_t)file_size - ((size_t)height << 2);
+
+	if (bitmap_offset != 9 && bitmap_offset != 14)
+		return 0;
+
+	uint8_t max = 0;
+
+	for (size_t i = 1; i < 5; i++)
+		if (max < s[i]) max = s[i];
+
+	return (max + 8 <= 56);
+}
+
 /* See https://www.clicketyclick.dk/databases/xbase/format/dbf.html#DBF_NOTE_21_TARGET */
 static int
 is_dbf_file(const uint8_t *s, const size_t slen, const off_t file_size)
@@ -6788,12 +6808,9 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "image/x-atari-mad-studio-spr"; /* .spr */
 	/* RECOIL: recoil.c:RECOIL_DecodeMpl */
 	if (file_size >= 13 && sig[0] > 0 && sig[0] <= 40
-	&& (size_t)file_size > ((size_t)sig[0] << 2)) {
-		const uint8_t height = sig[0];
-		const size_t bitmap_offset = (size_t)file_size - ((size_t)height << 2);
-		if (bitmap_offset == 9 || bitmap_offset == 14)
-			return "image/x-atari-mad-studio-mpl"; /* .mpl */
-	}
+	&& (size_t)file_size > ((size_t)sig[0] << 2)
+	&& is_mad_studio_mpl(sig, nread, file_size) == 1)
+		return "image/x-atari-mad-studio-mpl"; /* .mpl */
 	/* RECOIL: recoil.c:RECOIL_DecodeTl4 */
 	if (nread > 4 && sig[0] > 0 && sig[0] <= 4 && sig[1] > 0 && sig[1] <= 5
 	&& (size_t)file_size == (2 + ((size_t)sig[0] * (size_t)sig[1] * 9)))
@@ -7226,14 +7243,14 @@ struct tokens_t {
 
 struct tokens_t tokens[] = {
 	/* A token starting with a NUL byte is a glob pattern. */
-	{"#include ", 9, CLANG|CPLUS, 5},
-	{"#if ", 4, CLANG|CPLUS|OBJC|OCAML, 1},
-	{"#ifdef ", 7, CLANG|CPLUS|OBJC, 5},
-	{"#ifndef ", 8, CLANG|CPLUS|OBJC, 5},
-	{"#else", 5, CLANG|CPLUS|OBJC|OCAML, 1},
-	{"#endif", 6, CLANG|CPLUS|OBJC|OCAML, 1},
-	{"#define ", 8, CLANG|CPLUS|OBJC, 5},
-	{"#pragma ", 8, CLANG|CPLUS|OBJC|DLANG, 5},
+	{"#include ", 9, CLANG|CPLUS, 5}, {"# include ", 10, CLANG|CPLUS, 5},
+	{"#if ", 4, CLANG|CPLUS|OBJC|OCAML, 1}, {"# if ", 5, CLANG|CPLUS|OBJC|OCAML, 1},
+	{"#ifdef ", 7, CLANG|CPLUS|OBJC, 5}, {"# ifdef ", 8, CLANG|CPLUS|OBJC, 5},
+	{"#ifndef ", 8, CLANG|CPLUS|OBJC, 5}, {"# ifndef ", 9, CLANG|CPLUS|OBJC, 5},
+	{"#else", 5, CLANG|CPLUS|OBJC|OCAML, 1}, {"# else", 6, CLANG|CPLUS|OBJC|OCAML, 1},
+	{"#endif", 6, CLANG|CPLUS|OBJC|OCAML, 1}, {"# endif", 7, CLANG|CPLUS|OBJC|OCAML, 1},
+	{"#define ", 8, CLANG|CPLUS|OBJC, 5}, {"# define ", 9, CLANG|CPLUS|OBJC, 5},
+	{"#pragma ", 8, CLANG|CPLUS|OBJC|DLANG, 5}, {"# pragma ", 9, CLANG|CPLUS|OBJC|DLANG, 5},
 	{"extern ", 7, CLANG|CPLUS|OBJC|CSHARP|DLANG|RUST|VERILOG, 2},
 	{"int main(", 9, CLANG|CPLUS|DLANG, 5},
 	{"void main(", 10, CLANG|CPLUS|DLANG, 5}, /* Old invocation */
