@@ -1287,16 +1287,18 @@ Copy \fIFILE\fR(s) to \fIDIR\fR and bulk rename them at once.
 .B ver, version
 Show \fBclifm\fR version details.
 .TP
-.B view \fR[edit [\fIAPP\fR] | purge]
-preview files in the current directory (full screen). Requires \fBfzf\fR(1). \fBAlt+-\fR is also available.
+.B view \fR[\fIFILE\fR... | edit [\fIAPP\fR] | purge]
+Preview specified files in full-screen mode. Requires \fBfzf\fR(1). \fBAlt+-\fR is also available (current directory only).
 .sp
-By pressing \fBEnter\fR or \fBRight\fR, the currently highlighted file will be selected and \fBview\fR closed. To select multiple files, mark them with the TAB key and then press \fBEnter\fR or \fBRight\fR to confirm. To quit \fBview\fR press Escape or the Left arrow key.
+Without arguments, the current directory is assumed. Otherwise, only the specified files are previewed.
+.sp
+By pressing \fBEnter\fR or \fBRight\fR, the currently highlighted file will be selected and \fBview\fR closed. To select multiple files, mark them with the TAB key and then press \fBEnter\fR or \fBRight\fR to confirm. To quit \fBview\fR, press Escape or the Left arrow key.
 .sp
 Run `\fBview purge\fR` to purge the thumbnails directory (\fI$XDG_CACHE_HOME/clifm/thumbnails\fR) of dangling thumbnails.
 .sp
-To edit the previewer configuration file enter `\fBview edit\fR`, or `\fBview edit vi\fR` to open it with a specific application, in this case, \fBvi\fR(1).
+To edit the previewer configuration file, enter `\fBview edit\fR`, or `\fBview edit vi\fR` to open it with a specific application, in this case, \fBvi\fR(1).
 .sp
-For \fBimage previews\fR consult the Wiki (\fIhttps://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev\fR) or enter `\fBhelp image-previews\fR`.
+To enable \fBimage previews\fR, consult the Wiki (\fIhttps://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev\fR) or enter `\fBhelp image-previews\fR`.
 .sp
 For further information consult the \fBSHOTGUN\fR section below.
 .TP

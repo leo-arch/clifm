@@ -1255,11 +1255,13 @@ Note: If DIR does not exist, it will be created."
 
 #define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  view [edit [APP] | purge]\n\n\
+  view [FILE... | edit [APP] | purge]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Just run the previewer\n\
+- Preview files in the current directory\n\
     view (or Alt+-)\n\
   Note: Select files using the TAB key.\n\
+- Preview specified files\n\
+    view FILE... (e.g., 'view *.png' or 'view sel')\n\
 - Edit the configuration file\n\
     view edit (or F7)\n\
 - Edit the configuration file using vi\n\
