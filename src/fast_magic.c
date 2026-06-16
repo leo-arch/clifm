@@ -221,21 +221,172 @@ utf16le_cmp(const uint8_t *a, const size_t alen, const char *b,
 	const size_t blen)
 {
 	if (!a || !b || blen > SIZE_MAX / 2 || alen < blen * 2)
-		return 0;
+		return (-1); /* Error */
 
 	for (size_t i = 0, j = 0; j < blen; j++, i += 2) {
 		if (a[i] != (uint8_t)b[j] || a[i + 1] != 0x00)
-			return 0;
+			return 1; /* No match */
 	}
 
-	return 1;
+	return 0; /* Match */
 }
 
 static const char *
-get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
+check_ole2_clsid(const uint8_t *s, const size_t slen, const size_t offset)
 {
-	/* Check for "MSWordDoc" or "Microsoft Word document data" at offset
-	 * 2112 (magic taken from the Shared MIME-info database) */
+	const uint8_t *p = s + offset;
+	const size_t rem = offset < slen ? slen - offset : 0;
+
+	if (rem < 96) {
+#ifdef FMAGIC_NO_NULL
+		return "application/x-ole-storage";
+#else
+		return NULL;
+#endif
+	}
+
+	uint32_t hi = BE_U32(p + 88);
+	uint32_t lo = BE_U32(p + 92);
+	const uint64_t bequad88 = ((uint64_t)hi << 32) | (uint64_t)lo;
+
+	hi = BE_U32(p + 80);
+	lo = BE_U32(p + 84);
+	const uint64_t bequad80 = ((uint64_t)hi << 32) | (uint64_t)lo;
+
+	if (bequad88 == 0xC000000000000046) {
+		switch (bequad80) {
+		case 0x131a020000000000: return "application/vnd.visio";
+		case 0x141a020000000000: return "application/vnd.visio";
+		case 0x84100C0000000000: return "application/x-msi";
+		case 0x82100C0000000000: return "application/x-ms-mst";
+		case 0x86100C0000000000: return "application/x-wine-extension-msp";
+		case 0x0009020000000000: return "application/msword";
+		case 0x0609020000000000: return "application/msword";
+		case 0x0213020000000000: return "application/vnd.ms-works";
+		case 0x0313020000000000: return "application/vnd.ms-works-db";
+		case 0x1008020000000000: return "application/vnd.ms-excel";
+		case 0x2008020000000000: return "application/vnd.ms-excel";
+		case 0x0B0D020000000000: return "application/x-ms-msg";
+		case 0x46F0060000000000: return "application/x-ms-oft";
+		case 0x5148040000000000: return "application/vnd.ms-powerpoint";
+		case 0x602C020000000000: return "image/x-greenstreet-art";
+		default: break;
+		}
+	}
+
+	if (bequad88 == 0xA29A00AA004A1A72) {
+		if (bequad80 == 0xc2dbcd28e20ace11)
+			return "application/vnd.ms-works";
+		if (bequad80 == 0xc3dbcd28e20ace11)
+			return "application/vnd.ms-works-db";
+	}
+	if (bequad88 == 0xa40700c04fb932ba && bequad80 == 0xb25aa40e0a9ed111)
+		return "application/vnd.ms-works";
+	if (bequad88 == 0xa1c800c04f612452 && bequad80 == 0xc0c7266eb98cd311)
+		return "application/vnd.ms-works";
+	if (bequad88 == 0x00c0000000000046) {
+		if (bequad80 == 0x0012020000000000)
+			return "application/vnd.ms-publisher";
+		if (bequad80 == 0x0112020000000000)
+			return "application/vnd.ms-publisher";
+	}
+	if (bequad88 == 0xa90300aa00510ea3 && bequad80 == 0x70ae7bea3bfbcd11)
+		return "application/vnd.ms-powerpoint";
+	if (bequad88 == 0x86ea00aa00b929e8 && bequad80 == 0x108d81649b4fcf11)
+		return "application/vnd.ms-powerpoint";
+	if (bequad88 == 0x871800aa0060263b && bequad80 == 0xf04672810a72cf11)
+		return "application/vnd.ms-powerpoint";
+	if (bequad88 == 0xb29400dd010f2bf9 && bequad80 == 0x801cb0023de01a10)
+		return "image/x-ms-awd";
+	if (bequad88 == 0xbe1100c04fb6faf1 && bequad80 == 0x3a8fb774c8c8d111)
+		return "application/vnd.ms-project";
+	if (bequad88 == 0xb21c00aa004ba90b && bequad80 == 0x0004855964661b10)
+		return "application/x-msbinder";
+	if (bequad88 == 0x19370000929679cd && bequad80 == 0xff739851ad2d2002)
+		return "application/vnd.wordperfect";
+	if (bequad88 == 0x99ae04021c007002) {
+		if (bequad80 == 0x62fe2e4099191b10)
+			return "application/x-corelpresentations";
+		if (bequad80 == 0x60fe2e4099191b10)
+			return "image/x-wpg";
+	}
+	if (bequad88 == 0xbe26db67235e2689 && bequad80 == 0x20f414de1cacce11)
+		return "application/x-corel-cad";
+
+	if (bequad88 == 0x996104021c007002) {
+		if (bequad80 == 0x407e5cdc5cb31b10)
+			return "application/x-starwriter";
+		if (bequad80 == 0xa03f543fa6b61b10)
+			return "application/x-starcalc";
+		if (bequad80 == 0xe0aa10af6db31b10)
+			return "application/x-starimpress";
+	}
+	if (bequad88 == 0x89cb008029e4b0b1) {
+		if (bequad80 == 0x41d461633542d011)
+			return "application/x-starcalc";
+		if (bequad80 == 0x61b8a5c6d685d111)
+			return "application/vnd.stardivision.cal";
+		if (bequad80 == 0xc03c2d011642d011)
+			return "application/x-starimpress";
+	}
+	if (bequad88 == 0xb12a04021c007002 && bequad80 == 0x600459d4fd351c10)
+		return "application/x-starmath";
+	if (bequad88 == 0x8e2c00001b4cc711 && bequad80 == 0xe0999cfb6d2c1c10)
+		return "application/x-starchart";
+	if (bequad88 == 0xa45e00a0249d57b1 && bequad80 == 0xb0e9048b0e42d011)
+		return "application/x-starwriter";
+	if (bequad88 == 0x89ca008029e4b0b1) {
+		if (bequad80 == 0xe1b7b3022542d011)
+			return "application/x-starmath";
+		if (bequad80 == 0xe0b7b3022542d011)
+			return "application/x-starchart";
+	}
+	if (bequad88 == 0xa53f00a0249d57b1 && bequad80 == 0x70c90a340de3d011)
+		return "application/x-starwriter-global";
+	if (bequad88 == 0x89d0008029e4b0b1) {
+		if (bequad80 == 0x40e6b5ffde85d111)
+			return "application/vnd.stardivision.math";
+		if (bequad80 == 0xa005892ebd85d111)
+			return "application/vnd.stardivision.draw";
+		if (bequad80 == 0x21725c56bc85d111)
+			return "application/vnd.stardivision.impress";
+		if (bequad80 == 0x214388bfdd85d111)
+			return "application/vnd.stardivision.chart";
+	}
+	if (bequad88 == 0xaab4006097da561a) {
+		if (bequad80 == 0xd1f90cc2ae85d111)
+			return "application/vnd.stardivision.writer";
+		if (bequad80 == 0xd3f90cc2ae85d111)
+			return "application/vnd.stardivision.writer-global";
+	}
+	if (bequad88 == 0x855300aa00a1f95b && bequad80 == 0x0067615654c1ce11)
+		return "image/vnd.fpx";
+	if (bequad88 == 0x95f600a0cc3cca14 && bequad80 == 0x9174088a6452d411)
+		return "application/vnd.softmaker.planmaker";
+	if (bequad88 == 0x9fed04143144cc1e && bequad80 == 0x7b8cdd1cc081a045)
+		return "model/x-autodesk-max";
+	if (bequad88 == 0x93c37e0706000000 && bequad80 == 0x90b4294db249d011)
+		return "model/x-autodesk-ipt";
+	if (bequad88 == 0x893f00802964b632 && bequad80 == 0x0293c3a90a77d111)
+		return "application/x-corel-cl4";
+
+	if (rem > 384 && ((p[128] == '1' && p[256] == '2' && p[384] == '3')
+	|| (p[256] == 'C' && utf16le_cmp(p + 256, rem, "Catalog", 7) == 0)))
+		/* MIME-info uses "application/vnd.microsoft.windows.thumbnail-cache" */
+		return "application/x-ms-thumbnail"; /* Thumbs.db */
+
+#ifdef FMAGIC_NO_NULL
+	return "application/x-ole-storage";
+#else
+	return NULL;
+#endif
+}
+
+static const char *
+get_ole2_doc_type(const uint8_t *str, const size_t str_len)
+{
+	/* Check for "MSWordDoc" or "Microsoft Word" at offset 2112
+	 * (magic taken from the Shared MIME-info database) */
 	size_t offset = 2112; /* 0x840 */
 	if (str_len > offset + 9 && str[offset] == 'M' && str[offset + 2] == 'W'
 	&& memcmp(str + offset, "MSWordDoc", 9) == 0)
@@ -285,10 +436,10 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 	&& memcmp(str + offset, "MS PowerPoint", 13) == 0)
 		return "application/vnd.ms-powerpoint";
 
-	/* Check for "Workbook" (16 bit) at offset 1152 */
+	/* Check for "Workbook" (UTF16) at offset 1152 */
 	offset = 1152; /* 0x480 */
 	if (str_len > offset + 16 && str[offset] == 'W' && str[offset + 6] == 'k'
-	&& memcmp(str + offset, "W\0o\0r\0k\0b\0o\0o\0k\0", 16) == 0)
+	&& utf16le_cmp(str + offset, str_len - offset, "Workbook", 8) == 0)
 		return "application/vnd.ms-excel";
 
 	offset = 512;
@@ -299,16 +450,16 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 
 	offset = 3200; /* 0xC80 */
 	if (str_len > offset + 20 && str[offset] == 'S'
-	&& utf16le_cmp(str + offset, str_len - offset, "StarWriter", 10) == 1)
+	&& utf16le_cmp(str + offset, str_len - offset, "StarWriter", 10) == 0)
 		return "application/vnd.stardivision.writer";
-	if (str_len > offset + 20 && str[offset] == 'S'
-	&& utf16le_cmp(str + offset, str_len - offset, "StarCalc", 8) == 1)
+	if (str_len > offset + 16 && str[offset] == 'S'
+	&& utf16le_cmp(str + offset, str_len - offset, "StarCalc", 8) == 0)
 		return "application/vnd.stardivision.calc";
-	if (str_len > offset + 20 && str[offset] == 'S'
-	&& utf16le_cmp(str + offset, str_len - offset, "StarDraw", 8) == 1)
+	if (str_len > offset + 16 && str[offset] == 'S'
+	&& utf16le_cmp(str + offset, str_len - offset, "StarDraw", 8) == 0)
 		return "application/vnd.stardivision.draw";
-	if (str_len > offset + 20 && str[offset] == 'S'
-	&& utf16le_cmp(str + offset, str_len - offset, "StarImpress", 11) == 1)
+	if (str_len > offset + 22 && str[offset] == 'S'
+	&& utf16le_cmp(str + offset, str_len - offset, "StarImpress", 11) == 0)
 		return "application/vnd.stardivision.impress";
 
 	if (str_len <= 8)
@@ -317,8 +468,14 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 	/* Skip Compound Document Format (CDF) bytes (8) */
 	const uint8_t *s = str + 8;
 	const size_t l = str_len - 8;
+	size_t root_entry_offset = 0;
 
 	for (size_t i = 0; i + 8 <= l; i++) {
+		const size_t rem = l - i;
+		if (root_entry_offset == 0 && rem > 20 && s[i] == 'R'
+		&& s[i + 10] == 'E' && utf16le_cmp(s + i, rem, "Root Entry", 10) == 0)
+			root_entry_offset = i;
+
 		if (s[i] == 0xEC && s[i + 1] == 0xA5) { /* FibBase (Word) */
 			const uint16_t nfib = LE_U16(s + i + 2);
 			if (nfib == 0x00A0 || nfib == 0x00A1 || nfib == 0x00B0
@@ -338,31 +495,30 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 				return "application/vnd.ms-excel";
 		}
 
-		const size_t rem = l - i;
 		if (s[i] == 'W' && s[i + 2] == 'o'
-		&& utf16le_cmp(s + i, rem, "WordDocument", 12) == 1)
+		&& utf16le_cmp(s + i, rem, "WordDocument", 12) == 0)
 			return "application/msword";
 
 		if (s[i] == 'C' && s[i + 2] == 'u'
-		&& utf16le_cmp(s + i, rem, "Current User", 12) == 1)
+		&& utf16le_cmp(s + i, rem, "Current User", 12) == 0)
 			return "application/vnd.ms-powerpoint";
 		if (s[i] == 'O' && s[i + 2] == 'b'
-		&& utf16le_cmp(s + i, rem, "Object1", 7) == 1)
+		&& utf16le_cmp(s + i, rem, "Object1", 7) == 0)
 			return "application/vnd.ms-powerpoint";
 		if (s[i] == 'P') {
 			if (s[i + 1] == 'o' && memcmp(s + i, "PowerPoint", 10) == 0)
 				return "application/vnd.ms-powerpoint";
 			if (s[i + 2] == 'o'
-			&& utf16le_cmp(s + i, rem, "PowerPoint", 10) == 1)
+			&& utf16le_cmp(s + i, rem, "PowerPoint", 10) == 0)
 				return "application/vnd.ms-powerpoint";
-			if (s[i + 4] == 'T' && utf16le_cmp(s + i, rem, "PPT", 3) == 1)
+			if (s[i + 4] == 'T' && utf16le_cmp(s + i, rem, "PPT", 3) == 0)
 				return "application/vnd.ms-powerpoint";
-			if (s[i + 4] == '4' && utf16le_cmp(s + i, rem, "PP4", 3) == 1)
+			if (s[i + 4] == '4' && utf16le_cmp(s + i, rem, "PP4", 3) == 0)
 				return "application/vnd.ms-powerpoint";
 		}
 
 		if (s[i] == 'V' && s[i + 2] == 'i'
-		&& utf16le_cmp(s + i, rem, "VisioDocument", 13) == 1)
+		&& utf16le_cmp(s + i, rem, "VisioDocument", 13) == 0)
 			return "application/vnd.visio";
 
 		if (s[i] == 0xFF && s[i + 1] == 'W' && s[i + 2] == 'P'
@@ -373,7 +529,7 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 		&& memcmp(s + i, "MSPublisher", 11) == 0)
 			return "application/vnd.ms-publisher";
 		if (s[i] == 'Q' && s[i + 2] == 'u'
-		&& utf16le_cmp(s + i, rem, "Quill", 5) == 1)
+		&& utf16le_cmp(s + i, rem, "Quill", 5) == 0)
 			return "application/vnd.ms-publisher";
 
 		if (rem > 11 && i >= 0x820 && i < 0x840 && s[i] == 'S'
@@ -388,22 +544,27 @@ get_ole2_ms_office_type(const uint8_t *str, const size_t str_len)
 				return "application/vnd.stardivision.impress";
 		}
 		if (rem > 22 && s[i] == 'S' && !s[i + 1] && s[i + 2] == 't') {
-			if (s[i + 8] == 'D' && utf16le_cmp(s + i, rem, "StarDraw", 8) == 1)
+			if (s[i + 8] == 'D' && utf16le_cmp(s + i, rem, "StarDraw", 8) == 0)
 				return "application/vnd.stardivision.draw";
-			if (s[i + 8] == 'C' && utf16le_cmp(s + i, rem, "StarCalc", 8) == 1)
+			if (s[i + 8] == 'C' && utf16le_cmp(s + i, rem, "StarCalc", 8) == 0)
 				return "application/vnd.stardivision.calc";
-			if (s[i + 8] == 'W' && utf16le_cmp(s + i, rem, "StarWriter", 10) == 1)
+			if (s[i + 8] == 'W' && utf16le_cmp(s + i, rem, "StarWriter", 10) == 0)
 				return "application/vnd.stardivision.writer";
-			if (s[i + 8] == 'I' && utf16le_cmp(s + i, rem, "StarImpress", 11) == 1)
+			if (s[i + 8] == 'I' && utf16le_cmp(s + i, rem, "StarImpress", 11) == 0)
 				return "application/vnd.stardivision.impress";
 		}
+
+		if (rem > 20 && s[i] == 'F' && s[i + 8] == 'H'
+		&& utf16le_cmp(s + i, rem, "FileHeader", 10) == 0)
+			return "application/x-hwp";
+
+/*		Conflicts with .fla files
+		if (rem > 16 && s[i] == 'C' && s[i + 2] == 'o'
+		&& utf16le_cmp(s + i, rem, "Contents", 8) == 0)
+			return "application/x-corel-cl2"; */
 	}
 
-#ifdef FMAGIC_NO_NULL
-	return "application/x-ole-storage";
-#else
-	return NULL;
-#endif
+	return check_ole2_clsid(s, l, root_entry_offset);
 }
 
 static const char *
@@ -1180,7 +1341,7 @@ check_pre_ole2_office_docs(const uint8_t *s, const size_t slen)
 	if (slen > 128 && s[0] == 0x31 && s[1] == 0xBE && s[2] == 0x00
 	&& s[3] == 0x00 && s[128] > 0) { /* Pre OLE2 Word (DOS Word 5) */
 		const uint16_t b = LE_U16(s + 96);
-		if (b != 0) return "application/mswrite";
+		if (b != 0) return "application/x-mswrite";
 		return "application/msword";
 	}
 
@@ -4225,7 +4386,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 7 && sig[0] == 0xD0 && sig[1] == 0xCF && sig[2] == 0x11
 	&& sig[3] == 0xE0 && sig[4] == 0xA1 && sig[5] == 0xB1 && sig[6] == 0x1A
 	&& sig[7] == 0xE1) /* MS Compound Document Format - OLE2 */
-		return get_ole2_ms_office_type(sig, nread);
+		return get_ole2_doc_type(sig, nread);
 
 	const char *ret = check_pre_ole2_office_docs(sig, nread);
 	if (ret)
@@ -5072,6 +5233,11 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == 'S' && sig[1] == 'G' && sig[2] == 'A'
 	&& sig[3] == '3')
 		return "application/x-stargallery-sdg"; /* .sdg (Gallery) */
+	if (nread > 4 && BE_U16(sig) == 0x0400 && BE_U16(sig + 2) > 0) {
+		const uint8_t v = sig[2] + 13;
+		if (nread > v && sig[v] > 0x1F)
+			return "application/x-stargallery-thm";
+	}
 	if (nread > 3 && sig[0] == 'S' && sig[1] == 'W' && sig[2] == 'G'
 	&& sig[3] == '2') /* .sdw (Writer, old binary format) */
 		return "application/vnd.stardivision.writer";
