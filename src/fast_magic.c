@@ -3117,6 +3117,10 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& ((sig[3] == '4' && sig[8] == 'M') || (sig[3] == '8' && sig[16] == 'M')))
 		return "model/x-maya";
 
+	/* file(1): magic/Magdir/magic */
+	if (nread > 4 && (BE_U32(sig) == 0xF11E041C || LE_U32(sig) == 0xF11E041C))
+		return "application/x-file"; /* file(1) magic file (binary) */
+
 	if (nread >= 32 && sig[0] == 0xFF && sig[1] == 0xFE && sig[4] == 'S'
 	&& memcmp(sig, "\xff\xfe\xff\x0e\x53\x00\x6b\x00\x65\x00\x74\x00\x63\x00\x68\x00\x55\x00\x70\x00\x20\x00\x4d\x00\x6f\x00\x64\x00\x65\x00\x6c\x00", 32) == 0)
 		return "application/vnd.sketchup.skp";
@@ -7391,8 +7395,9 @@ check_ini_file(const uint8_t *s, const size_t slen)
 #define DART       0x100000000
 #define ZIG        0x200000000
 #define LUA        0x400000000
+#define FILE1      0x800000000
 /* Update this value after adding a new language (max 64) */
-#define LANG_NUM 35
+#define LANG_NUM 36
 #if LANG_NUM > 64
 # error "LANG_NUM must be <= 64"
 #endif
@@ -7531,7 +7536,7 @@ struct tokens_t tokens[] = {
 	{"await ", 6, PYTHON|JAVASCRIPT|NIM, 2},
 	{"self.", 5, PYTHON|RUBY|OBJC|DLANG|RUST|SWIFT, 1},
 	{"\"\"\" ", 4, PYTHON, 2},
-	{"# ", 2, PYTHON|PERL|ELIXIR|PHP|NIM, 1},
+	{"# ", 2, PYTHON|PERL|ELIXIR|PHP|NIM|FILE1, 1},
 
 	{"(:require", 4, CLOJURE, 5},
 	{"(defn", 5, CLOJURE, 5},
@@ -7730,6 +7735,13 @@ struct tokens_t tokens[] = {
 	{"<?\r\n", 4, PHP, 4},
 	{"?>", 2, PHP, 4},
 
+	{"!:mime\x09", 7, FILE1, MAX_SCORE},
+	{"# $File: ", 9, FILE1, MAX_SCORE},
+	{"\x09string\x09", 8, FILE1, 6},
+	{"\x09regex\x09", 7, FILE1, 6},
+	{">>>", 3, FILE1, 2},
+	{">>", 2, FILE1, 1},
+
 	{NULL, 0, 0, 0}
 };
 
@@ -7748,6 +7760,7 @@ best_scored_mimetype(const uint64_t lang)
 	case DLANG: return "text/x-d";
 	case ELIXIR: return "text/x-elixir";
 	case ERLANG: return "text/x-erlang";
+	case FILE1: return "text/x-file";
 	case FORTRAN: return "text/x-fortran";
 	case GOLANG: return "text/x-golang";
 	case GROOVY: return "text/x-groovy";
@@ -7851,7 +7864,7 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	for (size_t i = 0; i < max; i++) {
 		if (s[i] == 0x0A || s[i] == 0x0D)
 			{newline = 1; continue;}
-		if (newline == 0 || s[i] <= 0x20 || IS_DIGIT(s[i]))
+		if (s[i] != 0x09 && (newline == 0 || s[i] <= 0x20 || IS_DIGIT(s[i])))
 			continue;
 
 		newline = 0;
