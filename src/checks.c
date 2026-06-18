@@ -613,6 +613,8 @@ check_expansion_patterns(const char *str)
 	return 0;
 }
 
+/* Return 1 if the Z-cmd z[ID] is overridden by either an action name or
+ * an alias. Otherwise, zero is returned. */
 int
 z_cmd_used(char id)
 {
@@ -721,7 +723,8 @@ check_for_alias(char **args)
 	}
 
 	/* Replace vi-like 'z' commands by the corresponding internal command */
-	expand_cmd_aliases(&args[0]);
+	if (!is_action_name(args[0]))
+		expand_cmd_aliases(&args[0]);
 
 	return NULL;
 }
