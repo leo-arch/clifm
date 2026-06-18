@@ -613,6 +613,39 @@ check_expansion_patterns(const char *str)
 	return 0;
 }
 
+static void
+expand_cmd_aliases(char **cmd_name)
+{
+	char *cmd = *cmd_name;
+
+	if (!cmd || *cmd != 'z' || !cmd[1] || cmd[2])
+		return;
+
+	switch (cmd[1]) {
+	case 'c': *cmd = 'f'; cmd[1] = 'c'; break;  /* zc -> fc (file-counter) */
+	case 'd': *cmd = 'f'; cmd[1] = 'f'; break;  /* zd -> ff (dirs-first) */
+	case 'f': *cmd = 'k'; cmd[1] = '\0'; break; /* zf -> k (follow-links) */
+	case 'h': *cmd = 'h'; cmd[1] = 'f'; break;  /* zh -> hf (show-hidden) */
+	case 'i':                                   /* zi -> icons */
+		*cmd_name = xnrealloc(*cmd_name, 6, sizeof(char));
+		xstrsncpy(*cmd_name, "icons", 6);
+		break;
+	case 'n': *cmd = 'k'; cmd[1] = 'k'; break;  /* zn -> kk (max-name-len) */
+	case 'o': *cmd = 'o'; cmd[1] = 'd'; break;  /* zo -> od (only-dirs) */
+	case 'p':                                   /* zp -> view */
+		*cmd_name = xnrealloc(*cmd_name, 5, sizeof(char));
+		xstrsncpy(*cmd_name, "view", 5);
+		break;
+	case 'r': *cmd = 'f'; cmd[1] = 'z'; break;  /* zr -> fz (recursive-dir-size) */
+	case 's': *cmd = 'c'; cmd[1] = 'i'; break;  /* zs -> ci (case-sens-list) */
+	case 'v': *cmd = 's'; cmd[1] = 'r'; break;  /* zv -> sr (sort-reverse) */
+	case 'x': *cmd = 'l'; cmd[1] = 'l'; break;  /* zx -> ll (long-view) */
+	case 'y': *cmd = 'l'; cmd[1] = 'm'; break;  /* zy -> lm (light-mode) */
+	case 'z': *cmd = 'q'; cmd[1] = '\0'; break; /* zz -> q */
+	default: break;
+	}
+}
+
 /* Returns the parsed aliased command in an array of strings if a
  * matching alias is found, or NULL if not. */
 char **
@@ -664,6 +697,9 @@ check_for_alias(char **args)
 
 		return alias_cmd;
 	}
+
+	/* Replace vi-like 'z' commands by the corresponding internal command */
+	expand_cmd_aliases(&args[0]);
 
 	return NULL;
 }
