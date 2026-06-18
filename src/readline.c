@@ -1445,8 +1445,10 @@ int_z_cmds_generator(const char *text, int state)
 	};
 
 	const char *name;
-	while ((name = cmd_desc[i++]))
-		return strdup(name);
+	while ((name = cmd_desc[i++])) {
+		if (!z_cmd_used(name[1]))
+			return strdup(name);
+	}
 
 	return NULL;
 }

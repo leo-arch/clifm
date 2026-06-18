@@ -613,6 +613,28 @@ check_expansion_patterns(const char *str)
 	return 0;
 }
 
+int
+z_cmd_used(char id)
+{
+	if (usr_actions) {
+		for (size_t i = 0; i < actions_n; i++) {
+			char *s = usr_actions[i].name;
+			if (s[0] == 'z' && s[1] == id && !s[2])
+				return 1;
+		}
+	}
+
+	if (aliases) {
+		for (size_t i = 0; i < aliases_n; i++) {
+			char *s = aliases[i].name;
+			if (s[0] == 'z' && s[1] == id && !s[2])
+				return 1;
+		}
+	}
+
+	return 0;
+}
+
 static void
 expand_cmd_aliases(char **cmd_name)
 {

@@ -35,6 +35,7 @@ int  is_internal_cmd(char *cmd, const int flag, const int check_hist,
 int  is_number(const char *restrict str);
 int  is_url(const char *url);
 void truncate_file(const char *file, const int max, const int check_dups);
+int  z_cmd_used(char id);
 
 __END_DECLS
 

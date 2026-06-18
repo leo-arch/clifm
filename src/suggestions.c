@@ -116,7 +116,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 	}
 
 	else if (l == 2) {
-		if (*s == 'z') { /* Vi-like 'z' command aliases */
+		if (*s == 'z' && !z_cmd_used(s[1])) { /* Vi-like 'z' command aliases */
 			switch (s[1]) {
 			case 'c': return FC_DESC;
 			case 'd': return FF_DESC;
