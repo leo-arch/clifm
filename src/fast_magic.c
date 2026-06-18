@@ -7440,8 +7440,8 @@ struct tokens_t tokens[] = {
 
 	{"// ", 3, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SWIFT|KOTLIN|SCALA, 1},
 	{"/* ", 3, CLANG|CPLUS|OBJC|CSHARP|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SQL|KOTLIN|GROOVY, 1}, // also Swift and Scala
-	{"///", 3, CPLUS|CSHARP|DLANG|RUST|SCALA|SWIFT|PHP, 1},
-	{"/**", 3, CPLUS|KOTLIN|SCALA|PHP, 2},
+	{"/// ", 4, CPLUS|CSHARP|DLANG|RUST|SCALA|SWIFT|PHP, 1},
+	{"/** ", 4, KOTLIN|SCALA|PHP, 2},
 
 	{"using namespace ", 16, CPLUS, MAX_SCORE},
 	{"constexpr ", 10, CPLUS, MAX_SCORE},
@@ -7735,12 +7735,11 @@ struct tokens_t tokens[] = {
 	{"<?\r\n", 4, PHP, 4},
 	{"?>", 2, PHP, 4},
 
-	{"!:mime\x09", 7, FILE1, MAX_SCORE},
 	{"# $File: ", 9, FILE1, MAX_SCORE},
-	{"\x09string\x09", 8, FILE1, 6},
-	{"\x09regex\x09", 7, FILE1, 6},
+	{"!:mime\x09", 7, FILE1, MAX_SCORE},
+	{"string\x09", 7, FILE1, 6},
+	{"regex\x09", 6, FILE1, 6},
 	{">>>", 3, FILE1, 2},
-	{">>", 2, FILE1, 1},
 
 	{NULL, 0, 0, 0}
 };
@@ -7864,7 +7863,7 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	for (size_t i = 0; i < max; i++) {
 		if (s[i] == 0x0A || s[i] == 0x0D)
 			{newline = 1; continue;}
-		if (s[i] != 0x09 && (newline == 0 || s[i] <= 0x20 || IS_DIGIT(s[i])))
+		if (newline == 0 || s[i] <= 0x20 || IS_DIGIT(s[i]))
 			continue;
 
 		newline = 0;
