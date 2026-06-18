@@ -723,7 +723,7 @@ check_for_alias(char **args)
 	}
 
 	/* Replace vi-like 'z' commands by the corresponding internal command */
-	if (!is_action_name(args[0]))
+	if (*args[0] == 'z' && !is_action_name(args[0]))
 		expand_cmd_aliases(&args[0]);
 
 	return NULL;
