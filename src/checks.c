@@ -638,7 +638,7 @@ z_cmd_used(char id)
 }
 
 static void
-expand_cmd_aliases(char **cmd_name)
+expand_z_cmd(char **cmd_name)
 {
 	char *cmd = *cmd_name;
 
@@ -724,7 +724,7 @@ check_for_alias(char **args)
 
 	/* Replace vi-like 'z' commands by the corresponding internal command */
 	if (*args[0] == 'z' && !is_action_name(args[0]))
-		expand_cmd_aliases(&args[0]);
+		expand_z_cmd(&args[0]);
 
 	return NULL;
 }

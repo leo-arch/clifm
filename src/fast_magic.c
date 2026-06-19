@@ -7396,8 +7396,9 @@ check_ini_file(const uint8_t *s, const size_t slen)
 #define ZIG        0x200000000
 #define LUA        0x400000000
 #define FILE1      0x800000000
+#define VALA       0x1000000000
 /* Update this value after adding a new language (max 64) */
-#define LANG_NUM 36
+#define LANG_NUM 37
 #if LANG_NUM > 64
 # error "LANG_NUM must be <= 64"
 #endif
@@ -7415,11 +7416,11 @@ struct tokens_t {
 struct tokens_t tokens[] = {
 	/* A token starting with a NUL byte is a glob pattern. */
 	{"#include ", 9, CLANG|CPLUS, 5}, {"# include ", 10, CLANG|CPLUS, 5},
-	{"#if ", 4, CLANG|CPLUS|OBJC|OCAML, 1}, {"# if ", 5, CLANG|CPLUS|OBJC|OCAML, 1},
+	{"#if ", 4, CLANG|CPLUS|OBJC|OCAML|VALA, 1}, {"# if ", 5, CLANG|CPLUS|OBJC|OCAML|VALA, 1},
 	{"#ifdef ", 7, CLANG|CPLUS|OBJC, 5}, {"# ifdef ", 8, CLANG|CPLUS|OBJC, 5},
 	{"#ifndef ", 8, CLANG|CPLUS|OBJC, 5}, {"# ifndef ", 9, CLANG|CPLUS|OBJC, 5},
 	{"#else", 5, CLANG|CPLUS|OBJC|OCAML, 1}, {"# else", 6, CLANG|CPLUS|OBJC|OCAML, 1},
-	{"#endif", 6, CLANG|CPLUS|OBJC|OCAML, 1}, {"# endif", 7, CLANG|CPLUS|OBJC|OCAML, 1},
+	{"#endif", 6, CLANG|CPLUS|OBJC|OCAML|VALA, 1}, {"# endif", 7, CLANG|CPLUS|OBJC|OCAML|VALA, 1},
 	{"#define ", 8, CLANG|CPLUS|OBJC, 5}, {"# define ", 9, CLANG|CPLUS|OBJC, 5},
 	{"#pragma ", 8, CLANG|CPLUS|OBJC|DLANG, 5}, {"# pragma ", 9, CLANG|CPLUS|OBJC|DLANG, 5},
 	{"extern ", 7, CLANG|CPLUS|OBJC|CSHARP|DLANG|RUST|VERILOG, 2},
@@ -7428,38 +7429,38 @@ struct tokens_t tokens[] = {
 	{"main(", 5, CLANG|CPLUS|DLANG, 2},
 	{"char ", 5, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|SCALA, 2},
 	{"float ", 6, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|SCALA|PYTHON, 2},
-	{"static ", 7, CLANG|CPLUS|OBJC|CSHARP|DLANG|RUST|SWIFT|GROOVY|SCALA|VERILOG, 2},
+	{"static ", 7, CLANG|CPLUS|OBJC|CSHARP|DLANG|RUST|SWIFT|GROOVY|SCALA|VERILOG|VALA, 2},
 	{"struct ", 7, CLANG|CPLUS|OBJC|CSHARP|DLANG|RUST|SWIFT|GOLANG|VERILOG, 2},
 	{"typedef ", 8, CLANG|CPLUS|OBJC|VERILOG, 2},
-	{"int ", 4, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|GROOVY|SCALA, 2},
-	{"void ", 5, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|GROOVY|VERILOG, 2},
-	{"enum ", 5, CLANG|CPLUS|OBJC|CSHARP|DLANG|RUST|SWIFT|KOTLIN|GROOVY, 2},
+	{"int ", 4, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|GROOVY|SCALA|VALA, 2},
+	{"void ", 5, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|GROOVY|VERILOG|VALA, 2},
+	{"enum ", 5, CLANG|CPLUS|OBJC|CSHARP|DLANG|RUST|SWIFT|KOTLIN|GROOVY|VALA, 2},
 	{"register ", 9, CLANG|CPLUS|OBJC, 5},
 	{"volatile ", 9, CLANG|CPLUS|OBJC|CSHARP|SCALA, 3},
 	{"union ", 6, CLANG|CPLUS|OBJC|DLANG|VERILOG, 3},
 
-	{"// ", 3, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SWIFT|KOTLIN|SCALA, 1},
-	{"/* ", 3, CLANG|CPLUS|OBJC|CSHARP|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SQL|KOTLIN|GROOVY, 1}, // also Swift and Scala
+	{"// ", 3, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SWIFT|KOTLIN|SCALA|VALA, 1},
+	{"/* ", 3, CLANG|CPLUS|OBJC|CSHARP|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG|PHP|SQL|KOTLIN|GROOVY|VALA, 1}, // also Swift and Scala
 	{"/// ", 4, CPLUS|CSHARP|DLANG|RUST|SCALA|SWIFT|PHP, 1},
 	{"/** ", 4, KOTLIN|SCALA|PHP, 2},
 
 	{"using namespace ", 16, CPLUS, MAX_SCORE},
 	{"constexpr ", 10, CPLUS, MAX_SCORE},
-	{"namespace", 9, CPLUS|CSHARP|KOTLIN, 10},
+	{"namespace", 9, CPLUS|CSHARP|KOTLIN|VALA, 10},
 	{"static std::", 12, CPLUS, MAX_SCORE},
 	{"std::", 5, CPLUS|RUST, 10},
 	{"template ", 9, CPLUS|NIM|DLANG, 2},
 	{"concept ", 8, CPLUS, 2},
 	{"new ", 4, CPLUS|CSHARP|JAVA|JAVASCRIPT, 2},
 	{"delete ", 7, CPLUS|JAVASCRIPT, 2}, // Also C#
-	{"using ", 6, CPLUS|CSHARP, 2},
+	{"using ", 6, CPLUS|CSHARP|VALA, 2},
 	{"virtual ", 8, CPLUS|CSHARP|RUST|VERILOG, 2},
-	{"protected ", 10, CPLUS|CSHARP|DLANG|JAVA|KOTLIN|SCALA|VERILOG, 2},
+	{"protected ", 10, CPLUS|CSHARP|DLANG|JAVA|KOTLIN|SCALA|VERILOG|VALA, 2},
 	{"explicit ", 9, CPLUS|CSHARP, 2},
 	{"throw ", 6, CPLUS|DLANG|JAVA|JAVASCRIPT, 1},
-	{"public ", 7, CPLUS|CSHARP|DLANG|JAVA|PASCAL|SWIFT|KOTLIN|GROOVY, 2},
-	{"private ", 8, CPLUS|CSHARP|DLANG|JAVA|PASCAL|SWIFT|KOTLIN|SCALA|GROOVY, 2},
-	{"class ", 6, CPLUS|CSHARP|DLANG|RUBY|PYTHON|JAVA|JAVASCRIPT|HASKELL|PASCAL|SWIFT|KOTLIN|GROOVY|OCAML, 3},
+	{"public ", 7, CPLUS|CSHARP|DLANG|JAVA|PASCAL|SWIFT|KOTLIN|GROOVY|VALA, 2},
+	{"private ", 8, CPLUS|CSHARP|DLANG|JAVA|PASCAL|SWIFT|KOTLIN|SCALA|GROOVY|VALA, 2},
+	{"class ", 6, CPLUS|CSHARP|DLANG|RUBY|PYTHON|JAVA|JAVASCRIPT|HASKELL|PASCAL|SWIFT|KOTLIN|GROOVY|OCAML|VALA, 3},
 
 	{"#import ", 8, OBJC, 10},
 	{"@interface ", 11, OBJC, 5},
@@ -7473,10 +7474,10 @@ struct tokens_t tokens[] = {
 
 	{"using System", 12, CSHARP, MAX_SCORE},
 	{"System.", 7, CSHARP, 2},
-	{"catch ", 6, CPLUS|CSHARP|DLANG|KOTLIN, 2},
+	{"catch ", 6, CPLUS|CSHARP|DLANG|KOTLIN|VALA, 2},
 
 	{"foreach_reverse", 15, DLANG, 10},
-	{"foreach", 7, DLANG|PERL, 4},
+	{"foreach", 7, DLANG|PERL|VALA, 4},
 	{"nothrow ", 8, DLANG|PERL, 4},
 	{"immutable ", 6, DLANG, 3},
 	{"auto ", 5, DLANG, 3}, /* Also in C, but very rarely used */
@@ -7527,7 +7528,7 @@ struct tokens_t tokens[] = {
 	{"if not ", 7, PYTHON|HASKELL|NIM|LUA, 2},
 	{"else:", 5, PYTHON|NIM, 2},
 	{"try:", 4, PYTHON|NIM|DLANG, 2},
-	{"try ", 4, PYTHON|CPLUS|DLANG|JAVA|GROOVY|OCAML, 2},
+	{"try ", 4, PYTHON|CPLUS|DLANG|JAVA|GROOVY|OCAML|VALA, 2},
 	{"except:", 7, PYTHON|NIM, 2},
 	{"except ", 7, PYTHON|NIM, 2},
 	{"finally:", 8, PYTHON|NIM|CSHARP|DLANG|KOTLIN|SCALA|CLOJURE|JAVA, 2},
@@ -7564,12 +7565,12 @@ struct tokens_t tokens[] = {
 
 	{"BEGIN {", 7, AWK, MAX_SCORE},
 
-	{"public class", 12, JAVA, 10},
+	{"public class", 12, JAVA|VALA, 10},
 	{"@Override", 9, JAVA|GROOVY, 5},
 	{"@Deprecated", 11, JAVA, 10},
 	{"package ", 8, JAVA|GOLANG|PERL|KOTLIN|SCALA|GROOVY, 2},
 	{"byte ", 5, JAVA|GOLANG|CSHARP|DLANG|SCALA, 1},
-	{"this.", 5, JAVA|JAVASCRIPT|GROOVY, 1}, // Also C# and TypeScript
+	{"this.", 5, JAVA|JAVASCRIPT|GROOVY|VALA, 1}, // Also C# and TypeScript
 
 	{"\0import * from *", 0, JAVASCRIPT, 10},
 	{"'use strict'", 12, JAVASCRIPT, 10},
@@ -7577,13 +7578,13 @@ struct tokens_t tokens[] = {
 	{"(function(", 10, JAVASCRIPT, 10}, /* IIFE */
 	{"module.exports = ", 17, JAVASCRIPT, 5},
 	{"export ", 7, JAVASCRIPT|SCALA|NIM|DLANG|VERILOG, 2},
-	{"async ", 6, JAVASCRIPT|CSHARP|PYTHON, 2},
+	{"async ", 6, JAVASCRIPT|CSHARP|PYTHON|VALA, 2},
 	{"function ", 9, JAVASCRIPT|PASCAL|DLANG|OCAML|LUA, 1},
 	{"let ", 4, JAVASCRIPT|HASKELL|RUST|SWIFT|NIM|OCAML, 1},
-	{"})\n", 3, JAVASCRIPT, 1}, {"});\n", 4, JAVASCRIPT, 2},
+	{"})\n", 3, JAVASCRIPT, 1}, {"});\n", 4, JAVASCRIPT|VALA, 2},
 	{"})();\n", 6, JAVASCRIPT, 5}, {"})()\n", 5, JAVASCRIPT, 5},
 
-	{"var ", 4, GOLANG|JAVASCRIPT|SWIFT|KOTLIN|NIM|CSHARP|SCALA|VERILOG, 1},
+	{"var ", 4, GOLANG|JAVASCRIPT|SWIFT|KOTLIN|NIM|CSHARP|SCALA|VERILOG|VALA, 1},
 	{"func ", 5, GOLANG|SWIFT, 2},
 	{"chan ", 5, GOLANG, 2},
 	{"defer ", 6, GOLANG|JAVASCRIPT, 1},
@@ -7597,7 +7598,7 @@ struct tokens_t tokens[] = {
 	{"guard let", 9, SWIFT, 3},
 	{"typealias ", 10, SWIFT, 3},
 	{"unowned ", 8, SWIFT, 3},
-	{"override ", 9, SWIFT|KOTLIN|DLANG, 2},
+	{"override ", 9, SWIFT|KOTLIN|DLANG|VALA, 2},
 	{"protocol ", 9, SWIFT, 2},
 	{"guard ", 6, SWIFT, 2},
 	{"super.", 6, SWIFT|KOTLIN|SCALA|JAVA|DLANG, 2},
@@ -7606,7 +7607,7 @@ struct tokens_t tokens[] = {
 	{"data class ", 11, KOTLIN, 4},
 	{"interface ", 10, KOTLIN|GROOVY|DLANG, 3},
 	{"object ", 7, CSHARP|KOTLIN|SCALA|OCAML, 3},
-	{"abstract ", 9, KOTLIN|RUST|JAVA|DLANG|CSHARP|SCALA, 3},
+	{"abstract ", 9, KOTLIN|RUST|JAVA|DLANG|CSHARP|SCALA|VALA, 3},
 	{"fun ", 4, KOTLIN|OCAML, 2},
 	{"val ", 4, KOTLIN|SCALA|OCAML, 2},
 
@@ -7633,6 +7634,14 @@ struct tokens_t tokens[] = {
 	{"instance ", 9, HASKELL, 2},
 	{"{-\n", 3, HASKELL, 1}, /* Haskell multi-line comment */
 	{"-- ", 3, HASKELL|SQL|LUA, 1}, /* Single-line comment */
+
+	{"public signal ", 14, VALA, 4},
+	{"private signal ", 15, VALA, 4},
+	{"Object (", 8, VALA, 4},
+	{"get {", 5, VALA, 3},
+	{"set {", 5, VALA, 3},
+	{"signal ", 5, VALA, 3},
+	{"string ", 5, VALA|CSHARP, 2},
 
 	{"local function ", 15, LUA, 4},
 	{"elseif ", 7, LUA, 3},
@@ -7782,6 +7791,7 @@ best_scored_mimetype(const uint64_t lang)
 	case SCALA: return "text/x-scala";
 	case SQL: return "text/x-sql";
 	case SWIFT: return "text/x-swift";
+	case VALA: return "text/x-vala";
 	case VERILOG: return "text/x-verilog";
 	case ZIG: return "text/x-zig";
 	default: return "text/plain";
