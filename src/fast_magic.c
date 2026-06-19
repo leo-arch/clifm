@@ -7516,9 +7516,12 @@ struct tokens_t tokens[] = {
 	{"include ", 8, RUBY|OCAML, 2},
 	{"rescue ", 7, RUBY|ELIXIR, 2},
 	{"unless ", 7, RUBY|PERL, 2},
+	{"extend ", 7, RUBY, 2},
 	{"def ", 4, RUBY|PYTHON|ELIXIR|SCALA|GROOVY, 2},
 	{"module ", 7, RUBY|HASKELL|VERILOG|JAVASCRIPT|DLANG|OCAML, 3},
 	{"end\n", 4, RUBY|VERILOG|ELIXIR|PASCAL|OCAML|LUA, 2},
+	{"rescue ", 7, RUBY, 1},
+	{"when ", 5, RUBY, 1},
 
 	{"if __name__ ", 12, PYTHON, 10},
 	{"def __init__", 12, PYTHON, 10},
@@ -7533,11 +7536,11 @@ struct tokens_t tokens[] = {
 	{"except ", 7, PYTHON|NIM, 2},
 	{"finally:", 8, PYTHON|NIM|CSHARP|DLANG|KOTLIN|SCALA|CLOJURE|JAVA, 2},
 	{"elif:", 5, PYTHON, 2},
-	{"raise ", 6, PYTHON|NIM|OCAML, 2},
+	{"raise ", 6, PYTHON|RUBY|NIM|OCAML, 2},
 	{"await ", 6, PYTHON|JAVASCRIPT|NIM, 2},
 	{"self.", 5, PYTHON|RUBY|OBJC|DLANG|RUST|SWIFT, 1},
 	{"\"\"\" ", 4, PYTHON, 2},
-	{"# ", 2, PYTHON|PERL|ELIXIR|PHP|NIM|FILE1, 1},
+	{"# ", 2, PYTHON|PERL|RUBY|ELIXIR|PHP|NIM|FILE1, 1},
 
 	{"(:require", 4, CLOJURE, 5},
 	{"(defn", 5, CLOJURE, 5},
@@ -7853,6 +7856,11 @@ text_or_binary(const uint8_t *s, const size_t slen)
 			return NULL;
 #endif
 	}
+
+	if (len > 5 && s[0] == '<' && s[1] == '?' && TOUPPER(s[2]) == 'X'
+	&& TOUPPER(s[3]) == 'M' && TOUPPER(s[4]) == 'L' && (s[5] == ' '
+	|| s[5] == 0x09 || s[5] == 0x0A || s[5] == 0x0D))
+		return "text/xml";
 
 	/* Skip blanks */
 	while (len > 1 && (*s == ' ' || *s == 0x0A || *s == 0x0D || *s == 0x09)) {
