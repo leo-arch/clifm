@@ -7436,7 +7436,8 @@ struct tokens_t tokens[] = {
 	{"float ", 6, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|SCALA|PYTHON|FSHARP, 2},
 	{"static ", 7, CLANG|CPLUS|OBJC|CSHARP|DLANG|RUST|SWIFT|GROOVY|SCALA \
 		|VERILOG|VALA|FSHARP|DART, 2},
-	{"struct ", 7, CLANG|CPLUS|OBJC|CSHARP|DLANG|RUST|SWIFT|GOLANG|VERILOG, 2},
+	{"struct ", 7, CLANG|CPLUS|OBJC|CSHARP|DLANG|RUST|SWIFT|GOLANG \
+		|VERILOG|FSHARP, 2},
 	{"typedef ", 8, CLANG|CPLUS|OBJC|VERILOG, 2},
 	{"int ", 4, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|GROOVY|SCALA|VALA \
 		|FSHARP|DART, 2},
@@ -7447,10 +7448,10 @@ struct tokens_t tokens[] = {
 	{"union ", 6, CLANG|CPLUS|OBJC|DLANG|VERILOG, 3},
 
 	{"// ", 3, CLANG|CPLUS|OBJC|CSHARP|DLANG|JAVA|JAVASCRIPT|GOLANG|RUST \
-		|VERILOG|PHP|SWIFT|KOTLIN|SCALA|VALA, 1},
+		|VERILOG|PHP|SWIFT|KOTLIN|SCALA|VALA|FSHARP, 1},
 	{"/* ", 3, CLANG|CPLUS|OBJC|CSHARP|JAVA|JAVASCRIPT|GOLANG|RUST|VERILOG \
 		|PHP|SQL|KOTLIN|GROOVY|VALA, 1}, // also Swift and Scala
-	{"/// ", 4, CPLUS|CSHARP|DLANG|RUST|SCALA|SWIFT|PHP, 1},
+	{"/// ", 4, CPLUS|CSHARP|DLANG|RUST|SCALA|SWIFT|PHP|FSHARP, 1},
 	{"/** ", 4, KOTLIN|SCALA|PHP, 2},
 
 	{"using namespace ", 16, CPLUS, MAX_SCORE},
@@ -7540,7 +7541,7 @@ struct tokens_t tokens[] = {
 	{"\0import * as *", 0, PYTHON|NIM|DART, 10},
 	{"import ", 7, PYTHON|JAVA|JAVASCRIPT|GOLANG|HASKELL|SWIFT|SCALA \
 		|KOTLIN|GROOVY|NIM|DLANG|DART, 3},
-	{"if not ", 7, PYTHON|HASKELL|NIM|LUA, 2},
+	{"if not ", 7, PYTHON|HASKELL|NIM|LUA|FSHARP, 2},
 	{"else:", 5, PYTHON|NIM, 2},
 	{"try:", 4, PYTHON|NIM|DLANG, 2},
 	{"try ", 4, PYTHON|CPLUS|DLANG|JAVA|GROOVY|OCAML|VALA|FSHARP|DART, 2},
@@ -7552,7 +7553,7 @@ struct tokens_t tokens[] = {
 	{"raise ", 6, PYTHON|RUBY|NIM|OCAML, 2},
 	{"await ", 6, PYTHON|CSHARP|JAVASCRIPT|NIM, 2},
 	{"self.", 5, PYTHON|RUBY|OBJC|DLANG|RUST|SWIFT, 1},
-	{"\"\"\" ", 4, PYTHON, 2},
+	{"\"\"\"", 3, PYTHON, 2},
 	{"# ", 2, PYTHON|PERL|RUBY|ELIXIR|PHP|NIM|FILE1, 1},
 
 	{"(:require", 4, CLOJURE, 5},
@@ -7615,14 +7616,14 @@ struct tokens_t tokens[] = {
 	{"guard let", 9, SWIFT, 3},
 	{"typealias ", 10, SWIFT, 3},
 	{"unowned ", 8, SWIFT|VALA, 3},
-	{"override ", 9, SWIFT|KOTLIN|DLANG|VALA, 2},
+	{"override ", 9, SWIFT|KOTLIN|DLANG|VALA|FSHARP, 2},
 	{"protocol ", 9, SWIFT, 2},
 	{"guard ", 6, SWIFT, 2},
 	{"super.", 6, SWIFT|KOTLIN|SCALA|JAVA|DLANG, 2},
 
 	{"override fun ", 13, KOTLIN, 5},
 	{"data class ", 11, KOTLIN, 4},
-	{"interface ", 10, KOTLIN|GROOVY|DLANG, 3},
+	{"interface ", 10, KOTLIN|GROOVY|DLANG|FSHARP, 3},
 	{"object ", 7, CSHARP|KOTLIN|SCALA|OCAML, 3},
 	{"abstract ", 9, KOTLIN|RUST|JAVA|DLANG|CSHARP|SCALA|VALA|FSHARP, 3},
 	{"fun ", 4, KOTLIN|OCAML|FSHARP, 2},
@@ -7632,7 +7633,7 @@ struct tokens_t tokens[] = {
 	{"final class ", 12, SCALA, 4},
 	{"opaque ", 7, SCALA, 3},
 	{"given ", 6, SCALA, 2},
-	{"lazy ", 5, SCALA|OCAML, 2},
+	{"lazy ", 5, SCALA|OCAML|FSHARP, 2},
 
 	{"@Compile", 8, GROOVY, 5},
 	{"@Immutable", 10, GROOVY, 5},
