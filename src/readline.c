@@ -183,18 +183,18 @@ rl_get_y_n_common(const char *msg_str, char default_answer, int allow_all)
 			else
 				{ free(answer); answer = NULL; continue; }
 
-		case 's':
+		case 's': /* fallthrough */
 		case 'S':
 			if (allow_all && strcasecmp(answer, "skipall") == 0)
 				{ free(answer); free(msg); return RL_ANSWER_SKIP_ALL; }
-			else if (allow_all && (!answer[1] || strcasecmp(answer, "skip") == 0))
-				{ free(answer); free(msg); return RL_ANSWER_SKIP; }
 			else if (allow_all && answer[1] == 'a' && !answer[2])
 				{ free(answer); free(msg); return RL_ANSWER_SKIP_ALL; }
+			else if (allow_all && (!answer[1] || strcasecmp(answer, "skip") == 0))
+				{ free(answer); free(msg); return RL_ANSWER_SKIP; }
 			else
 				{ free(answer); answer = NULL; continue; }
 
-		case 'o':
+		case 'o': /* fallthrough */
 		case 'O':
 			if (allow_all && !answer[1])
 				{ free(answer); free(msg); return RL_ANSWER_NONE; }

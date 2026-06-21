@@ -1292,6 +1292,9 @@ By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively\n\
 instead, use the -f/--force parameter (see the examples below). You can\n\
 also permanently run in non-interactive mode using the cpCmd/mvCmd options\n\
 in the configuration file ('config' or F10).\n\n\
+Just as 'c' and 'm', the 'r' command accepts the -f/--force paramater to\n\
+prevent 'r' from prompting before removals. Set rmForce to true in the\n\
+configuration file to make this option permanent.\n\n\
 If interactivity is enabled and the destination file exists, the user is\n\
 prompted to choose how to proceed ('c'/'m' commands only). Available options\n\
 are:\n\n\
@@ -1303,9 +1306,6 @@ none     o      Do not overwrite remainig existing files (cp/mv to new unique na
 skip     s      Skip the current file\n\
 skipall  sa/k   Skip all remaining existing files, including the current one\n\
 quit     q      Stop processing (skip all remaining files)\n\n\
-Just as 'c' and 'm', the 'r' command accepts -f/--force as paramater to\n\
-prevent 'r' from prompting before removals. Set rmForce to true in the\n\
-configuration file to make this option permanent.\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Create a copy of 'file1' named 'file2'\n\
     c file1 file2\n\
