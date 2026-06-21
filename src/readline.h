@@ -11,12 +11,13 @@
 #define READLINE_H
 
 /* Macros for rl_get_y* functions */
-#define RL_ANSWER_NO   0
-#define RL_ANSWER_YES  1
-#define RL_ANSWER_ALL  2
-#define RL_ANSWER_QUIT 3
-#define RL_ANSWER_NONE 4
-#define RL_ANSWER_SKIP 5
+#define RL_ANSWER_NO       0
+#define RL_ANSWER_YES      1
+#define RL_ANSWER_ALL      2
+#define RL_ANSWER_QUIT     3
+#define RL_ANSWER_NONE     4
+#define RL_ANSWER_SKIP     5
+#define RL_ANSWER_SKIP_ALL 6
 
 __BEGIN_DECLS
 

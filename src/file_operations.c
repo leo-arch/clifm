@@ -1611,6 +1611,7 @@ check_overwrite(char **args, const int force, size_t *skipped,
 	const int ends_with_slash =
 		(dest_len > 1 && dest[dest_len - 1] == '/');
 	int answer_none = 0;
+	int answer_skipall = 0;
 
 	for (size_t i = 1; i < files_num; i++) {
 		char *p = unescape_str(args[i]);
@@ -1630,8 +1631,9 @@ check_overwrite(char **args, const int force, size_t *skipped,
 		if (lstat(buf, &a) == -1)
 			continue;
 
-		if (answer_none == 1) {
-			make_unique_and_copy(args[0], args[i], dest, cwd, copied);
+		if (answer_none == 1 || answer_skipall == 1) {
+			if (answer_none == 1)
+				make_unique_and_copy(args[0], args[i], dest, cwd, copied);
 			*args[i] = '\0';
 			(*skipped)++;
 			continue;
@@ -1639,7 +1641,9 @@ check_overwrite(char **args, const int force, size_t *skipped,
 
 		const int answer = ask_overwrite(cmd_name, buf, 1);
 
-		if (answer == RL_ANSWER_SKIP) {
+		if (answer == RL_ANSWER_SKIP || answer == RL_ANSWER_SKIP_ALL) {
+			if (answer == RL_ANSWER_SKIP_ALL)
+				answer_skipall = 1;
 			*args[i] = '\0';
 			(*skipped)++;
 			continue;

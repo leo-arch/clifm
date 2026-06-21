@@ -1286,22 +1286,26 @@ cp(1), mv(1), and rm(1) shell\ncommands, respectively.\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
 c  -> cp -iRp\n\
 m  -> mv -i\n\
-r  -> rm ('rm -r' for directories) (1)\n\n\
-(1) By default, the user will asked for confirmation (set rmForce to true\n\
-in the configuration file to disable the confirmation prompt).\n\n\
-The 'paste' command is equivalent to 'c' and exists only for semantic\n\
-reasons: if you want to copy selected files to the current directory, it\n\
-makes sense to write 'paste sel'.\n\n\
+r  -> rm ('rm -r' for directories)\n\n\
 By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively\n\
 (-i), i.e., prompting before overwriting a file. To run non-interactively\n\
 instead, use the -f/--force parameter (see the examples below). You can\n\
 also permanently run in non-interactive mode using the cpCmd/mvCmd options\n\
 in the configuration file ('config' or F10).\n\n\
+If interactivity is enabled and the destination file exists, the user is\n\
+prompted to choose how to proceed ('c'/'m' commands only). Available options\n\
+are:\n\n\
+Long     Short  Description\n\
+yes      y      Overwrite the current file\n\
+no       n      Do not overwrite the current file (cp/mv to a new unique name)\n\
+all      a      Overwrite all remainig existing files, including the current one\n\
+none     o      Do not overwrite remainig existing files (cp/mv to new unique names)\n\
+skip     s      Skip the current file\n\
+skipall  sa/k   Skip all remaining existing files, including the current one\n\
+quit     q      Stop processing (skip all remaining files)\n\n\
 Just as 'c' and 'm', the 'r' command accepts -f/--force as paramater to\n\
 prevent 'r' from prompting before removals. Set rmForce to true in the\n\
 configuration file to make this option permanent.\n\n\
-To use different parameters, run the corresponding utility as usual.\n\
-For example: cp -abf ...\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Create a copy of 'file1' named 'file2'\n\
     c file1 file2\n\

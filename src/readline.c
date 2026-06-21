@@ -110,12 +110,12 @@ gen_yes_no_str(char def_answer, int allow_all)
 {
 	switch (def_answer) {
 	case 'y':
-		return allow_all ? "[Y/n/all/none/skip/quit]" : "[Y/n]";
+		return allow_all ? "[Y/n/all/none/skip/skipall/quit]" : "[Y/n]";
 	case 'n':
-		return allow_all ? "[y/N/all/none/skip/quit]" : "[y/N]";
+		return allow_all ? "[y/N/all/none/skip/skipall/quit]" : "[y/N]";
 	case 'u': /* fallthrough */ /* unset */
 	default:
-		return allow_all ? "[y/n/all/none/skip/quit]" : "[y/n]";
+		return allow_all ? "[y/n/all/none/skip/skipall/quit]" : "[y/n]";
 	}
 }
 
@@ -177,10 +177,20 @@ rl_get_y_n_common(const char *msg_str, char default_answer, int allow_all)
 			else
 				{ free(answer); answer = NULL; continue; }
 
+		case 'k':
+			if (allow_all && !answer[1])
+				{ free(answer); free(msg); return RL_ANSWER_SKIP_ALL; }
+			else
+				{ free(answer); answer = NULL; continue; }
+
 		case 's':
 		case 'S':
-			if (allow_all && (!answer[1] || strcasecmp(answer, "skip") == 0))
+			if (allow_all && strcasecmp(answer, "skipall") == 0)
+				{ free(answer); free(msg); return RL_ANSWER_SKIP_ALL; }
+			else if (allow_all && (!answer[1] || strcasecmp(answer, "skip") == 0))
 				{ free(answer); free(msg); return RL_ANSWER_SKIP; }
+			else if (allow_all && answer[1] == 'a' && !answer[2])
+				{ free(answer); free(msg); return RL_ANSWER_SKIP_ALL; }
 			else
 				{ free(answer); answer = NULL; continue; }
 
