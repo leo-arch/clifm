@@ -1450,7 +1450,7 @@ get_rename_dest_filename(char *name, int *status)
 }
 
 static char **
-construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
+build_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 {
 	size_t n = 0;
 	char **tcmd = xnmalloc(3 + args_n + 2, sizeof(char *));
@@ -1505,6 +1505,22 @@ construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 }
 
 static int
+ask_overwrite(const char *cmd_name, char *file, const int all)
+{
+	char msg[PATH_MAX + 28];
+	char *abbrev = abbreviate_file_name(file);
+	snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
+		cmd_name, abbrev ? abbrev : file);
+	if (abbrev && abbrev != file)
+		free(abbrev);
+
+	if (all)
+		return rl_get_y_n_all(msg, conf.default_answer.overwrite);
+
+	return rl_get_y_or_n(msg, conf.default_answer.overwrite);
+}
+
+static int
 handle_nodir_overwrite(char *arg, const char *cmd_name)
 {
 	char *file = unescape_str(arg);
@@ -1513,10 +1529,7 @@ handle_nodir_overwrite(char *arg, const char *cmd_name)
 
 	struct stat a;
 	if (lstat(file, &a) != -1) {
-		char msg[PATH_MAX + 28];
-		snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
-			cmd_name, file);
-		const int answer = rl_get_y_or_n(msg, conf.default_answer.overwrite);
+		const int answer = ask_overwrite(cmd_name, file, 0);
 		if (answer == RL_ANSWER_NO) {
 			free(file);
 			return 0;
@@ -1593,7 +1606,6 @@ check_overwrite(char **args, const int force, size_t *skipped,
 	if (!S_ISDIR(a.st_mode))
 		return handle_nodir_overwrite(args[2], cmd_name);
 
-	char msg[PATH_MAX + 28];
 	char buf[PATH_MAX + 1];
 	const size_t dest_len = strlen(dest);
 	const int ends_with_slash =
@@ -1625,9 +1637,7 @@ check_overwrite(char **args, const int force, size_t *skipped,
 			continue;
 		}
 
-		snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
-			cmd_name, buf);
-		const int answer = rl_get_y_n_all(msg, conf.default_answer.overwrite);
+		const int answer = ask_overwrite(cmd_name, buf, 1);
 
 		if (answer == RL_ANSWER_SKIP) {
 			*args[i] = '\0';
@@ -1739,7 +1749,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	const size_t files_num =
 		args_n - (args_n > 1 && sel_is_last == 0) - skipped - force_param;
 
-	char **tcmd = construct_cp_mv_cmd(args, new_name, &cwd, force_param);
+	char **tcmd = build_cp_mv_cmd(args, new_name, &cwd, force_param);
 	if (!tcmd)
 		return FUNC_FAILURE;
 
