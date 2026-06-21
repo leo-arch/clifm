@@ -683,17 +683,30 @@ This built-in bulk rename function will not deal with deletions, replacements, f
 \fBc\fR, \fBm\fR, \fBmd\fR, \fBr\fR
 Short for the following shell commands respectively: `\fBcp -iRp\fR`, `\fBmv -i\fR`, `\fBmkdir -p\fR`, and `\fBrm\fR` (for files) or `\fBrm -r\fR` (for directories).
 .sp
+To use these commands without any of these options, or with any other option you want, use the appropriate shell command, for instance, \fBcp\fR instead of \fBc\fR. Of course, you can also create aliases to use your preferred commands, for example, "c=\'cp -adp\'". Consult the \fBalias\fR command above for more information.
+.sp
 By default, the \fBc\fR, \fBm\fR, and \fBr\fR commands ask for confirmation before operations. Since this might sometimes be quite intrusive (specially when operating on large number of files), it is possible to turn interactivity off in two different ways:
 
   a) For the current command only: via the \fB-f/--force\fR switch. For example: `\fBc -f sel\fR`, `\fBm -f sel\fR`, or `\fBr -f *\fR`.
 
   b) Permanently. Use the \fBcpCmd\fR, \fBmvCmd\fR, and \fBrmForce\fR options in the configuration file to permanently set any of these commands to non-interactive mode.
 .sp
-To use these commands without any of these options, or with any other option you want, use the appropriate shell command, for instance, \fBcp\fR instead of \fBc\fR. Of course, you can also create aliases to use your preferred commands, for example, "c=\'cp -adp\'". Consult the \fBalias\fR command above for more information.
+If interactivity is enabled and the destination file exists, the user is prompted to choose how to proceed (\fBc\fR and \fBm\fR commands only). Available options are:
+
+.TS
+tab(:);
+l l l.
+Option:Shortcut:Description
+yes:y:Overwrite the current file
+no:n:Do not overwrite (copy/move to a new unique name)
+all:a:Overwrite all existing files, including the current one
+none:o:Do not overwrite any existing file (copy/move with unique names)
+skip:s:Ignore the current file
+quit:q:Stop processing (skip all remaining files)
+.TE
+
 .sp
-The \fBl\fR command allows the use of the \fBe, edit\fR option to modify the destination of a symbolic link. For example: `\fBl edit 12\fR` (or `\fBle 12\fR`)  to relink the symbolic link corresponding to the file whose ELN is 12.
-.sp
-When using the \fBsel\fR keyword and no destination is provided, \fBc\fR and \fBm\fR will copy/move selected files to the current directory.
+When using the \fBsel\fR keyword and no destination file is specified, \fBc\fR and \fBm\fR will copy/move selected files to the current directory.
 .sp
 When renaming a file with the \fBm\fR command, filename validation is performed for the new filename. See the \fBnew\fR command below for more information.
 .sp
