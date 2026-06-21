@@ -1398,7 +1398,7 @@ cwd_has_sel_files(void)
 static int
 print_cp_mv_summary_msg(const char *c, const size_t n, const int cwd)
 {
-	if (conf.autols == 1 && cwd == 1)
+	if (conf.autols == 1 && cwd > 0)
 		reload_dirlist();
 
 	if (IS_MVCMD(c))
@@ -1482,7 +1482,7 @@ construct_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 		tcmd[n] = savestring(p, strlen(p));
 		free(p);
 		if (*cwd == 0)
-			*cwd = is_file_in_cwd(tcmd[n]);
+			*cwd += is_file_in_cwd(tcmd[n]);
 		n++;
 	}
 
@@ -1527,8 +1527,49 @@ handle_nodir_overwrite(char *arg, const char *cmd_name)
 	return 1;
 }
 
+static void
+make_unique_and_copy(const char *cmd_name, char *src, const char *dest,
+	int *cwd, size_t *copied)
+{
+	if (!cmd_name || !src || !dest)
+		return;
+
+	char *usrc = unescape_str(src);
+	if (!usrc)
+		return;
+
+	const size_t src_len = strlen(usrc);
+	if (src_len > 1 && usrc[src_len - 1] == '/')
+		usrc[src_len - 1] = '\0';
+
+	const char *ptr = strrchr(usrc, '/');
+	const char *base = (ptr && ptr[1]) ? ptr + 1 : usrc;
+
+	char buf[PATH_MAX];
+	snprintf(buf, sizeof(buf), "%s/%s", dest, base);
+	char *new_name = make_filename_unique(buf);
+
+	const int is_mv = IS_MVCMD(cmd_name);
+	const char *param = is_mv ? "-f" : "-rf";
+
+	const char *cmd[] =	{is_mv ? "mv" : "cp", param, "--", usrc, new_name, NULL};
+	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
+
+	if (ret == 0) {
+		if (*cwd == 0)
+			*cwd += is_file_in_cwd(new_name);
+		(*copied)++;
+	} else { /* Error */
+		press_any_key_to_continue(0);
+	}
+
+	free(usrc);
+	free(new_name);
+}
+
 static int
-check_overwrite(char **args, const int force, size_t *skipped)
+check_overwrite(char **args, const int force, size_t *skipped,
+	size_t *copied, int *cwd)
 {
 	const int append_curdir = (sel_is_last == 1 && sel_n > 0);
 	const size_t files_num = args_n + (append_curdir == 1);
@@ -1578,6 +1619,7 @@ check_overwrite(char **args, const int force, size_t *skipped)
 			continue;
 
 		if (answer_none == 1) {
+			make_unique_and_copy(args[0], args[i], dest, cwd, copied);
 			*args[i] = '\0';
 			(*skipped)++;
 			continue;
@@ -1587,8 +1629,15 @@ check_overwrite(char **args, const int force, size_t *skipped)
 			cmd_name, buf);
 		const int answer = rl_get_y_n_all(msg, conf.default_answer.overwrite);
 
-		if (answer == RL_ANSWER_NONE) { /* Skip all existent files */
+		if (answer == RL_ANSWER_SKIP) {
+			*args[i] = '\0';
+			(*skipped)++;
+			continue;
+		}
+
+		if (answer == RL_ANSWER_NONE) { /* Do not overwrite any file. */
 			answer_none = 1;
+			make_unique_and_copy(args[0], args[i], dest, cwd, copied);
 			*args[i] = '\0';
 			(*skipped)++;
 			continue;
@@ -1610,6 +1659,7 @@ check_overwrite(char **args, const int force, size_t *skipped)
 		}
 
 		if (answer == RL_ANSWER_NO) {
+			make_unique_and_copy(args[0], args[i], dest, cwd, copied);
 			/* Nullify this entry. It will be skipped later. */
 			*args[i] = '\0';
 			(*skipped)++;
@@ -1617,7 +1667,7 @@ check_overwrite(char **args, const int force, size_t *skipped)
 	}
 
 	/* If skipped == files_num - 1, there are no source files left, only
-	 * the destination file. There's nothing to do. */
+	 * the destination file: there's nothing to do. */
 	return (*skipped < files_num - 1);
 }
 
@@ -1647,12 +1697,17 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 {
 	int ret = 0;
 	size_t skipped = 0;
+	size_t copied = 0;
+	int cwd = 0;
 
 	if (!args || !args[0])
 		return FUNC_FAILURE;
 
-	if (check_overwrite(args, force, &skipped) == 0)
+	if (check_overwrite(args, force, &skipped, &copied, &cwd) == 0) {
+		if (copied > 0)
+			return print_cp_mv_summary_msg(args[0], copied, cwd);
 		return FUNC_SUCCESS;
+	}
 
 	/* vv command */
 	if (copy_and_rename == 1
@@ -1684,7 +1739,6 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	const size_t files_num =
 		args_n - (args_n > 1 && sel_is_last == 0) - skipped - force_param;
 
-	int cwd = 0;
 	char **tcmd = construct_cp_mv_cmd(args, new_name, &cwd, force_param);
 	if (!tcmd)
 		return FUNC_FAILURE;
@@ -1713,7 +1767,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		}
 	}
 
-	return print_cp_mv_summary_msg(args[0], files_num, cwd);
+	return print_cp_mv_summary_msg(args[0], files_num + copied, cwd);
 }
 #undef IS_MVCMD
 

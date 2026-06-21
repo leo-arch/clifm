@@ -3245,7 +3245,7 @@ unescape_str(const char *text)
 
 	while (*text) {
 		if (*text == '\\') {
-			++text;
+			text++;
 			buf[len++] = *text;
 		} else {
 			buf[len++] = *text;
