@@ -698,13 +698,15 @@ tab(:);
 l l l.
 Option:Shortcut:Description
 yes:y:Overwrite the current file
-no:n:Do not overwrite the current file (copy/move to a new unique name)
+no:n:Do not overwrite the current file \fB(1)\fR
 all:a:Overwrite all remaining existing files, including the current one
-none:o:Do not overwrite remaining existing files (copy/move to new unique names)
+none:o:Do not overwrite remaining existing files \fB(1)\fR
 skip:s:Skip the current file
 skipall:sa/k:Skip all remaining existing files, including the current one
 quit:q:Stop processing (skip all remaining files)
 .TE
+.sp
+\fB(1)\fR Source files are copied/moved to unique destination names created by appending a dash (-) and a numeric suffix: e.g., a file named \fIfoo\fR is copied/moved to \fIfoo-1\fR, or \fIfoo-2\fR if \fIfoo-1\fR already exists.
 
 .sp
 When using the \fBsel\fR keyword and no destination file is specified, \fBc\fR and \fBm\fR will copy/move selected files to the current directory.

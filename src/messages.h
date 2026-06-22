@@ -1300,12 +1300,16 @@ prompted to choose how to proceed ('c'/'m' commands only). Available options\n\
 are:\n\n\
 Long     Short  Description\n\
 yes      y      Overwrite the current file\n\
-no       n      Do not overwrite the current file (cp/mv to a new unique name)\n\
-all      a      Overwrite all remainig existing files, including the current one\n\
-none     o      Do not overwrite remainig existing files (cp/mv to new unique names)\n\
+no       n      Do not overwrite the current file (1)\n\
+all      a      Overwrite all remaining existing files, including the current\n\
+                one\n\
+none     o      Do not overwrite remaining existing files (1)\n\
 skip     s      Skip the current file\n\
 skipall  sa/k   Skip all remaining existing files, including the current one\n\
 quit     q      Stop processing (skip all remaining files)\n\n\
+(1) Source files are copied/moved to unique destination names created by\n\
+appending a dash (-) and a numeric suffix: e.g., a file named 'foo' is\n\
+copied/moved to 'foo-1', or 'foo-2' if 'foo-1' already exists.\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - Create a copy of 'file1' named 'file2'\n\
     c file1 file2\n\
