@@ -252,7 +252,19 @@ entrycmp(const void *a, const void *b)
 	const int have_utf8 = (pa->utf8 == 1 || pb->utf8 == 1);
 
 	switch (st) {
-	case STSIZE: ret = F_SORT(pa->size, pb->size); break;
+	case STSIZE:
+		/* Let's have the logic of sorting dirs without access (unknown
+		 * recursive size) before everything else. */
+		if (conf.full_dir_size == 1 && conf.long_view == 1) {
+			const off_t asize =
+				(pa->dir == 1 && pa->user_access == 0) ? (off_t)-1 : pa->size;
+			const off_t bsize =
+				(pb->dir == 1 && pb->user_access == 0) ? (off_t)-1 : pb->size;
+			ret = F_SORT(asize, bsize);
+		} else {
+			ret = F_SORT(pa->size, pb->size);
+		}
+		break;
 	case SATIME: /* fallthrough */
 	case SBTIME: /* fallthrough */
 	case SCTIME: /* fallthrough */

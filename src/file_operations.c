@@ -1558,10 +1558,11 @@ make_unique_and_copy(const char *cmd_name, char *src, const char *dest,
 	const char *ptr = strrchr(usrc, '/');
 	const char *base = (ptr && ptr[1]) ? ptr + 1 : usrc;
 
-	char buf[PATH_MAX];
+	char buf[PATH_MAX + 1];
 	snprintf(buf, sizeof(buf), "%s/%s", dest, base);
 	char *new_name = make_filename_unique(buf);
 
+	/* We should be using here cpCmd and mvCmd (user's config). */
 	const int is_mv = IS_MVCMD(cmd_name);
 	const char *param = is_mv ? "-f" : "-rf";
 

@@ -3242,7 +3242,7 @@ set_long_attribs_link_target(const filesn_t n, const struct stat *a)
 		file_info[n].size = dir_size(file_info[n].name, 1,
 			&file_info[n].du_status);
 	} else {
-	file_info[n].size = FILE_SIZE_PTR(a);
+		file_info[n].size = FILE_SIZE_PTR(a);
 	}
 
 	const time_t birth_time =
@@ -3276,6 +3276,8 @@ load_link_info(const int fd, const filesn_t n)
 
 	if (conf.long_view == 1)
 		set_long_attribs_link_target(n, &a);
+	else
+		file_info[n].size = FILE_SIZE(a);
 
 	/* We only need the symlink target name provided the target is not a
 	 * directory, because set_link_target_color() will check the filename
@@ -3297,9 +3299,13 @@ load_link_info(const int fd, const filesn_t n)
 			file_info[n].color = ln_c;
 	} else {
 		file_info[n].dir = 1;
-		file_info[n].filesn = conf.file_counter == 1
-			? count_dir(file_info[n].name, NO_CPOP) - 2
-			: 1;
+		file_info[n].filesn = (conf.file_counter == 1
+			|| conf.full_dir_size == 1)
+				? count_dir(file_info[n].name, NO_CPOP) - 2
+				: 1;
+
+		if (file_info[n].filesn < 0) /* No access */
+			file_info[n].user_access = 0;
 
 		const filesn_t files_in_dir = conf.file_counter == 1
 			? (file_info[n].filesn > 0 ? 3 : file_info[n].filesn)
