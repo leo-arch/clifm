@@ -218,12 +218,10 @@ get_mimetype_fallback(const char *file)
 
 #ifndef _NO_MAGIC
 
-/* Get FILE's type using the libmagic library.
- * Return the MIME type if QUERY_MIME is set to 1, or a text description
- * otherwise.
- * NULL is returned in case of error.
+/* Return the MIME type of FILE if QUERY_MIME is set to 1, or a text description
+ * otherwise. NULL is returned in case of error.
  *
- * When querying MIME types (query_mime == 1), the check is made in three steps:
+ * When querying MIME types (query_mime == 1), the check is made in four steps:
  * 1. Check associations in the mime.types file
  * 2. Consult the fast-magic module (Moira)
  * 3. Consult the libmagic database
