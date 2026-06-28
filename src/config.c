@@ -759,14 +759,14 @@ set_plugins_helper_file(void)
 	if (getenv("CLIFM_PLUGINS_HELPER"))
 		return FUNC_SUCCESS;
 
-	struct stat attr;
+	struct stat a;
 	if (plugins_dir && *plugins_dir) {
 		char helper_path[PATH_MAX + 1];
 		snprintf(helper_path, sizeof(helper_path),
 			"%s/plugins-helper", plugins_dir);
 
-		if (stat(helper_path, &attr) != -1) {
-			plugins_helper_file = savestring(helper_path, strlen(helper_path));
+		if (stat(helper_path, &a) != -1 && S_ISREG(a.st_mode) && a.st_size > 0) {
+			plugins_helper_file = strdup(helper_path);
 			return FUNC_SUCCESS;
 		}
 	}
@@ -776,8 +776,8 @@ set_plugins_helper_file(void)
 		snprintf(helper_path, sizeof(helper_path),
 			"%s/%s/plugins/plugins-helper", data_dir, PROGRAM_NAME);
 
-		if (stat(helper_path, &attr) != -1) {
-			plugins_helper_file = savestring(helper_path, strlen(helper_path));
+		if (stat(helper_path, &a) != -1 && S_ISREG(a.st_mode) && a.st_size > 0) {
+			plugins_helper_file = strdup(helper_path);
 			return FUNC_SUCCESS;
 		}
 	}
@@ -807,8 +807,8 @@ set_plugins_helper_file(void)
 
 	size_t i;
 	for (i = 0; std_paths[i]; i++) {
-		if (stat(std_paths[i], &attr) != -1) {
-			plugins_helper_file = savestring(std_paths[i], strlen(std_paths[i]));
+		if (stat(std_paths[i], &a) != -1 && S_ISREG(a.st_mode) && a.st_size > 0) {
+			plugins_helper_file = strdup(std_paths[i]);
 			return FUNC_SUCCESS;
 		}
 	}
