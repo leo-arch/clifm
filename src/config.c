@@ -914,7 +914,7 @@ import_from_data_dir(const char *src_filename, char *dest, const int exec)
 	char sys_file[PATH_MAX + 1];
 	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir,
 		PROGRAM_NAME, src_filename);
-	if (stat(sys_file, &a) == -1)
+	if (stat(sys_file, &a) == -1 || !S_ISREG(a.st_mode) || a.st_size <= 0)
 		return FUNC_FAILURE;
 
 	const mode_t old_umask = umask(exec == 1 ? 0077 : 0177); /* flawfinder: ignore */
@@ -943,7 +943,7 @@ create_kbinds_file(void)
 
 	struct stat attr;
 	/* If the file already exists, do nothing */
-	if (stat(kbinds_file, &attr) == FUNC_SUCCESS)
+	if (stat(kbinds_file, &attr) == 0)
 		return FUNC_SUCCESS;
 
 	/* If not, try to import it from DATADIR */
