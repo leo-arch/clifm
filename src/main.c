@@ -435,7 +435,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"auto", 4, PARAM_STR, 0},
 	{"autocd", 6, PARAM_STR, 0},
 	{"actions", 7, PARAM_STR, 0},
-	{"alias", 5, PARAM_FNAME, 0}, // diff (old 0110, new 1110) // 'alias import' takes filenames
+	{"alias", 5, PARAM_FNAME, 0}, /* 'alias import' takes filenames */
 	{"ao", 2, PARAM_STR, 0},
 	{"auto-open", 9, PARAM_STR, 0},
 	{"b", 1, PARAM_STR, 0},
@@ -443,13 +443,13 @@ const struct cmdslist_t internal_cmds[] = {
 	{"bb", 2, PARAM_FNAME, 0},
 	{"bleach", 6, PARAM_FNAME, 0},
 	{"bd", 2, PARAM_STR, 0},
-	{"dh", 2, PARAM_FNAME, 0}, // diff (old 0110, new 1110)
+	{"dh", 2, PARAM_FNAME, 0},
 	{"bl", 2, PARAM_FNAME, 0},
 	{"bm", 2, PARAM_FNAME, 0},
 	{"bookmarks", 9, PARAM_FNAME, 0},
 	{"br", 2, PARAM_FNAME, 0},
 	{"bulk", 4, PARAM_FNAME, 0},
-	{"c", 1, PARAM_FNAME, 0}, //"cp",
+	{"c", 1, PARAM_FNAME, 0},
 	{"colors", 6, NO_PARAM, 0},
 	{"cd", 2, PARAM_FNAME, 0},
 	{"cl", 2, PARAM_STR, 0},
@@ -460,12 +460,12 @@ const struct cmdslist_t internal_cmds[] = {
 	{"colorschemes", 12, PARAM_STR, 0},
 	{"d", 1, PARAM_FNAME, 0},
 	{"dup", 3, PARAM_FNAME, 0},
-	{"ds", 2, PARAM_FNAME, 0}, // diff (old 0110, new 1110)
-	{"desel", 5, PARAM_FNAME, 0}, // diff (old 0110, new 1110)
+	{"ds", 2, PARAM_FNAME, 0},
+	{"desel", 5, PARAM_FNAME, 0},
 	{"config", 6, PARAM_STR, 0},
 	{"ci", 2, NO_PARAM, 0},
 	{"exp", 3, PARAM_FNAME, 0},
-	{"export", 6, PARAM_FNAME | PARAM_STR, 0}, // diff (old 1101, new 1111)
+	{"export", 6, PARAM_FNAME | PARAM_STR, 0},
 	{"ext", 3, PARAM_STR, 0},
 	{"f", 1, PARAM_STR, 0},
 	{"forth", 5, PARAM_STR, 0},
@@ -483,9 +483,9 @@ const struct cmdslist_t internal_cmds[] = {
 	{"j", 1, PARAM_STR, 0},
 	{"jump", 4, PARAM_STR, 0},
 	{"je", 2, PARAM_STR, 0},
-	{"jc", 2, PARAM_STR, 0}, // diff (old 1101, new 0101)
+	{"jc", 2, PARAM_STR, 0},
 	{"jl", 2, PARAM_STR, 0},
-	{"jp", 2, PARAM_STR, 0}, // diff (old 1101, new 0101)
+	{"jp", 2, PARAM_STR, 0},
 	{"k", 1, NO_PARAM, 0},
 	{"kk", 2, NO_PARAM, 0},
 	{"kb", 2, PARAM_STR, 0},
@@ -497,7 +497,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"ll", 2, PARAM_STR, 0},
 	{"lv", 2, PARAM_STR, 0},
 	{"m", 1, PARAM_FNAME, 0},
-	{"md", 2, PARAM_FNAME, 0}, // diff (old 0110, 1110)
+	{"md", 2, PARAM_FNAME, 0},
 	{"media", 5, NO_PARAM, 0},
 	{"mf", 2, PARAM_NUM, 0},
 	{"mm", 2, PARAM_FNAME, 0},
@@ -513,7 +513,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"oc", 2, PARAM_FNAME, 0},
 	{"od", 2, NO_PARAM, 0},
 	{"open", 4, PARAM_FNAME, 0},
-	{"ow", 2, PARAM_FNAME, 0}, // diff (old 0110, new 1110)
+	{"ow", 2, PARAM_FNAME, 0},
 	{"opener", 6, PARAM_STR, 0},
 	{"p", 1, PARAM_FNAME, 0},
 	{"pc", 2, PARAM_FNAME, 0},
@@ -533,7 +533,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"q", 1, NO_PARAM, 0},
 	{"quit", 4, NO_PARAM, 0},
 	{"exit", 4, NO_PARAM, 0},
-	{"r", 1, PARAM_FNAME, 0}, //"rm",
+	{"r", 1, PARAM_FNAME, 0},
 	{"rf", 2, NO_PARAM, 0},
 	{"refresh", 7, NO_PARAM, 0},
 	{"rl", 2, NO_PARAM, 0},
@@ -543,7 +543,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"sel", 3, PARAM_FNAME, 0},
 	{"sb", 2, NO_PARAM, 0},
 	{"selbox", 6, NO_PARAM, 0},
-	{"sr", 2, NO_PARAM, 0}, // alias for 'sort rev'
+	{"sr", 2, NO_PARAM, 0}, /* Alias for 'sort rev' */
 	{"st", 2, PARAM_NUM, 0},
 	{"sort", 4, PARAM_NUM, 0},
 	{"stats", 5, NO_PARAM, 0},
@@ -553,7 +553,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"tag", 3, PARAM_FNAME, 0},
 	{"ta", 2, PARAM_FNAME, 0},
 	{"td", 2, PARAM_STR, 0},
-	{"tl", 2, PARAM_STR, 0}, // diff (old 0110, new 0101)
+	{"tl", 2, PARAM_STR, 0},
 	{"tm", 2, PARAM_STR, 0},
 	{"tn", 2, PARAM_STR, 0},
 	{"tu", 2, PARAM_STR, 0},
@@ -570,8 +570,9 @@ const struct cmdslist_t internal_cmds[] = {
 	{"version", 7, NO_PARAM, 0},
 	{"view", 4, PARAM_FNAME, 0},
 	{"ws", 2, PARAM_NUM, 0},
-	{"x", 1, PARAM_FNAME, 0}, // diff (old 0110, new 1110)
-	{"X", 1, PARAM_FNAME, 0}, // diff (old 0110, new 1110)
+	{"x", 1, PARAM_FNAME, 0},
+	{"X", 1, PARAM_FNAME, 0},
+	{"zp", 2, PARAM_FNAME, 0}, /* Alias for 'view' */
 	{NULL, 0, 0, 0}
 };
 
