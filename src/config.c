@@ -2668,10 +2668,11 @@ set_time_style_env(void)
 		return;
 
 	char *p = getenv("CLIFM_TIME_STYLE");
-	if (!p || !*p)
+	if (!p || !*p) {
 		p = getenv("TIME_STYLE");
-	if (!p || !*p)
-		return;
+		if (!p || !*p)
+			return;
+	}
 
 	set_time_style(p, &conf.time_str, 0);
 }
