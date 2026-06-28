@@ -1359,6 +1359,29 @@ Open \fIDIR\fR, or the current working directory if \fIDIR\fR is not specified, 
 .B unset \fINAME\fR
 .sp
   Remove a variable from the environment
+.TP
+.B Z commands
+Z-commands are built-in command aliases that provide easier and more consistent names for file-listing functions. This is the list of available aliases (you can also press \fBz<TAB>\fR to generate this same list):
+
+.TS
+tab(:);
+l l l.
+Alias:Aliased command:Description
+zc:fc:Toggle file-counter
+zd:ff:Toggle list-directories-first
+zf:k:Toggle follow-symlinks
+zh:hf:Toggle hidden-files
+zi:icons:Toggle icons
+zn:kk:Toggle max-filename-len
+zo:od:Toggle list-directories-only
+zp:view:Preview files in full-screen
+zr:fz:Toggle recursive-directory-size
+zs:ci:Toggle case-sensitive-sort
+zv:sr:Toggle sort-reverse
+zx:ll:Toggle long-view
+zy:lm:Toggle light-mode
+zz:quit:Exit
+.TE
 
 .SH 5. FILE FILTERS
 \fBClifm\fR provides multiple ways to filter the current list of files:
