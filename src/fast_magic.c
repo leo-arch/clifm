@@ -3966,7 +3966,7 @@ is_srt_image(const char *file)
 	uint8_t buf[6];
 	const ssize_t bytes = read_file_at(file, 32000, buf, sizeof(buf));
 
-	if (bytes > 0 && buf[0] == 'J' && buf[1] == 'H' && buf[2] == 'S'
+	if (bytes > 5 && buf[0] == 'J' && buf[1] == 'H' && buf[2] == 'S'
 	&& buf[3] == 'y' && buf[4] == 0x00 && buf[5] == 0x01)
 		return 1;
 
@@ -3981,7 +3981,7 @@ is_palette_master(const char *file)
 	const ssize_t bytes = read_file_at(file, 35968, buf, sizeof(buf));
 
 	/* 0xFFFF (-1 or 65535) marks the end of the picture. */
-	if (bytes <= 0 || buf[0] != 0xFF || buf[1] != 0xFF)
+	if (bytes <= 2 || buf[0] != 0xFF || buf[1] != 0xFF)
 		return 0;
 
 	/* After 0xFFFF, all bytes should be zero (we check only 30). */
@@ -8045,9 +8045,9 @@ fast_magic(const char *file)
 		return mimetype;
 
 	/* CDROM images (size is divisible by 2048 - ISO-9660 sector size) */
-	if (st.st_size > 32774 && (st.st_size & 0x7FF) == 0 && BYTES_TO_READ > 7) {
+	if (st.st_size > 32774 && (st.st_size & 0x7FF) == 0 && sizeof(buf) > 7) {
 		const ssize_t read = read_file_at(file, 32768, buf, 7);
-		if (read > 0 &&  buf[0] == 0x01 && buf[1] == 'C' && buf[2] == 'D'
+		if (read >= 7 && buf[0] == 0x01 && buf[1] == 'C' && buf[2] == 'D'
 		&& buf[3] == '0' && buf[4] == '0' && buf[5] == '1' && buf[6] == 0x01)
 			return "application/x-iso9660-image";
 	}
