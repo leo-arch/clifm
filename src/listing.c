@@ -140,11 +140,11 @@ struct wtrunc_t {
 /* Hold default values for the fileinfo struct. */
 static struct fileinfo default_file_info;
 
-static int pager_bk = 0;
-static int dir_out = 0;
-static int pager_quit = 0;
-static int pager_help = 0;
-static int long_view_bk = UNSET;
+static int g_pager_bk = 0;
+static int g_pager_quit = 0;
+static int g_pager_help = 0;
+static int g_dir_out = 0;
+static int g_long_view_bk = UNSET;
 
 /* A version of the loop-unswitching optimization: move loop-invariant
  * conditions out of the loop to reduce the number of conditions in each
@@ -237,7 +237,7 @@ set_ext_name_hashes(void)
 	for (i = 0; i < total; i++) {
 		for (size_t j = i + 1; j < total; j++) {
 			if (ext_icon_hashes[i] != ext_icon_hashes[j])
-				continue:
+				continue;
 			printf("%s conflicts with %s\n", icon_ext[i].name, icon_ext[j].name);
 			conflicts++;
 		}
@@ -766,20 +766,20 @@ print_cdpath(void)
 	is_cdpath = 0;
 }
 
-/* Restore the original value of long-view (taken from LONG_VIEW_BK)
+/* Restore the original value of long-view (taken from G_LONG_VIEW_BK)
  * after switching mode for the pager (according to PagerView). */
 static void
 restore_pager_view(void)
 {
-	if (long_view_bk != UNSET) {
-		conf.long_view = long_view_bk;
-		long_view_bk = UNSET;
+	if (g_long_view_bk != UNSET) {
+		conf.long_view = g_long_view_bk;
+		g_long_view_bk = UNSET;
 	}
 }
 
 /* If running the pager, set long-view according to the value of PagerView in
  * the config file. The original value of long-view will be restored after
- * list_dir() by restore_pager_view() according to the value of LONG_VIEW_BK. */
+ * list_dir() by restore_pager_view() according to the value of G_LONG_VIEW_BK. */
 static void
 set_pager_view(const filesn_t columns_n)
 {
@@ -798,7 +798,7 @@ set_pager_view(const filesn_t columns_n)
 		return;
 
 	if (conf.pager == 1 || g_files_num >= (filesn_t)conf.pager) {
-		long_view_bk = conf.long_view;
+		g_long_view_bk = conf.long_view;
 		conf.long_view = (conf.pager_view == PAGER_LONG);
 	}
 }
@@ -829,7 +829,7 @@ post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 	if (conf.pager_once == 0) {
 		if (reset_pager == 1 && (conf.pager < 2
 		|| g_files_num < (filesn_t)conf.pager))
-			conf.pager = pager_bk;
+			conf.pager = g_pager_bk;
 	} else {
 		conf.pager_once = 0;
 		conf.pager = 0;
@@ -837,7 +837,7 @@ post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 
 	const size_t s_files = (size_t)g_files_num;
 
-	if (pager_quit == 0 && conf.max_files != UNSET
+	if (g_pager_quit == 0 && conf.max_files != UNSET
 	&& g_files_num > (filesn_t)conf.max_files)
 		printf("... (%d/%zu)\n", conf.max_files, s_files);
 
@@ -926,7 +926,7 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 		xgetchar();
 		CLEAR;
 
-		pager_help = conf.long_view == 0;
+		g_pager_help = conf.long_view == 0;
 
 		if (columns_n == -1) { /* Long view */
 			*i = 0;
@@ -946,11 +946,11 @@ run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
 	case 'c': /* fallthrough */
 	case 'p': /* fallthrough */
 	case 'Q':
-		pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
+		g_pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
 		break;
 
 	case 'q':
-		pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
+		g_pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
 		putchar('\r');
 		ERASE_TO_RIGHT;
 		if (conf.long_view == 0 && conf.columned == 1
@@ -1282,7 +1282,7 @@ print_long_mode(int *reset_pager, const int eln_len)
 		space_left = (int)longest.name_len;
 
 	maxes.name = space_left + (conf.icons == 1 ? ICON_LEN : 0);
-	pager_quit = pager_help = 0;
+	g_pager_quit = g_pager_help = 0;
 
 	/* Cache conf struct values for faster access. */
 	const filesn_t conf_max_files = conf.max_files;
@@ -1303,7 +1303,7 @@ print_long_mode(int *reset_pager, const int eln_len)
 				const int ret = run_pager(-1, reset_pager, &i, &pager_counter);
 
 				if (ret == PAGER_RET_QUIT) {
-					pager_quit = 1;
+					g_pager_quit = 1;
 					break;
 				}
 
@@ -1331,7 +1331,7 @@ print_long_mode(int *reset_pager, const int eln_len)
 		print_entry_props(&file_info[i], &maxes, have_xattr);
 	}
 
-	if (pager_quit == 1)
+	if (g_pager_quit == 1)
 		printf("... (%zd/%zd)\n", i, g_files_num);
 }
 
@@ -1413,7 +1413,7 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	 * Because of this, we need to recalculate the length of the current entry
 	 * whenever we're coming from the pager help screen, in order to know
 	 * whether we should truncate the name or not. */
-	size_t namelen = pager_help == 1
+	size_t namelen = g_pager_help == 1
 		? (file_info[i].utf8 == 1 ? wc_xstrlen(file_info[i].name)
 		: file_info[i].bytes) : file_info[i].len;
 
@@ -2076,7 +2076,7 @@ list_files_horizontal(int *reset_pager, const int eln_len, size_t columns_n)
 	int last_column = 0;
 	int backup_last_column = last_column;
 
-	pager_quit = pager_help = 0;
+	g_pager_quit = g_pager_help = 0;
 	size_t pager_counter = 0;
 
 	for (i = 0; i < nn; i++) {
@@ -2107,7 +2107,7 @@ list_files_horizontal(int *reset_pager, const int eln_len, size_t columns_n)
 				ret = run_pager((int)columns_n, reset_pager, &i, &pager_counter);
 
 			if (ret == PAGER_RET_QUIT) {
-				pager_quit = 1;
+				g_pager_quit = 1;
 				goto END;
 			}
 
@@ -2148,7 +2148,7 @@ END:
 //	free(longest_per_col);
 	if (last_column == 0)
 		putchar('\n');
-	if (pager_quit == 1)
+	if (g_pager_quit == 1)
 		printf("... (%zd/%zd)\n", i, g_files_num);
 }
 
@@ -2203,7 +2203,7 @@ list_files_vertical(int *reset_pager, const int eln_len, size_t num_columns)
 	const int conf_no_eln = conf.no_eln;
 	const int conf_classify = conf.classify;
 
-	pager_quit = pager_help = 0;
+	g_pager_quit = g_pager_help = 0;
 	size_t pager_counter = 0;
 
 	for ( ; ; i++) {
@@ -2259,7 +2259,7 @@ list_files_vertical(int *reset_pager, const int eln_len, size_t num_columns)
 					reset_pager, &file_index, &pager_counter);
 
 			if (ret == PAGER_RET_QUIT) {
-				pager_quit = 1;
+				g_pager_quit = 1;
 				goto END;
 			}
 
@@ -2323,7 +2323,7 @@ END:
 #endif
 	if (last_column == 0)
 		putchar('\n');
-	if (pager_quit == 1)
+	if (g_pager_quit == 1)
 		printf("... (%zd/%zd)\n", i, g_files_num);
 }
 
@@ -2634,7 +2634,7 @@ check_autocmd_files(void)
 
 	if (lstat(buf, &a) != -1 && S_ISREG(a.st_mode)
 	&& a.st_size > 0 && a.st_size <= PATH_MAX)
-		dir_out = 1;
+		g_dir_out = 1;
 }
 
 /* List files in the current working directory (global variable 'path').
@@ -3465,9 +3465,9 @@ list_dir(void)
 		autocmd_ret = check_autocmds();
 	}
 
-	if (dir_changed == 1 && dir_out == 1) {
+	if (dir_changed == 1 && g_dir_out == 1) {
 		run_dir_cmd(AUTOCMD_DIR_OUT, NULL);
-		dir_out = 0;
+		g_dir_out = 0;
 	}
 
 	if (conf.clear_screen > 0) {
