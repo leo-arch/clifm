@@ -1283,8 +1283,13 @@ check_elf_magic(const uint8_t *s, const size_t slen)
 
 	switch (s[16]) {
 	case 1:  return "application/x-object";
-	case 2:  /* Fallthrough */
-	case 3:  return "application/x-executable";
+	case 2: return "application/x-executable";
+	case 3:
+#ifdef FMAGIC_NO_NULL
+		return "application/x-executable";
+#else
+		return NULL;
+#endif
 	case 4:  return "application/x-coredump";
 	default: return "application/octet-stream";
 	}

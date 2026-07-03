@@ -588,9 +588,12 @@ char
 * The general idea is to give the user a hint about how to open/handle the file. */
 
 struct icons_t const icon_ext[] = {
-/* Do not exceed 768 extensions. Otherwise, ext_table will raise from 1024
- * to 2048, probably making the lookup slower. Even more, keep the list
- * below 650 entries, to avoid overloading the table and reducing performance. */
+/* Do not exceed 767 extensions. Otherwise, ext_table will raise from 1024
+ * to 2048 slots (see ext_table_init() in listing.c), probably making the
+ * lookup slower. Even more, keep the list below 650 entries, to avoid
+ * overloading the table and reducing performance.
+ * To check the number of extensions and possible conflicts compile with
+ * the CHECK_ICONS macro. */
 
 	/* Graphics */
 	{"ai", ICON_ILLUSTRATOR, YELLOW}, // Adobe Illustrator
