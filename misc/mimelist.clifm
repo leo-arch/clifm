@@ -235,6 +235,10 @@ X:^audio/.*=iina --music-mode %x;gmplayer %x;smplayer %x;vlc %x;showtime %x;tote
 # Misc
 #-----------------------------
 
+# 3D Graphics
+X:^model/iges$=f3d %x
+X:^model/(stl|step|3mf)$=f3d %x;prusa-slicer %x
+X:^application/x-openscad$=openscad %x
 # Fonts
 X:^font/.*|^application/(font.*|.*opentype)=fontforge %x;fontpreview
 # Torrent files
