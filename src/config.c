@@ -64,10 +64,11 @@ regen_config(void)
 		}
 
 		char *abbrev = abbreviate_file_name(backup);
-		printf(_("Old configuration file saved as '%s'\n"),
+		printf(_("Old configuration file saved to '%s'\n"),
 			abbrev ? abbrev : backup);
+		if (abbrev && abbrev != backup)
+			free(abbrev);
 		free(backup);
-		free(abbrev);
 	}
 
 	if (create_main_config_file(config_file) != FUNC_SUCCESS)
