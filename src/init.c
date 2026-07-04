@@ -1190,13 +1190,13 @@ load_bookmarks(void)
 		if (!*line || *line == '\n' || *line == '#')
 			continue;
 		if (line[line_len - 1] == '\n')
-			line[line_len - 1] = '\0';
+			line[--line_len] = '\0';
 
 		/* Neither hotkey nor name, but only a path */
 		if (*line == '/') {
 			bookmarks[bm_n].shortcut = NULL;
 			bookmarks[bm_n].name = NULL;
-			bookmarks[bm_n++].path = savestring(line, strlen(line));
+			bookmarks[bm_n++].path = savestring(line, (size_t)line_len);
 			continue;
 		}
 
@@ -1212,8 +1212,7 @@ load_bookmarks(void)
 			}
 
 			*tmp = '\0';
-
-			bookmarks[bm_n].shortcut = savestring(p, strlen(p));
+			bookmarks[bm_n].shortcut = savestring(p, (size_t)(tmp - p));
 
 			tmp++;
 			p = tmp;
@@ -1226,7 +1225,7 @@ load_bookmarks(void)
 			}
 
 			*tmp = '\0';
-			bookmarks[bm_n].name = savestring(p, strlen(p));
+			bookmarks[bm_n].name = savestring(p, (size_t)(tmp - p));
 
 			if (!*(++tmp)) {
 				bookmarks[bm_n++].path = NULL;
@@ -1249,14 +1248,12 @@ load_bookmarks(void)
 		}
 
 		*tmp = '\0';
-		bookmarks[bm_n].name = savestring(line, strlen(line));
+		bookmarks[bm_n].name = savestring(line, (size_t)(tmp - line));
 
-		if (!*(++tmp)) {
+		if (!*(++tmp))
 			bookmarks[bm_n++].path = NULL;
-			continue;
-		} else {
+		else
 			bookmarks[bm_n++].path = save_bm_path(tmp);
-		}
 	}
 
 	free(line);
@@ -1265,12 +1262,9 @@ load_bookmarks(void)
 	if (bm_n == 0) {
 		free(bookmarks);
 		bookmarks = NULL;
-		return FUNC_SUCCESS;
+	} else {
+		bookmarks[bm_n] = (struct bookmarks_t){0};
 	}
-
-	bookmarks[bm_n].name = NULL;
-	bookmarks[bm_n].path = NULL;
-	bookmarks[bm_n].shortcut = NULL;
 
 	return FUNC_SUCCESS;
 }
@@ -1291,6 +1285,7 @@ load_actions(void)
 
 		free(usr_actions);
 		usr_actions = xnmalloc(1, sizeof(struct actions_t));
+		usr_actions[0] = (struct actions_t){0};
 		actions_n = 0;
 	}
 
@@ -1316,13 +1311,15 @@ load_actions(void)
 			continue;
 
 		/* Now copy left and right value of each action into the actions struct */
-		usr_actions = xnrealloc(usr_actions, (size_t)(actions_n + 1),
+		usr_actions = xnrealloc(usr_actions, (size_t)(actions_n + 2),
 			sizeof(struct actions_t));
 		*tmp = '\0';
 		const size_t name_len = (size_t)(tmp - line);
 		const size_t value_len = (size_t)line_len - name_len - 1;
 		usr_actions[actions_n].name = savestring(line, name_len);
 		usr_actions[actions_n++].value = savestring(tmp + 1, value_len);
+
+		usr_actions[actions_n] = (struct actions_t){0};
 	}
 
 	free(line);
