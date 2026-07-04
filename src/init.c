@@ -1312,7 +1312,7 @@ load_actions(void)
 			line[line_len - 1] = '\0';
 
 		char *tmp = strrchr(line, '=');
-		if (!tmp || !tmp[1])
+		if (!tmp || !tmp[1] || tmp == line)
 			continue;
 
 		/* Now copy left and right value of each action into the actions struct */
@@ -1320,7 +1320,8 @@ load_actions(void)
 			sizeof(struct actions_t));
 		usr_actions[actions_n].value = savestring(tmp + 1, strlen(tmp + 1));
 		*tmp = '\0';
-		usr_actions[actions_n++].name = savestring(line, strlen(line));
+		const size_t name_len = (size_t)(tmp - line);
+		usr_actions[actions_n++].name = savestring(line, name_len);
 	}
 
 	free(line);
