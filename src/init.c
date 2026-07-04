@@ -1309,7 +1309,7 @@ load_actions(void)
 			continue;
 
 		if (line[line_len - 1] == '\n')
-			line[line_len - 1] = '\0';
+			line[--line_len] = '\0';
 
 		char *tmp = strrchr(line, '=');
 		if (!tmp || !tmp[1] || tmp == line)
@@ -1318,10 +1318,11 @@ load_actions(void)
 		/* Now copy left and right value of each action into the actions struct */
 		usr_actions = xnrealloc(usr_actions, (size_t)(actions_n + 1),
 			sizeof(struct actions_t));
-		usr_actions[actions_n].value = savestring(tmp + 1, strlen(tmp + 1));
 		*tmp = '\0';
 		const size_t name_len = (size_t)(tmp - line);
-		usr_actions[actions_n++].name = savestring(line, name_len);
+		const size_t value_len = (size_t)line_len - name_len - 1;
+		usr_actions[actions_n].name = savestring(line, name_len);
+		usr_actions[actions_n++].value = savestring(tmp + 1, value_len);
 	}
 
 	free(line);
