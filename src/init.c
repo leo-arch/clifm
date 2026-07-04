@@ -1365,7 +1365,7 @@ load_remotes(void)
 			remotes[n] = (struct remote_t){0};
 
 			*name_end = '\0';
-			remotes[n].name = savestring(name, strlen(name));
+			remotes[n].name = savestring(name, (size_t)(name_end - name));
 		}
 
 		if (!remotes[n].name)
@@ -1611,7 +1611,7 @@ load_prompts(void)
 			unset_prompt_values(n);
 
 			*name_end = '\0';
-			prompts[n].name = savestring(name, strlen(name));
+			prompts[n].name = savestring(name, (size_t)(name_end - name));
 		}
 
 		if (!prompts[n].name)
@@ -1755,10 +1755,8 @@ get_sel_files(void)
 
 		/* Remove the ending slash: fstatat() won't take a symlink to dir as
 		 * a symlink (but as a dir), if the filename ends with a slash. */
-		if (len > 1 && line[len - 1] == '/') {
-			len--;
-			line[len] = '\0';
-		}
+		if (len > 1 && line[len - 1] == '/')
+			line[--len] = '\0';
 
 		if (!*line || *line == '#' || len == 0)
 			continue;
@@ -1903,10 +1901,8 @@ get_path_env(const int check_timestamps)
 
 		if (*p && (q - p) > 0) {
 			size_t len = (size_t)(q - p);
-			if (len > 1 && p[len - 1] == '/') {
-				p[len - 1] = '\0';
-				len--;
-			}
+			if (len > 1 && p[len - 1] == '/')
+				p[--len] = '\0';
 
 			/* Skip duplicate entries */
 			for (size_t i = 0; i < n; i++) {
@@ -2235,6 +2231,7 @@ free_aliases(void)
 
 	free(aliases);
 	aliases = xnmalloc(1, sizeof(struct alias_t));
+	aliases[0] = (struct alias_t){0};
 	aliases_n = 0;
 }
 
@@ -2323,10 +2320,8 @@ write_dirhist(char *line, ssize_t len)
 	if (!line || !*line || *line == '\n')
 		return;
 
-	if (len > 0 && line[len - 1] == '\n') {
-		line[len - 1] = '\0';
-		len--;
-	}
+	if (len > 0 && line[len - 1] == '\n')
+		line[--len] = '\0';
 
 	old_pwd[dirhist_total_index] = xnmalloc((size_t)len + 1, sizeof(char));
 	xstrsncpy(old_pwd[dirhist_total_index], line, (size_t)len + 1);
