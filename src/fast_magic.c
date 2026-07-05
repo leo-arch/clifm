@@ -7911,10 +7911,11 @@ text_or_binary(const uint8_t *s, const size_t slen)
 
 	const size_t max = len > 4096 ? 4096 : len;
 	size_t newline = 1;
+	size_t lines = 0;
 
 	for (size_t i = 0; i < max; i++) {
 		if (s[i] == 0x0A || s[i] == 0x0D)
-			{newline = 1; continue;}
+			{newline = 1; lines++; continue;}
 		if (newline == 0 || s[i] <= 0x20 || IS_DIGIT(s[i]))
 			continue;
 
@@ -7968,7 +7969,8 @@ text_or_binary(const uint8_t *s, const size_t slen)
 			break;
 	}
 
-	if (best_score >= MIN_REQUIRED_SCORE)
+	if (best_score >= MIN_REQUIRED_SCORE
+	|| (best_score > 0 && best_score >= (lines > 3 ? lines / 3 : lines)))
 		return best_scored_mimetype(best_scored_lang);
 
 	if (len > 4 && s[0] == '[' && s[1] >= 0x20 && s[1] <= 0x7E

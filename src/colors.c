@@ -1512,11 +1512,7 @@ split_extension_colors(const char *extcolors)
 	p = NULL;
 
 	if (ext_colors) {
-		ext_colors[ext_colors_n].name = NULL;
-		ext_colors[ext_colors_n].value = NULL;
-		ext_colors[ext_colors_n].len = 0;
-		ext_colors[ext_colors_n].value_len = 0;
-		ext_colors[ext_colors_n].hash = 0;
+		ext_colors[ext_colors_n] = (struct ext_t){0};
 		check_ext_color_hash_conflicts(0);
 	}
 }
