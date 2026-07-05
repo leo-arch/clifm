@@ -3122,6 +3122,16 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& ((sig[3] == '4' && sig[8] == 'M') || (sig[3] == '8' && sig[16] == 'M')))
 		return "model/x-maya";
 
+	/* file(1): magic/Magdir/diff */
+	if (nread > 20 && !BE_U32(sig + 16) && sig[0] == 'B' && sig[6] == '4'
+	&& memcmp(sig, "BSDIFF40", 8) == 0)
+		return "application/x-bsdiff";
+
+	/* file(1): magic/Magdir/diff */
+	if (nread >= 8 && sig[0] == 'G' && sig[1] == 'B' && sig[6] == '4'
+	&& memcmp(sig, "GBSDIF42", 8) == 0)
+		return "application/x-patch";
+
 	/* file(1): magic/Magdir/magic */
 	if (nread > 4 && (BE_U32(sig) == 0xF11E041C || LE_U32(sig) == 0xF11E041C))
 		return "application/x-file"; /* file(1) magic file (binary) */
@@ -7403,8 +7413,9 @@ check_ini_file(const uint8_t *s, const size_t slen)
 #define FILE1      0x800000000
 #define VALA       0x1000000000
 #define FSHARP     0x2000000000
+#define DIFF       0x4000000000
 /* Update this value after adding a new language (max 64) */
-#define LANG_NUM 38
+#define LANG_NUM 39
 #if LANG_NUM > 64
 # error "LANG_NUM must be <= 64"
 #endif
@@ -7780,6 +7791,10 @@ struct tokens_t tokens[] = {
 	{"<?\r\n", 4, PHP, 4},
 	{"?>", 2, PHP, 4},
 
+	{"--- ", 4, DIFF, 10},
+	{"+++ ", 4, DIFF, 10},
+	{"@@ -", 4, DIFF, 10},
+
 	{"# $File: ", 9, FILE1, MAX_SCORE},
 	{"!:mime\x09", 7, FILE1, MAX_SCORE},
 	{"string\x09", 7, FILE1, 6},
@@ -7801,6 +7816,7 @@ best_scored_mimetype(const uint64_t lang)
 	case CPLUS: return "text/x-c++";
 	case CSHARP: return "text/x-csharp";
 	case DART: return "text/x-dart";
+	case DIFF: return "text/x-diff";
 	case DLANG: return "text/x-d";
 	case ELIXIR: return "text/x-elixir";
 	case ERLANG: return "text/x-erlang";
