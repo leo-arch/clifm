@@ -4454,7 +4454,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 
 	/* libmagic: magic/Magdir/msvc */
 	if (nread > 4 && (BE_U32(sig) & 0xFF0F80FF) == 0xF00D0000
-	&& sig[1] + 3 < nread && (sig[sig[1] + 3] & 0xFD) == 0x80)
+	&& (size_t)sig[1] + 3 < nread && (sig[sig[1] + 3] & 0xFD) == 0x80)
 		return "application/x-omf-lib";
 
 	/* http://fileformats.archiveteam.org/wiki/LoadDskF/SaveDskF */
