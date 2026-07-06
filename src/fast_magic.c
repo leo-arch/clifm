@@ -7414,8 +7414,9 @@ check_ini_file(const uint8_t *s, const size_t slen)
 #define VALA       0x1000000000
 #define FSHARP     0x2000000000
 #define DIFF       0x4000000000
+#define MAKE       0x8000000000
 /* Update this value after adding a new language (max 64) */
-#define LANG_NUM 39
+#define LANG_NUM 40
 #if LANG_NUM > 64
 # error "LANG_NUM must be <= 64"
 #endif
@@ -7545,7 +7546,7 @@ struct tokens_t tokens[] = {
 	{"require '", 9, RUBY, MAX_SCORE},
 	{"require \"", 9, RUBY|LUA, 10},
 	{"elsif", 5, RUBY|PERL, 10},
-	{"include ", 8, RUBY|OCAML, 2},
+	{"include ", 8, RUBY|OCAML|MAKE, 2},
 	{"rescue ", 7, RUBY|ELIXIR, 2},
 	{"unless ", 7, RUBY|PERL, 2},
 	{"extend ", 7, RUBY, 2},
@@ -7574,7 +7575,7 @@ struct tokens_t tokens[] = {
 	{"await ", 6, PYTHON|CSHARP|JAVASCRIPT|NIM, 2},
 	{"self.", 5, PYTHON|RUBY|OBJC|DLANG|RUST|SWIFT, 1},
 	{"\"\"\"", 3, PYTHON, 2},
-	{"# ", 2, PYTHON|PERL|RUBY|ELIXIR|PHP|NIM|FILE1, 1},
+	{"# ", 2, PYTHON|PERL|RUBY|ELIXIR|PHP|NIM|FILE1|MAKE, 1},
 
 	{"(:require", 4, CLOJURE, 5},
 	{"(defn", 5, CLOJURE, 5},
@@ -7795,6 +7796,21 @@ struct tokens_t tokens[] = {
 	{"+++ ", 4, DIFF, 10},
 	{"@@ -", 4, DIFF, 10},
 
+	{".PHONY:", 7, MAKE, 7},
+	{".PRECIOUS:", 10, MAKE, 7},
+	{".SUFFIXES:", 10, MAKE, 7},
+	{"CFLAGS", 6, MAKE, 7},
+	{"LDLAGS", 6, MAKE, 7},
+	{"VPATH", 5, MAKE, 7}, {"vpath ", 6, MAKE, 7},
+	{"ifeq (", 6, MAKE, 7}, {"ifeq(", 5, MAKE, 7},
+	{"ifneq (", 7, MAKE, 7}, {"ifneq(", 6, MAKE, 7},
+	{"SUBDIRS", 7, MAKE, 4},
+	{"OBJS", 4, MAKE, 4},
+	{"clean:", 6, MAKE, 4},
+	{"install:", 8, MAKE, 4},
+	{"all:", 4, MAKE, 4},
+	{"${CC} ", 6, MAKE, 4},
+
 	{"# $File: ", 9, FILE1, MAX_SCORE},
 	{"!:mime\x09", 7, FILE1, MAX_SCORE},
 	{"string\x09", 7, FILE1, 6},
@@ -7832,6 +7848,7 @@ best_scored_mimetype(const uint64_t lang)
 	case KOTLIN: return "text/x-kotlin";
 	case LISP: return "text/x-lisp";
 	case LUA: return "text/x-lua";
+	case MAKE: return "text/x-makefile";
 	case NIM: return "text/x-nim";
 	case OBJC: return "text/x-objective-c";
 	case OCAML: return "text/x-ocaml";
@@ -7986,8 +8003,12 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	}
 
 	if (best_score >= MIN_REQUIRED_SCORE
-	|| (best_score > 0 && best_score >= (lines > 3 ? lines / 3 : lines)))
+	|| (best_score > 1 && best_score >= (lines > 3 ? lines / 3 : lines)))
 		return best_scored_mimetype(best_scored_lang);
+
+	if (len > 64 && s[0] == '#' && (s[1] == ' ' || s[1] == 0x09)
+	&& xmemmem(s, 64, "Makefile", 8))
+		return "text/x-makefile";
 
 	if (len > 4 && s[0] == '[' && s[1] >= 0x20 && s[1] <= 0x7E
 	&& is_ini_file(s, len) == 1)
