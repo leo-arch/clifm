@@ -1561,6 +1561,12 @@ make_unique_and_copy(const char *cmd_name, char *src, const char *dest,
 	char buf[PATH_MAX + 1];
 	snprintf(buf, sizeof(buf), "%s/%s", dest, base);
 	char *new_name = make_filename_unique(buf);
+	if (!new_name) {
+		xerror(_("%s: Cannot create unique name for '%s'\n"), cmd_name, buf);
+		free(usrc);
+		press_any_key_to_continue(0);
+		return;
+	}
 
 	/* We should be using here cpCmd and mvCmd (user's config). */
 	const int is_mv = IS_MVCMD(cmd_name);
@@ -1579,6 +1585,32 @@ make_unique_and_copy(const char *cmd_name, char *src, const char *dest,
 
 	free(usrc);
 	free(new_name);
+}
+
+static int
+is_dup_in_list(char **args, const char *file)
+{
+	if (!args || !file)
+		return 0;
+
+	size_t dups = 0;
+
+	for (size_t i = 0; args[i]; i++) {
+		if (*args[i] == '\0') continue;
+
+		char *p = strrchr(args[i], '/');
+		char *src_base = (p && p[1]) ? p + 1 : args[i];
+
+		char *b = strchr(src_base, '\\') ? unescape_str(src_base) : src_base;
+		if (!b) continue;
+
+		dups += (*b == *file && strcmp(b, file) == 0);
+
+		if (b != src_base) free(b);
+		if (dups > 1) return 1;
+	}
+
+	return 0;
 }
 
 static int
@@ -1627,10 +1659,12 @@ check_overwrite(char **args, const int force, size_t *skipped,
 		else
 			snprintf(buf, sizeof(buf), "%s%s", dest, basename);
 
-		free(p);
-
-		if (lstat(buf, &a) == -1)
+		if (lstat(buf, &a) == -1 && is_dup_in_list(args + 1, basename) == 0) {
+			free(p);
 			continue;
+		}
+
+		free(p);
 
 		if (answer_none == 1 || answer_skipall == 1) {
 			if (answer_none == 1)
