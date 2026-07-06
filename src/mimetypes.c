@@ -61,12 +61,11 @@ get_mimetypes_file(void)
 			return fp;
 	}
 
-	if (!user.home || !*user.home)
-		return NULL;
-
-	snprintf(buf, sizeof(buf), "%s/.mime.types", user.home);
-	if ((fp = try_open_file(buf)) != NULL)
-		return fp;
+	if (user.home && *user.home) {
+		snprintf(buf, sizeof(buf), "%s/.mime.types", user.home);
+		if ((fp = try_open_file(buf)) != NULL)
+			return fp;
+	}
 
 	return NULL;
 }
