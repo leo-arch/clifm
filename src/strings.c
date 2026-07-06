@@ -2630,7 +2630,7 @@ do_path_normalization(char **s, const size_t i, const int is_int_cmd)
  * pattern (first parameter) by a find(1) command.
  * The replaced pattern will be expanded later by expand_word().
  *
- * Case-sensitivy depends on the value of conf.case_sens_list
+ * Case-sensitivity depends on the value of conf.case_sens_list
  *
  * The first parameter is assumed to be '-x' or '-X'. In the first case, the
  * pattern is taken as a wildcard pattern, otherwise as a regular expression.
@@ -2676,7 +2676,7 @@ make_sel_recursive(char ***substr)
 	free(s[1]);
 	s[1] = buf;
 
-	free(s[2]); /* Remove "-x" parameter */
+	free(s[2]); /* Remove "-r" parameter */
 	s[2] = NULL;
 	if (args_n > 0) args_n--;
 
