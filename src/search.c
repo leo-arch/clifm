@@ -168,6 +168,7 @@ set_file_type_and_search_path(char **args, mode_t *file_type,
 	case 'l': *file_type = invert == 1 ? DT_LNK : S_IFLNK; break;
 	case 'p': *file_type = invert == 1 ? DT_FIFO : S_IFIFO; break;
 	case 's': *file_type = invert == 1 ? DT_SOCK : S_IFSOCK; break;
+	case 'r': /* Fallthrough */
 	case 'x': run_find(*search_path, args[0]); return FUNC_SUCCESS;
 	default:
 		fprintf(stderr, _("search: '%c': Unrecognized file "
@@ -547,7 +548,7 @@ search_glob(char **args)
 		return ERR_SKIP_REGEX;
 	}
 
-	if (file_type == 'x') /* Recursive search via find(1) */
+	if (file_type == 'x' || file_type == 'r') /* Recursive search via find(1) */
 		return FUNC_SUCCESS;
 
 	/* If we have a path ("/str /path"), chdir into it, since glob(3)

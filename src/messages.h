@@ -1038,7 +1038,7 @@ the editor (quit without saving to cancel the operation).\n\n\
 
 #define SEARCH_USAGE "Search for files using either glob or regular expressions\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  /PATTERN [-filetype] [-x] [DIR]\n\n\
+  /PATTERN [-filetype] [-r] [DIR]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - List all PDF files in the current directory\n\
     /*.pdf (or, as a regular expression, '/.*\\.pdf$')\n\
@@ -1054,11 +1054,11 @@ You can further filter the search using a file type filter:\n\
   -l	symlink\n\
   -p	FIFO/pipe\n\
   -s	socket\n\
-- For example, to list all directories containing a dot or a dash and ending \
-with 'd' in the directory named 'Documents'\n\
+- For example, to list all directories containing a dot or a dash and ending\n\
+with 'd' in the directory named 'Documents':\n\
     /[.-].*d$ -d Documents/\n\n\
-To perform a recursive search, use the -x modifier (file types not allowed)\n\
-    /str -x /boot\n\n\
+To perform a recursive search, use the -r modifier (file types not allowed)\n\
+    /str -r /boot\n\n\
 To search for files by content instead of names, use the rgfind plugin, bound\n\
 by default to the \"//\" action name. For example:\n\
     // content I\\'m looking for\n\n\
@@ -1082,7 +1082,7 @@ injection. To enable this mode, use the --secure-cmds command line switch."
 
 #define SEL_USAGE "Select one or multiple files\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  s, sel [--invert] [FILE...] [(!)PATTERN] [-(d|f|l|s|p|b|c)] [:PATH]\n\n\
+  s, sel [--invert] [FILE...] [(!)PATTERN] [-(d|f|l|s|p|b|c|r|R)] [:PATH]\n\n\
 Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 (s)ocket, fifo/(p)ipe, (b)lock device, (c)haracter device\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -1099,6 +1099,12 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 - Interactively select files in '/media' (requires fzf, fnf, or smenu\n\
   tab completion modes)\n\
     s /media/*<TAB>\n\
+- Recursively select *.PNG files starting from the current directory\n\
+    s *.png -r\n\
+- Recursively select *.PNG files starting from the directory 'dir'\n\
+    s *.png -r dir/\n\
+  Note: To use a regular expression instead of a glob pattern, use -R\n\
+  Note: Only a single pattern is allowed when recursively selecting files\n\
 - List currently selected files\n\
     sb\n\
 - Invert (toggle) selection in the current directory\n\

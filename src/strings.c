@@ -2625,6 +2625,69 @@ do_path_normalization(char **s, const size_t i, const int is_int_cmd)
 	return 0;
 }
 
+#ifdef HAVE_WORDEXP
+/* Make the 'sel' command select files recursively by replacing the selection
+ * pattern (first parameter) by a find(1) command.
+ * The replaced pattern will be expanded later by expand_word().
+ *
+ * Case-sensitivy depends on the value of conf.case_sens_list
+ *
+ * The first parameter is assumed to be '-x' or '-X'. In the first case, the
+ * pattern is taken as a wildcard pattern, otherwise as a regular expression.
+ *
+ * If a second parameter is provided, it is passed to find(1) as starting
+ * path. Otherwise, the current directory is used. */
+static void
+make_sel_recursive(char ***substr)
+{
+	char **s = *substr;
+	if (!s || !s[0] || !s[1] || !s[2])
+		return;
+
+	const char *pattern = s[1];
+	const char *search_path = (s[3] && *s[3]) ? s[3] : ".";
+	if (*search_path == ':' && search_path[1])
+		search_path++;
+	const char *cmd = "find";
+
+#ifdef _BE_POSIX
+	char *method = "-name";
+#else
+	static int check_find = 0;
+	if (check_find == 0) {
+		if (is_cmd_in_path("gfind", NULL) == 1)
+			cmd = "gfind";
+		check_find = 1;
+	}
+
+	const int use_regex = (s[2][0] && s[2][1] == 'R');
+	char *method = NULL;
+	if (conf.case_sens_list == 1)
+		method = use_regex ? "-regex" : "-name";
+	else
+		method = use_regex ? "-iregex" : "-iname";
+#endif /* _BE_POSIX */
+
+	const size_t len = strlen(cmd) + strlen(search_path) + strlen(method)
+		+ strlen(pattern) + 8 + 1;
+	char *buf = xnmalloc(len, sizeof(char));
+	snprintf(buf, len, "$(%s %s %s '%s')", cmd, search_path, method, pattern);
+
+	free(s[1]);
+	s[1] = buf;
+
+	free(s[2]); /* Remove "-x" parameter */
+	s[2] = NULL;
+	if (args_n > 0) args_n--;
+
+	if (s[3]) { /* Remove the path parameter */
+		free(s[3]);
+		s[3] = NULL;
+		if (args_n > 0) args_n--;
+	}
+}
+#endif /* HAVE_WORDEXP */
+
 /*
  * This function is one of the keys of clifm. It will perform a series of
  * actions:
@@ -2761,6 +2824,15 @@ parse_input_str(char *str)
 	if (conf.tr_as_rm == 1 && substr[0] && *substr[0] == 'r' && !substr[0][1])
 		*substr[0] = 't';
 #endif /* !_NO_TRASH*/
+
+#ifdef HAVE_WORDEXP
+	/* Handle 'sel pattern -[rR]' (recursive selection via find(1)) */
+	if (((substr[0][0] == 's' && !substr[0][1])
+	|| strcmp(substr[0], "sel") == 0) && substr[1] && *substr[1] && substr[2]
+	&& substr[2][0] == '-' && (substr[2][1] == 'r' || substr[2][1] == 'R')
+	&& !substr[2][2])
+		make_sel_recursive(&substr);
+#endif /* HAVE_WORDEXP */
 
 				/* ##############################
 				 * #   2) BUILTIN EXPANSIONS    #
