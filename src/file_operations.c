@@ -1547,23 +1547,14 @@ make_unique_and_copy(const char *cmd_name, char *src, const char *dest,
 	if (!cmd_name || !src || !dest)
 		return;
 
-	char *usrc = unescape_str(src);
-	if (!usrc)
-		return;
-
-	const size_t src_len = strlen(usrc);
-	if (src_len > 1 && usrc[src_len - 1] == '/')
-		usrc[src_len - 1] = '\0';
-
-	const char *ptr = strrchr(usrc, '/');
-	const char *base = (ptr && ptr[1]) ? ptr + 1 : usrc;
+	const char *ptr = strrchr(src, '/');
+	const char *base = (ptr && ptr[1]) ? ptr + 1 : src;
 
 	char buf[PATH_MAX + 1];
 	snprintf(buf, sizeof(buf), "%s/%s", dest, base);
 	char *new_name = make_filename_unique(buf);
 	if (!new_name) {
 		xerror(_("%s: Cannot create unique name for '%s'\n"), cmd_name, buf);
-		free(usrc);
 		press_any_key_to_continue(0);
 		return;
 	}
@@ -1572,7 +1563,7 @@ make_unique_and_copy(const char *cmd_name, char *src, const char *dest,
 	const int is_mv = IS_MVCMD(cmd_name);
 	const char *param = is_mv ? "-f" : "-rf";
 
-	const char *cmd[] =	{is_mv ? "mv" : "cp", param, "--", usrc, new_name, NULL};
+	const char *cmd[] =	{is_mv ? "mv" : "cp", param, "--", src, new_name, NULL};
 	const int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 
 	if (ret == 0) {
@@ -1583,7 +1574,6 @@ make_unique_and_copy(const char *cmd_name, char *src, const char *dest,
 		press_any_key_to_continue(0);
 	}
 
-	free(usrc);
 	free(new_name);
 }
 
@@ -1631,9 +1621,15 @@ fill_src_info(char **args, const size_t files_num)
 		if (!s[i].name)
 			continue;
 
+		const size_t name_len = strlen(s[i].name);
+		if (name_len > 1 && s[i].name[name_len - 1] == '/')
+			s[i].name[name_len - 1] = '\0';
+
 		char *p = strrchr(s[i].name, '/');
 		s[i].basename = (p && p[1]) ? p + 1 : s[i].name;
-		s[i].basename_len = strlen(s[i].basename);
+		s[i].basename_len = (p && p[1])
+			? name_len - (size_t)((p + 1) - s[i].name)
+			: name_len);
 	}
 
 	s[i] = (struct src_t){0};
@@ -1705,8 +1701,10 @@ handle_overwrite(char **args, const int force, size_t *skipped,
 			continue;
 
 		if (answer_none == 1 || answer_skipall == 1) {
-			if (answer_none == 1)
-				make_unique_and_copy(args[0], args[i], dest, cwd, copied);
+			if (answer_none == 1) {
+				printf("%s %s\n", args[i], src[i].name);
+				make_unique_and_copy(args[0], src[i].name, dest, cwd, copied);
+			}
 			/* Nullify this entry. It will be skipped later. */
 			nullify_entry(args, i, skipped, src);
 			continue;
@@ -1723,7 +1721,7 @@ handle_overwrite(char **args, const int force, size_t *skipped,
 
 		if (answer == RL_ANSWER_NONE) { /* Do not overwrite any file. */
 			answer_none = 1;
-			make_unique_and_copy(args[0], args[i], dest, cwd, copied);
+			make_unique_and_copy(args[0], src[i].name, dest, cwd, copied);
 			nullify_entry(args, i, skipped, src);
 			continue;
 		}
@@ -1746,12 +1744,13 @@ handle_overwrite(char **args, const int force, size_t *skipped,
 		}
 
 		if (answer == RL_ANSWER_NO) {
-			make_unique_and_copy(args[0], args[i], dest, cwd, copied);
+			make_unique_and_copy(args[0], src[i].name, dest, cwd, copied);
 			nullify_entry(args, i, skipped, src);
 		}
 	}
 
 	free_src_info(src, files_num);
+	press_any_key_to_continue(0);
 
 	/* If skipped == files_num - 1, there are no source files left, only
 	 * the destination file: there's nothing to do. */
