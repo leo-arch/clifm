@@ -1587,34 +1587,77 @@ make_unique_and_copy(const char *cmd_name, char *src, const char *dest,
 	free(new_name);
 }
 
+struct src_t {
+	char *name;
+	char *basename;
+	size_t basename_len;
+	int skipped;
+};
+
 static int
-is_dup_in_list(char **args, const char *file)
+is_dup_in_list(struct src_t *src, const char *file, const size_t file_num)
 {
-	if (!args || !file)
+	if (!src || !file)
 		return 0;
 
 	size_t dups = 0;
+	const size_t file_len = strlen(file);
 
-	for (size_t i = 0; args[i]; i++) {
-		if (*args[i] == '\0') continue;
+	for (size_t i = 1; i < file_num; i++) {
+		if (src[i].skipped == 1 || !src[i].basename)
+			continue;
 
-		char *p = strrchr(args[i], '/');
-		char *src_base = (p && p[1]) ? p + 1 : args[i];
+		dups += (*src[i].basename == *file && src[i].basename_len == file_len
+			&& strcmp(src[i].basename, file) == 0);
 
-		char *b = strchr(src_base, '\\') ? unescape_str(src_base) : src_base;
-		if (!b) continue;
-
-		dups += (*b == *file && strcmp(b, file) == 0);
-
-		if (b != src_base) free(b);
-		if (dups > 1) return 1;
+		if (dups > 1)
+			return 1;
 	}
 
 	return 0;
 }
 
+struct src_t *
+fill_src_info(char **args, const size_t files_num)
+{
+	struct src_t *s = xnmalloc(files_num + 1, sizeof(struct src_t));
+	s[0] = (struct src_t){0};
+
+	size_t i = 0;
+	for (i = 1; i < files_num; i++) {
+		s[i] = (struct src_t){0};
+
+		s[i].name = unescape_str(args[i]);
+		if (!s[i].name)
+			continue;
+
+		char *p = strrchr(s[i].name, '/');
+		s[i].basename = (p && p[1]) ? p + 1 : s[i].name;
+		s[i].basename_len = strlen(s[i].basename);
+	}
+
+	s[i] = (struct src_t){0};
+	return s;
+}
+
+static void
+free_src_info(struct src_t *src, const size_t files_num)
+{
+	for (size_t i = 1; i < files_num; i++)
+		free(src[i].name);
+	free(src);
+}
+
+static inline void
+nullify_entry(char **args, const size_t i, size_t *skipped, struct src_t *src)
+{
+	args[i][0] = '\0';
+	src[i].skipped = 1;
+	(*skipped)++;
+}
+
 static int
-check_overwrite(char **args, const int force, size_t *skipped,
+handle_overwrite(char **args, const int force, size_t *skipped,
 	size_t *copied, int *cwd)
 {
 	const int append_curdir = (sel_is_last == 1 && sel_n > 0);
@@ -1646,31 +1689,26 @@ check_overwrite(char **args, const int force, size_t *skipped,
 	int answer_none = 0;
 	int answer_skipall = 0;
 
-	for (size_t i = 1; i < files_num; i++) {
-		char *p = unescape_str(args[i]);
-		if (!p)
-			continue;
+	struct src_t *src = fill_src_info(args, files_num);
 
-		const char *s = strrchr(p, '/');
-		const char *basename = (s && s[1]) ? s + 1 : p;
+	for (size_t i = 1; i < files_num; i++) {
+		if (!src[i].name)
+			continue;
 
 		if (ends_with_slash == 0)
-			snprintf(buf, sizeof(buf), "%s/%s", dest, basename);
+			snprintf(buf, sizeof(buf), "%s/%s", dest, src[i].basename);
 		else
-			snprintf(buf, sizeof(buf), "%s%s", dest, basename);
+			snprintf(buf, sizeof(buf), "%s%s", dest, src[i].basename);
 
-		if (lstat(buf, &a) == -1 && is_dup_in_list(args + 1, basename) == 0) {
-			free(p);
+		if (lstat(buf, &a) == -1
+		&& is_dup_in_list(src, src[i].basename, files_num) == 0)
 			continue;
-		}
-
-		free(p);
 
 		if (answer_none == 1 || answer_skipall == 1) {
 			if (answer_none == 1)
 				make_unique_and_copy(args[0], args[i], dest, cwd, copied);
-			*args[i] = '\0';
-			(*skipped)++;
+			/* Nullify this entry. It will be skipped later. */
+			nullify_entry(args, i, skipped, src);
 			continue;
 		}
 
@@ -1679,41 +1717,41 @@ check_overwrite(char **args, const int force, size_t *skipped,
 		if (answer == RL_ANSWER_SKIP || answer == RL_ANSWER_SKIP_ALL) {
 			if (answer == RL_ANSWER_SKIP_ALL)
 				answer_skipall = 1;
-			*args[i] = '\0';
-			(*skipped)++;
+			nullify_entry(args, i, skipped, src);
 			continue;
 		}
 
 		if (answer == RL_ANSWER_NONE) { /* Do not overwrite any file. */
 			answer_none = 1;
 			make_unique_and_copy(args[0], args[i], dest, cwd, copied);
-			*args[i] = '\0';
-			(*skipped)++;
+			nullify_entry(args, i, skipped, src);
 			continue;
 		}
 
-		if (answer == RL_ANSWER_ALL)
+		if (answer == RL_ANSWER_ALL) {
+			free_src_info(src, files_num);
 			return 1;
+		}
 
 		if (answer == RL_ANSWER_QUIT) {
-			if (i == 1) /* First file */
+			if (i == 1) { /* First file */
+				free_src_info(src, files_num);
 				return 0;
+			}
 
 			/* At least one file has been processed: skip the remainig ones. */
-			for (size_t j = i; j < files_num; j++) {
-				*args[j] = '\0';
-				(*skipped)++;
-			}
+			for (size_t j = i; j < files_num; j++)
+				nullify_entry(args, j, skipped, src);
 			break;
 		}
 
 		if (answer == RL_ANSWER_NO) {
 			make_unique_and_copy(args[0], args[i], dest, cwd, copied);
-			/* Nullify this entry. It will be skipped later. */
-			*args[i] = '\0';
-			(*skipped)++;
+			nullify_entry(args, i, skipped, src);
 		}
 	}
+
+	free_src_info(src, files_num);
 
 	/* If skipped == files_num - 1, there are no source files left, only
 	 * the destination file: there's nothing to do. */
@@ -1745,14 +1783,14 @@ int
 cp_mv_file(char **args, const int copy_and_rename, const int force)
 {
 	int ret = 0;
+	int cwd = 0;
 	size_t skipped = 0;
 	size_t copied = 0;
-	int cwd = 0;
 
 	if (!args || !args[0])
 		return FUNC_FAILURE;
 
-	if (check_overwrite(args, force, &skipped, &copied, &cwd) == 0) {
+	if (handle_overwrite(args, force, &skipped, &copied, &cwd) == 0) {
 		if (copied > 0)
 			return print_cp_mv_summary_msg(args[0], copied, cwd);
 		return FUNC_SUCCESS;
