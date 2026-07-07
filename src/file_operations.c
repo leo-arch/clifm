@@ -1701,10 +1701,8 @@ handle_overwrite(char **args, const int force, size_t *skipped,
 			continue;
 
 		if (answer_none == 1 || answer_skipall == 1) {
-			if (answer_none == 1) {
-				printf("%s %s\n", args[i], src[i].name);
+			if (answer_none == 1)
 				make_unique_and_copy(args[0], src[i].name, dest, cwd, copied);
-			}
 			/* Nullify this entry. It will be skipped later. */
 			nullify_entry(args, i, skipped, src);
 			continue;
