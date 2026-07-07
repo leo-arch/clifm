@@ -1629,7 +1629,7 @@ fill_src_info(char **args, const size_t files_num)
 		s[i].basename = (p && p[1]) ? p + 1 : s[i].name;
 		s[i].basename_len = (p && p[1])
 			? name_len - (size_t)((p + 1) - s[i].name)
-			: name_len);
+			: name_len;
 	}
 
 	s[i] = (struct src_t){0};
