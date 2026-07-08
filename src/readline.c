@@ -111,6 +111,11 @@ gen_yes_no_str(char def_answer, int allow_all)
 	switch (def_answer) {
 	case 'y': return allow_all ? "[Y/n/a/o/s/k/q]" : "[Y/n]";
 	case 'n': return allow_all ? "[y/N/a/o/s/k/q]" : "[y/N]";
+	case 'a': return allow_all ? "[y/n/A/o/s/k/q]" : "[y/n]";
+	case 'o': return allow_all ? "[y/n/a/O/s/k/q]" : "[y/n]";
+	case 's': return allow_all ? "[y/n/a/o/S/k/q]" : "[y/n]";
+	case 'k': return allow_all ? "[y/n/a/o/s/K/q]" : "[y/n]";
+	case 'q': return allow_all ? "[y/n/a/o/s/k/Q]" : "[y/n]";
 	case 'u': /* fallthrough */ /* unset */
 	default: return allow_all ? "[y/n/a/o/s/k/q]" : "[y/n]";
 	}
@@ -216,20 +221,18 @@ rl_get_y_n_common(const char *msg_str, char default_answer, int allow_all)
 	return 0;
 }
 
-/* Get user input (y/n, uppercase is allowed) using MSG_STR as prompt message.
+/* Get user input using MSG_STR as prompt message.
  * If DEFAULT_ANSWER isn't zero, it will be used in case the user just
  * presses Enter on an empty line.
- * Returns RL_ANSWER_YES if 'y' or RL_ANSWER_NO if 'n'. */
+ * Returns one of the RL_ANSWER macros describing the answer. */
 int
 rl_get_y_or_n(const char *msg_str, char default_answer)
 {
 	return rl_get_y_n_common(msg_str, default_answer, 0);
 }
 
-/* Same as rl_get_y_or_n, but accepts a third and fourth options (all/quit).
- * Besides RL_ANSWER_YES and RL_ANSWER_NO, it returns RL_ANSWER_ALL if
- * the answer is 'a' (or all) and RL_ANSWER_QUIT if 'q' (or quit).
- * Useful when applying a single operation to multiple items. */
+/* Same as rl_get_y_or_n, but accepts further answers
+ * (all/none/skip/skipall/quit). */
 int
 rl_get_y_n_all(const char *msg_str, char default_answer)
 {

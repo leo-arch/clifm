@@ -406,6 +406,8 @@
 #
 # The right value holds the default answer for the corresponding prompt:
 #  'y', 'n', or 'u' (unset - no default answer, wait for explicit input).
+# The overwrite prompt ('o') accepts these additional values:
+#  'a': all, 'o': none, 's':skip, 'k':skip all, 'q':quit
 #
 # If a value, left or right, is unset (or set to any other value), no default
 # answer is used ('y' or 'n' is explicitly required, unless 'd' or 'D'
@@ -413,7 +415,7 @@
 #
 # For example, to set 'n' as the default answer for the 'r' command, unset for
 # trash, and 'y' for everything else: "r:n,t:u,d:y".
-;DefaultAnswer="o:n,r:n,t:y,R:n,d:y"
+;DefaultAnswer="o:o,r:n,t:y,R:n,d:y"
 
 # Specify how the 'l' command creates symbolic links. Supported values:
 # absolute = Make the target an absolute path

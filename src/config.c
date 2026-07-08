@@ -3209,17 +3209,28 @@ set_default_answers_to_default(void)
 static void
 set_default_answer(const char *str)
 {
-	if (!str || !*str || str[1] != ':'
-	|| (str[2] != 'y' && str[2] != 'n' && str[2] != 'u'))
+	if (!str || !str[0] || str[1] != ':' || !str[2])
 		return;
 
-	switch (*str) {
-	case 'd': conf.default_answer.default_ = str[2]; break;
-	case 'D': conf.default_answer.default_all = str[2]; break;
-	case 'o': conf.default_answer.overwrite = str[2]; break;
-	case 'r': conf.default_answer.remove = str[2]; break;
-	case 'R': conf.default_answer.bulk_rename = str[2]; break;
-	case 't': conf.default_answer.trash = str[2]; break;
+	const char p = str[0]; /* Prompt type */
+	const char v = str[2]; /* Prompt value */
+
+	if (p == 'o') { /* Validate values for the overwrite prompt */
+		if (v != 'y' && v != 'a' && v != 'o' && v != 's' && v != 'k'
+		&& v != 'q' && v != 'u')
+			return;
+	} else { /* Validate values for the remaining prompts */
+		if (v != 'y' && v != 'n' && v != 'u')
+			return;
+	}
+
+	switch (p) {
+	case 'd': conf.default_answer.default_ = v; break;
+	case 'D': conf.default_answer.default_all = v; break;
+	case 'o': conf.default_answer.overwrite = v; break;
+	case 'r': conf.default_answer.remove = v; break;
+	case 'R': conf.default_answer.bulk_rename = v; break;
+	case 't': conf.default_answer.trash = v; break;
 	default: break;
 	}
 }
