@@ -1398,6 +1398,9 @@ cwd_has_sel_files(void)
 static int
 print_cp_mv_summary_msg(const char *c, const size_t n, const int cwd)
 {
+	if (!c)
+		return FUNC_FAILURE;
+
 	if (conf.autols == 1 && cwd > 0)
 		reload_dirlist();
 
@@ -1413,7 +1416,7 @@ static char *
 get_rename_dest_filename(char *name, int *status)
 {
 	if (!name || !*name) {
-		*status = EINVAL;
+		if (status) *status = EINVAL;
 		return NULL;
 	}
 
@@ -1424,7 +1427,7 @@ get_rename_dest_filename(char *name, int *status)
 	free(p);
 
 	if (ret == -1) {
-		*status = errno;
+		if (status) *status = errno;
 		alt_prompt = 0;
 		xerror("m: '%s': %s\n", name, strerror(errno));
 		return NULL;
@@ -1433,14 +1436,14 @@ get_rename_dest_filename(char *name, int *status)
 	/* Get destination filename. */
 	char *new_name = get_new_filename(name);
 	if (!new_name) { /* The user pressed Ctrl+d */
-		*status = FUNC_SUCCESS;
+		if (status) *status = FUNC_SUCCESS;
 		return NULL;
 	}
 
 	if (validate_filename(&new_name, 0) == 0) {
 		xerror(_("m: '%s': Unsafe filename\n"), new_name);
 		if (rl_get_y_or_n(_("Continue?"), 0) == 0) {
-			*status = FUNC_SUCCESS;
+			if (status) *status = FUNC_SUCCESS;
 			free(new_name);
 			return NULL;
 		}
@@ -1452,6 +1455,9 @@ get_rename_dest_filename(char *name, int *status)
 static char **
 build_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 {
+	if (!cmd | !cmd[0])
+		return NULL;
+
 	size_t n = 0;
 	char **tcmd = xnmalloc(3 + args_n + 2, sizeof(char *));
 
@@ -1508,9 +1514,9 @@ static int
 ask_overwrite(const char *cmd_name, char *file, const int all)
 {
 	char msg[PATH_MAX + 28];
-	char *abbrev = abbreviate_file_name(file);
+	char *abbrev = file ? abbreviate_file_name(file) : NULL;
 	snprintf(msg, sizeof(msg), _("%s: '%s': Overwrite this file?"),
-		cmd_name, abbrev ? abbrev : file);
+		cmd_name ? cmd_name : "?", abbrev ? abbrev : (file ? file : "unknown"));
 	if (abbrev && abbrev != file)
 		free(abbrev);
 
@@ -1523,13 +1529,13 @@ ask_overwrite(const char *cmd_name, char *file, const int all)
 static int
 handle_nodir_overwrite(char *arg, const char *cmd_name)
 {
-	char *file = unescape_str(arg);
+	char *file = arg ? unescape_str(arg) : NULL;
 	if (!file)
 		return 0;
 
 	struct stat a;
 	if (lstat(file, &a) != -1) {
-		const int answer = ask_overwrite(cmd_name, file, 0);
+		const int answer = ask_overwrite(cmd_name ? cmd_name : "?", file, 0);
 		if (answer == RL_ANSWER_NO) {
 			free(file);
 			return 0;
@@ -1617,7 +1623,7 @@ fill_src_info(char **args, const size_t files_num)
 	for (i = 1; i < files_num; i++) {
 		s[i] = (struct src_t){0};
 
-		s[i].name = unescape_str(args[i]);
+		s[i].name = (args && args[i]) ? unescape_str(args[i]) : NULL;
 		if (!s[i].name)
 			continue;
 
@@ -1639,6 +1645,9 @@ fill_src_info(char **args, const size_t files_num)
 static void
 free_src_info(struct src_t *src, const size_t files_num)
 {
+	if (!src)
+		return;
+
 	for (size_t i = 1; i < files_num; i++)
 		free(src[i].name);
 	free(src);
@@ -1647,6 +1656,9 @@ free_src_info(struct src_t *src, const size_t files_num)
 static inline void
 nullify_entry(char **args, const size_t i, size_t *skipped, struct src_t *src)
 {
+	if (!args || !skipped || !src)
+		return;
+
 	args[i][0] = '\0';
 	src[i].skipped = 1;
 	(*skipped)++;
@@ -1656,6 +1668,9 @@ static int
 handle_overwrite(char **args, const int force, size_t *skipped,
 	size_t *copied, int *cwd)
 {
+	if (!args || !skipped || !copied)
+		return 0;
+
 	const int append_curdir = (sel_is_last == 1 && sel_n > 0);
 	const size_t files_num = args_n + (append_curdir == 1);
 
@@ -1759,7 +1774,7 @@ handle_overwrite(char **args, const int force, size_t *skipped,
 static void
 remove_dirslash_from_source(char **args)
 {
-	if (args_n <= 1)
+	if (args_n <= 1 || !args)
 		return;
 
 	for (size_t i = 1; i < args_n; i++) {
