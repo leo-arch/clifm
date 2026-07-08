@@ -1763,7 +1763,6 @@ handle_overwrite(char **args, const int force, size_t *skipped,
 	}
 
 	free_src_info(src, files_num);
-	press_any_key_to_continue(0);
 
 	/* If skipped == files_num - 1, there are no source files left, only
 	 * the destination file: there's nothing to do. */
