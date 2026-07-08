@@ -109,13 +109,10 @@ static const char *
 gen_yes_no_str(char def_answer, int allow_all)
 {
 	switch (def_answer) {
-	case 'y':
-		return allow_all ? "[Y/n/all/none/skip/skipall/quit]" : "[Y/n]";
-	case 'n':
-		return allow_all ? "[y/N/all/none/skip/skipall/quit]" : "[y/N]";
+	case 'y': return allow_all ? "[Y/n/a/o/s/k/q]" : "[Y/n]";
+	case 'n': return allow_all ? "[y/N/a/o/s/k/q]" : "[y/N]";
 	case 'u': /* fallthrough */ /* unset */
-	default:
-		return allow_all ? "[y/n/all/none/skip/skipall/quit]" : "[y/n]";
+	default: return allow_all ? "[y/n/a/o/s/k/q]" : "[y/n]";
 	}
 }
 
@@ -141,6 +138,11 @@ rl_get_y_n_common(const char *msg_str, char default_answer, int allow_all)
 	const size_t msg_len = strlen(msg_str) + strlen(yes_no_str) + 3;
 	char *msg = xnmalloc(msg_len, sizeof(char));
 	snprintf(msg, msg_len, "%s %s ", msg_str, yes_no_str);
+
+	if (allow_all == 1) {
+		puts("Tip: y=yes, n=no, a=all, o=none, s=skip, k=skip all, q=quit");
+		fflush(stdout);
+	}
 
 	for (;;) {
 		char *answer = rl_no_hist(msg, 0);
