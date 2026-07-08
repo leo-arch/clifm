@@ -139,11 +139,6 @@ rl_get_y_n_common(const char *msg_str, char default_answer, int allow_all)
 	char *msg = xnmalloc(msg_len, sizeof(char));
 	snprintf(msg, msg_len, "%s %s ", msg_str, yes_no_str);
 
-	if (allow_all == 1) {
-		puts("Tip: y=yes, n=no, a=all, o=none, s=skip, k=skip all, q=quit");
-		fflush(stdout);
-	}
-
 	for (;;) {
 		char *answer = rl_no_hist(msg, 0);
 		rl_default_answer = def_answer;
@@ -238,6 +233,8 @@ rl_get_y_or_n(const char *msg_str, char default_answer)
 int
 rl_get_y_n_all(const char *msg_str, char default_answer)
 {
+	puts("Tip: y=yes, n=no, a=all, o=none, s=skip, k=skip all, q=quit");
+	fflush(stdout);
 	return rl_get_y_n_common(msg_str, default_answer, 1);
 }
 
