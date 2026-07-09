@@ -1906,11 +1906,12 @@ get_path_env(const int check_timestamps)
 
 			/* Skip duplicate entries */
 			for (size_t i = 0; i < n; i++) {
-				if (strcmp(paths[i].path, p) == 0)
+				if (len == paths[i].len && strcmp(paths[i].path, p) == 0)
 					goto CONT;
 			}
 
-			paths[n++].path = savestring(p, len);
+			paths[n].path = savestring(p, len);
+			paths[n++].len = len;
 		}
 
 CONT:
@@ -2102,8 +2103,10 @@ skip_this_path(const char *name)
 	if (!rpath)
 		return 1;
 
+	const size_t len = strlen(rpath);
 	for (size_t i = 0; paths[i].path; i++) {
-		if (*paths[i].path && strcmp(paths[i].path, rpath) == 0) {
+		if (len == paths[i].len && *paths[i].path
+		&& strcmp(paths[i].path, rpath) == 0) {
 			free(rpath);
 			return 1;
 		}
@@ -2167,8 +2170,7 @@ get_path_programs(void)
 	/* Now add aliases, if any */
 	if (aliases_n > 0) {
 		for (i = aliases_n; i-- > 0;) {
-			bin_commands[l] = savestring(aliases[i].name,
-				strlen(aliases[i].name));
+			bin_commands[l] = strdup(aliases[i].name);
 			l++;
 		}
 	}
@@ -2176,8 +2178,7 @@ get_path_programs(void)
 	/* And user defined actions too, if any */
 	if (actions_n > 0) {
 		for (i = actions_n; i-- > 0;) {
-			bin_commands[l] = savestring(usr_actions[i].name,
-				strlen(usr_actions[i].name));
+			bin_commands[l] = strdup(usr_actions[i].name);
 			l++;
 		}
 	}
@@ -2205,8 +2206,7 @@ get_path_programs(void)
 					continue;
 				}
 #endif /* __CYGWIN__ */
-				bin_commands[l] = savestring(commands_bin[i][j]->d_name,
-					strlen(commands_bin[i][j]->d_name));
+				bin_commands[l] = strdup(commands_bin[i][j]->d_name);
 				l++;
 				free(commands_bin[i][j]);
 			}

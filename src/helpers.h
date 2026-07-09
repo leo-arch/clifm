@@ -1752,9 +1752,7 @@ extern struct shades_t size_shades;
 
 struct paths_t {
 	char *path;
-#ifdef __arm__
-	char *pad0;
-#endif /* __arm__ */
+	size_t len;
 	time_t mtime;
 };
 extern struct paths_t *paths;
