@@ -1108,7 +1108,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 - List currently selected files\n\
     sb\n\
 - Invert (toggle) selection in the current directory\n\
-    s --invert (or Shift+Tab)\n\
+    s -i (also 's --invert' or Shift+Tab)\n\
 - Copy selected files to the current directory:\n\
     c sel\n\
 - Move selected files to the directory whose ELN is 24\n\

@@ -703,8 +703,8 @@ gen_backup_file(const char *file, const int human)
 	struct tm t;
 	char *suffix = localtime_r(&rawtime, &t) ? gen_date_suffix(t, human) : NULL;
 	if (!suffix) {
-		xerror(_("kb: Cannot generate time suffix string for "
-			"the backup file\n"));
+		xerror(_("%s: Cannot generate time suffix string for "
+			"the backup file\n"), PROGRAM_NAME);
 		return NULL;
 	}
 
