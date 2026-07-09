@@ -1220,7 +1220,7 @@ Remove files and/or directories in bulk using a text editor.
 .sp
 Once in the editor, remove the lines corresponding to the files you want to delete. Save changes and close the editor. Removed files will be listed and the user asked for confirmation.
 .TP
-.B s, sel [--invert] \fIFILE\fR... [(!)\fIPATTERN\fR] [\fI-(d|f|l|s|p|b|c|r|R)\fR] [\fI:PATH\fR]
+.B s, sel [-i/--invert] \fIFILE\fR... [(!)\fIPATTERN\fR] [\fI-(d|f|l|s|p|b|c|r|R)\fR] [\fI:PATH\fR]
 Mark one or more files (either regular files or directories) as selected (send to the Selection Box). \fBsel\fR accepts individual elements, range of elements, say 1-6, filenames and paths, just as wildcards (globbing) and regular expressions. Recursive selection is also supported. For example: `\fBs 1 4-10 ^r file* filename /path/to/filename\fR`.
 .sp
 If not in light mode, once a file is selected, and if the file is in the current directory, the corresponding filename will be highlighted with a mark (colored according to the value of \fBli\fR in the color scheme file (by default bold green)) at the left of the filename (and at the right of its ELN).
@@ -1239,7 +1239,7 @@ To recursively select files, use the \fB-r\fR modifier followed by the starting 
 .sp
 The Selection Box is accessible from different instances of the program, provided they use the same profile (see the \fBprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behavior via the \fBShareSelbox\fR option in the configuration file. If \fBShareSelbox\fR is enabled, selected files are stored in \fI/tmp/clifm/username/.selbox.clifm\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename.clifm\fR is used (this is the default).
 .sp
-To invert selected files in the current directory, use the \fB--invert\fR option (or press \fBShift+Tab\fR). Note that selected files not falling under the current directory are not affected.
+To invert selected files in the current directory, use the \fB-i/--invert\fR option (or press \fBShift+Tab\fR). Note that selected files not falling under the current directory are not affected.
 .sp
 \fBOperating on selected files\fR
 .sp
