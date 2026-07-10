@@ -1072,7 +1072,7 @@ resolve_path(char *file, const size_t flen, const int exit_on_error)
 		}
 
 	} else if (*file == '~' || strstr(file, "./") || file[flen - 1] == '.') {
-		s_path = normalize_path(file, strlen(file));
+		s_path = normalize_path(file, flen);
 		if (!s_path) {
 			if (exit_on_error == 0) return NULL;
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
@@ -1081,7 +1081,7 @@ resolve_path(char *file, const size_t flen, const int exit_on_error)
 		}
 
 	} else if (*file == '/') {
-		s_path = savestring(file, strlen(file));
+		s_path = savestring(file, flen);
 
 	} else {
 		char tmp[PATH_MAX + 1] = "";
@@ -1094,7 +1094,7 @@ resolve_path(char *file, const size_t flen, const int exit_on_error)
 			exit(errno);
 		}
 
-		const size_t len = strlen(cwd) + strlen(file) + 2;
+		const size_t len = strlen(cwd) + flen + 2;
 		s_path = xnmalloc(len, sizeof(char));
 		snprintf(s_path, len, "%s/%s", cwd, file);
 	}
