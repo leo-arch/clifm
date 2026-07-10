@@ -1422,6 +1422,7 @@ c: Quit paging (printing remaining files)\n"
 \n -j FILE  Run the 'p' command on FILE and exit\
 \n -J FILE  Run the 'pp' command on FILE and exit\
 \n -k FILE  Set an alternative keybindings file\
+\n -K FILE  Print MIME type of file(s) and exit\
 \n -l       Display extended file metadata (long view)\
 \n -L       Do not follow symbolic links when listing files\
 \n -m       Enable fuzzy matching\
@@ -1513,6 +1514,7 @@ and paths\
 \n      --lscolors\t\t Read file colors from LS_COLORS or LSCOLORS (FreeBSD style)\
 \n      --max-dirhist=NUM\t\t Maximum number of visited directories to recall\
 \n      --max-files=NUM\t\t List only up to NUM files\
+\n      --mime-type FILE...\t Print MIME type of files and exit\
 \n      --mimelist-file=FILE\t Set FILE as Lira's configuration file\
 \n      --mnt-udisks2\t\t Use udisks2(1) instead of udevil(1) for the 'media' command\
 \n      --no-bold\t\t\t Disable bold colors (applies to all color schemes)\
