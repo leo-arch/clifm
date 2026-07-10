@@ -1058,13 +1058,14 @@ set_alt_file(char *src, char **dest, const char *err_name)
 }
 
 static char *
-resolve_path(char *file, const size_t flen)
+resolve_path(char *file, const size_t flen, const int exit_on_error)
 {
 	char *s_path = NULL;
 
 	if (IS_FILE_URI(file, flen)) {
 		s_path = url_decode(file + FILE_URI_PREFIX_LEN);
 		if (!s_path) {
+			if (exit_on_error == 0) return NULL;
 			fprintf(stderr, _("%s: '%s': Error decoding filename\n"),
 				PROGRAM_NAME, file);
 			exit(EXIT_FAILURE);
@@ -1073,7 +1074,9 @@ resolve_path(char *file, const size_t flen)
 	} else if (*file == '~' || strstr(file, "./") || file[flen - 1] == '.') {
 		s_path = normalize_path(file, strlen(file));
 		if (!s_path) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
+			if (exit_on_error == 0) return NULL;
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+				file, strerror(errno));
 			exit(errno);
 		}
 
@@ -1085,7 +1088,9 @@ resolve_path(char *file, const size_t flen)
 		const char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 
 		if (!cwd || !*cwd) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
+			if (exit_on_error == 0) return NULL;
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+				file, strerror(errno));
 			exit(errno);
 		}
 
@@ -1101,7 +1106,7 @@ static char *
 resolve_starting_path(char *file)
 {
 	const size_t len = file ? strlen(file) : 0;
-	char *s_path = file ? resolve_path(file, len) : NULL;
+	char *s_path = file ? resolve_path(file, len, 1) : NULL;
 	if (!s_path)
 		return NULL;
 
@@ -1527,7 +1532,7 @@ print_mimetypes_and_exit(char **files, const char *opt_str)
 			continue;
 		}
 
-		char *file = resolve_path(s, strlen(s));
+		char *file = resolve_path(s, strlen(s), 0);
 		if (s != files[i])
 			free(s);
 
