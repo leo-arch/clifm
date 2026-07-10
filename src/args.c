@@ -47,7 +47,7 @@
 #endif /* CLIFM_DATADIR */
 
 #ifdef _BE_POSIX
-# define OPTSTRING ":a::Ab:B:c:CdDeEfFgGhHiI:j:J:k:lLmMnNo:O:p:P:qQrRsSt:TuUvV:w:WxXyYz:Z"
+# define OPTSTRING ":a::Ab:B:c:CdDeEfFgGhHiI:j:J:k:KlLmMnNo:O:p:P:qQrRsSt:TuUvV:w:WxXyYz:Z"
 #else
 # ifdef RUN_CMD
 #  define OPTSTRING "+:a::Ab:c:C:D:eEfFgGhHiIk:lLmoOP:rsStT:vw:xyz:"
@@ -144,6 +144,7 @@
 #define LOPT_KITTY_KEYS             284
 #define LOPT_TABMODE                285
 #define LOPT_FOLLOW_SYMLINKS_LONG   286 /* Deprecated */
+#define LOPT_MIMETYPE               287
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -217,6 +218,7 @@ static struct option const longopts[] = {
 	{"max-files", required_argument, 0, LOPT_MAX_FILES},
 	{"max-path", required_argument, 0, LOPT_MAX_PATH}, /* Deprecated */
 	{"mimelist-file", required_argument, 0, LOPT_ALT_MIMEFILE},
+	{"mime-type", no_argument, 0, LOPT_MIMETYPE},
 	{"mnt-udisks2", no_argument, 0, LOPT_MNT_UDISKS2},
 	{"no-apparent-size", no_argument, 0, LOPT_NO_APPARENT_SIZE},
 	{"no-bold", no_argument, 0, LOPT_NO_BOLD},
@@ -1485,7 +1487,6 @@ print_follow_symlinks_long_deprecation_warning(void)
 		"has no effect. It will be removed in a future release.\n",
 		PROGRAM_NAME);
 }
-
 #endif /* !_BE_POSIX */
 
 #ifdef _BE_POSIX
@@ -1508,6 +1509,35 @@ set_tab_mode(const char *opt)
 	}
 }
 #endif /* _BE_POSIX */
+
+static void
+print_mimetypes_and_exit(char **files, const char *opt_str)
+{
+	if (!files || !files[0])
+		err_arg_required(opt_str); /* noreturn */
+
+	struct stat a;
+	int ret = EXIT_SUCCESS;
+
+	for (size_t i = 0; files[i]; i++) {
+		if (lstat(files[i], &a) == -1) {
+			fprintf(stderr, "%s: %s\n", files[i], strerror(errno));
+			ret = EXIT_FAILURE;
+			continue;
+		}
+
+		char *mimetype = xmagic(files[i], 1);
+		if (!mimetype) {
+			fprintf(stderr, _("%s: Error getting MIME type\n"), files[i]);
+			ret = EXIT_FAILURE;
+		} else {
+			printf("%s: %s\n", files[i], mimetype);
+			free(mimetype);
+		}
+	}
+
+	exit(ret);
+}
 
 /* Set directories passed as positional parameters. */
 static int
@@ -1604,6 +1634,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'j': set_stat(optc, optarg); break;
 		case 'J': set_stat(optc, optarg); break;
 		case 'k': set_alt_file(optarg, &alt_kbinds_file, "-k"); break;
+		case 'K': print_mimetypes_and_exit(argv + optind, "-K"); break;
 		case 'l': xargs.long_view = conf.long_view = 1; break;
 		case 'L': xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case 'm': xargs.fuzzy_match = conf.fuzzy_match = 1; break;
@@ -1836,6 +1867,8 @@ parse_cmdline_args(const int argc, char **argv)
 			break;
 		case LOPT_ALT_MIMEFILE:
 			set_alt_file(optarg, &alt_mimelist_file, "--mimelist-file"); break;
+		case LOPT_MIMETYPE:
+			print_mimetypes_and_exit(argv + optind, "--mime-type"); break;
 		case LOPT_MNT_UDISKS2:
 			xargs.mount_cmd = MNT_UDISKS2; break;
 		case LOPT_NO_APPARENT_SIZE:
