@@ -1455,7 +1455,7 @@ get_rename_dest_filename(char *name, int *status)
 static char **
 build_cp_mv_cmd(char **cmd, char *new_name, int *cwd, const size_t force)
 {
-	if (!cmd | !cmd[0])
+	if (!cmd || !cmd[0])
 		return NULL;
 
 	size_t n = 0;
