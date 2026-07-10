@@ -1543,8 +1543,8 @@ print_mimetypes_and_exit(char **files, const char *opt_str)
 		}
 
 		if (lstat(file, &a) == -1) {
+			ret = errno;
 			fprintf(stderr, "%s: %s\n", files[i], strerror(errno));
-			ret = EXIT_FAILURE;
 			free(file);
 			continue;
 		}
