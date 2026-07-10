@@ -1520,13 +1520,31 @@ print_mimetypes_and_exit(char **files, const char *opt_str)
 	int ret = EXIT_SUCCESS;
 
 	for (size_t i = 0; files[i]; i++) {
-		if (lstat(files[i], &a) == -1) {
-			fprintf(stderr, "%s: %s\n", files[i], strerror(errno));
+		char *s = strchr(files[i], '\\') ? unescape_str(files[i]) : files[i];
+		if (!s) {
+			fprintf(stderr, _("%s: Error unescaping path\n"), files[i]);
 			ret = EXIT_FAILURE;
 			continue;
 		}
 
-		char *mimetype = xmagic(files[i], 1);
+		char *file = resolve_path(s, strlen(s));
+		if (s != files[i])
+			free(s);
+
+		if (!file) {
+			fprintf(stderr, _("%s: Error resolving path\n"), files[i]);
+			ret = EXIT_FAILURE;
+			continue;
+		}
+
+		if (lstat(file, &a) == -1) {
+			fprintf(stderr, "%s: %s\n", files[i], strerror(errno));
+			ret = EXIT_FAILURE;
+			free(file);
+			continue;
+		}
+
+		char *mimetype = xmagic(file, 1);
 		if (!mimetype) {
 			fprintf(stderr, _("%s: Error getting MIME type\n"), files[i]);
 			ret = EXIT_FAILURE;
@@ -1534,6 +1552,8 @@ print_mimetypes_and_exit(char **files, const char *opt_str)
 			printf("%s: %s\n", files[i], mimetype);
 			free(mimetype);
 		}
+
+		free(file);
 	}
 
 	exit(ret);
