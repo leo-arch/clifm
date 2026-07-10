@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 6, 2026" "clifm 1.28.4" "Clifm Manual"
+.TH "CLIFM" "1" "Jul 9, 2026" "clifm 1.28.5" "Clifm Manual"
 .SH NAME
 clifm - The Command-Line File Manager
 .SH SYNOPSIS
@@ -250,6 +250,9 @@ Maximum number of visited directories to remember.
 .TP
 \fB--max-files\fR=\fI\,NUM\/\fR
 List only up to \fINUM\fR files. Use -1 or \fBunset\fR to remove this limit (default). See the \fBmf\fR command for a more detailed description.
+.TP
+\fB--mime-type\fR \fI\,FILE...\/\fR
+Print the MIME type of files and exit. For information on how MIME types are detected, consult the \fBMIME type source\fR section in the \fBmm\fR command description.
 .TP
 \fB--mimelist-file\fR=\fI\,FILE\/\fR
 Set \fIFILE\fR as \fBLira\fR\'s configuration file (see the \fBFILE OPENER\fR section below for more information).
@@ -969,11 +972,29 @@ This is \fBLira\fR, \fBclifm\fR's file opener.
 .sp
 Use the \fBopen\fR subcommand to open a file with the default associated application. Note that, since \fBopen\fR is the default action, it can be omitted. For example: `\fBmm file.pdf\fR`. The same can be achieved more easily using the \fBopen\fR command: `\fBopen file.pdf\fR` (or using the short command, `\fBo file.pdf\fR`). Or, even shorter, just `\fBfile.pdf\fR`.
 .sp
-The \fBinfo\fR subcommand displays metadata and application matches for the file \fIFILE\fR: its name and MIME type, the application chosen to open it, and the preview application. Each application line includes a "(match: ...)" tag showing whether the selection was made by the file name or by its MIME type. The output is intended to help users understand why a particular app was selected and to make it easy to verify or troubleshoot association rules.
+The \fBinfo\fR subcommand displays metadata and application matches for the file \fIFILE\fR: its name and MIME type, the application chosen to open it, and the preview application. Each application line includes a "(match: ...)" tag showing whether the selection was made by the file name or by its MIME type. A "(source: ...)" tag is also included, indicating the source of the MIME type information (see below). The output is intended to help users understand why a particular app was selected and to make it easy to verify or troubleshoot association rules.
 .sp
 The \fBedit\fR subcommand allows the user to edit and customize the MIME list file. For example, if a file has no default associated application, first get its MIME info or its file extension (running `\fBmm info FILE\fR`), and then add a value for it to the MIME list file using the \fBedit\fR option (`\fBmm edit\fR` or \fBF6\fR). Check the \fBFILE OPENER\fR section below for information about the mimelist file syntax.
 .sp
 Finally, with the \fBimport\fR subcommand \fBclifm\fR will try to import MIME associations from the system looking for \fImimeapps.list\fR files in those paths specified by the Freedesktop specification (see \fIhttps://specifications.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html\fR). If at least one MIME association is successfully imported, it will be stored as \fImimelist.clifm.XXXXXX\fR (where XXXXXX is a random six digits alphanumerical string). You can add these new associations to your mimelist file using the `\fBmime edit\fR` command.
+.sp
+\fBMIME type source:\fR
+.sp 0
+MIME types are retrieved from 4 different sources, in this order of precedence:
+ 1. The \fImime.types\fR file (either \fI~/.config/clifm/mime.types\fR, or \fI~/.mime.types\fR, or the one specified by \fB$CLIFM_MIMETYPES_FILE\fR)
+ 2. Moira
+ 3. Libmagic
+ 4. Shared MIME-info database
+.sp
+The first source returning a valid MIME type is used.
+.sp
+1. The \fImime.types\fR file follows the same strcuture as the \fI/etc/mime.types\fR file. You can even use this specific file by pointing to it with the \fBCLIFM_MIMETYPES_FILE\fR environment variable. If none of these files is found, this step is skipped. Also, these files are never consulted when running with \fB--mime-type\fR.
+.sp
+2. Moira (or simply fast-magic) is \fBClifm\fR's built-in file-type identification tool. It is enabled by default, but you can disable it by setting \fBFastMagic\fR to \fBfalse\fR in the main configuration file.
+.sp
+3. Libmagic is the same library used by the \fBfile\fR(1) tool.
+.sp
+4. The Shared MIME-info database is consulted via either \fBmimetype\fR(1) or \fBxdg-mime\fR(1), in this precedence order. If none of these tools is found, this step is skipped.
 .TP
 .B mp, mountpoints
 List available mountpoints and change the current working directory to the selected mountpoint.
