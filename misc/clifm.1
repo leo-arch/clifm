@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 9, 2026" "clifm 1.28.5" "Clifm Manual"
+.TH "CLIFM" "1" "Jul 11, 2026" "clifm 1.28.6" "Clifm Manual"
 .SH NAME
 clifm - The Command-Line File Manager
 .SH SYNOPSIS
@@ -142,8 +142,8 @@ Set an alternative keybindings file.
 \fB-l\fR, \fB--long-view\fR
 Print file extended metadata next to filenames (long view). The displayed fields can be customized using \fB--prop-fields\fR (or the \fBPropFields\fR option in the configuration file). Set a custom time/date format with \fB--time-style\fR (or the \fBTimeStyle\fR option in the configuration file).
 .TP
-\fB-L\fR, \fB--no-follow-symlinks\fR
-Do not follow symbolic links when listing files (overrides \fB--colorize-symlinks-as-target\fR)
+\fB-L\fR, \fB--dereference\fR
+Follow symbolic links when listing files (default). Use \fB--no-dereference\fR to disable.
 .TP
 \fB-m\fR, \fB--dirhist-map\fR
 Enable the directory history map to keep in view previous, current, and next entries in the directory history list.
@@ -289,6 +289,9 @@ Disable colors.
 .TP
 \fB--no-columns\fR
 Disable columned file listing (use a single column).
+.TP
+\fB--no-dereference\fR
+Do not follow symbolic links when listing files.
 .TP
 \fB--no-file-cap\fR
 Do not check file capabilities when listing files (only meaningful for performance reasons).
@@ -2602,7 +2605,6 @@ To run the \fIpager.sh\fR plugin, for example, you only need to enter the corres
 \fBNote 2\fR: An alternative files previewing function (built-in, and thereby faster than \fBBFG\fR) is provided by \fBshotgun\fR. See the \fBSHOTGUN\fR section above for more information.
 .TP
 In addition to the built-in \fBBFG\fR previewer, \fBfzfnav\fR supports the use of both Ranger\'s \fIscope.sh\fR script and \fBpistol\fR(1). To use \fBscope\fR, edit the \fBBFG\fR configuration file and set \fIUSE_SCOPE\fR to 1 and \fISCOPE_FILE\fR to the correct path to the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set \fIUSE_PISTOL\fR to 1.
-.TP
 .TP
 Take a look at the Wiki for more information: \fIhttps://github.com/clifm/wiki/Advanced#plugins\fR
 
