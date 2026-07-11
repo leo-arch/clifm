@@ -145,6 +145,7 @@
 #define LOPT_TABMODE                285
 #define LOPT_FOLLOW_SYMLINKS_LONG   286 /* Deprecated */
 #define LOPT_MIMETYPE               287
+#define LOPT_NO_DEREFERENCE         288
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -170,7 +171,7 @@ static struct option const longopts[] = {
 	{"case-sensitive", no_argument, 0, 'I'},
 	{"keybindings-file", required_argument, 0, 'k'},
 	{"long-view", no_argument, 0, 'l'},
-	{"no-follow-symlinks", no_argument, 0, 'L'},
+	{"dereference", no_argument, 0, 'L'},
 	{"dirhist-map", no_argument, 0, 'm'},
 	{"autols", no_argument, 0, 'o'},
 	{"no-autols", no_argument, 0, 'O'},
@@ -227,6 +228,7 @@ static struct option const longopts[] = {
 	{"no-clear-screen", no_argument, 0, LOPT_NO_CLEAR_SCREEN},
 	{"no-colors", no_argument, 0, LOPT_NO_COLORS},
 	{"no-columns", no_argument, 0, LOPT_NO_COLUMNS},
+	{"no-dereference", no_argument, 0, LOPT_NO_DEREFERENCE},
 	{"no-dir-jumper", no_argument, 0, LOPT_NO_DIR_JUMPER},
 	{"no-file-cap", no_argument, 0, LOPT_NO_FILE_CAP},
 	{"no-files-counter", no_argument, 0, LOPT_NO_FILE_COUNTER}, /* Deprecated */
@@ -1803,7 +1805,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'I': xargs.case_sens_list = conf.case_sens_list = 1; break;
 		case 'k': set_alt_file(optarg, &alt_kbinds_file, "-k"); break;
 		case 'l': xargs.long_view = conf.long_view = 1; break;
-		case 'L': xargs.follow_symlinks = conf.follow_symlinks = 0; break;
+		case 'L': xargs.follow_symlinks = conf.follow_symlinks = 1; break;
 		case 'm': xargs.dirhist_map = conf.dirhist_map = 1; break;
 		case 'o': xargs.autols = conf.autols = 1; break;
 		case 'O': xargs.autols = conf.autols = 0; break;
@@ -1910,6 +1912,8 @@ parse_cmdline_args(const int argc, char **argv)
 			set_no_colors(); break;
 		case LOPT_NO_COLUMNS:
 			xargs.columned = conf.columned = 0; break;
+		case LOPT_NO_DEREFERENCE:
+			xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case LOPT_NO_DIR_JUMPER:
 			xargs.no_dirjump = 1; break;
 		case LOPT_NO_FILE_CAP:

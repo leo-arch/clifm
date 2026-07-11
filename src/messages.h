@@ -1472,7 +1472,7 @@ c: Quit paging (printing remaining files)\n"
 \n  -I, --case-sensitive\t\t Do not ignore case when listing files\
 \n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
 \n  -l, --long-view\t\t Display extended file metadata (long view)\
-\n  -L, --no-follow-symlinks\t Do not follow symbolic links when listing files (overrides --color-links-as-target)\
+\n  -L, --dereference\t\t Follow symbolic links when listing files (default)\
 \n  -m, --dirhist-map\t\t Enable the directory history map\
 \n  -o, --autols\t\t\t List files automatically (default)\
 \n  -O, --no-autols\t\t Do not list files automatically\
@@ -1523,6 +1523,7 @@ and paths\
 \n      --no-clear-screen\t\t Do not clear the screen when listing files\
 \n      --no-color\t\t Disable colors \
 \n      --no-columns\t\t Disable columned file listing\
+\n      --no-dereference\t\t Do not follow symbolic links\
 \n      --no-file-cap\t\t Do not check file capabilities when listing files\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\
 \n      --no-file-counter\t\t Disable the file counter for directories\
