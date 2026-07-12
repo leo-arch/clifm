@@ -1523,6 +1523,7 @@ print_mimetypes_and_exit(char **files, const char *opt_str)
 	if (!files || !files[0])
 		err_arg_required(opt_str); /* noreturn */
 
+	char resolved_target[PATH_MAX + 1]; *resolved_target = '\0';
 	struct stat a;
 	int ret = EXIT_SUCCESS;
 
@@ -1551,7 +1552,16 @@ print_mimetypes_and_exit(char **files, const char *opt_str)
 			continue;
 		}
 
-		char *mimetype = xmagic(file, 1);
+		if (xargs.follow_symlinks == 1 && S_ISLNK(a.st_mode)) {
+			*resolved_target = '\0';
+			if (!realpath(file, resolved_target)) {
+				fprintf(stderr, "%s: %s\n", files[i], strerror(errno));
+				free(file);
+				continue;
+			}
+		}
+
+		char *mimetype = xmagic(*resolved_target ? resolved_target : file, 1);
 		if (!mimetype) {
 			fprintf(stderr, _("%s: Error getting MIME type\n"), files[i]);
 			ret = EXIT_FAILURE;
