@@ -516,7 +516,9 @@ bookmark_add(char *file, char *name, char *shortcut)
 
 	free(np);
 	free(p);
+	p = NULL;
 	free(q);
+	q = NULL;
 
 	reload_bookmarks(); /* Update bookmarks for tab completion. */
 
