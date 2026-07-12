@@ -459,7 +459,7 @@ check_bm_shortcut(const char *shortcut, const int add)
  * FILE and NAME are guaranteed to be non-NULL.
  * FILE is already dequoted. */
 static int
-bookmark_add(char *file, char *name, char *shortcut)
+bookmark_add(char *file, const char *name, const char *shortcut)
 {
 	if (check_bm_path(file) == 1 && rl_get_y_or_n(_("Continue?"), 0) == 0)
 		return FUNC_SUCCESS;
