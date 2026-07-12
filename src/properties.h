@@ -74,7 +74,8 @@ void get_color_age(const time_t t, char *str, const size_t len);
 void get_color_size(const off_t s, char *str, const size_t len);
 struct perms_t
      get_file_perms(const mode_t mode);
-int  properties_function(char **args, const int follow_link);
+int  properties_function(char **args, const int follow_link,
+	const int full_dirsize);
 void print_analysis_stats(const off_t total, const off_t largest,
 	const char *color, const char *name);
 int  set_file_perms(char **args);

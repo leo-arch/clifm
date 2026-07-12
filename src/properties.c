@@ -1862,7 +1862,7 @@ err_no_file(const char *filename, const char *target)
  * instead of just 'p', symbolic links are followed and directory sizes are
  * calculated recursively. */
 static int
-do_stat(const char *filename, const int follow_link)
+do_stat(const char *filename, const int follow_link, const int full_dirsize)
 {
 	if (!filename || !*filename)
 		return FUNC_FAILURE;
@@ -1873,11 +1873,14 @@ do_stat(const char *filename, const int follow_link)
 	const int is_link = (ret != -1 && S_ISLNK(attr.st_mode));
 
 	char target[PATH_MAX + 1]; target[0] = '\0';
+	char resolved_target[PATH_MAX + 1]; resolved_target[0] = '\0';
 	if (is_link == 1) {
 		(void)xreadlink(XAT_FDCWD, filename, target, sizeof(target));
 
-		if (follow_link == 1)
-			ret = *target ? stat(target, &attr) : -1;
+		if (follow_link == 1) {
+			char *s = realpath(filename, resolved_target);
+			ret = (!s || !*resolved_target) ? -1 : stat(resolved_target, &attr);
+		}
 	}
 
 	if (ret == -1)
@@ -1898,7 +1901,7 @@ do_stat(const char *filename, const int follow_link)
 
 	/* At this point, we know that target isn't empty. */
 	const char *file_name = (follow_link == 1 && is_link == 1)
-		? target : filename;
+		? (*resolved_target ? resolved_target : target) : filename;
 	const char *color = get_file_type_and_color(file_name,
 		&attr, &file_type, &ctype);
 
@@ -1918,12 +1921,12 @@ do_stat(const char *filename, const int follow_link)
 	print_timestamps(file_name, &attr);
 
 #ifdef USE_DU1
-	print_file_size(filename, &attr, file_perm, follow_link);
-	if (S_ISDIR(attr.st_mode) && follow_link == 1)
+	print_file_size(filename, &attr, file_perm, full_dirsize);
+	if (S_ISDIR(attr.st_mode) && full_dirsize == 1)
 		print_dir_items(file_name, file_perm);
 #else
 	if (S_ISDIR(attr.st_mode)) {
-		if (follow_link == 1)
+		if (full_dirsize == 1)
 			print_dir_info(file_name, file_perm);
 	} else {
 		print_file_size(&attr);
@@ -1936,7 +1939,7 @@ do_stat(const char *filename, const int follow_link)
 
 /* Print file properties (in a stat(1) fashion) for all files passed via ARGS. */
 int
-properties_function(char **args, const int follow_link)
+properties_function(char **args, const int follow_link, const int full_dirsize)
 {
 	if (!args)
 		return FUNC_FAILURE;
@@ -1957,7 +1960,7 @@ properties_function(char **args, const int follow_link)
 			args[i] = deq_file;
 		}
 
-		if (do_stat(args[i], follow_link) != 0)
+		if (do_stat(args[i], follow_link, full_dirsize) != 0)
 			exit_status = FUNC_FAILURE;
 	}
 
@@ -2015,12 +2018,15 @@ do_stat_and_exit(const int full_stat)
 		exit(EXIT_FAILURE);
 	}
 
+	int follow_links = (full_stat == 1 || xargs.follow_symlinks == 1);
+	int full_dirsize = (full_stat == 1 || xargs.full_dir_size == 1);
+
 	for (i = start; i < argc_bk; i++) {
 		char *norm_path = *argv_bk[i] == '~'
 			? tilde_expand(argv_bk[i]) : NULL;
 
-		 const int ret =
-			do_stat(norm_path ? norm_path : argv_bk[i], full_stat);
+		 const int ret = do_stat(norm_path ? norm_path : argv_bk[i],
+			follow_links, full_dirsize);
 		if (ret != 0)
 			status = ret;
 

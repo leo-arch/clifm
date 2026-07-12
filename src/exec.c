@@ -931,8 +931,12 @@ props_function(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	const int full_dirsize = args[0][1] == 'p'; /* Command is 'pp' */
-	return properties_function(args + 1, full_dirsize);
+	int full_dirsize = 0;
+	int follow_links = 0;
+	if (args[0][1] == 'p')
+		full_dirsize = follow_links = 1;
+
+	return properties_function(args + 1, follow_links, full_dirsize);
 }
 
 static int
