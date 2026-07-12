@@ -177,18 +177,15 @@ get_file_attrs(const char *file)
 #endif /* LINUX_FILE_ATTRS */
 
 static char *
-get_link_color(const char *name)
+get_link_color(const char *name, struct stat *attr)
 {
 	struct stat a;
 	char *color = no_c;
 
-	if (lstat(name, &a) == -1)
-		return color;
-
-	if (S_ISDIR(a.st_mode)) {
-		color = get_dir_color(name, &a, -1);
+	if (S_ISDIR(attr->st_mode)) {
+		color = get_dir_color(name, attr, -1);
 	} else {
-		switch (a.st_mode & S_IFMT) {
+		switch (attr->st_mode & S_IFMT) {
 		case S_IFLNK:  color = stat(name, &a) == -1 ? or_c : ln_c; break;
 		case S_IFSOCK: color = so_c; break;
 		case S_IFIFO:  color = pi_c; break;
@@ -198,7 +195,7 @@ get_link_color(const char *name)
 		case S_IFDOOR: color = oo_c; break;
 		case S_IFPORT: color = oo_c; break;
 #endif /* SOLARIS_DOORS */
-		case S_IFREG: color = get_regfile_color(name, &a, NULL); break;
+		case S_IFREG: color = get_regfile_color(name, attr, NULL); break;
 		default: color = df_c; break;
 		}
 	}
@@ -1110,12 +1107,16 @@ print_filename(const char *filename, const char *color, const int follow_link,
 
 	const char *target_str = *quoted_target ? quoted_target : target;
 
+	char resolved_target[PATH_MAX + 1]; *resolved_target = '\0';
+	if (target && *target && *target != '/' && *target != '~')
+		(void)realpath(filename, resolved_target);
+
 	struct stat a;
-	if (target && lstat(target, &a) != -1) {
-		const char *link_color = get_link_color(target);
+	const char *t = *resolved_target ? resolved_target : target;
+	if (t && lstat(t, &a) != -1) {
+		const char *link_color = get_link_color(t, &a);
 		printf(_("\tName: %s%s%s %s%s%s %s%s%s\n"), ln_c, name, df_c,
 			dn_c, SET_MSG_PTR, df_c, link_color, target_str, df_c);
-
 	} else { /* Broken link */
 		if (target) {
 			printf(_("\tName: %s%s%s %s%s%s %s%s%s (broken symlink)\n"), or_c,
