@@ -187,11 +187,11 @@ NAME is not specified, print the list of all parent directories\n\n\
 - Symlink files 'file1', 'file2', 'file3', and 'file4' at once\n\
     bl file* (or 'bl <TAB>' to select from a list - multi-selection is\n\
   allowed)\n\
-- Create symbolic links in the directory 'dir' for all .png files\n\
+  Note: The user is prompted to enter a destination directory.\n\
+- Create symbolic links in the directory 'dir' for all PNG files\n\
     s *.png\n\
-    cd dir\n\
-    bl sel\n\n\
-Note: Links are always created in the current directory."
+    bl sel\n\
+    (in the prompt enter 'dir')"
 
 #define BLEACH_USAGE "Sanitize filenames by removing/converting non-ASCII characters\n\n\
 \x1b[1mUSAGE\x1b[22m\n\

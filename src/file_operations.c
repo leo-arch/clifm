@@ -2160,7 +2160,72 @@ export_files(char **filenames, const int open)
 	return NULL;
 }
 
-/* Create a symlink in CWD for each filename in ARGS.
+static char *
+get_bl_dest_dir(void)
+{
+	puts(_("Tip: Enter '.' for the current directory ('q' to quit)"));
+	const int prompt_offset_bk = prompt_offset;
+	char prompt_str[128];
+	snprintf(prompt_str, sizeof(prompt_str), _("Destination directory: "));
+	prompt_offset = (int)strlen(prompt_str) + 1;
+	alt_prompt = FILES_PROMPT;
+
+	struct stat a;
+	char *dir = NULL;
+	while (!dir) {
+		dir = rl_no_hist(prompt_str, 1);
+		if (!dir || !*dir) {
+			free(dir); dir = NULL;
+			continue;
+		}
+
+		if (TOUPPER(*dir) == 'Q' && !dir[1]) {
+			free(dir);
+			return NULL;
+		}
+
+		if (strchr(dir, '\\')) {
+			char *p = unescape_str(dir);
+			free(dir); dir = NULL;
+			if (!p)
+				continue;
+			dir = p;
+		}
+
+		/* Remove ending space or slash */
+		const size_t len = strlen(dir);
+		if (len > 1 && (dir[len - 1] == ' ' || dir[len - 1] == '/'))
+			dir[len - 1] = '\0';
+
+		/* Validate dir */
+		if (*dir == '~') {
+			char *p = tilde_expand(dir);
+			free(dir); dir = NULL;
+			if (!p)
+				continue;
+			dir = p;
+		}
+
+		if (stat(dir, &a) == -1) {
+			fprintf(stderr, "'%s': %s\n", dir, strerror(errno));
+			free(dir); dir = NULL;
+			continue;
+		}
+
+		if (!S_ISDIR(a.st_mode)) {
+			fprintf(stderr, "'%s': %s\n", dir, strerror(ENOTDIR));
+			free(dir); dir = NULL;
+		}
+	}
+
+	alt_prompt = 0;
+	prompt_offset = prompt_offset_bk;
+
+	return dir;
+}
+
+/* Create symlinks for each filename in ARGS.
+ * Destination directory is taken from a prompt.
  * If the destination file exists, a positive integer suffix is appended to
  * make the filename unique. */
 int
@@ -2170,6 +2235,10 @@ batch_link(char **args)
 		puts(_(BL_USAGE));
 		return FUNC_SUCCESS;
 	}
+
+	char *dest = get_bl_dest_dir();
+	if (!dest)
+		return FUNC_SUCCESS;
 
 	size_t symlinked = 0;
 	int exit_status = FUNC_SUCCESS;
@@ -2199,13 +2268,13 @@ batch_link(char **args)
 		const char *basename = s && *(++s) ? s : filename;
 
 		/* + 64 = Make some room for suffix */
-		const size_t tmp_len = strlen(basename) + 64;
+		const size_t tmp_len = strlen(basename) + strlen(dest) + 64;
 		char *tmp = xnmalloc(tmp_len, sizeof(char));
-		xstrsncpy(tmp, basename, tmp_len);
+		snprintf(tmp, tmp_len, "%s/%s", dest, basename);
 
 		size_t suffix = 1;
 		while (lstat(tmp, &a) != -1) {
-			snprintf(tmp, tmp_len, "%s-%zu", basename, suffix);
+			snprintf(tmp, tmp_len, "%s/%s-%zu", dest, basename, suffix);
 			suffix++;
 		}
 
@@ -2220,6 +2289,8 @@ batch_link(char **args)
 		free(filename);
 		free(tmp);
 	}
+
+	free(dest);
 
 	if (conf.autols == 1 && symlinked > 0) {
 		if (exit_status != FUNC_SUCCESS)
