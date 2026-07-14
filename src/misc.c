@@ -123,6 +123,14 @@ ask_user_for_dir(const char *prompt_msg, const int normalize_dir,
 			return NULL;
 		}
 
+		if (IS_DIGIT(*dir) && is_number(dir)) {
+			const int n = xatoi(dir);
+			if (n > 0 && (filesn_t)n <= g_files_num) {
+				free(dir);
+				dir = strdup(file_info[n - 1].name);
+			}
+		}
+
 		if (strchr(dir, '\\')) {
 			char *p = unescape_str(dir);
 			free(dir); dir = NULL;
