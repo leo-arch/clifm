@@ -187,7 +187,7 @@ get_dup_file_dest_dir(void)
 	char *dir = NULL;
 
 	puts(_("Enter destination directory (Ctrl+d to quit)\n"
-		"Tip: \".\" for the current directory"));
+		"Tip: '.' for the current directory"));
 	char n_prompt[NAME_MAX];
 	snprintf(n_prompt, sizeof(n_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
@@ -203,8 +203,7 @@ get_dup_file_dest_dir(void)
 			const int n = xatoi(dir);
 			if (n > 0 && (filesn_t)n <= g_files_num) {
 				free(dir);
-				const char *name = file_info[n - 1].name;
-				dir = savestring(name, strlen(name));
+				dir = strdup(file_info[n - 1].name);
 			}
 		} else {
 			if (*dir == '~') { /* Expand tilde */
@@ -1118,11 +1117,11 @@ relpath(const char *target, const char *link_name, char *buf, size_t len)
 }
 
 static char *
-gen_relative_target(char *link_name, char *target)
+gen_relative_target(char *link_name, char *target, const char *err_cmd)
 {
 	char *norm_link = normalize_path(link_name, strlen(link_name));
 	if (!norm_link) {
-		xerror(_("link: '%s': Error normalizing path\n"), link_name);
+		xerror(_("%s: '%s': Error normalizing path\n"), err_cmd, link_name);
 		return NULL;
 	}
 
@@ -1133,7 +1132,7 @@ gen_relative_target(char *link_name, char *target)
 	char *norm_target = normalize_path(target, strlen(target));
 	if (!norm_target) {
 		free(norm_link);
-		xerror(_("link: '%s': Error normalizing path\n"), target);
+		xerror(_("%s: '%s': Error normalizing path\n"), err_cmd, target);
 		return NULL;
 	}
 
@@ -1233,7 +1232,7 @@ symlink_file(char **args)
 	case LNK_CREAT_ABSOLUTE:
 		resolved_target = normalize_path(target, strlen(target)); break;
 	case LNK_CREAT_RELATIVE:
-		resolved_target = gen_relative_target(link_name, target); break;
+		resolved_target = gen_relative_target(link_name, target, "link"); break;
 	default: break;
 	}
 
@@ -2213,14 +2212,33 @@ batch_link(char **args)
 			suffix++;
 		}
 
-		if (symlinkat(filename, XAT_FDCWD, tmp) == -1) {
+		char *link_path = tmp;
+		char *target = filename;
+
+		switch (conf.link_creat_mode) {
+		case LNK_CREAT_ABSOLUTE:
+			target = normalize_path(target, strlen(target)); break;
+		case LNK_CREAT_RELATIVE:
+			target = gen_relative_target(link_path, target, "bl"); break;
+		default: break;
+		}
+
+		if (!target) {
+			exit_status = FUNC_FAILURE;
+			xerror(_("bl: Cannot generate target for '%s'\n"), filename);
+			free(filename); free(tmp);
+			continue;
+		}
+
+		if (symlinkat(target, XAT_FDCWD, link_path) == -1) {
 			exit_status = errno;
 			xerror(_("bl: Cannot create symbolic link '%s': %s\n"),
-				tmp, strerror(errno));
+				link_path, strerror(errno));
 		} else {
 			symlinked++;
 		}
 
+		if (target != filename) free(target);
 		free(filename);
 		free(tmp);
 	}
