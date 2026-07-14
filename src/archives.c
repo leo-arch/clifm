@@ -35,61 +35,6 @@
 /* Append this suffix to extraction directories */
 #define DEF_EXTRACTION_DIR_SUFFIX "extracted"
 
-static char *
-ask_user_for_path(void)
-{
-	const char *m = _("Extraction dir ('q' to quit): ");
-
-	const int poffset_bk = prompt_offset;
-	prompt_offset = (int)strlen(m) + 1;
-	rl_nohist = 1;
-	alt_prompt = FILES_PROMPT;
-
-	char *ext_path = secondary_prompt(m, NULL);
-
-	alt_prompt = rl_nohist = 0;
-	prompt_offset = poffset_bk;
-
-	if (!ext_path)
-		return NULL;
-
-	char *p = NULL;
-	if ((*ext_path == '"' || *ext_path == '\'')
-	&& (p = remove_quotes(ext_path)))
-		memmove(ext_path, p, strlen(p) + 1);
-
-	char *unesc_path = unescape_str(ext_path);
-	if (unesc_path) {
-		free(ext_path);
-		ext_path = unesc_path;
-	}
-
-	return ext_path;
-}
-
-static char *
-get_extraction_path(void)
-{
-	char *ext_path = ask_user_for_path();
-	if (!ext_path || !*ext_path) {
-		free(ext_path);
-		return NULL;
-	}
-
-	if (TOUPPER(*ext_path) == 'Q' && !ext_path[1]) {
-		free(ext_path);
-		return NULL;
-	}
-
-	char *p = normalize_path(ext_path, strlen(ext_path));
-	if (p) {
-		free(ext_path);
-		ext_path = p;
-	}
-
-	return ext_path;
-}
-
 static char
 get_operation(const int mode)
 {
@@ -171,9 +116,10 @@ extract_iso_to_dir(char *file)
 	/* 7z x -oDIR FILE (ask for DIR) */
 	int exit_status = FUNC_SUCCESS;
 
-	char *ext_path = get_extraction_path();
+	const char *prompt_msg = _("Extraction dir: ");
+	char *ext_path = ask_user_for_dir(prompt_msg, 1, 0);
 	if (!ext_path)
-		return FUNC_FAILURE;
+		return FUNC_SUCCESS;
 
 	const size_t len = strlen(ext_path);
 	char *o_option = xnmalloc(len + 3, sizeof(char));
@@ -823,12 +769,13 @@ static int
 extract_to_dir_others(char **args)
 {
 	int exit_status = FUNC_SUCCESS;
+	const char *prompt_msg = _("Extraction dir: ");
 
 	for (size_t i = 1; args[i]; i++) {
 		/* Ask for extraction path */
 		printf(_("%sFile%s: %s\n"), BOLD, df_c, args[i]);
 
-		char *ext_path = get_extraction_path();
+		char *ext_path = ask_user_for_dir(prompt_msg, 1, 0);
 		if (!ext_path)
 			break;
 

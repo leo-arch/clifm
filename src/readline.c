@@ -885,19 +885,7 @@ rl_no_hist(const char *prompt_str, const int tabcomp)
 		return NULL;
 	}
 
-	/* Do we have some non-blank char? */
-	int blank = 1;
-	char *p = input;
-
-	while (*p) {
-		if (*p != ' ' && *p != '\n' && *p != '\t') {
-			blank = 0;
-			break;
-		}
-		p++;
-	}
-
-	if (blank == 1) {
+	if (is_blank_str(input) == 1) {
 		free(input);
 		return NULL;
 	}

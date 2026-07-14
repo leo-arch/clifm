@@ -1360,17 +1360,15 @@ get_new_filename(char *cur_name)
 		if (!new_name) /* The user pressed Ctrl+d */
 			return NULL;
 
-		if (is_blank_name(new_name) == 1) {
+		if (is_blank_str(new_name) == 1) {
 			free(new_name);
 			new_name = NULL;
 		}
 	}
 
 	size_t len = strlen(new_name);
-	if (len > 0 && new_name[len - 1] == ' ') {
-		len--;
-		new_name[len] = '\0';
-	}
+	if (len > 0 && new_name[len - 1] == ' ')
+		new_name[--len] = '\0';
 
 	char *n = normalize_path(new_name, len);
 	free(new_name);
@@ -2160,70 +2158,6 @@ export_files(char **filenames, const int open)
 	return NULL;
 }
 
-static char *
-get_bl_dest_dir(void)
-{
-	puts(_("Tip: Enter '.' for the current directory ('q' to quit)"));
-	const int prompt_offset_bk = prompt_offset;
-	char prompt_str[128];
-	snprintf(prompt_str, sizeof(prompt_str), _("Destination directory: "));
-	prompt_offset = (int)strlen(prompt_str) + 1;
-	alt_prompt = FILES_PROMPT;
-
-	struct stat a;
-	char *dir = NULL;
-	while (!dir) {
-		dir = rl_no_hist(prompt_str, 1);
-		if (!dir || !*dir) {
-			free(dir); dir = NULL;
-			continue;
-		}
-
-		if (TOUPPER(*dir) == 'Q' && !dir[1]) {
-			free(dir);
-			return NULL;
-		}
-
-		if (strchr(dir, '\\')) {
-			char *p = unescape_str(dir);
-			free(dir); dir = NULL;
-			if (!p)
-				continue;
-			dir = p;
-		}
-
-		/* Remove ending space or slash */
-		const size_t len = strlen(dir);
-		if (len > 1 && (dir[len - 1] == ' ' || dir[len - 1] == '/'))
-			dir[len - 1] = '\0';
-
-		/* Validate dir */
-		if (*dir == '~') {
-			char *p = tilde_expand(dir);
-			free(dir); dir = NULL;
-			if (!p)
-				continue;
-			dir = p;
-		}
-
-		if (stat(dir, &a) == -1) {
-			fprintf(stderr, "'%s': %s\n", dir, strerror(errno));
-			free(dir); dir = NULL;
-			continue;
-		}
-
-		if (!S_ISDIR(a.st_mode)) {
-			fprintf(stderr, "'%s': %s\n", dir, strerror(ENOTDIR));
-			free(dir); dir = NULL;
-		}
-	}
-
-	alt_prompt = 0;
-	prompt_offset = prompt_offset_bk;
-
-	return dir;
-}
-
 /* Create symlinks for each filename in ARGS.
  * Destination directory is taken from a prompt.
  * If the destination file exists, a positive integer suffix is appended to
@@ -2236,7 +2170,8 @@ batch_link(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	char *dest = get_bl_dest_dir();
+	const char *prompt_msg = _("Destination directory: ");
+	char *dest = ask_user_for_dir(prompt_msg, 0, 1);
 	if (!dest)
 		return FUNC_SUCCESS;
 

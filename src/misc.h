@@ -14,6 +14,8 @@
 
 __BEGIN_DECLS
 
+char *ask_user_for_dir(const char *prompt_msg, const int normalize_dir,
+	const int stat_dir);
 int  err(const int msg_type, const int prompt_flag, const char *format, ...);
 int  alias_import(char *file);
 void bonus_function(void);
@@ -31,7 +33,7 @@ char *gen_diff_str(const int diff);
 char *get_newname(const char *_prompt, char *old_name, int *quoted);
 void get_term_size(void);
 int  handle_stdin(void);
-int  is_blank_name(const char *s);
+int  is_blank_str(const char *s);
 int  list_mountpoints(void);
 int  new_instance(char *, int);
 int  print_reload_msg(const char *ptr, const char *color, const char *msg, ...);

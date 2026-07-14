@@ -75,23 +75,103 @@ gen_diff_str(const int diff)
 	return diff_str;
 }
 
+/* Return 1 if the string S contains only spaces (see isspace(3)),
+ * or zero otherwise. */
 int
-is_blank_name(const char *s)
+is_blank_str(const char *s)
 {
 	if (!s || !*s)
 		return 1;
 
-	int blank = 1;
-
 	while (*s) {
-		if (*s != ' ' && *s != '\n' && *s != '\t') {
-			blank = 0;
-			break;
-		}
+		if (*s != ' ' && *s != '\n' && *s != '\r'
+		&& *s != '\t' && *s != '\v' && *s != '\f')
+			return 0;
 		s++;
 	}
 
-	return blank;
+	return 1;
+}
+
+/* Prompt the user to enter a directory name, using PROMPT_MSG as prompt
+ * message. Input is normalized if normalize_dir is set to 1, and stat'ed
+ * if stat_dir is set to 1.
+ * The input string is returned, or NULL if the string is "Q/q" or the
+ * user pressed Ctrl+d. */
+char *
+ask_user_for_dir(const char *prompt_msg, const int normalize_dir,
+	const int stat_dir)
+{
+	puts(_("Tip: Enter '.' for the current directory ('q' to quit)"));
+
+	const char *p_msg = (prompt_msg && *prompt_msg) ? prompt_msg : "> ";
+	const int prompt_offset_bk = prompt_offset;
+	prompt_offset = (int)strlen(p_msg) + 1;
+	alt_prompt = FILES_PROMPT;
+
+	struct stat a;
+	char *dir = NULL;
+	while (!dir) {
+		dir = rl_no_hist(p_msg, 1);
+		if (!dir || !*dir) {
+			free(dir); dir = NULL;
+			continue;
+		}
+
+		if (TOUPPER(*dir) == 'Q' && !dir[1]) {
+			free(dir);
+			return NULL;
+		}
+
+		if (strchr(dir, '\\')) {
+			char *p = unescape_str(dir);
+			free(dir); dir = NULL;
+			if (!p)
+				continue;
+			dir = p;
+		}
+
+		/* Remove ending space or slash */
+		const size_t len = strlen(dir);
+		if (len > 1 && (dir[len - 1] == ' ' || dir[len - 1] == '/'))
+			dir[len - 1] = '\0';
+
+		if (*dir == '~') {
+			char *p = tilde_expand(dir);
+			free(dir); dir = NULL;
+			if (!p)
+				continue;
+			dir = p;
+		}
+
+		if (normalize_dir == 1) {
+			char *p = normalize_path(dir, strlen(dir));
+			free(dir); dir = NULL;
+			if (!p)
+				continue;
+			dir = p;
+		}
+
+		if (stat_dir == 0)
+			break;
+
+		/* Validate dir */
+		if (stat(dir, &a) == -1) {
+			fprintf(stderr, "'%s': %s\n", dir, strerror(errno));
+			free(dir); dir = NULL;
+			continue;
+		}
+
+		if (!S_ISDIR(a.st_mode)) {
+			fprintf(stderr, "'%s': %s\n", dir, strerror(ENOTDIR));
+			free(dir); dir = NULL;
+		}
+	}
+
+	alt_prompt = 0;
+	prompt_offset = prompt_offset_bk;
+
+	return dir;
 }
 
 /* Prompt for a new name using MSG as prompt.
