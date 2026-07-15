@@ -218,40 +218,23 @@ cd_to_mountpoint(char *file, char *mountpoint)
 static int
 mount_iso(char *file)
 {
-#if !defined(__linux__)
-	UNUSED(file);
-	xerror("%s\n", _("mount: This feature is available only on Linux."));
-	return FUNC_SUCCESS;
-#else
+	if (!file || !*file)
+		return FUNC_FAILURE;
+
 	char *mountpoint = create_mountpoint(file);
 	if (!mountpoint)
 		return FUNC_FAILURE;
 
-	/* Construct and execute the cmd */
-	char *sudo = get_sudo_path();
-	if (!sudo) {
-		free(mountpoint);
-		return FUNC_FAILURE;
-	}
-
-	const char *cmd[] = {sudo, "mount", "-o", "loop", file, mountpoint, NULL};
-	if (confirm_sudo_cmd(cmd) == 0) {
-		free(mountpoint);
-		free(sudo);
-		return FUNC_SUCCESS;
-	}
+	const char *cmd[] = {"archivemount", file, mountpoint, NULL};
 
 	if (launch_execv(cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {
 		free(mountpoint);
-		free(sudo);
 		return FUNC_FAILURE;
 	}
-	free(sudo);
 
 	int exit_status = cd_to_mountpoint(file, mountpoint);
 	free(mountpoint);
 	return exit_status;
-#endif /* __linux__ */
 }
 
 /* Use 7z to
