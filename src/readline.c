@@ -880,12 +880,7 @@ rl_no_hist(const char *prompt_str, const int tabcomp)
 	if (!input) /* Ctrl+d */
 		return savestring("q", 1);
 
-	if (!*input) {
-		free(input);
-		return NULL;
-	}
-
-	if (is_blank_str(input) == 1) {
+	if (!*input || is_blank_str(input) == 1) {
 		free(input);
 		return NULL;
 	}

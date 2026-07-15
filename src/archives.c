@@ -773,7 +773,9 @@ extract_to_dir_others(char **args)
 
 	for (size_t i = 1; args[i]; i++) {
 		/* Ask for extraction path */
-		printf(_("%sFile%s: %s\n"), BOLD, df_c, args[i]);
+		char *abb = abbreviate_file_name(args[i]);
+		printf(_("%sFile%s: %s\n"), BOLD, df_c, abb ? abb : args[i]);
+		free(abb);
 
 		char *ext_path = ask_user_for_dir(prompt_msg, 1, 0);
 		if (!ext_path)
