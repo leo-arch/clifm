@@ -190,10 +190,12 @@ create_mountpoint(char *file)
 	return mountpoint;
 }
 
-#if defined(__linux__)
 static int
 cd_to_mountpoint(char *file, char *mountpoint)
 {
+	if (!mountpoint || !*mountpoint)
+		return FUNC_FAILURE;
+
 	if (xchdir(mountpoint, SET_TITLE) == -1) {
 		xerror("archiver: '%s': %s\n", mountpoint, strerror(errno));
 		return FUNC_FAILURE;
@@ -203,17 +205,16 @@ cd_to_mountpoint(char *file, char *mountpoint)
 	workspaces[cur_ws].path = savestring(mountpoint, strlen(mountpoint));
 	add_to_jumpdb(workspaces[cur_ws].path);
 
-	int exit_status = FUNC_SUCCESS;
 	if (conf.autols == 1) {
 		reload_dirlist();
 		add_to_dirhist(workspaces[cur_ws].path);
 	} else {
-		printf("'%s': Successfully mounted on '%s'\n", file, mountpoint);
+		if (file)
+			printf("'%s': Successfully mounted on '%s'\n", file, mountpoint);
 	}
 
-	return exit_status;
+	return FUNC_SUCCESS;
 }
-#endif /* __linux__ */
 
 static int
 mount_iso(char *file)
@@ -856,27 +857,6 @@ repack_others(char **args)
 }
 
 static int
-list_mounted_files(char *mountpoint)
-{
-	if (xchdir(mountpoint, SET_TITLE) == -1) {
-		xerror("archiver: '%s': %s\n", mountpoint, strerror(errno));
-		return FUNC_FAILURE;
-	}
-
-	free(workspaces[cur_ws].path);
-	workspaces[cur_ws].path = savestring(mountpoint, strlen(mountpoint));
-	add_to_jumpdb(workspaces[cur_ws].path);
-
-	int exit_status = FUNC_SUCCESS;
-	if (conf.autols == 1) {
-		reload_dirlist();
-		add_to_dirhist(workspaces[cur_ws].path);
-	}
-
-	return exit_status;
-}
-
-static int
 mount_others(char **args)
 {
 	int exit_status = FUNC_SUCCESS;
@@ -904,7 +884,7 @@ mount_others(char **args)
 			continue;
 		}
 
-		if (list_mounted_files(mountpoint) == FUNC_FAILURE)
+		if (cd_to_mountpoint(NULL, mountpoint) == FUNC_FAILURE)
 			exit_status = FUNC_FAILURE;
 		free(mountpoint);
 	}
