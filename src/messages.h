@@ -55,7 +55,7 @@ use the -h/--help flag. Example: \"- --help\"."
 \x1b[1mUSAGE\x1b[22m\n\
   ac, ad FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
-- Compress/archive all selected files\n\
+- Compress/archive selected files\n\
     ac sel\n\
 - Compress/archive a range of files\n\
     ac 12-24\n\
@@ -68,9 +68,12 @@ use the -h/--help flag. Example: \"- --help\"."
 \x1b[1mDEPENDENCIES\x1b[22m\n\
 zstd(1)           Everything related to Zstandard\n\
 mkisofs(1)        Create ISO 9660 files\n\
-7z(1) / mount(1)  Operate on ISO 9660 files\n\
-archivemount(1)   Mount archives\n\
-atool(1)          Extraction/decompression, listing, and repacking of archives"
+7z(1)             Operate on ISO 9660 files\n\
+archivemount(1)   Mount archives/ISO-9660 files\n\
+atool(1)          Extraction/decompression, listing, and repacking of archives\n\n\
+Note: Mounted archives are automatically unmounted at program exit.\n\
+To manually unmount an archive, use umount(8) over the mountpoint.\n\
+Mountpoints are created under '$TMPDIR/clifm-$USER/mnt/'."
 
 #define AUTOCD_USAGE "Turn autocd on/off\n\
 \x1b[1mUSAGE\x1b[22m\n\
