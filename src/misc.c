@@ -1532,6 +1532,7 @@ free_stuff(void)
 	free(hist_file);
 	free(kbinds_file);
 	free(msgs_log_file);
+	free(mnt_dir);
 	free(cmds_log_file);
 	free(mime_file);
 	free(plugins_dir);

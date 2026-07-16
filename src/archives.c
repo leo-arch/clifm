@@ -167,19 +167,16 @@ test_iso(char *file)
 static char *
 create_mountpoint(char *file)
 {
+	if (!file || !mnt_dir)
+		return NULL;
+
 	char *mountpoint = NULL;
 	char *p = strrchr(file, '/');
 	const char *tfile = (p && *(++p)) ? p : file;
 
-	if (xargs.stealth_mode == 1) {
-		const size_t len = strlen(tfile) + P_tmpdir_len + 12;
-		mountpoint = xnmalloc(len, sizeof(char));
-		snprintf(mountpoint, len, "%s/clifm-mnt/%s", P_tmpdir, tfile);
-	} else {
-		const size_t len = strlen(tmp_dir) + strlen(tfile) + 6;
-		mountpoint = xnmalloc(len, sizeof(char));
-		snprintf(mountpoint, len, "%s/mnt/%s", tmp_dir, tfile);
-	}
+	const size_t len = strlen(mnt_dir) + strlen(tfile) + 2;
+	mountpoint = xnmalloc(len, sizeof(char));
+	snprintf(mountpoint, len, "%s/%s", mnt_dir, tfile);
 
 	const char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
 	if (launch_execv(dir_cmd, FOREGROUND, E_NOFLAG) != FUNC_SUCCESS) {

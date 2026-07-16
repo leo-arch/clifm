@@ -2037,6 +2037,7 @@ extern char
 	*jump_suggestion,
 	*last_cmd,
 	*mime_file,
+	*mnt_dir,
 	*msgs_log_file,
 	*pinned_dir,
 	*plugins_dir,

@@ -267,6 +267,7 @@ char
 	*kbinds_file = NULL,
 	*last_cmd = NULL,
 	*mime_file = NULL,
+	*mnt_dir = NULL,
 	*msgs_log_file = NULL,
 	*pinned_dir = NULL,
 	*plugins_dir = NULL,

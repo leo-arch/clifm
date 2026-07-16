@@ -2428,12 +2428,11 @@ expand_symlink(char **substr)
 static int
 expand_mnt_dir(char **substr)
 {
-	if (!*substr || !*(*substr) || !tmp_dir)
+	if (!*substr || !*(*substr) || !mnt_dir)
 		return FUNC_FAILURE;
 
-	const size_t len = strlen(tmp_dir) + 5;
-	*substr = xnrealloc(*substr, len, sizeof(char));
-	snprintf(*substr, len, "%s/mnt", tmp_dir);
+	free(*substr);
+	*substr = strdup(mnt_dir);
 
 	return FUNC_SUCCESS;
 }
