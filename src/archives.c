@@ -172,13 +172,13 @@ create_mountpoint(char *file)
 	const char *tfile = (p && *(++p)) ? p : file;
 
 	if (xargs.stealth_mode == 1) {
-		const size_t len = strlen(tfile) + P_tmpdir_len + 15;
+		const size_t len = strlen(tfile) + P_tmpdir_len + 12;
 		mountpoint = xnmalloc(len, sizeof(char));
-		snprintf(mountpoint, len, "%s/clifm-mounts/%s", P_tmpdir, tfile);
+		snprintf(mountpoint, len, "%s/clifm-mnt/%s", P_tmpdir, tfile);
 	} else {
-		const size_t len = config_dir_len + strlen(tfile) + 9;
+		const size_t len = strlen(tmp_dir) + strlen(tfile) + 6;
 		mountpoint = xnmalloc(len, sizeof(char));
-		snprintf(mountpoint, len, "%s/mounts/%s", config_dir, tfile);
+		snprintf(mountpoint, len, "%s/mnt/%s", tmp_dir, tfile);
 	}
 
 	const char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
@@ -188,6 +188,61 @@ create_mountpoint(char *file)
 	}
 
 	return mountpoint;
+}
+
+/* Unmount the mountpoint DIR using umount(8). Returns zero on success
+ * or a non-zero value on error. */
+int
+unmount_mount(const char *dir)
+{
+	if (!dir || !*dir)
+		return (-1);
+
+	if (count_dir(dir, CPOP) <= 2)
+		return FUNC_SUCCESS;
+
+	const char *cmd[] = {"umount", dir, NULL};
+	return launch_execv(cmd, FOREGROUND, E_NOFLAG);
+}
+
+/* Add DIR to the jump database. If already there, just update the number of
+ * visits and the last visit time. */
+static int
+add_to_mountsdb(char *dir)
+{
+	if (!dir || !*dir)
+		return FUNC_FAILURE;
+
+	size_t dir_len = strlen(dir);
+	if (dir_len > 1 && dir[dir_len - 1] == '/')
+		dir[--dir_len] = '\0';
+
+	if (!mounts) {
+		mounts = xnmalloc(1, sizeof(struct mounts_t));
+		mounts[0] = (struct mounts_t){0};
+	}
+
+	size_t i;
+	for (i = 0; mounts[i].path; i++) {
+		/* Entries are all absolute paths, so that they all start with
+		 * a slash. Let's start comparing them from the second char. */
+		if (dir_len != mounts[i].len
+		|| dir[1] != mounts[i].path[1])
+			continue;
+
+		if (strcmp(mounts[i].path, dir) == 0)
+			return FUNC_SUCCESS;
+	}
+
+	/* Append new entry to the list */
+	mounts = xnrealloc(mounts, i + 2, sizeof(struct mounts_t));
+	mounts[i].len = dir_len;
+	mounts[i++].path = savestring(dir, dir_len);
+
+	mounts[i].len = 0;
+	mounts[i].path = NULL;
+
+	return FUNC_SUCCESS;
 }
 
 static int
@@ -200,6 +255,8 @@ cd_to_mountpoint(char *file, char *mountpoint)
 		xerror("archiver: '%s': %s\n", mountpoint, strerror(errno));
 		return FUNC_FAILURE;
 	}
+
+	add_to_mountsdb(mountpoint);
 
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(mountpoint, strlen(mountpoint));

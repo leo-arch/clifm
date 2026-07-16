@@ -14,6 +14,7 @@ __BEGIN_DECLS
 
 int is_compressed(const char *file, const int test_iso);
 int archiver(char **args, char mode);
+int unmount_mount(const char *dir);
 
 __END_DECLS
 

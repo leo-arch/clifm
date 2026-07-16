@@ -44,6 +44,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 # include <sys/inotify.h>
 #endif /* LINUX_INOTIFY */
 
+#include "archives.h" /* unmount_mount() */
 #include "aux.h"
 #include "autocmds.h" /* update_autocmd_opts() */
 #include "bookmarks.h"
@@ -1262,6 +1263,35 @@ free_file_templates(void)
 	file_templates = NULL;
 }
 
+static void
+free_mounts(void)
+{
+	if (!mounts)
+		return;
+
+	/* Get out of mountpoints, just in case we're inside one. */
+	xchdir("/", NO_TITLE);
+
+	for (size_t i = 0; mounts[i].path; i++) {
+		const char *mp = mounts[i].path;
+		const int ret = unmount_mount(mp);
+
+		const char *p = strrchr(mp, '/');
+		const char *name = (p && p[1]) ? p + 1 : mp;
+
+		if (ret == FUNC_SUCCESS) {
+			printf(_("%s: Unmounted '%s'\n"), PROGRAM_NAME, name);
+		} else {
+			fprintf(stderr, _("%s: Could not unmount '%s'\n"),
+				PROGRAM_NAME, name);
+		}
+
+		free(mounts[i].path);
+	}
+
+	free(mounts);
+}
+
 /* This function is called by atexit() to clear whatever is there at exit
  * time and avoid thus memory leaks */
 void
@@ -1348,6 +1378,7 @@ free_stuff(void)
 	free_tags();
 	free_remotes(1);
 	free_file_templates();
+	free_mounts();
 
 	if (xargs.stealth_mode != 1)
 		save_jumpdb();

@@ -1300,6 +1300,13 @@ struct jump_t {
 
 extern struct jump_t *jump_db;
 
+struct mounts_t {
+	char *path;
+	size_t len;
+};
+
+extern struct mounts_t *mounts;
+
 /* Struct to store bookmarks */
 struct bookmarks_t {
 	char *shortcut;

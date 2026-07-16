@@ -46,6 +46,7 @@ struct actions_t *usr_actions = NULL;
 struct ws_t *workspaces = NULL;
 struct kbinds_t *kbinds = NULL;
 struct jump_t *jump_db = NULL;
+struct mounts_t *mounts = NULL;
 struct bookmarks_t *bookmarks = NULL;
 struct fileinfo *file_info = NULL;
 struct remote_t *remotes = NULL;
