@@ -498,6 +498,8 @@ Mounted archives are automatically unmounted at program exit.
 To manually unmount an archive, use \fBumount\fR(8) over the mountpoint.
 .sp 0
 Mountpoints are created under \fI$TMPDIR/clifm-$USER/mnt/\fR.
+.sp 0
+To quickly change to the mountpoints directory, enter \fBmnt:\fR.
 .sp
 The archive mount function depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third-party utilities for achieve formats support, for example, \fBp7zip\fR. \fBp7zip\fR is also used to manage most decompressing options for ISO 9660 files. Creation of ISO files is done via \fBgenisoimage\fR(1). For more information consult \fBatool\fR(1), \fBarchivemount\fR(1), \fBzstd\fR(1), and \fB7z\fR(1).
 .TP
@@ -2076,6 +2078,10 @@ A single comma (,) expands to the currently \fBpinned directory\fR (see the \fBp
 \fB9. Parent directories\fR
 .sp
 Via the \fIfastback\fR function, you can quickly change to any parent directory using a series of dots. A single dot (.) refers to the current directory, and two dots (..) refer to the parent directory. This pattern continues, so three dots (...) refer to the parent of the parent directory, four dots (....) refer to the parent of the parent of the parent directory, and so on. In general, n dots refer to the nth level of parent directories.
+.TP
+\fB10. Mountpoints directory\fR
+.sp
+The expression \fBmnt:\fR expands to the directory used to mount archives (ZIP, ISO, etc), usually \fI$TMPDIR/clifm-$USER/mnt\fR. For example, to quickly change to this directory, enter `\fBcd mnt:\fR`. Useful when working with multiple archives.
 .TP
 Needless to say, combinations are possible. For example, the command `\fBc sel b:work @image =L 1-3 ,\fR` will copy all selected files, the bookmark named \fIwork\fR, all images, broken symbolic links in the current directory, and files with ELNs 1 through 3 to the pinned directory.
 .TP

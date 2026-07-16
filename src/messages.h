@@ -73,7 +73,8 @@ archivemount(1)   Mount archives/ISO-9660 files\n\
 atool(1)          Extraction/decompression, listing, and repacking of archives\n\n\
 Note: Mounted archives are automatically unmounted at program exit.\n\
 To manually unmount an archive, use umount(8) over the mountpoint.\n\
-Mountpoints are created under '$TMPDIR/clifm-$USER/mnt/'."
+Mountpoints are created under '$TMPDIR/clifm-$USER/mnt/'.\n\
+To quickly change to the mountpoints directory, enter 'cd mnt:'."
 
 #define AUTOCD_USAGE "Turn autocd on/off\n\
 \x1b[1mUSAGE\x1b[22m\n\

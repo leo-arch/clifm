@@ -2425,6 +2425,19 @@ expand_symlink(char **substr)
 	return 0;
 }
 
+static int
+expand_mnt_dir(char **substr)
+{
+	if (!*substr || !*(*substr) || !tmp_dir)
+		return FUNC_FAILURE;
+
+	const size_t len = strlen(tmp_dir) + 5;
+	*substr = xnrealloc(*substr, len, sizeof(char));
+	snprintf(*substr, len, "%s/mnt", tmp_dir);
+
+	return FUNC_SUCCESS;
+}
+
 /* Return 1 if glob expansion should be performed for the current command,
  * or 0 otherwise. */
 static int
@@ -2971,6 +2984,11 @@ parse_input_str(char *str)
 
 		if (*substr[i] == 'w' && substr[i][1] == ':' && substr[i][2]
 		&& expand_workspace(&substr[i]) == FUNC_SUCCESS)
+			continue;
+
+		if (*substr[i] == 'm' && substr[i][1] == 'n' && substr[i][2] == 't'
+		&& substr[i][3] == ':' && !substr[i][4]
+		&& expand_mnt_dir(&substr[i]) == FUNC_SUCCESS)
 			continue;
 
 			/* ###################################

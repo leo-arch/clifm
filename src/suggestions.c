@@ -2039,6 +2039,12 @@ rl_suggestions(const unsigned char c)
 		goto SUCCESS;
 	}
 
+	/* 'mnt:' keyword */
+	if (*word == 'm' && word[1] == 'n' && word[2] == 't' && word[3] == ':') {
+		if (wrong_cmd == 1) recover_from_wrong_cmd();
+		goto SUCCESS;
+	}
+
 	/* '~' or '~/' */
 	if (*word == '~' && (!word[1] || (word[1] == '/' && !word[2]))) {
 		if (wrong_cmd)
