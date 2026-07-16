@@ -1389,15 +1389,15 @@ define_selfile(void)
 }
 
 static void
-build_mnt_dir(void)
+set_mnt_dir(void)
 {
 	if (mnt_dir)
 		free(mnt_dir);
 
 	if (xargs.stealth_mode == 1) {
-		const size_t len = P_tmpdir_len + 11;
+		const size_t len = P_tmpdir_len + 5 + sizeof(PROGRAM_NAME) - 1;
 		mnt_dir = xnmalloc(len, sizeof(char));
-		snprintf(mnt_dir, len, "%s/clifm-mnt", P_tmpdir);
+		snprintf(mnt_dir, len, "%s/%s-mnt", P_tmpdir, PROGRAM_NAME);
 	} else {
 		const size_t len = strlen(tmp_dir) + 5;
 		mnt_dir = xnmalloc(len, sizeof(char));
@@ -1409,7 +1409,7 @@ void
 create_tmp_files(void)
 {
 	if (xargs.stealth_mode == 1) {
-		build_mnt_dir();
+		set_mnt_dir();
 		return;
 	}
 
@@ -1454,7 +1454,7 @@ create_tmp_files(void)
 	}
 
 	define_selfile();
-	build_mnt_dir();
+	set_mnt_dir();
 }
 
 /* Set the main configuration directory. Three sources are examined:
