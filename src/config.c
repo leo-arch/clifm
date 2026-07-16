@@ -1408,8 +1408,10 @@ build_mnt_dir(void)
 void
 create_tmp_files(void)
 {
-	if (xargs.stealth_mode == 1)
+	if (xargs.stealth_mode == 1) {
+		build_mnt_dir();
 		return;
+	}
 
 	free(tmp_rootdir); /* In case we come from reload_config() */
 	tmp_rootdir = create_tmp_rootdir();
