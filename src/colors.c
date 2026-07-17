@@ -2908,7 +2908,7 @@ print_date_colors(void)
 	props_now = t;
 
 	if (*dd_c) {
-		printf(_("%sColor%s (dd)  Date (e.g. %sJul 9 08:12%s)\n"),
+		printf(_("%sColor%s (dd)  Date (e.g., %sJul 9 08:12%s)\n"),
 			dd_c, df_c, dd_c, df_c);
 	} else {
 		print_date_shades(t);
@@ -2916,7 +2916,7 @@ print_date_colors(void)
 
 	char tstr[MAX_SHADE_LEN]; *tstr = '\0';
 	get_color_age(t - (24LL*60*60), tstr, sizeof(tstr));
-	printf(_("%s%sColor%s (dt)  Timestamp mark (e.g. %sMay 25 22:08%sm%s)\n"),
+	printf(_("%s%sColor%s (dt)  Timestamp mark (e.g., %sMay 25 22:08%sm%s)\n"),
 		tstr, dt_c, df_c, tstr, dt_c, df_c);
 }
 
@@ -2931,15 +2931,15 @@ print_prop_colors(void)
 		dxd_c, df_c, dxd_c, df_c);
 	printf(_("%sColor%s (dxr) Execute bit - file (%sx%s)\n"),
 		dxr_c, df_c, dxr_c, df_c);
-	printf(_("%sColor%s (dp)  SUID/SGID bit (e.g. %ss%s)\n"), dp_c,
+	printf(_("%sColor%s (dp)  SUID/SGID bit (e.g., %ss%s)\n"), dp_c,
 		df_c, dp_c, df_c);
-	printf(_("%sColor%s (du)  User ID (e.g. %sjane%s)\n"),
+	printf(_("%sColor%s (du)  User ID (e.g., %sjane%s)\n"),
 		du_c, df_c, du_c, df_c);
-	printf(_("%s%sColor%s (dg)  Group ID (e.g. %s%swheel%s)\n"),
+	printf(_("%s%sColor%s (dg)  Group ID (e.g., %s%swheel%s)\n"),
 		du_c, dg_c, df_c, du_c, dg_c, df_c);
 
 	if (*dz_c) {
-		printf(_("%sColor%s (dz)  Size (e.g. %s12.69k%s)\n"),
+		printf(_("%sColor%s (dz)  Size (e.g., %s12.69k%s)\n"),
 			dz_c, df_c, dz_c, df_c);
 	} else {
 		print_size_shades();
@@ -2947,15 +2947,15 @@ print_prop_colors(void)
 
 	print_date_colors();
 
-	printf(_("%sColor%s (db)  Used blocks (e.g. %s1576%s)\n"),
+	printf(_("%sColor%s (db)  Used blocks (e.g., %s1576%s)\n"),
 		db_c, df_c, db_c, df_c);
-	printf(_("%sColor%s (dk)  Links number (e.g. %s92%s)\n"),
+	printf(_("%sColor%s (dk)  Links number (e.g., %s92%s)\n"),
 		dk_c, df_c, dk_c, df_c);
-	printf(_("%sColor%s (de)  Inode number (e.g. %s802721%s)\n"),
+	printf(_("%sColor%s (de)  Inode number (e.g., %s802721%s)\n"),
 		de_c, df_c, de_c, df_c);
-	printf(_("%sColor%s (do)  Octal permissions (e.g. %s0640%s)\n"),
+	printf(_("%sColor%s (do)  Octal permissions (e.g., %s0640%s)\n"),
 		do_c, df_c, do_c, df_c);
-	printf(_("%sColor%s (dn)  Dot/dash (e.g. %sr%sw%s-.%sr%s--.--%s)\n"),
+	printf(_("%sColor%s (dn)  Dot/dash (e.g., %sr%sw%s-.%sr%s--.--%s)\n"),
 		dn_c, df_c, dr_c, dw_c, dn_c, dr_c, dn_c, df_c);
 
 }
@@ -2965,27 +2965,28 @@ print_interface_colors(void)
 {
 	printf(_("\n%sInterface%s\n\n"), BOLD, df_c);
 
-	printf(_("%sColor%s (el) ELN's (e.g. %s12%s filename)\n"),
+	printf(_("%sColor%s (el) ELN (e.g., %s12%s filename)\n"),
 		el_c, df_c, el_c, df_c);
-	printf(_("%sColor%s (fc) File counter (e.g. dir%s/24%s)\n"),
+	printf(_("%sColor%s (fc) File counter (e.g., dir%s/24%s)\n"),
 		fc_c, df_c, fc_c, df_c);
-	printf(_("%sColor%s (lc) Symbolic link indicator (e.g. %s36%s"
+	printf(_("%sColor%s (lc) Symbolic link indicator (e.g., %s36%s"
 		"%s%s%ssymlink) (%s1%s)\n"), lc_c, df_c, el_c, df_c, lc_c,
 		term_caps.unicode == 1 ? LINK_STR_U : LINK_STR, df_c, BOLD, df_c);
-	printf(_("%sColor%s (li) Selected file indicator (e.g. %s12%s"
+	printf(_("%sColor%s (li) Selected file indicator (e.g., %s12%s"
 		"%s%s%sfilename)\n"), li_cb, df_c, el_c, df_c, li_cb,
 		term_caps.unicode == 1 ? SELFILE_STR_U : SELFILE_STR, df_c);
-	printf(_("%sColor%s (tt) Truncated filenames mark (e.g. "
+	printf(_("%sColor%s (tt) Truncated filename mark (e.g., "
 		"filenam%s%c%s.odt)\n"), tt_c, df_c, tt_c, TRUNC_FILE_CHR, df_c);
-	printf(_("%sColor%s (dl) Dividing line (e.g. %s------>%s)\n"),
+	printf(_("%sColor%s (dl) Dividing line (e.g., %s------>%s)\n"),
 		dl_c, df_c, dl_c, df_c);
 	printf(_("%sColor%s (mi) Miscellaneous indicator (%s%s%s) (%s2%s)\n"),
-		mi_c, df_c, mi_c, MSG_PTR_STR, df_c, BOLD, df_c);
-	printf(_("%sColor%s (ts) Matching completion prefix (e.g. "
+		mi_c, df_c, mi_c, term_caps.unicode == 1 ? MSG_PTR_STR_U : MSG_PTR_STR,
+		df_c, BOLD, df_c);
+	printf(_("%sColor%s (ts) Matching completion prefix (e.g., "
 		"%sfile%sname) (%s3%s)\n"), ts_c, df_c, ts_c, df_c, BOLD, df_c);
 	printf(_("%sColor%s (df) Default color\n"), df_c, df_c);
 
-	printf(_("\n(%s1%s) Used only when ColorLinksAsTarget is "
+	printf(_("\n(%s1%s) Used only when ColorizeSymlinksAsTarget is "
 		"enabled\n"), BOLD, df_c);
 	printf(_("(%s2%s) Also used for miscellaneous names (like bookmarks "
 		"and color schemes) in tab completion\n"), BOLD, df_c);
@@ -3021,7 +3022,7 @@ print_prompt_colors(void)
 {
 	printf(_("\n%sPrompt%s\n\n"), BOLD, df_c);
 
-	printf(_("%sColor%s (tx) Input text (e.g. \x1b[1m$\x1b[0m "
+	printf(_("%sColor%s (tx) Input text (e.g., \x1b[1m$\x1b[0m "
 		"%sls%s %s-l%s %sfilename.zst%s)\n"), tx_c, df_c, tx_c, df_c,
 		hp_c, df_c, tx_c, df_c);
 	const char *p = remove_ctrl_chars(ac_c);
@@ -3036,7 +3037,7 @@ print_prompt_colors(void)
 	printf(_("%sColor%s (xs) Success exit code (<%s0%s>)\n"),
 		p, df_c, p, df_c);
 	p = remove_ctrl_chars(xf_c);
-	printf(_("%sColor%s (xf) Error exit code (e.g. <%s1%s>)\n"),
+	printf(_("%sColor%s (xf) Error exit code (e.g., <%s1%s>)\n"),
 		p, df_c, p, df_c);
 	p = remove_ctrl_chars(nm_c);
 	printf(_("%sColor%s (nm) Notice message indicator (%sN%s)\n"),
@@ -3060,22 +3061,22 @@ print_suggestion_colors(void)
 {
 #ifndef _NO_SUGGESTIONS
 	printf("\n%sSuggestions%s\n\n", BOLD, df_c);
-	printf("%sColor%s (sh) History (e.g. sud%so vim clifmrc%s)\n",
+	printf("%sColor%s (sh) History (e.g., sud%so vim clifmrc%s)\n",
 		sh_c, df_c, sh_c, df_c);
-	printf("%sColor%s (sf) Filenames (e.g. thi%ss_filename%s)\n",
+	printf("%sColor%s (sf) Filenames (e.g., thi%ss_filename%s)\n",
 		sf_c, df_c, sf_c, df_c);
-	printf("%sColor%s (sz) Filenames (fuzzy) (e.g. dwn %s%c%s "
+	printf("%sColor%s (sz) Filenames (fuzzy) (e.g., dwn %s%c%s "
 		"%sDownloads%s)\n", sz_c, df_c, sp_c, SUG_POINTER, df_c,
 		sz_c, df_c);
 	printf("%sColor%s (sx) Internal command names and parameters "
-		"(e.g. boo%skmarks%s)\n", sx_c, df_c, sx_c, df_c);
-	printf("%sColor%s (sc) External command names (e.g. lib%sreoffice%s)\n",
+		"(e.g., boo%skmarks%s)\n", sx_c, df_c, sx_c, df_c);
+	printf("%sColor%s (sc) External command names (e.g., lib%sreoffice%s)\n",
 		sc_c, df_c, sc_c, df_c);
-	printf("%sColor%s (sb) Shell built-in names (e.g. ex%sport%s)\n",
+	printf("%sColor%s (sb) Shell built-in names (e.g., ex%sport%s)\n",
 		sb_c, df_c, sb_c, df_c);
-	printf("%sColor%s (sd) Internal commands description (e.g. "
+	printf("%sColor%s (sd) Internal command description (e.g., "
 		"br %s(batch rename files)%s)\n", sd_c, df_c, sd_c, df_c);
-	printf("%sColor%s (sp) Pointer (e.g. %s48%s %s%c%s %sfilename%s)\n",
+	printf("%sColor%s (sp) Pointer (e.g., %s48%s %s%c%s %sfilename%s)\n",
 		sp_c, df_c, hn_c, df_c, sp_c, SUG_POINTER, df_c, sf_c, df_c);
 #else
 	return;
@@ -3090,25 +3091,25 @@ print_highlight_colors(void)
 
 	printf(_("%sColor%s (hb) Brackets: %s(){}[]%s\n"),
 		hb_c, df_c, hb_c, df_c);
-	printf(_("%sColor%s (hc) Commented out text (e.g. some text "
+	printf(_("%sColor%s (hc) Commented out text (e.g., some text "
 		"%s#comment%s)\n"), hc_c, df_c, hc_c, df_c);
-	printf(_("%sColor%s (hd) Slash (e.g. dir%s/%sfile)\n"),
+	printf(_("%sColor%s (hd) Slash (e.g., dir%s/%sfile)\n"),
 		hd_c, df_c, hd_c, df_c);
 	printf(_("%sColor%s (he) Expansion characters: %s~*%s\n"),
 		he_c, df_c, he_c, df_c);
-	printf(_("%sColor%s (hn) Number (e.g. pp %s12%s)\n"),
+	printf(_("%sColor%s (hn) Number (e.g., pp %s12%s)\n"),
 		hn_c, df_c, hn_c, df_c);
-	printf(_("%sColor%s (hp) Command parameter (e.g. cmd %s--param%s)\n"),
+	printf(_("%sColor%s (hp) Command parameter (e.g., cmd %s--param%s)\n"),
 		hp_c, df_c, hp_c, df_c);
-	printf(_("%sColor%s (hq) Quoted text (e.g. %s\"some text\"%s)\n"),
+	printf(_("%sColor%s (hq) Quoted text (e.g., %s\"some text\"%s)\n"),
 		hq_c, df_c, hq_c, df_c);
 	printf(_("%sColor%s (hr) Redirection characters: %s><%s\n"),
 		hr_c, df_c, hr_c, df_c);
 	printf(_("%sColor%s (hs) Process separator characters: %s|;&%s \n"),
 		hs_c, df_c, hs_c, df_c);
-	printf(_("%sColor%s (hv) Variable name (e.g. %s$FOO%s)\n"),
+	printf(_("%sColor%s (hv) Variable name (e.g., %s$FOO%s)\n"),
 		hv_c, df_c, hv_c, df_c);
-	printf(_("%sColor%s (hw) Backslash (e.g. sel this%s\\%s file%s\\%s "
+	printf(_("%sColor%s (hw) Backslash (e.g., sel this%s\\%s file%s\\%s "
 		"name)\n"), hw_c, df_c, hw_c, df_c, hw_c, df_c);
 #else
 	return;
