@@ -2428,8 +2428,22 @@ expand_symlink(char **substr)
 static int
 expand_mnt_dir(char **substr)
 {
-	if (!*substr || !*(*substr) || !mnt_dir)
+	struct stat a;
+
+	if (!*substr || !*(*substr) || !mnt_dir || !*mnt_dir)
 		return FUNC_FAILURE;
+
+	const int ret = stat(mnt_dir, &a); /* Allow mnt to be a symlink to dir */
+	if (ret == 0 && !S_ISDIR(a.st_mode))
+		return FUNC_FAILURE;
+
+	/* If MNT_DIR does not exist, create it. */
+	if (ret == -1 && errno == ENOENT) {
+		if (xargs.stealth_mode == 1)
+			return FUNC_FAILURE;
+		if (xmkdir(mnt_dir, S_IRWXU) != FUNC_SUCCESS)
+			return FUNC_FAILURE;
+	}
 
 	free(*substr);
 	*substr = strdup(mnt_dir);
