@@ -1275,7 +1275,7 @@ free_mounts(void)
 	for (size_t i = 0; mounts[i].path; i++) {
 		const char *mp = mounts[i].path;
 		const int ret = unmount_mount(mp);
-		if (ret == -1 || ret == -2) { /* Error (-1) or empty dir (-2) */
+		if (ret == -2) { /* Empty dir: likely manually unmounted. */
 			free(mounts[i].path);
 			continue;
 		}
