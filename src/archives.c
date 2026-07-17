@@ -195,8 +195,12 @@ unmount_mount(const char *dir)
 	if (!dir || !*dir)
 		return (-1);
 
-	if (count_dir(dir, CPOP) <= 2)
-		return FUNC_SUCCESS;
+	const filesn_t n = count_dir(dir, CPOP);
+	if (n == -1) /* Error. */
+		return (-1);
+
+	if (n == 2) /* Empty directory: only self and parent. */
+		return (-2);
 
 	const char *cmd[] = {"umount", dir, NULL};
 	return launch_execv(cmd, FOREGROUND, E_NOFLAG);

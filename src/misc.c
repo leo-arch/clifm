@@ -1275,6 +1275,10 @@ free_mounts(void)
 	for (size_t i = 0; mounts[i].path; i++) {
 		const char *mp = mounts[i].path;
 		const int ret = unmount_mount(mp);
+		if (ret == -1 || ret == -2) { /* Error (-1) or empty dir (-2) */
+			free(mounts[i].path);
+			continue;
+		}
 
 		const char *p = strrchr(mp, '/');
 		const char *name = (p && p[1]) ? p + 1 : mp;

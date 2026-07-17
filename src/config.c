@@ -2320,7 +2320,7 @@ create_main_config_dir(void)
 	if (launch_execv(tmp_cmd, FOREGROUND, E_NOSTDERR) != FUNC_SUCCESS) {
 		config_ok = 0;
 		err('e', PRINT_PROMPT, _("%s: Cannot create configuration "
-			"directory '%s': Bookmarks, commands logs, and "
+			"directory '%s': Bookmarks, command logs, and "
 			"command history are disabled. Program messages will not be "
 			"persistent. Falling back to default settings.\n"),
 			PROGRAM_NAME, config_dir);
