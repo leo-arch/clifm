@@ -2026,6 +2026,15 @@ check_shebang(const uint8_t *s, const size_t slen)
 	if (!s || slen < 2 || s[0] != '#' || s[1] != '!')
 		return NULL;
 
+	/* libmagic: magic/Magdir/archive */
+	if (slen > 35 && s[10] == '#' && s[11] == ' ' && s[12] == 'T'
+	&& memcmp(s + 10, "# This is a shell archive", 25) == 0)
+		return "application/x-shar";
+
+	if (s[2] == ' ' && s[3] == 'r' && s[4] == 'n' && s[4] == 'e'
+	&& s[5] == 'w' && s[6] == 's')
+		return "message/rfc822";
+
 	size_t path_sep = 0;
 	size_t token_end = 0;
 	const uint8_t *basename = NULL;
@@ -6360,7 +6369,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'M' && sig[4] == 0x00)
 		return "application/x-scumm-room";
 
-	/* FOund in Sherlock Holmes games folder (EA 1992, 1996) */
+	/* Found in Sherlock Holmes games folder (EA 1992, 1996) */
 	if (nread > 3 && sig[0] == 'L' && sig[1] == 'I' && sig[2] == 'B'
 	&& sig[3] == 0x1A)
 		return "application/x-lib";
@@ -7226,6 +7235,13 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& LE_U32(sig + 8) == 0x10000419)
 		return "application/x-epoc-sis";
 
+	/* libmagic: magic/Magdir/archive */
+	if (nread > 4 && (BE_U32(sig) & 0xffff00fc) == 0x48410000)
+		return "application/x-ha";
+	if (nread > 6 && sig[0] == 0xE9 && sig[1] == ',' && sig[2] == 0x01
+	&& sig[3] == 'J' && sig[4] == 'A' && sig[5] == 'M' && sig[6] == ' ')
+		return "application/x-jam";
+
 	/* =================================
 	 * WEAK MAGIC! Only 2-3 conditions
 	 * ================================= */
@@ -7368,6 +7384,31 @@ check_ini_file(const uint8_t *s, const size_t slen)
 		&& s[i + 1] != '[')
 			return is_ini_file(s + i, slen - i);
 	}
+
+	return 0;
+}
+
+static int
+is_rfc_message(const uint8_t *s, const size_t slen)
+{
+	if (!s || !*s)
+		return 0;
+
+	if ((slen > 14 && *s == 'R' && memcmp(s, "Relay-Version:", 14) == 0)
+	|| (slen > 9 && *s == 'N' && memcmp(s, "N#! rnews", 9) == 0)
+	|| (slen > 10 && *s == 'F' && memcmp(s, "Forward to", 10) == 0)
+	|| (slen > 7 && *s == 'P' && memcmp(s, "Pipe to", 7) == 0)
+	|| (slen > 11 && *s == 'd' && memcmp(s, "deliver-to:", 11) == 0)
+	|| (slen > 12 && *s == 'r' && memcmp(s, "return-path:", 12) == 0)
+	|| (slen > 5 && *s == 'P' && memcmp(s, "Path:", 5) == 0)
+	|| (slen > 5 && *s == 'X' && memcmp(s, "Xref:", 5) == 0)
+	|| (slen > 5 && *s == 'F' && memcmp(s, "From:", 5) == 0)
+	|| (slen > 5 && *s == 'D' && memcmp(s, "Date:", 5) == 0)
+	|| (slen > 8 && *s == 'S' && memcmp(s, "Subject:", 8) == 0)
+	|| (slen > 3 && *s == 'C' && memcmp(s, "Cc:", 3) == 0)
+	|| (slen > 3 && *s == 'S' && memcmp(s, "To:", 3) == 0)
+	|| (slen > 8 && *s == 'A' && memcmp(s, "Article:", 8) == 0))
+		return 1;
 
 	return 0;
 }
@@ -7956,6 +7997,11 @@ text_or_binary(const uint8_t *s, const size_t slen)
 		const size_t rem = max - i;
 		int override = 0;
 
+		if (rem > 45 && s[i] == '(' && s[i + 1] == 'T' && s[i + 34] == 'B'
+		&& memcmp(s + i, "(This file must be converted with BinHex", 40) == 0)
+			return (s[i + 41] == '4' || s[i + 41] == '5')
+				? "application/mac-binhex40" : "application/mac-binhex";
+
 		for (size_t j = 0; tokens[j].token; j++) {
 			if (used_tokens[j] == 1) /* Let's count each token only once */
 				continue;
@@ -8023,6 +8069,9 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	if (len > 10 && (p[0] == 'E' || p[0] == 'e') && p[4] == ' '
 	&& strncasecmp(p, "echo off", 8) == 0)
 		return "text/x-msdos-batch";
+
+	if (is_rfc_message(s, len) == 0)
+		return "message/rfc822";
 
 #ifdef FMAGIC_NO_NULL
 	return "text/plain";

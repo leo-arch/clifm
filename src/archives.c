@@ -268,7 +268,7 @@ cd_to_mountpoint(char *file, char *mountpoint)
 		add_to_dirhist(workspaces[cur_ws].path);
 	} else {
 		if (file)
-			printf("'%s': Successfully mounted on '%s'\n", file, mountpoint);
+			printf(_("'%s': Successfully mounted on '%s'\n"), file, mountpoint);
 	}
 
 	return FUNC_SUCCESS;
