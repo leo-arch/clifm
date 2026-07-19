@@ -1561,7 +1561,8 @@ print_mimetypes_and_exit(char **files, const char *opt_str)
 			}
 		}
 
-		char *mimetype = xmagic(*resolved_target ? resolved_target : file, 1);
+		const char *f = *resolved_target ? resolved_target : file;
+		char *mimetype = xmagic(f, MIME_TYPE);
 		if (!mimetype) {
 			fprintf(stderr, _("%s: Error getting MIME type\n"), files[i]);
 			ret = EXIT_FAILURE;
