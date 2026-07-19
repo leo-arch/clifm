@@ -117,7 +117,8 @@ In addition to common file operations, such as copy, move, remove, etc., **clifm
   - [File previewer](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) (similar to [`pistol`](https://github.com/yonasBSD/pistol) and Ranger's `scope.sh`)
   - [Disk usage analyzer](https://github.com/leo-arch/clifm/wiki/Specifics#disk-usage-analyzer)
   - [File lister (ls-mode)](https://github.com/leo-arch/clifm/wiki/Advanced#files-lister-ls-mode)
-  - [Stat mode](https://github.com/leo-arch/clifm/wiki/Advanced/#stat1-replacement) (just like the shell command **stat**)
+  - [Stat mode](https://github.com/leo-arch/clifm/wiki/Advanced/#stat1-replacement) (similar to the shell command **stat**)
+  - [File type identification (file-mode)](https://github.com/leo-arch/clifm/wiki/FastMagic#benchmarking-moira) (similar to `file --mime-type`)
 - Customization
   - [Custom commands](https://github.com/leo-arch/clifm/wiki/Customization#custom-commands)
   - [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles)
