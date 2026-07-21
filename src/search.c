@@ -454,25 +454,24 @@ construct_glob_query(char **arg, const int invert)
 	return (*arg) + 1;
 }
 
-static int
-calculate_glob_output_columns(const size_t flongest, const int found)
+static size_t
+calc_columns(const size_t longest_file_len, const size_t matches)
 {
-	int columns_n = 0;
-
-	unsigned short tcols = DEFAULT_WIN_COLS;
 	struct winsize w;
+	unsigned short termcols = DEFAULT_WIN_COLS;
 	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) != -1 && w.ws_col > 0)
-		tcols = w.ws_col;
+		termcols = w.ws_col;
 
-	if (flongest == 0 || flongest > tcols)
-		columns_n = 1;
+	size_t columns;
+	if (longest_file_len == 0 || longest_file_len > termcols)
+		columns = 1;
 	else
-		columns_n = (int)(tcols / (flongest + 1));
+		columns = (size_t)termcols / (longest_file_len + 1);
 
-	if (columns_n > found)
-		columns_n = found;
+	if (columns > matches)
+		columns = matches;
 
-	return columns_n;
+	return columns;
 }
 
 static int
@@ -489,7 +488,8 @@ print_glob_matches(struct search_t *matches, const char *search_path)
 
 	get_glob_longest(matches, &longest_eln, &flongest, &eln_pad);
 
-	int columns_n = calculate_glob_output_columns(flongest, found);
+	const size_t n = calc_columns(flongest, (size_t)found);
+	const int columns_n = n > INT_MAX ? INT_MAX : (int)n;
 
 	/* colors_list() makes use of TAB_OFFSET. We don't want it here. */
 	const size_t tab_offset_bk = tab_offset;
@@ -753,26 +753,6 @@ get_regex_longest(struct search_t *list, const int total, int *elnpad)
 	longest_file_len += (size_t)(*elnpad - DIGINUM(longest_file_eln));
 
 	return longest_file_len;
-}
-
-static size_t
-calc_columns(const size_t longest_file_len, const size_t matches)
-{
-	struct winsize w;
-	unsigned short termcols = DEFAULT_WIN_COLS;
-	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) != -1 && w.ws_col > 0)
-		termcols = w.ws_col;
-
-	size_t columns;
-	if (longest_file_len == 0 || longest_file_len > termcols)
-		columns = 1;
-	else
-		columns = (size_t)termcols / (longest_file_len + 1);
-
-	if (columns > matches)
-		columns = matches;
-
-	return columns;
 }
 
 static void

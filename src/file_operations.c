@@ -1152,7 +1152,7 @@ gen_relative_target(char *link_name, char *target, const char *err_cmd)
 }
 
 /* Create a symbolic link to ARGS[0] named ARGS[1]. If args[1] is not specified,
- * the link is created as target_basename.link.
+ * the link is created as target_basename-link.
  * Returns 0 in case of success, or 1 otherwise. */
 int
 symlink_file(char **args)
