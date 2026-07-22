@@ -538,7 +538,7 @@ search_glob(char **args)
 	if (!args || !args[0])
 		return FUNC_FAILURE;
 
-	int invert = (args[0][1] == '!');
+	const int invert = (args[0][1] == '!');
 
 	char *search_query = NULL, *search_path = NULL;
 	mode_t file_type = 0;
@@ -563,7 +563,7 @@ search_glob(char **args)
 
 	/* Get matches, if any. */
 	glob_t globbed_files;
-	int ret = glob(search_query, GLOB_BRACE, NULL, &globbed_files);
+	const int ret = glob(search_query, GLOB_BRACE, NULL, &globbed_files);
 	if (ret != 0) {
 		globfree(&globbed_files);
 
@@ -595,7 +595,7 @@ search_glob(char **args)
 
 	globfree(&globbed_files);
 
-	int matches = print_glob_matches(list, search_path);
+	const int matches = print_glob_matches(list, search_path);
 
 	/* Free stuff */
 	if (list) {
