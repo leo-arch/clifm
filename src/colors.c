@@ -281,7 +281,7 @@ get_regfile_color(const char *filename, const struct stat *a, size_t *is_ext)
 		return color;
 
 	const char *ext = strrchr(filename, '.');
-	if (!ext)
+	if (!ext || ext == filename || *(ext - 1) == '/')
 		return color;
 
 	size_t color_len = 0;
