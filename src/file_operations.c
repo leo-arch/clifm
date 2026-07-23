@@ -2201,16 +2201,20 @@ batch_link(char **args)
 		char *s = strrchr(filename, '/');
 		const char *basename = s && *(++s) ? s : filename;
 
-		/* + 64 = Make some room for suffix */
-		const size_t tmp_len = strlen(basename) + strlen(dest) + 64;
+		const size_t tmp_len = strlen(dest) + strlen(basename) + 2;
 		char *tmp = xnmalloc(tmp_len, sizeof(char));
 		snprintf(tmp, tmp_len, "%s/%s", dest, basename);
 
-		size_t suffix = 1;
-		while (lstat(tmp, &a) != -1) {
-			snprintf(tmp, tmp_len, "%s/%s-%zu", dest, basename, suffix);
-			suffix++;
+		char *t = make_filename_unique(tmp);
+		if (!t) {
+			xerror(_("bl: Cannot create unique name for '%s'\n"), tmp);
+			free(tmp); free(filename);
+			press_any_key_to_continue(0);
+			continue;
 		}
+
+		free(tmp);
+		tmp = t;
 
 		char *link_path = tmp;
 		char *target = filename;
