@@ -1391,8 +1391,7 @@ define_selfile(void)
 static void
 set_mnt_dir(void)
 {
-	if (mnt_dir)
-		free(mnt_dir);
+	free(mnt_dir);
 
 	if (xargs.stealth_mode == 1) {
 		const size_t len = P_tmpdir_len + 5 + sizeof(PROGRAM_NAME) - 1;

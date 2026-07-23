@@ -2207,9 +2207,9 @@ batch_link(char **args)
 
 		char *t = make_filename_unique(tmp);
 		if (!t) {
+			exit_status = FUNC_FAILURE;
 			xerror(_("bl: Cannot create unique name for '%s'\n"), tmp);
 			free(tmp); free(filename);
-			press_any_key_to_continue(0);
 			continue;
 		}
 
