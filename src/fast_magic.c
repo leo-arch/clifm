@@ -7465,9 +7465,6 @@ is_rfc_message(const uint8_t *s, const size_t slen)
 struct tokens_t {
 	const char *token;
 	const size_t token_len;
-#if UINTPTR_MAX == 0xFFFFFFFFUL /* 32-bit */
-	const size_t pad;
-#endif
 	const uint64_t lang;
 	const size_t score;
 };
@@ -8070,7 +8067,7 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	&& strncasecmp(p, "echo off", 8) == 0)
 		return "text/x-msdos-batch";
 
-	if (is_rfc_message(s, len) == 0)
+	if (is_rfc_message(s, len) == 1)
 		return "message/rfc822";
 
 #ifdef FMAGIC_NO_NULL
