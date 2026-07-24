@@ -2675,7 +2675,7 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		return "application/x-zpaq";
 
 	if (nread > 3 && sig[0] == 'x' && sig[1] == 'a' && sig[2] == 'r'
-	&& sig[3] == '!') /* MacOS eXtensible ARchiver */
+	&& sig[3] == '!') /* macOS eXtensible ARchiver */
 		return "application/x-xar";
 
 	/* See http://fileformats.archiveteam.org/wiki/JXL */
@@ -5273,7 +5273,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 19 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x01
 	&& sig[3] == 0x00 && sig[4] == 0x00
 	&& sig[19] != 0x1C /* Avoid conflict with JBIG1 files*/)
-		return "application/x-dfont"; /* MacOS font */
+		return "application/x-dfont"; /* macOS font */
 
 	if (nread > 4 && sig[0] == 'M' && sig[1] == 'M' && sig[2] == 'M'
 	&& sig[3] == 'D')

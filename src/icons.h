@@ -638,7 +638,7 @@ struct icons_t const icon_ext[] = {
 	{"ppm", ICON_IMG, GREEN}, // Portable Pixmap Image
 	{"psb", ICON_PHOTOSHOP, B_BLUE}, // Adobe Photoshop Big (PSB) format
 	{"psd", ICON_PHOTOSHOP, B_BLUE}, // Adobe Photoshop Document
-	{"pxm", ICON_IMG, GREEN}, // MacOS/iOS Pixelmator Image
+	{"pxm", ICON_IMG, GREEN}, // macOS/iOS Pixelmator Image
 	{"qoi", ICON_IMG, GREEN}, // Quite OK Image Format
 	{"svg", ICON_IMG, GREEN}, // Scalable Vector Graphic
 	{"svgz", ICON_IMG, GREEN}, // Compressed SVG
@@ -1199,7 +1199,7 @@ struct icons_t const icon_ext[] = {
 	{"com", ICON_EXEC, WHITE}, // DOS Command File
 	{"dat", ICON_BINARY, WHITE}, // Generic binary data file
 	{"dll", ICON_SHARE, BLUE}, // Dynamic Link Library (Windows)
-	{"dylib", ICON_SHARE, BLUE}, // Mach-O Dynamic Library (MacOS)
+	{"dylib", ICON_SHARE, BLUE}, // Mach-O Dynamic Library (macOS)
 	{"elc", ICON_EMACS, BLUE}, // Compiled bytecode from .el files (Emacs)
 	{"elf", ICON_BINARY, WHITE}, // Executable and Linkable Format (Unix)
 	{"exe", ICON_EXEC, WHITE}, // Windows Executable File

@@ -14,7 +14,7 @@ Once this is done, you might want to check and modify a few things from the resu
 
 ### C source
 
-Portability: Though mostly developed in Linux (and this always means better support), we try to keep **clifm** working on other  platforms as well (\*BSD, MacOS, Solaris, and Haiku). So, when calling a function make sure it exists on these platforms as well, and, if possible, make sure it is POSIX. Check its syntax as well: some functions might take different parameters on different platforms. For example, **getmntinfo**(3) does not exist in Linux, and, while it takes a `statfs` struct in FreeBSD, OpenBSD, and MacOS, it takes a `statvfs` struct instead in NetBSD.
+Portability: Though mostly developed in Linux (and this always means better support), we try to keep **clifm** working on other  platforms as well (\*BSD, macOS, Solaris, and Haiku). So, when calling a function make sure it exists on these platforms as well, and, if possible, make sure it is POSIX. Check its syntax as well: some functions might take different parameters on different platforms. For example, **getmntinfo**(3) does not exist in Linux, and, while it takes a `statfs` struct in FreeBSD, OpenBSD, and MacOS, it takes a `statvfs` struct instead in NetBSD.
 
 Generally, try to stick as closely as possible to the [Linux kernel coding style](https://www.kernel.org/doc/html/v4.10/process/coding-style.html). Also, though we do not follow it strictly, we also like the [Suckless coding style](https://suckless.org/coding_style/).
 

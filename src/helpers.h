@@ -203,7 +203,7 @@
 #endif /* S_ARCH1 */
 
 #ifndef DT_WHT
-# define DT_WHT     14 /* Whiteout (FreeBSD/NetBSD/DragonFly/MacOS)*/
+# define DT_WHT     14 /* Whiteout (FreeBSD/NetBSD/DragonFly/macOS)*/
 #endif /* DT_WHT */
 
 /* If any of these file type checks isn't available, fake it */
@@ -323,7 +323,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # define BSD_KQUEUE
 #endif /* HAVE_KQUEUE && !USE_GENERIC_FS_MONITOR */
 
-/* Before MacOS X 10.10, renameat(2) is declared in sys/stdio.h */
+/* Before macOS X 10.10, renameat(2) is declared in sys/stdio.h */
 #if defined(__APPLE__) && !defined(CLIFM_LEGACY)
 # include <AvailabilityMacros.h>
 # if MAC_OS_X_VERSION_MIN_REQUIRED < 101000
@@ -375,7 +375,7 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 /* Linux-glibc/FreeBSD/NetBSD/OpenBSD: S_BLKSIZE/DEV_BSIZE = 512.
  * CYGWIN: S_BLKSIZE/DEV_BSIZE = 1024.
  * Solaris/Termux/Linux-musl: S_BLKSIZE is unset, DEV_BSIZE = 512.
- * DragonFly/MacOS/Haiku: S_BLKSIZE = 512 (DEV_BSIZE is unset). */
+ * DragonFly/macOS/Haiku: S_BLKSIZE = 512 (DEV_BSIZE is unset). */
 
 #ifndef ARG_MAX
 # ifdef __linux__

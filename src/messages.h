@@ -301,7 +301,7 @@ If set to 'kitty', notifications are displayed using the Kitty Notifications\n\
 Protocol (requires the Kitty terminal or a terminal supporting this protocol).\n\n\
 If set to 'system', notifications are displayed using one of the following commands:\n\n\
 Linux/BSD: notify-send -u \"TYPE\" \"TITLE\" \"MSG\"\n\
-MacOS:     osascript -e 'display notification \"MSG\" subtitle \"TYPE\" with title \"TITLE\"'\n\
+macOS:     osascript -e 'display notification \"MSG\" subtitle \"TYPE\" with title \"TITLE\"'\n\
 Haiku:     notify --type \"TYPE\" --title \"TITLE\" \"MSG\"\n\n\
 Note: It is the notifications daemon itself who takes care of actually displaying\n\
 notifications on your screen. For troubleshoting, consult your \
