@@ -1418,10 +1418,10 @@ xgen_time_str(char *buf, const size_t buf_size, const time_t tim,
 
 	struct tm t;
 #ifndef CLIFM_LEGACY
-	if (nsec > NANO_SEC_MAX || tim < 0 || !localtime_r(&tim, &t))
+	if (nsec > NANO_SEC_MAX || !localtime_r(&tim, &t))
 #else
 	UNUSED(nsec);
-	if (tim < 0 || !localtime_r(&tim, &t))
+	if (!localtime_r(&tim, &t))
 #endif /* CLIFM_LEGACY */
 		goto END;
 

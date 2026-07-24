@@ -351,7 +351,7 @@ gen_time(char *time_str, const struct fileinfo *props)
 		const int index = conf.relative_time == 1 ? 1 : 0;
 		file_time[index] = UNKNOWN_CHR;
 		cdate = df_c;
-	} else if (t >= 0 && t != (time_t)-1) {
+	} else if (t != (time_t)-1) {
 		/* PROPS_NOW (global) is set by list_dir(), in listing.c before
 		 * calling print_entry_props(), which calls this function. */
 		const time_t age = props_now - t;
