@@ -59,6 +59,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #include "readline.h"
 #include "remotes.h"
 #include "spawn.h"
+#include "selset.h" /* devino_set_destroy */
 
 char *
 gen_diff_str(const int diff)
@@ -1443,6 +1444,7 @@ free_stuff(void)
 		free(sel_elements);
 	}
 	free(sel_devino);
+	devino_set_destroy(&sel_set);
 
 	if (bin_commands) {
 		for (i = path_progsn; i-- > 0;)

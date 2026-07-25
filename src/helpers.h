@@ -1412,6 +1412,20 @@ struct devino_t {
 
 extern struct devino_t *sel_devino;
 
+typedef struct {
+    dev_t dev;
+    ino_t ino;
+} devino_t;
+
+typedef struct {
+    size_t cap;           /* Power of two */
+    size_t size;          /* Number of occupied slots */
+    unsigned char *state; /* 0 empty, 1 occupied (2 deleted not used when rebuilding) */
+    devino_t *keys;       /* Only valid when state[i]==1 */
+} devino_set_t;
+
+extern devino_set_t sel_set;
+
 struct autocmds_t {
 	struct filter_t filter;
 	char *pattern;

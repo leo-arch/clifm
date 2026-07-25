@@ -75,6 +75,7 @@
 #include "properties.h" /* print_analysis_stats() */
 #include "long_view.h"  /* print_entry_props() */
 #include "sanitize.h"
+#include "selset.h" /* devino_set_contains */
 #include "sort.h"
 #include "spawn.h"
 #include "xdu.h"        /* dir_size() */
@@ -2987,26 +2988,32 @@ static int
 check_seltag(const dev_t dev, const ino_t ino, const nlink_t links,
 	const filesn_t index)
 {
-	if (sel_n == 0 || !sel_devino)
+	if (sel_n == 0 || sel_set.cap == 0)
 		return 0;
 
-	for (size_t j = sel_n; j-- > 0;) {
-		if (sel_devino[j].dev != dev || sel_devino[j].ino != ino)
-			continue;
-		/* Only check hardlinks in case of regular files */
-		if (file_info[index].type != DT_DIR && links > 1) {
+	if (!devino_set_contains(&sel_set, dev, ino))
+		return 0;
+
+	/* Now only the hardlink name disambiguation remains. */
+	if (file_info[index].type != DT_DIR && links > 1) {
+		/* We still need to check the selected entry name tail.
+		 * This part may still scan, but only when dev/ino matched. */
+		for (size_t j = sel_n; j-- > 0;) {
+			if (sel_devino[j].dev != dev || sel_devino[j].ino != ino)
+				continue;
+
 			const char *p = strrchr(sel_elements[j].name, '/');
 			if (!p || !*(++p))
 				continue;
-			if (*p == *file_info[index].name
-			&& strcmp(p, file_info[index].name) == 0)
+
+			if (*p == *file_info[index].name &&
+				strcmp(p, file_info[index].name) == 0)
 				return 1;
-		} else {
-			return 1;
 		}
+		return 0;
 	}
 
-	return 0;
+	return 1;
 }
 
 /* Get the color of a link target NAME, whose file attributes are ATTR,

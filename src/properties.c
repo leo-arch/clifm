@@ -1108,11 +1108,12 @@ print_filename(const char *filename, const char *color, const int follow_link,
 	const char *target_str = *quoted_target ? quoted_target : target;
 
 	char resolved_target[PATH_MAX + 1]; *resolved_target = '\0';
+	char *ret = NULL;
 	if (target && *target && *target != '/' && *target != '~')
-		(void)realpath(filename, resolved_target);
+		ret = realpath(filename, resolved_target);
 
 	struct stat a;
-	const char *t = *resolved_target ? resolved_target : target;
+	const char *t = (ret && *resolved_target) ? resolved_target : target;
 	if (t && lstat(t, &a) != -1) {
 		const char *link_color = get_link_color(t, &a);
 		printf(_("\tName: %s%s%s %s%s%s %s%s%s\n"), ln_c, name, df_c,

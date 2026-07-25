@@ -45,6 +45,7 @@
 #include "prompt.h" /* set_prompt_options() */
 #include "sanitize.h"
 #include "selection.h"
+#include "selset.h" /* devino_set_(destroy,init,insert) */
 #include "sort.h"
 #include "spawn.h"
 
@@ -1712,6 +1713,16 @@ set_sel_devino(void)
 		sel_devino[i].ino = a.st_ino;
 		sel_devino[i].dev = a.st_dev;
 	}
+
+	devino_set_destroy(&sel_set);
+
+	/* Keep load factor <= ~0.7 by sizing to sel_n/0.7.
+	 * Using *2 is simpler and safe for thousands. */
+	size_t want = (sel_n > 0) ? (sel_n * 2 + 8) : 8;
+	(void)devino_set_init(&sel_set, want);
+
+	for (size_t i = 0; i < sel_n; i++)
+		(void)devino_set_insert(&sel_set, sel_devino[i].dev, sel_devino[i].ino);
 
 	return FUNC_SUCCESS;
 }

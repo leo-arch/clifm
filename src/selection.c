@@ -38,6 +38,7 @@
 #include "properties.h" /* get_size_color() */
 #include "readline.h"
 #include "selection.h"
+#include "selset.h" /* devino_set_contains/devino_set_insert */
 #include "sort.h"
 #include "xdu.h" /* dir_size() */
 
@@ -96,8 +97,10 @@ select_file(char *file)
 	if (flen > 1 && file[flen - 1] == '/')
 		file[flen - 1] = '\0';
 
+	const int lstat_ret = lstat(file, &a);
+
 	/* If we are in a virtual directory, dereference symlinks */
-	if (virtual_dir == 1 && lstat(file, &a) == 0 && S_ISLNK(a.st_mode)
+	if (virtual_dir == 1 && lstat_ret == 0 && S_ISLNK(a.st_mode)
 	&& is_file_in_cwd(file)) {
 		*buf = '\0';
 		const ssize_t ret = xreadlink(XAT_FDCWD, file, buf, sizeof(buf));
@@ -107,15 +110,23 @@ select_file(char *file)
 			return 0;
 		}
 		tfile = buf;
+		if (lstat(tfile, &a) == -1) {
+			xerror(_("sel: Cannot select file '%s': %s\n"),
+				file, strerror(errno));
+			return 0;
+		}
 	}
 
-	/* Check if FILE is already in the selection box */
-	filesn_t j = (filesn_t)sel_n;
-	while (--j >= 0) {
-		if (*tfile == *sel_elements[j].name
-		&& strcmp(sel_elements[j].name, tfile) == 0) {
-			exists = 1;
-			break;
+	if (devino_set_contains(&sel_set, a.st_dev, a.st_ino)) {
+		/* Only scan for names in case of dev/ino matches (mostly hardlinks
+		 * or names in different devices). */
+		filesn_t j = (filesn_t)sel_n;
+		while (--j >= 0) {
+			if (*tfile == *sel_elements[j].name
+			&& strcmp(sel_elements[j].name, tfile) == 0) {
+				exists = 1;
+				break;
+			}
 		}
 	}
 
@@ -128,6 +139,7 @@ select_file(char *file)
 		sel_elements[sel_n].size = (off_t)UNSET;
 
 		new_sel++;
+		devino_set_insert(&sel_set, a.st_dev, a.st_ino);
 	} else {
 		xerror(_("sel: '%s': Already selected\n"), tfile);
 	}

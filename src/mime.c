@@ -357,7 +357,7 @@ xmagic(const char *file, const int query_mime)
 	close(tmp_fd);
 
 /* --mime-type is only available since file 4.24 (Mar, 2008), while the -i
- * flag (-I in MacOS) is supported since 3.30 (Apr, 2000).
+ * flag (-I in macOS) is supported since 3.30 (Apr, 2000).
  * NOTE: the -i flag in the POSIX file(1) specification is a completely
  * different thing. */
 #ifdef __APPLE__
@@ -719,7 +719,7 @@ mime_import(const char *file)
 	return (-1);
 #elif defined(__APPLE__)
 	xerror("%s: Importing MIME associations is not supported "
-		"on MacOS\n", err_name);
+		"on macOS\n", err_name);
 	return (-1);
 #endif /* __HAIKU__ */
 

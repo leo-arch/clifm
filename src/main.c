@@ -54,6 +54,7 @@ struct alias_t *aliases = NULL;
 struct user_t user = {0};
 /* Store device and inode number of selected files */
 struct devino_t *sel_devino = NULL;
+devino_set_t sel_set = {0};
 #ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion = {0};
 #endif /* !_NO_SUGGESTIONS */
