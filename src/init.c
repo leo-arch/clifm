@@ -1702,7 +1702,7 @@ static int
 set_sel_devino(void)
 {
 	free(sel_devino);
-	sel_devino = xnmalloc(sel_n + 1, sizeof(struct devino_t));
+	sel_devino = xnmalloc(sel_n + 1, sizeof(devino_t));
 
 	struct stat a;
 	for (size_t i = 0; i < sel_n; i++) {

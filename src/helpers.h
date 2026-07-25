@@ -1400,28 +1400,18 @@ struct maxes_t {
 	int blocks;
 };
 
-struct devino_t {
-	ino_t ino;
-	dev_t dev; /* 4 bytes on OpenBSD, DragonFly, and Haiku */
-	char mark;
-	char pad0[3];
-#if !defined(__OpenBSD__) && !defined(__DragonFly__) && !defined(__HAIKU__)
-	int pad1;
-#endif /* !__OpenBSD__ && !__DragonFly__ && !__HAIKU__ */
-};
-
-extern struct devino_t *sel_devino;
-
 typedef struct {
     dev_t dev;
     ino_t ino;
 } devino_t;
 
+extern devino_t *sel_devino;
+
 typedef struct {
     size_t cap;           /* Power of two */
     size_t size;          /* Number of occupied slots */
-    unsigned char *state; /* 0 empty, 1 occupied (2 deleted not used when rebuilding) */
-    devino_t *keys;       /* Only valid when state[i]==1 */
+    unsigned char *state; /* 0 empty, 1 occupied, 2 deleted (not used when rebuilding) */
+    devino_t *keys;       /* Only valid when state[i] == 1 */
 } devino_set_t;
 
 extern devino_set_t sel_set;

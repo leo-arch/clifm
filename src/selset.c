@@ -52,8 +52,10 @@ next_pow2(size_t x)
 int
 devino_set_init(devino_set_t *s, size_t initial_cap)
 {
-	if (!s) return 0;
-	if (initial_cap < 8) initial_cap = 8;
+	if (!s)
+		return 0;
+	if (initial_cap < 8)
+		initial_cap = 8;
 
 	s->cap = next_pow2(initial_cap);
 	s->size = 0;
@@ -67,13 +69,16 @@ devino_set_init(devino_set_t *s, size_t initial_cap)
 		s->cap = 0;
 		return 0;
 	}
+
 	return 1;
 }
 
 void
 devino_set_destroy(devino_set_t *s)
 {
-	if (!s) return;
+	if (!s)
+		return;
+
 	free(s->state);
 	free(s->keys);
 	s->state = NULL;
@@ -90,7 +95,7 @@ idx_for(const devino_set_t *s, uint64_t h, size_t probe)
 }
 
 int
-devino_set_contains(const devino_set_t *s, dev_t dev, ino_t ino)
+devino_set_contains(const devino_set_t *s, const dev_t dev, const ino_t ino)
 {
 	if (!s || !s->state || s->cap == 0) return 0;
 
@@ -102,17 +107,21 @@ devino_set_contains(const devino_set_t *s, dev_t dev, ino_t ino)
 		size_t idx = idx_for(s, h, probe);
 		unsigned char st = s->state[idx];
 
-		if (st == 0) return 0;           /* Empty => not present */
-		if (st == 1 && devino_equal(s->keys[idx], key)) return 1;
+		if (st == 0)
+			return 0; /* Empty => not present */
+		if (st == 1 && devino_equal(s->keys[idx], key))
+			return 1;
 		/* Otherwise, continue probing */
 	}
+
 	return 0;
 }
 
 int
-devino_set_insert(devino_set_t *s, dev_t dev, ino_t ino)
+devino_set_insert(devino_set_t *s, const dev_t dev, const ino_t ino)
 {
-	if (!s || !s->state || !s->keys) return 0;
+	if (!s || !s->state || !s->keys)
+		return 0;
 
 	devino_t key = { .dev = dev, .ino = ino };
 	uint64_t h = hash_devino(key);
@@ -127,14 +136,15 @@ devino_set_insert(devino_set_t *s, dev_t dev, ino_t ino)
 			first_empty = idx;
 			break;
 		}
+
 		if (st == 1 && devino_equal(s->keys[idx], key))
 			return 0; /* Already present */
 
-		/* If you later add tombstones, you'd handle DELETED here. */
+		/* If we later add tombstones, we'd handle DELETED here. */
 	}
 
 	if (first_empty == (size_t)-1) {
-		/* Table full (shouldn't happen if you size it reasonably). */
+		/* Table full (shouldn't happen if sized reasonably). */
 		return 0;
 	}
 

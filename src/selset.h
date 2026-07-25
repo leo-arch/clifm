@@ -18,8 +18,8 @@ __BEGIN_DECLS
 
 int  devino_set_init(devino_set_t *s, size_t initial_cap);
 void devino_set_destroy(devino_set_t *s);
-int  devino_set_insert(devino_set_t *s, dev_t dev, ino_t ino); // returns 1 if inserted, 0 if already present
-int  devino_set_contains(const devino_set_t *s, dev_t dev, ino_t ino);
+int  devino_set_insert(devino_set_t *s, const dev_t dev, const ino_t ino);
+int  devino_set_contains(const devino_set_t *s, const dev_t dev, const ino_t ino);
 
 __END_DECLS
 
