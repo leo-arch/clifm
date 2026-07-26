@@ -1605,6 +1605,8 @@ struct sel_t {
 	char *pad0;
 #endif /* __arm__ */
 	off_t size;
+	ino_t ino;
+	dev_t dev;
 };
 
 extern struct sel_t *sel_elements;

@@ -1697,32 +1697,36 @@ unset_xargs(void)
 }
 
 /* Store device and inode number of each selected file to identify them
- * later and mark them as selected in the file list. */
+ * later and mark them as selected in the file list.
+ * If DO_STAT is set, fstatat is called to get inode and device number of
+ * each selected file . Otherwise, the values are taken from the sel_elements
+ * struct itself. */
 static int
-set_sel_devino(void)
+set_sel_devino(const int do_stat)
 {
 	free(sel_devino);
 	sel_devino = xnmalloc(sel_n + 1, sizeof(devino_t));
 
-	struct stat a;
-	for (size_t i = 0; i < sel_n; i++) {
-		const char *name = sel_elements[i].name;
-		if (fstatat(XAT_FDCWD, name, &a, AT_SYMLINK_NOFOLLOW) == -1)
-			continue;
-
-		sel_devino[i].ino = a.st_ino;
-		sel_devino[i].dev = a.st_dev;
-	}
-
 	devino_set_destroy(&sel_set);
-
 	/* Keep load factor <= ~0.7 by sizing to sel_n/0.7.
 	 * Using *2 is simpler and safe for thousands. */
 	size_t want = (sel_n > 0) ? (sel_n * 2 + 8) : 8;
 	(void)devino_set_init(&sel_set, want);
 
-	for (size_t i = 0; i < sel_n; i++)
+	struct stat a;
+	for (size_t i = 0; i < sel_n; i++) {
+		if (do_stat == 1) {
+			const char *name = sel_elements[i].name;
+			const int ret = fstatat(XAT_FDCWD, name, &a, AT_SYMLINK_NOFOLLOW);
+			sel_devino[i].dev = ret == -1 ? 0 : a.st_dev;
+			sel_devino[i].ino = ret == -1 ? 0 : a.st_ino;
+		} else {
+			sel_devino[i].dev = sel_elements[i].dev;
+			sel_devino[i].ino = sel_elements[i].ino;
+		}
+
 		(void)devino_set_insert(&sel_set, sel_devino[i].dev, sel_devino[i].ino);
+	}
 
 	return FUNC_SUCCESS;
 }
@@ -1732,7 +1736,7 @@ int
 get_sel_files(void)
 {
 	if (xargs.stealth_mode == 1 && sel_n > 0)
-		return set_sel_devino();
+		return set_sel_devino(1);
 
 	if (selfile_ok == 0 || config_ok == 0 || !sel_file)
 		return FUNC_FAILURE;
@@ -1777,6 +1781,8 @@ get_sel_files(void)
 
 		sel_elements = xnrealloc(sel_elements, sel_n + 2, sizeof(struct sel_t));
 		sel_elements[sel_n].name = savestring(line, len);
+		sel_elements[sel_n].dev = a.st_dev;
+		sel_elements[sel_n].ino = a.st_ino;
 		sel_elements[sel_n++].size = (off_t)UNSET;
 
 		sel_elements[sel_n].name = NULL;
@@ -1786,7 +1792,7 @@ get_sel_files(void)
 	fclose(fp);
 
 	if (sel_n > 0)
-		set_sel_devino();
+		set_sel_devino(0);
 
 	/* If previous and current number of selected files don't match (mostly
 	 * because some selected files were removed), recreate the selections
