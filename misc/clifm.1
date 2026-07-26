@@ -91,6 +91,9 @@ To start always in a specific directory, disregarding the current directory, you
 .TP
 \fBNote\fR: If compiled in POSIX mode, the following list of options does not apply. In this case, run `\fBclifm -h\fR` to get the actual list of options. (To make sure run `\fBclifm -v\fR`: if compiled in POSIX mode the version number is followed by "-POSIX").
 .TP
+\fB-1\fR, \fB--oneline\fR
+List one file per line
+.TP
 \fB-a\fR, \fB--show-hidden[\fR=\fI\,VAL\/\fR]
 Show hidden files (filenames starting with '.'). Supported values are: \fBfirst\fR, \fBlast\fR, \fBtrue\fR, and \fBfalse\fR. If no value is specified, it defaults to \fBtrue\fR.
 .TP
@@ -286,9 +289,6 @@ Do not clear the screen before listing files.
 .TP
 \fB--no-color\fR
 Disable colors.
-.TP
-\fB--no-columns\fR
-Disable columned file listing (use a single column).
 .TP
 \fB--no-dereference\fR
 Do not follow symbolic links when listing files.
