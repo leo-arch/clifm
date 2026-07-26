@@ -37,6 +37,7 @@
 #ifdef SECURITY_PARANOID
 # include "sanitize.h"
 #endif /* SECURITY_PARANOID */
+#include "selset.h" /* devino_set_init() */
 #include "term.h" /* set_term_title() */
 
 /* Globals */
@@ -1263,6 +1264,11 @@ main(int argc, char *argv[])
 #ifndef _NO_ICONS
 	init_icons_hashes();
 #endif /* !_NO_ICONS */
+
+	/* If there is a selection file, i.e., there are selected files, the
+	 * selected files tracker (sel_set) is initialized by set_sel_devino().
+	 * Do not count on it: let's initialize it here. */
+	devino_set_init(&sel_set, 0);
 
 	set_locale();
 
