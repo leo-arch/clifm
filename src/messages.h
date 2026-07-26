@@ -1405,6 +1405,7 @@ c: Quit paging (printing remaining files)\n"
 
 #ifdef _BE_POSIX
 #define OPTIONS_LIST "\
+\n -1       List one file per line\
 \n -a[VAL]  List hidden files ('first', 'last', 'true', or 'false')\
 \n -A       Do not list hidden files (same as -afalse)\
 \n -b FILE  Set an alternative bookmarks file\
@@ -1459,6 +1460,7 @@ c: Quit paging (printing remaining files)\n"
 \n -Z NUM   List only up to NUM files"
 #else
 #define SHORT_OPTIONS "\
+\n  -1, --oneline\t\t\t List one file per line\
 \n  -a, --show-hidden[=VALUE]\t Show hidden files ('first', 'last', 'true', or 'false'). If VALUE is omitted, 'true' is assumed.\
 \n  -A, --no-hidden\t\t Do not show hidden files (same as --show-hidden=false)\
 \n  -b, --bookmarks-file=FILE\t Set an alternative bookmarks file\
@@ -1526,7 +1528,6 @@ and paths\
 \n      --no-classify\t\t Do not append file type indicators\
 \n      --no-clear-screen\t\t Do not clear the screen when listing files\
 \n      --no-color\t\t Disable colors \
-\n      --no-columns\t\t Disable columned file listing\
 \n      --no-dereference\t\t Do not follow symbolic links\
 \n      --no-file-cap\t\t Do not check file capabilities when listing files\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\

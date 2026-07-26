@@ -47,12 +47,12 @@
 #endif /* CLIFM_DATADIR */
 
 #ifdef _BE_POSIX
-# define OPTSTRING ":a::Ab:B:c:CdDeEfFgGhHiI:j:J:k:KlLmMnNo:O:p:P:qQrRsSt:TuUvV:w:WxXyYz:Z"
+# define OPTSTRING ":a::Ab:B:c:CdDeEfFgGhHiI:j:J:k:KlLmMnNo:O:p:P:qQrRsSt:TuUvV:w:WxXyYz:Z1"
 #else
 # ifdef RUN_CMD
-#  define OPTSTRING "+:a::Ab:c:C:D:eEfFgGhHiIk:lLmoOP:rsStT:vw:xyz:"
+#  define OPTSTRING "+:a::Ab:c:C:D:eEfFgGhHiIk:lLmoOP:rsStT:vw:xyz:1"
 # else
-#  define OPTSTRING "+:a::Ab:c:D:eEfFgGhHiIk:lLmoOP:rsStT:vw:xyz:"
+#  define OPTSTRING "+:a::Ab:c:D:eEfFgGhHiIk:lLmoOP:rsStT:vw:xyz:1"
 # endif /* RUN_CMD */
 #endif /* _BE_POSIX */
 
@@ -82,7 +82,7 @@
 #define LOPT_NO_DIR_JUMPER          221
 #define LOPT_ICONS                  222
 #define LOPT_ICONS_USE_FILE_COLOR   223
-#define LOPT_NO_COLUMNS             224
+//#define LOPT_NO_COLUMNS             224
 #define LOPT_NO_COLORS              225
 #define LOPT_MAX_FILES              226
 #define LOPT_TRASH_AS_RM            227
@@ -187,6 +187,8 @@ static struct option const longopts[] = {
 	{"no-ext-cmds", no_argument, 0, 'x'},
 	{"light-mode", no_argument, 0, 'y'},
 	{"sort", required_argument, 0, 'z'},
+	{"no-columns", no_argument, 0, '1'}, /* Deprecated */
+	{"oneline", no_argument, 0, '1'},
 
 	/* Only-long options */
 	{"bell", required_argument, 0, LOPT_BELL},
@@ -227,7 +229,6 @@ static struct option const longopts[] = {
 	{"no-classify", no_argument, 0, LOPT_NO_CLASSIFY},
 	{"no-clear-screen", no_argument, 0, LOPT_NO_CLEAR_SCREEN},
 	{"no-colors", no_argument, 0, LOPT_NO_COLORS},
-	{"no-columns", no_argument, 0, LOPT_NO_COLUMNS},
 	{"no-dereference", no_argument, 0, LOPT_NO_DEREFERENCE},
 	{"no-dir-jumper", no_argument, 0, LOPT_NO_DIR_JUMPER},
 	{"no-file-cap", no_argument, 0, LOPT_NO_FILE_CAP},
@@ -1635,6 +1636,7 @@ parse_cmdline_args(const int argc, char **argv)
 
 	while ((optc = getopt(argc, argv, OPTSTRING)) != EOF) {
 		switch (optc) {
+		case '1': xargs.columned = conf.columned = 0; break;
 		case 'a': set_show_hidden(optarg); break;
 		case 'A': xargs.show_hidden = conf.show_hidden = HIDDEN_FALSE; break;
 		case 'b':
@@ -1721,7 +1723,7 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.secure_env_full = 1;
 			xsecure_env(SECURE_ENV_FULL);
 			break;
-		case 'y': conf.light_mode = xargs.light_mode = 1; break;
+		case 'y': xargs.light_mode = conf.light_mode = 1; break;
 		case 'Y':
 			xargs.secure_cmds = xargs.secure_env = 1;
 			xsecure_env(SECURE_ENV_IMPORT);
@@ -1783,6 +1785,7 @@ parse_cmdline_args(const int argc, char **argv)
 
 		switch (optc) {
 		/* Short options */
+		case '1': xargs.columned = conf.columned = 0; break;
 		case 'a': set_show_hidden(optarg); break;
 		case 'A': xargs.show_hidden = conf.show_hidden = HIDDEN_FALSE; break;
 		case 'b':
@@ -1921,8 +1924,6 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.clear_screen = conf.clear_screen = 0; break;
 		case LOPT_NO_COLORS:
 			set_no_colors(); break;
-		case LOPT_NO_COLUMNS:
-			xargs.columned = conf.columned = 0; break;
 		case LOPT_NO_DEREFERENCE:
 			xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case LOPT_NO_DIR_JUMPER:
