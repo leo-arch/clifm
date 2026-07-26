@@ -12,15 +12,19 @@
 #include "selset.h"
 #include <stdlib.h>
 
+/* SplitMix64: a well-known 64-bit bit-mixing function (PRNG-style scrambler).
+ * Constants are fixed parameters chosen to produce strong avalanche behavior. */
 static inline uint64_t
 splitmix64(uint64_t x)
 {
-	x += 0x9e3779b97f4a7c15ULL;
+	x += 0x9e3779b97f4a7c15ULL; /* Golden-ratio constant */
 	x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
 	x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
 	return x ^ (x >> 31);
 }
 
+/* Hash (dev, ino) by hashing each component with SplitMix64, then combining
+ * the two 64-bit results with a standard hash-combine step. */
 static inline uint64_t
 hash_devino(devino_t k)
 {
@@ -31,7 +35,7 @@ hash_devino(devino_t k)
 	uint64_t h1 = splitmix64((uint64_t)d);
 	uint64_t h2 = splitmix64((uint64_t)i);
 
-	/* Combine */
+	/* Combine: mix h1/h2 into one 64-bit value with better distribution. */
 	return h1 ^ (h2 + 0x9e3779b97f4a7c15ULL + (h1 << 6) + (h1 >> 2));
 }
 
