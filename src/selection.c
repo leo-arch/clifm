@@ -661,8 +661,11 @@ print_sel_results(const int new_sel, const char *sel_path,
 		return FUNC_FAILURE;
 	}
 
-	if (conf.autols == 1 && error == 0)
+	if (conf.autols == 1) {
+		if (error > 0)
+			press_any_key_to_continue(0);
 		reload_dirlist();
+	}
 
 	print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 		_("%d file(s) selected\n"), new_sel);
