@@ -84,7 +84,7 @@ select_file(char *file)
 		return 0;
 
 	if (sel_n == MAX_SEL) {
-		xerror(_("sel: Cannot select any more files"));
+		xerror(_("sel: Cannot select any more files\n"));
 		return 0;
 	}
 
