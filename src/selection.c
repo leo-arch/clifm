@@ -97,10 +97,13 @@ select_file(char *file)
 	if (flen > 1 && file[flen - 1] == '/')
 		file[flen - 1] = '\0';
 
-	const int lstat_ret = lstat(file, &a);
+	if (lstat(file, &a) == -1) {
+		xerror(_("sel: Cannot select file '%s': %s\n"), file, strerror(errno));
+		return 0;
+	}
 
 	/* If we are in a virtual directory, dereference symlinks */
-	if (virtual_dir == 1 && lstat_ret == 0 && S_ISLNK(a.st_mode)
+	if (virtual_dir == 1 && S_ISLNK(a.st_mode)
 	&& is_file_in_cwd(file)) {
 		*buf = '\0';
 		const ssize_t ret = xreadlink(XAT_FDCWD, file, buf, sizeof(buf));
