@@ -20,6 +20,7 @@
 
 /* Generics */
 #define NERD_DIRECTORY     ""
+#define NERD_DIR_OPEN      ""
 #define NERD_FILE          ""
 #define NERD_EXEC          ""
 #define NERD_MANUAL        "󰘥"

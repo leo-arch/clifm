@@ -36,6 +36,7 @@ char
 #if defined(EMOJI_ICONS)
 	/* File types */
 	ICON_DIR[] = EMOJI_FOLDER,
+	ICON_DIR_EMPTY[] = EMOJI_FOLDER_OPEN,
 	ICON_EXEC[] = EMOJI_EXEC,
 	ICON_LINK[] = EMOJI_LINK,
 	ICON_LOCK[] = EMOJI_LOCK,
@@ -203,6 +204,7 @@ char
 #elif defined(_ICONS_IN_TERMINAL)
 	/* File types */
 	ICON_DIR[] = FA_FOLDER,
+	ICON_DIR_EMPTY[] = FA_FOLDER_OPEN,
 	ICON_EXEC[] = FA_COG,
 	ICON_LINK[] = OCT_FILE_SYMLINK_FILE,
 	ICON_LOCK[] = FA_LOCK,
@@ -370,6 +372,7 @@ char
 #else /* Nerdfonts */
 	/* File types */
 	ICON_DIR[] = NERD_DIRECTORY,
+	ICON_DIR_EMPTY[] = NERD_DIR_OPEN,
 	ICON_EXEC[] = NERD_EXEC,
 	ICON_LOCK[] = NERD_LOCK,
 	ICON_LINK[] = NERD_LINK,
@@ -562,6 +565,7 @@ char
 
 /* Default icons and colors */
 #define DEF_DIR_ICON ICON_DIR /* Directory */
+#define DEF_EMPTY_DIR_ICON ICON_DIR_EMPTY
 #define DEF_DIR_ICON_COLOR YELLOW
 
 #define DEF_LINK_ICON ICON_LINK /* Symbolic link */

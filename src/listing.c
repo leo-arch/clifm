@@ -283,7 +283,8 @@ get_dir_icon(const filesn_t n)
 		return;
 
 	/* Default values for directories */
-	file_info[n].icon = DEF_DIR_ICON;
+	file_info[n].icon = file_info[n].filesn == 0
+		? DEF_EMPTY_DIR_ICON : DEF_DIR_ICON;
 	/* DIR_ICO_C is set from the color scheme file */
 	file_info[n].icon_color = *dir_ico_c ? dir_ico_c : DEF_DIR_ICON_COLOR;
 
@@ -3194,11 +3195,6 @@ load_dir_info(const mode_t mode, const filesn_t n)
 {
 	file_info[n].dir = 1;
 
-#ifndef _NO_ICONS
-	if (conf.icons == 1)
-		get_dir_icon(n);
-#endif /* !_NO_ICONS */
-
 	if (checks.file_counter == 1) {
 		/* Avoid count_dir() if we have no access to the current directory. */
 		file_info[n].filesn = file_info[n].user_access == 0 ? -1
@@ -3206,6 +3202,11 @@ load_dir_info(const mode_t mode, const filesn_t n)
 	} else {
 		file_info[n].filesn = 1;
 	}
+
+#ifndef _NO_ICONS
+	if (conf.icons == 1)
+		get_dir_icon(n);
+#endif /* !_NO_ICONS */
 
 	if (*nd_c && (file_info[n].user_access == 0 || file_info[n].filesn < 0)) {
 		file_info[n].color = nd_c;

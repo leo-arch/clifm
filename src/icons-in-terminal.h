@@ -42,6 +42,7 @@
 #define FA_FILM "\ue0e9"
 #define FA_FLOPPY_O "\ue190"
 #define FA_FOLDER "\ue155"
+#define FA_FOLDER_OPEN "\ue156"
 #define FA_HISTORY "\ue292"
 #define FA_HOME "\ue0f5"
 #define FA_INBOX "\ue0fc"
