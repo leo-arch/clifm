@@ -94,7 +94,7 @@ devino_set_destroy(devino_set_t *s)
 }
 
 static inline size_t
-idx_for(const devino_set_t *s, uint64_t h, size_t probe)
+idx_for(const devino_set_t *s, const uint64_t h, const size_t probe)
 {
 	/* linear probing; cap is power of two */
 	return (size_t)((h + probe) & (s->cap - 1));
@@ -105,8 +105,8 @@ devino_set_contains(const devino_set_t *s, const dev_t dev, const ino_t ino)
 {
 	if (!s || !s->state || s->cap == 0) return 0;
 
-	devino_t key = { .dev = dev, .ino = ino };
-	uint64_t h = hash_devino(key);
+	const devino_t key = { .dev = dev, .ino = ino };
+	const uint64_t h = hash_devino(key);
 
 	/* Probe until we hit an empty slot. */
 	for (size_t probe = 0; probe < s->cap; probe++) {
@@ -129,8 +129,8 @@ devino_set_insert(devino_set_t *s, const dev_t dev, const ino_t ino)
 	if (!s || !s->state || !s->keys)
 		return 0;
 
-	devino_t key = { .dev = dev, .ino = ino };
-	uint64_t h = hash_devino(key);
+	const devino_t key = { .dev = dev, .ino = ino };
+	const uint64_t h = hash_devino(key);
 
 	size_t first_empty = (size_t)-1;
 
