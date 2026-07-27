@@ -13,7 +13,9 @@
 #include <stdlib.h>
 
 /* SplitMix64: a well-known 64-bit bit-mixing function (PRNG-style scrambler).
- * Constants are fixed parameters chosen to produce strong avalanche behavior. */
+ * Constants are fixed parameters chosen to produce strong avalanche behavior.
+ * Taken from https://github.com/svaarala/duktape/blob/master/misc/splitmix64.c,
+ * licensed under the public domain. */
 static inline uint64_t
 splitmix64(uint64_t x)
 {
