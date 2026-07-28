@@ -89,7 +89,15 @@ export_status_values(const char *fifo_path)
 	if (cur_cscheme && *cur_cscheme)
 		setenv("CLIFM_COLOR_SCHEME", cur_cscheme, 1);
 	if (conf.colorize != 1) setenv("CLIFM_COLORLESS", "1", 1);
-	if (conf.list_dirs_first == 1) setenv("CLIFM_DIRS_FIRST", "1", 1);
+
+	if (conf.sort_dirs > 0) { /* Either first or last */
+		if (conf.sort_dirs == SORT_DIRS_FIRST)
+			setenv("CLIFM_DIRS_FIRST", "1", 1);
+		else
+			setenv("CLIFM_DIRS_LAST", "1", 1);
+	}
+
+
 	if (conf.file_counter == 1) setenv("CLIFM_FILE_COUNTER", "1", 1);
 	if (filter.str && *filter.str) {
 		setenv("CLIFM_FILE_FILTER", filter.str, 1);

@@ -119,7 +119,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 		if (*s == 'z' && !z_cmd_used(s[1])) { /* Vi-like 'z' command aliases */
 			switch (s[1]) {
 			case 'c': return FC_DESC;
-			case 'd': return FF_DESC;
+			case 'd': return SD_DESC;
 			case 'f': return K_DESC;
 			case 'h': return HF_DESC;
 			case 'i': return ICONS_DESC;
@@ -164,7 +164,6 @@ check_int_cmd_desc(const char *s, const size_t l)
 
 		else if (*s == 'f') {
 			if (s[1] == 'c') return FC_DESC;
-			if (s[1] == 'f') return FF_DESC;
 			if (s[1] == 't') return FT_DESC;
 			if (s[1] == 'z') return FZ_DESC;
 		}
@@ -211,6 +210,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 
 		else if (*s == 's') {
 			if (s[1] == 'b') return SB_DESC;
+			if (s[1] == 'd') return SD_DESC;
 			if (s[1] == 't') return ST_DESC;
 		}
 
@@ -359,10 +359,9 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return AO_DESC;
 		if (*s == 'b' && strcmp(s + 1, "ookmarks") == 0)
 			return BM_DESC;
+		if (*s == 's' && strcmp(s + 1, "ort-dirs") == 0) {
+			return SD_DESC;
 	}
-
-	else if (l == 10 && *s == 'd' && strcmp(s + 1, "irs-first") == 0) {
-			return FF_DESC;
 
 	} else if (l == 11 && *s == 'm' && strcmp(s + 1, "ountpoints") == 0) {
 		return MP_DESC;

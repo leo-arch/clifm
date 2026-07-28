@@ -228,14 +228,24 @@ glob_sort_dirs(glob_t *globbed_files, size_t *g)
 			dirs[i] = 0;
 	}
 
-	for (i = 0; globbed_files->gl_pathv[i]; i++) {
-		if (dirs[i] == 1)
-			gfiles[n++] = globbed_files->gl_pathv[i];
-	}
-
-	for (i = 0; globbed_files->gl_pathv[i]; i++) {
-		if (dirs[i] == 0)
-			gfiles[n++] = globbed_files->gl_pathv[i];
+	if (conf.sort_dirs == SORT_DIRS_FIRST) {
+		for (i = 0; globbed_files->gl_pathv[i]; i++) {
+			if (dirs[i] == 1)
+				gfiles[n++] = globbed_files->gl_pathv[i];
+		}
+		for (i = 0; globbed_files->gl_pathv[i]; i++) {
+			if (dirs[i] == 0)
+				gfiles[n++] = globbed_files->gl_pathv[i];
+		}
+	} else { /* SORT_DIRS_LAST */
+		for (i = 0; globbed_files->gl_pathv[i]; i++) {
+			if (dirs[i] == 0)
+				gfiles[n++] = globbed_files->gl_pathv[i];
+		}
+		for (i = 0; globbed_files->gl_pathv[i]; i++) {
+			if (dirs[i] == 1)
+				gfiles[n++] = globbed_files->gl_pathv[i];
+		}
 	}
 
 	free(dirs);
@@ -580,7 +590,7 @@ search_glob(char **args)
 	size_t g = globbed_files.gl_pathc;
 
 	/* glob(3) doesn't sort directories first. Let's do it ourselves */
-	if (conf.list_dirs_first == 1)
+	if (conf.sort_dirs > 0)
 		gfiles = glob_sort_dirs(&globbed_files, &g);
 
 	/* We need to store pointers to matching filenames in array of pointers,
@@ -604,7 +614,7 @@ search_glob(char **args)
 		free(list);
 	}
 
-	if (conf.list_dirs_first == 1)
+	if (conf.sort_dirs > 0)
 		free(gfiles);
 
 	/* If needed, go back to the directory we came from */

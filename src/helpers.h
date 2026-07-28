@@ -594,6 +594,11 @@ extern time_t curdir_mtime;
 #define GLOB_CHARS "*?[{"
 #define GLOB_REGEX_CHARS "*?[{|^+$."
 
+/* Values for SortDirs (conf.sort_dirs) */
+#define SORT_DIRS_AS_FILES 0
+#define SORT_DIRS_FIRST    1
+#define SORT_DIRS_LAST     2
+
 /* Possible values for PagerView (conf.pager_view) */
 #define PAGER_AUTO  0
 #define PAGER_LONG  1
@@ -1152,7 +1157,6 @@ struct config_t {
 	int int_vars;
 	int light_mode;
 	int link_creat_mode;
-	int list_dirs_first;
 	int listing_mode;
 	int log_cmds;
 	int log_msgs;
@@ -1200,6 +1204,7 @@ struct config_t {
 	int show_hidden;
 	int skip_non_alnum_prefix;
 	int sort;
+	int sort_dirs;
 	int sort_reverse;
 	int splash_screen;
 	int suggest_filetype_color;
@@ -1445,7 +1450,6 @@ struct opts_t {
 	int file_counter;
 	int full_dir_size;
 	int light_mode;
-	int list_dirs_first;
 	int long_view;
 	int max_files;
 	int max_name_len;
@@ -1453,6 +1457,7 @@ struct opts_t {
 	int pager;
 	int show_hidden;
 	int sort;
+	int sort_dirs;
 	int sort_reverse;
 };
 
@@ -1515,7 +1520,6 @@ struct param_t {
 	int kitty_keys; /* kitty keyboard protocol */
 	int list_and_quit;
 	int light_mode;
-	int list_dirs_first;
 	int long_view;
 	int lscolors;
 	int max_dirhist;
@@ -1548,6 +1552,7 @@ struct param_t {
 	int show_hidden;
 	int si; /* Sizes in powers of 1000 instead of 1024 */
 	int sort;
+	int sort_dirs;
 	int sort_reverse;
 	int splash_screen;
 	int stat;

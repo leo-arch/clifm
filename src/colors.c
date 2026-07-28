@@ -2684,7 +2684,8 @@ get_colorschemes(void)
 			if (is_valid_colorscheme_name(ent->d_name) == 0)
 				continue;
 
-			color_schemes[i++] = savestring(ent->d_name, strlen(ent->d_name));
+			/* File extension removed by is_valid_colorscheme_name(). */
+			color_schemes[i++] = strdup(ent->d_name);
 		}
 
 		closedir(dir_p);
@@ -2720,7 +2721,7 @@ get_colorschemes(void)
 		|| is_duplicate_colorscheme_name(ent->d_name, i_tmp) == 1)
 			continue;
 
-		color_schemes[i++] = savestring(ent->d_name, strlen(ent->d_name));
+		color_schemes[i++] = strdup(ent->d_name);
 	}
 
 	closedir(dir_p);

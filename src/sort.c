@@ -20,7 +20,8 @@
 #include "messages.h" /* SORT_USAGE */
 
 #define F_SORT(a, b)      ((a) == (b) ? 0 : ((a) > (b) ? 1 : -1))
-#define F_SORT_DIRS(a, b) ((a) == (b) ? 0 : ((a) < (b) ? 1 : -1))
+#define F_SORT_DIRS_FIRST(a, b) ((a) == (b) ? 0 : ((a) < (b) ? 1 : -1))
+#define F_SORT_DIRS_LAST(a, b)  ((a) == (b) ? 0 : ((a) > (b) ? 1 : -1))
 
 int
 skip_files(const struct dirent *ent)
@@ -232,7 +233,10 @@ entrycmp(const void *a, const void *b)
 	const struct fileinfo *pb = (const struct fileinfo *)b;
 	int st = conf.sort;
 
-	int ret = conf.list_dirs_first == 1 ? F_SORT_DIRS(pa->dir, pb->dir) : 0;
+	int ret = conf.sort_dirs == SORT_DIRS_FIRST
+		? F_SORT_DIRS_FIRST(pa->dir, pb->dir)
+		: (conf.sort_dirs == SORT_DIRS_LAST
+			? F_SORT_DIRS_LAST(pa->dir, pb->dir) : 0);
 	if (ret != 0)
 		return ret;
 

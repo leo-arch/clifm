@@ -1627,7 +1627,7 @@ rl_toggle_follow_symlinks(int count, int key)
 }
 
 int
-rl_toggle_dirs_first(int count, int key)
+rl_cycle_sort_dirs(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy == 1)
@@ -1638,7 +1638,9 @@ rl_toggle_dirs_first(int count, int key)
 		free_suggestion();
 #endif /* !_NO_SUGGESTIONS */
 
-	conf.list_dirs_first = !conf.list_dirs_first;
+	conf.sort_dirs++;
+	if (conf.sort_dirs > 2)
+		conf.sort_dirs = SORT_DIRS_AS_FILES; // 0
 
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
@@ -1646,8 +1648,9 @@ rl_toggle_dirs_first(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg(NULL, NULL, _("Directories first: %s\n"),
-		conf.list_dirs_first ? _("on") : _("off"));
+	print_reload_msg(NULL, NULL, _("Sort directories: %s\n"),
+		conf.sort_dirs == SORT_DIRS_FIRST ? _("first")
+		: (conf.sort_dirs == SORT_DIRS_LAST ? _("last") : ("as-files")));
 	xrl_reset_line_state();
 	return FUNC_SUCCESS;
 }
@@ -2807,24 +2810,24 @@ rl_toggle_disk_usage(int count, int key)
 
 	/* Default values */
 	static int dsort = DEF_SORT, dlong = DEF_LONG_VIEW,
-		ddirsize = DEF_FULL_DIR_SIZE, ddf = DEF_LIST_DIRS_FIRST;
+		ddirsize = DEF_FULL_DIR_SIZE, dsd = DEF_SORT_DIRS;
 
 	if (xargs.disk_usage_analyzer == 1) {
 		xargs.disk_usage_analyzer = 0;
 		conf.sort = dsort;
 		conf.long_view = dlong;
 		conf.full_dir_size = ddirsize;
-		conf.list_dirs_first = ddf;
+		conf.sort_dirs = dsd;
 	} else {
 		xargs.disk_usage_analyzer = 1;
 		dsort = conf.sort;
 		dlong = conf.long_view;
 		ddirsize = conf.full_dir_size;
-		ddf = conf.list_dirs_first;
+		dsd = conf.sort_dirs;
 
 		conf.sort = STSIZE;
 		conf.long_view = conf.full_dir_size = 1;
-		conf.list_dirs_first = 0;
+		conf.sort_dirs = SORT_DIRS_AS_FILES;
 	}
 
 	const int exit_status = exit_code;
@@ -3082,7 +3085,8 @@ set_keybinds_from_file(void)
 		{"toggle-light", rl_toggle_light_mode},
 		{"toggle-case-sensitive-sort", rl_toggle_case_sensitive_sort},
 		{"invert-selection", rl_invert_selection},
-		{"dirs-first", rl_toggle_dirs_first},
+		{"dirs-first", rl_cycle_sort_dirs}, // Deprecated
+		{"sort-dirs", rl_cycle_sort_dirs},
 		{"sort-previous", rl_sort_previous}, {"sort-next", rl_sort_next},
 		{"sort-reverse", rl_sort_reverse},
 		{"only-dirs", rl_toggle_only_dirs},
@@ -3158,7 +3162,7 @@ set_default_keybinds(void)
 		{"\\C-r", rl_refresh}, {"\\M-c", rl_clear_line},
 		{"\\M-i", rl_toggle_hidden_files}, {"\\M-.", rl_toggle_hidden_files},
 		{"\\M-l", rl_toggle_long_view}, {"\\M-+", rl_toggle_follow_symlinks},
-		{"\\M-y", rl_toggle_light_mode}, {"\\M-g", rl_toggle_dirs_first},
+		{"\\M-y", rl_toggle_light_mode}, {"\\M-g", rl_cycle_sort_dirs},
 		{"\\M-z", rl_sort_previous}, {"\\M-x", rl_sort_next},
 		{"\\M-r", rl_sort_reverse},
 		{"\\M-,", rl_toggle_only_dirs}, {"\\M-0", rl_run_pager},

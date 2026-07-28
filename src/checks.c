@@ -647,7 +647,7 @@ expand_z_cmd(char **cmd_name)
 
 	switch (cmd[1]) {
 	case 'c': *cmd = 'f'; cmd[1] = 'c'; break;  /* zc -> fc (file-counter) */
-	case 'd': *cmd = 'f'; cmd[1] = 'f'; break;  /* zd -> ff (dirs-first) */
+	case 'd': *cmd = 's'; cmd[1] = 'd'; break;  /* zd -> sd (sort-dirs) */
 	case 'f': *cmd = 'k'; cmd[1] = '\0'; break; /* zf -> k (follow-links) */
 	case 'h': *cmd = 'h'; cmd[1] = 'f'; break;  /* zh -> hf (show-hidden) */
 	case 'i':                                   /* zi -> icons */

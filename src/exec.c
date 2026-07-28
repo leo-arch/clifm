@@ -333,31 +333,32 @@ SUCCESS:
 }
 
 static int
-dirs_first_function(const char *arg)
+sort_dirs_function(const char *arg)
 {
 	if (conf.autols == 0)
 		return FUNC_SUCCESS;
 
 	if (!arg)
-		return rl_toggle_dirs_first(0, 0);
+		return rl_cycle_sort_dirs(0, 0);
 
 	if (IS_HELP(arg)) {
-		puts(_(FF_USAGE));
+		puts(_(SD_USAGE));
 		return FUNC_SUCCESS;
 	}
 
-	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		printf(_("Directories first is %s\n"),
-			conf.list_dirs_first == 1 ? _("on") : _("off"));
-	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		conf.list_dirs_first = 1;
+	if (*arg == 'f' && strcmp(arg, "first") == 0) {
+		conf.sort_dirs = SORT_DIRS_FIRST;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Directories first: on\n"));
+		print_reload_msg(NULL, NULL, _("Sort directories: first\n"));
+	} else if (*arg == 'l' && strcmp(arg, "last") == 0) {
+		conf.sort_dirs = SORT_DIRS_LAST;
+		if (conf.autols == 1) reload_dirlist();
+		print_reload_msg(NULL, NULL, _("Sort directories: last\n"));
 	} else {
-		if (*arg == 'o' && strcmp(arg, "off") == 0) {
-			conf.list_dirs_first = 0;
+		if (*arg == 'a' && strcmp(arg, "asfiles") == 0) {
+			conf.sort_dirs = SORT_DIRS_AS_FILES;
 			if (conf.autols == 1) reload_dirlist();
-			print_reload_msg(NULL, NULL, _("Directories first: off\n"));
+			print_reload_msg(NULL, NULL, _("Sort directories: as-files\n"));
 		}
 	}
 
@@ -2358,10 +2359,10 @@ exec_cmd(char **args)
 	|| strcmp(args[0], "filecounter") == 0))
 		return (exit_code = file_counter_function(args[1]));
 
-	/* #### DIRECTORIES FIRST #### */
-	else if ((*args[0] == 'f' && args[0][1] == 'f' && !args[0][2])
-	|| (*args[0] == 'd' && strcmp(args[0], "dirs-first") == 0))
-		return (exit_code = dirs_first_function(args[1]));
+	/* #### SORT DIRECTORIES #### */
+	else if ((*args[0] == 's' && args[0][1] == 'd' && !args[0][2])
+	|| (*args[0] == 's' && strcmp(args[0], "sort-dirs") == 0))
+		return (exit_code = sort_dirs_function(args[1]));
 
 	/* #### ONLY DIRECTORIES #### */
 	else if (*args[0] == 'o' && args[0][1] == 'd' && !args[0][2])

@@ -295,6 +295,17 @@ gen_term_title_str(const int value)
 	}
 }
 
+static const char *
+get_sort_dirs_str(const int value)
+{
+	switch (value) {
+	case SORT_DIRS_FIRST: return "first";
+	case SORT_DIRS_LAST: return "last";
+	case SORT_DIRS_AS_FILES: return "asfiles";
+	default: return "unknown";
+	}
+}
+
 /* Dump current value of config options (as defined in the config file),
  * highlighting those that differ from default values.
  * Note that values displayed here represent the CURRENT status of the
@@ -441,10 +452,6 @@ dump_config(void)
 		get_link_creat_mode(conf.link_creat_mode),
 		get_link_creat_mode(DEF_LINK_CREATION_MODE), DUMP_CONFIG_STR_NO_QUOTE);
 
-	n = DEF_LIST_DIRS_FIRST;
-	print_config_value("ListDirsFirst", &conf.list_dirs_first, &n,
-		DUMP_CONFIG_BOOL);
-
 	n = DEF_LISTING_MODE;
 	print_config_value("ListingMode", &conf.listing_mode, &n, DUMP_CONFIG_INT);
 
@@ -570,6 +577,10 @@ dump_config(void)
 
 	print_config_value("Sort", num_to_sort_name(conf.sort, 0),
 		num_to_sort_name(DEF_SORT, 0), DUMP_CONFIG_STR_NO_QUOTE);
+
+	print_config_value("SortDirs",
+		get_sort_dirs_str(conf.sort_dirs),
+		get_sort_dirs_str(DEF_SORT_DIRS), DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_SORT_REVERSE;
 	print_config_value("SortReverse", &conf.sort_reverse, &n, DUMP_CONFIG_BOOL);
@@ -1032,7 +1043,7 @@ clear-msgs:\\et\n\
 copy-sel:\\e\\C-v\n\
 create-file:\\en\n\
 deselect-all:\\ed\n\
-dirs-first:\\eg\n\
+sort-dirs:\\eg\n\
 export-sel:\\e\\C-e\n\
 invert-selection:\\e[Z\n\
 launch-view:\\e-\n\
@@ -2031,7 +2042,7 @@ create_main_config_file(char *file)
 
 	    "# Print a usage tip at startup.\n\
 ;Tips=%s\n\n\
-;ListDirsFirst=%s\n\n\
+;SortDirs=%s\n\n\
 # Enable case sensitive listing for files in the current directory.\n\
 ;CaseSensitiveList=%s\n\n\
 # Enable case sensitive lookups for the directory jumper function (via \n\
@@ -2067,7 +2078,8 @@ create_main_config_file(char *file)
 		DEF_PRIORITY_SORT_CHAR,
 		DEF_PRIVATE_WS_SETTINGS == 1 ? "true" : "false",
 		DEF_TIPS == 1 ? "true" : "false",
-		DEF_LIST_DIRS_FIRST == 1 ? "true" : "false",
+		DEF_SORT_DIRS == SORT_DIRS_FIRST ? "first"
+			: (DEF_SORT_DIRS == SORT_DIRS_LAST ? "last" : "asfiles"),
 		DEF_CASE_SENS_LIST == 1 ? "true" : "false",
 		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
 		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
@@ -2869,6 +2881,22 @@ set_file_filter(char *line)
 	filter.str = savestring(q, l);
 
 	return FUNC_SUCCESS;
+}
+
+static void
+set_sort_dirs(const char *val)
+{
+	if (!val || !*val)
+		return;
+
+	if (*val == 'f' && strcmp(val, "first\n") == 0) {
+		conf.sort_dirs = SORT_DIRS_FIRST;
+	} else if (*val == 'l' && strcmp(val, "last\n") == 0) {
+		conf.sort_dirs = SORT_DIRS_LAST;
+	} else {
+		if (*val == 'a' && strcmp(val, "asfiles\n") == 0)
+			conf.sort_dirs = SORT_DIRS_AS_FILES;
+	}
 }
 
 static void
@@ -3743,9 +3771,10 @@ read_config(void)
 			set_link_creation_mode(line + 17);
 		}
 
-		else if (xargs.list_dirs_first == UNSET && *line == 'L'
-		&& strncmp(line, "ListDirsFirst=", 14) == 0) {
-			set_config_bool_value(line + 14, &conf.list_dirs_first);
+		else if (*line == 'L' && strncmp(line, "ListDirsFirst=", 14) == 0) {
+			err('n', PRINT_PROMPT, _("%s: ListDirsFirst: This option is "
+				"deprecated. Use SortDirs=[first|last|asfiles] instead.\n"),
+				PROGRAM_NAME);
 		}
 
 		else if (xargs.horizontal_list == UNSET && *line == 'L'
@@ -3939,6 +3968,11 @@ read_config(void)
 				set_config_int_value(line + 5, &conf.sort, 0, SORT_TYPES);
 		}
 
+		else if (xargs.sort_dirs == UNSET && *line == 'S'
+		&& strncmp(line, "SortDirs=", 9) == 0) {
+			set_sort_dirs(line + 9);
+		}
+
 		else if (xargs.sort_reverse == UNSET && *line == 'S'
 		&& strncmp(line, "SortReverse=", 12) == 0) {
 			set_config_bool_value(line + 12, &conf.sort_reverse);
@@ -4061,8 +4095,9 @@ read_config(void)
 
 	if (xargs.disk_usage_analyzer == 1) {
 		conf.sort = STSIZE;
+		conf.sort_dirs = SORT_DIRS_AS_FILES;
 		conf.long_view = conf.full_dir_size = 1;
-		conf.list_dirs_first = conf.welcome_message = 0;
+		conf.welcome_message = 0;
 	}
 
 	if (filter.str && filter.type == FILTER_FILE_NAME)

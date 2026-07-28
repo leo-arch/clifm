@@ -409,14 +409,6 @@ Note 2: Unlike 'p', 'pp' always dereferences symbolic links."
 - Display file sizes in powers of 1000 (SI units) instead of 1024 (IEC units)\n\
     Run with --si"
 
-#define FF_USAGE "Turn list-directories-first on/off\n\n\
-\x1b[1mUSAGE\x1b[22m\n\
-  ff, dirs-first [on | off | status]\n\
-\x1b[1mEXAMPLE\x1b[22m\n\
-- Disable list-directories-first\n\
-    ff off\n\
-  Note: Toggle list-directories-first with Alt+g."
-
 #define FILE_PREVIEWS "\
 File previews are enabled by default if running in fzf mode.\n\n\
 To disable this feature, run with '--no-fzfpreview' or set 'FzfPreview' to\n\
@@ -1040,6 +1032,14 @@ the editor (quit without saving to cancel the operation).\n\n\
 - Bulk remove files/dirs in the directory 'mydir' using vi\n\
     rr mydir :vi"
 
+#define SD_USAGE "Set sort-directories mode\n\n\
+\x1b[1mUSAGE\x1b[22m\n\
+  sd, sort-dirs [first | last | asfiles]\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
+- List directories last (after files)\n\
+    sd last\n\
+  Note: Cycle through sort-dir modes with Alt+g."
+
 #define SEARCH_USAGE "Search for files using either glob or regular expressions\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   /PATTERN [-filetype] [-r] [DIR]\n\n\
@@ -1468,8 +1468,7 @@ c: Quit paging (printing remaining files)\n"
 \n  -D, --config-dir=DIR\t\t Set an alternative configuration directory\
 \n  -e, --no-eln\t\t\t Do not print ELNs (Entry List Numbers)\
 \n  -E, --eln-use-workspace-color\t Use the current workspace color for ELNs\
-\n  -f, --dirs-first\t\t List directories first (default)\
-\n  -F, --no-dirs-first\t\t Do not list directories first\
+\n  -f, --sort-dirs=MODE\t\t Set sort-directories mode: 'first' (default), 'last', or 'asfiles'\
 \n  -g, --pager\t\t\t Enable the pager\
 \n  -G, --no-pager\t\t Disable the pager (default)\
 \n  -h, --help\t\t\t Show this help and exit\
@@ -1493,7 +1492,7 @@ on an empty line\
 \n  -w, --workspace=NUM\t\t Start in the workspace NUM\
 \n  -x, --no-ext-cmds\t\t Disallow the use of external commands\
 \n  -y, --light-mode\t\t Run in light mode\
-\n  -z, --sort=METHOD\t\t Sort files by METHOD (for available methods see the manpage)"
+\n  -z, --sort=MODE\t\t Sort files by MODE (for available modes consult the manpage)"
 
 #define LONG_OPTIONS_A "\
 \n      --bell=STYLE\t\t Set terminal bell style to: 0 (none), 1 (audible), 2 (visible), 3 (flash)\
@@ -1616,7 +1615,6 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  ext                Turn external/shell commands on/off\n\
  f, forth           Change to the next visited directory\n\
  fc                 Toggle file-counter\n\
- ff, dirs-first     Toggle list-directories-first\n\
  ft, filter         Set a file filter\n\
  fz                 Toggle recursive directory sizes (long view only)\n\
  hh, hidden         Toggle show-hidden-files\n\
@@ -1653,6 +1651,7 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  rr                 Remove files in bulk\n\
  s, sel             Select files\n\
  sb, selbox         Access the Selection Box\n\
+ sd, sort-dirs      Set sort-directories mode: first, last, asfiles\n\
  st, sort           Change file sort order\n\
  stats              Print file statistics\n\
  t, trash           Move files to the trash can\n\
@@ -1677,7 +1676,7 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  Alt+Right, Alt+f   Accept the first suggested word\n\
  Alt+c              Clear the current command line buffer\n\
  Alt+q              Delete the last entered word\n\
- Alt+g              Toggle list-directories-first\n\
+ Alt+g              Cycle through sort-directories modes\n\
  Alt+l              Toggle long-view\n\
  Alt+Plus           Toggle follow-symlinks\n\
  Alt+.              Toggle show-hidden-files\n\
@@ -1895,7 +1894,6 @@ q | F12         I'm tired, quit"
 #define EXT_DESC     " (turn external/shell commands on/off)"
 #define F_DESC       " (change to the next visited directory)"
 #define FC_DESC      " (toggle file-counter)"
-#define FF_DESC      " (toggle list-directories-first)"
 #define FT_DESC      " (set a file filter)"
 #define FZ_DESC      " (toggle recursive-directory-size: long view only)"
 #define HF_DESC      " (toggle hidden files)"
@@ -1937,6 +1935,7 @@ q | F12         I'm tired, quit"
 #define RL_DESC      " (reload the configuration file)"
 #define RR_DESC      " (remove files in bulk)"
 #define SB_DESC      " (show the selection box)"
+#define SD_DESC      " (set sort-directories mode)"
 #define SEL_DESC     " (select files)"
 #define SR_DESC      " (toggle sort-reverse)"
 #define ST_DESC      " (change file sort order)"

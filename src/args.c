@@ -47,12 +47,12 @@
 #endif /* CLIFM_DATADIR */
 
 #ifdef _BE_POSIX
-# define OPTSTRING ":a::Ab:B:c:CdDeEfFgGhHiI:j:J:k:KlLmMnNo:O:p:P:qQrRsSt:TuUvV:w:WxXyYz:Z1"
+# define OPTSTRING ":a::Ab:B:c:CdDeEf:gGhHiI:j:J:k:KlLmMnNo:O:p:P:qQrRsSt:TuUvV:w:WxXyYz:Z1"
 #else
 # ifdef RUN_CMD
-#  define OPTSTRING "+:a::Ab:c:C:D:eEfFgGhHiIk:lLmoOP:rsStT:vw:xyz:1"
+#  define OPTSTRING "+:a::Ab:c:C:D:eEf:gGhHiIk:lLmoOP:rsStT:vw:xyz:1"
 # else
-#  define OPTSTRING "+:a::Ab:c:D:eEfFgGhHiIk:lLmoOP:rsStT:vw:xyz:1"
+#  define OPTSTRING "+:a::Ab:c:D:eEf:gGhHiIk:lLmoOP:rsStT:vw:xyz:1"
 # endif /* RUN_CMD */
 #endif /* _BE_POSIX */
 
@@ -146,6 +146,7 @@
 #define LOPT_FOLLOW_SYMLINKS_LONG   286 /* Deprecated */
 #define LOPT_MIMETYPE               287
 #define LOPT_NO_DEREFERENCE         288
+#define LOPT_DIRS_FIRST             289
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -161,8 +162,7 @@ static struct option const longopts[] = {
 	{"config-dir", required_argument, 0, 'D'},
 	{"no-eln", no_argument, 0, 'e'},
 	{"eln-use-workspace-color", no_argument, 0, 'E'},
-	{"dirs-first", no_argument, 0, 'f'},
-	{"no-dirs-first", no_argument, 0, 'F'},
+	{"sort-dirs", required_argument, 0, 'f'},
 	{"pager", no_argument, 0, 'g'},
 	{"no-pager", no_argument, 0, 'G'},
 	{"help", no_argument, 0, 'h'},
@@ -201,6 +201,8 @@ static struct option const longopts[] = {
 	{"cwd-in-title", no_argument, 0, LOPT_CWD_IN_TITLE},
 	{"data-dir", required_argument, 0, LOPT_DATA_DIR},
 	{"desktop-notifications", optional_argument, 0, LOPT_DESKTOP_NOTIFICATIONS},
+	{"dirs-first", no_argument, 0, LOPT_DIRS_FIRST},
+	{"no-dirs-first", no_argument, 0, LOPT_DIRS_FIRST},
 	{"disk-usage", no_argument, 0, LOPT_DISK_USAGE},
 	{"follow-symlinks-long", no_argument, 0, LOPT_FOLLOW_SYMLINKS_LONG}, /* Deprecated */
 	{"fnftab", no_argument, 0, LOPT_FNFTAB},
@@ -924,6 +926,25 @@ set_alt_dir(char *src, char **dest, const char *err_name)
 
 #ifndef _BE_POSIX
 static void
+set_sort_dirs(const char *val)
+{
+	if (!val || !*val || *val == '-')
+		err_arg_required("--sort-dirs"); /* noreturn */
+
+	if (*val == 'f' && strcmp(val, "first") == 0) {
+		xargs.sort_dirs = conf.sort_dirs = SORT_DIRS_FIRST;
+	} else if (*val == 'l' && strcmp(val, "last") == 0) {
+		xargs.sort_dirs = conf.sort_dirs = SORT_DIRS_LAST;
+	} else if (*val == 'a' && strcmp(val, "asfiles") == 0) {
+		xargs.sort_dirs = conf.sort_dirs = SORT_DIRS_AS_FILES;
+	} else {
+		fprintf(stderr, _("%s: '--sort-dirs': Valid values "
+			"are 'first', 'last', or 'asfiles'.\n"), PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+}
+
+static void
 set_vt100(void)
 {
 	xargs.vt100 = 1;
@@ -1016,9 +1037,16 @@ set_alt_selfile(char *file)
 static void
 print_cwd_in_title_deprecation_warning(void)
 {
-	err('w', PRINT_PROMPT, _("%s: '--cwd-in-title' is deprecated. "
+	err('n', PRINT_PROMPT, _("%s: '--cwd-in-title' is deprecated. "
 		"Use TermTitle=[true|false|auto] in the configuration file "
 		"instead.\n"), PROGRAM_NAME);
+}
+
+static void
+print_dirs_first_deprecation_warning(void)
+{
+	err('n', PRINT_PROMPT, _("%s: '--[no-]dirs-first' is deprecated. "
+		"Use -f,--sort-dirs=[first|last|asfiles] instead.\n"), PROGRAM_NAME);
 }
 #endif /* !_BE_POSIX */
 
@@ -1377,10 +1405,10 @@ set_show_hidden(const char *val)
 	} else {
 #ifndef _BE_POSIX
 		fprintf(stderr, _("%s: '--show-hidden': Valid values "
-			"are 'true','first', 'last', or 'false'.\n"), PROGRAM_NAME);
+			"are 'true', 'first', 'last', or 'false'.\n"), PROGRAM_NAME);
 #else
 		fprintf(stderr, _("%s: '-a': Valid values "
-			"are 'true','first', 'last', or 'false'.\n"), PROGRAM_NAME);
+			"are 'true', 'first', 'last', or 'false'.\n"), PROGRAM_NAME);
 #endif /* !_BE_POSIX */
 		exit(EXIT_FAILURE);
 	}
@@ -1809,8 +1837,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'D': set_alt_config_dir(optarg); break;
 		case 'e': xargs.no_eln = conf.no_eln = 1; break;
 		case 'E': xargs.eln_use_workspace_color = 1; break;
-		case 'f': xargs.list_dirs_first = conf.list_dirs_first = 1; break;
-		case 'F': xargs.list_dirs_first = conf.list_dirs_first = 0; break;
+		case 'f': set_sort_dirs(optarg); break;
 		case 'g': xargs.pager = conf.pager = 1; break;
 		case 'G': xargs.pager = conf.pager = 0; break;
 		case 'h': help_function(); break; /* noreturn */
@@ -1848,12 +1875,14 @@ parse_cmdline_args(const int argc, char **argv)
 			set_color_scheme(optarg, "--color-scheme"); break;
 		case LOPT_COLORIZE_LNK_AS_TARGET:
 			xargs.colorize_lnk_as_target = conf.colorize_lnk_as_target = 1; break;
-		case LOPT_CWD_IN_TITLE:
+		case LOPT_CWD_IN_TITLE: // Deprecated
 			print_cwd_in_title_deprecation_warning(); break;
 		case LOPT_DATA_DIR:
 			set_datadir(optarg); break;
 		case LOPT_DESKTOP_NOTIFICATIONS:
 			set_desktop_notifications(optarg); break;
+		case LOPT_DIRS_FIRST: // Deprecated
+			print_dirs_first_deprecation_warning(); break;
 		case LOPT_DISK_USAGE:
 			xargs.disk_usage = conf.disk_usage = 1; break;
 		case LOPT_FNFTAB:
