@@ -26,15 +26,18 @@
 # Both plain filenames and wildcards are supported for specifying hidden files.
 ;ReadDotHidden=false
 
+# Specify how to sort directories. Supported values:
+# first   = List dirs before files
+# last    = List dirs after files
+# asfiles = No distinction is made between dirs and non-dir files
+;SortDirs=first
+
 # Regular expression to filter files from the file list.
 # For example: "!.*~$" to exclude backup files (ending with ~), or "^\." to
 # list only hidden files. File type filters are also supported, such as
 # "=d" to list directories only, or "!=l" to exclude symbolic links.
 # Run 'help file-filters' for more information.
 ;Filter=""
-
-# List directories before files.
-;ListDirsFirst=true
 
 # Display the number of files inside each directory next to the directory
 # name. This feature may slow down performance when, for example, listing
