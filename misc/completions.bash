@@ -1,8 +1,8 @@
 #
-# Bash completion definition for CliFM
+# Bash completion definition for Clifm
 #
 # Author:
-#   L. Abramovich <johndoe.arch@outlook.com>
+#   L. Abramovich <leo.clifm@outlook.com>
 #
 
 _clifm ()
@@ -12,6 +12,8 @@ _clifm ()
     local cur=$2 prev=$3
     local -a opts
     opts=(
+        -1
+        --oneline
         -a
         --show-hidden
         -A
@@ -27,9 +29,7 @@ _clifm ()
         -E
         --eln-use-workspace-color
         -f
-        --dirs-first
-        -F
-        --no-dirs-first
+        --sort-dirs
         -g
         --pager
         -G
@@ -47,7 +47,7 @@ _clifm ()
         -l
         --long-view
         -L
-        --no-follow-symlinks
+        --dereference
         -m
         --dirhist-map
         -o
@@ -91,8 +91,6 @@ _clifm ()
         --fuzzy-algo
         --fuzzy-matching
         --fzfpreview-hidden
-        --fzftab
-        --fzytab
         --icons
         --icons-use-file-color
         --int-vars
@@ -102,13 +100,14 @@ _clifm ()
         --max-dirhist
         --max-files
         --mimelist-file
+        --mime-type
         --mnt-udisk2
         --no-bold
         --no-cd-auto
         --no-classify
         --no-clear-screen
         --no-color
-        --no-columns
+        --no-dereference
         --no-file-cap
         --no-file-ext
         --no-file-counter
@@ -142,11 +141,10 @@ _clifm ()
         --share-selbox
         --shotgun-file
         --si
-        --smenutab
         --sort-reverse
         --stat
         --stat-full
-        --stdtab
+        --tabmode
         --time-style
         --trash-as-rm
         --unicode
@@ -155,7 +153,7 @@ _clifm ()
         --vt100
     )
 
-    if [[ $prev == "-b" || $prev == "-c" || $prev == "-k" || $prev == "-p" || $prev == "--open" || $prev == "--preview" || $prev == "--shotgun-file" ]]; then
+    if [[ $prev == "-b" || $prev == "-c" || $prev == "-k" || $prev == "-p" || $prev == "--open" || $prev == "--preview" || $prev == "--shotgun-file" || $prev == "--mime-type" ]]; then
         COMPREPLY=( $(compgen -f -d -- "$cur") )
 
     elif [[ $prev == "-P" || $prev == "--profile" ]]; then
@@ -182,8 +180,20 @@ _clifm ()
 		local args=$(echo -e "default\niso\nlong-iso\nfull-iso\nfull-iso-nano")
 		COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
+	elif [[ $prev == "--tabmode" ]]; then
+		local args=$(echo -e "fzf\nfnf\nsmenu\nstandard")
+		COMPREPLY=( $(compgen -W "$args" -- "$cur") )
+
     elif [[ $prev == "-z" || $prev == "--sort" ]]; then
 		local args=$(echo -e "none\nname\nsize\natime\nbtime\nctime\nmtime\nversion\nextension\ninode\nowner\ngroup\nblocks\nlinks\ntype")
+        COMPREPLY=( $(compgen -W "$args" -- "$cur") )
+
+    elif [[ $prev == "-f" || $prev == "--sort-dirs" ]]; then
+		local args=$(echo -e "first\nlast\nasfiles")
+        COMPREPLY=( $(compgen -W "$args" -- "$cur") )
+
+    elif [[ $prev == "-a" || $prev == "--show-hidden" ]]; then
+		local args=$(echo -e "first\nlast\ntrue\nfalse")
         COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "--bell" ]]; then

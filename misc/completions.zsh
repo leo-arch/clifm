@@ -1,6 +1,6 @@
 #compdef clifm
 #
-# Completion definition for clifm
+# Completion definition for Clifm
 # Author: L. Abramovich
 #
 
@@ -8,15 +8,15 @@ setopt localoptions noshwordsplit noksharrays
 local -a args
 
 args=(
-	{-a,--show-hidden}'[show hidden files]'
+	{-1,--oneline}'[list one file per line]'
+	{-a+,--show-hidden}'[show hidden files]:hidden_mode:->hidden_modes'
 	{-A,--no-hidden}'[do not show hidden files (default)]'
 	{-b+,--bookmarks-file=}'[set an alternative bookmarks file]:filename:_files'
 	{-c+,--config-file=}'[set an alternative configuration file]:filename:_files'
 	{-D+,--config-dir=}'[set an alternative configuration directory]:directory:_directories'
-	{-e,--no-eln}'[do not print ELNs (entry list number) at the left of each filename]'
+	{-e,--no-eln}'[do not print ELNs (entry list number)]'
 	{-E,--eln-use-workspace-color}'[ELNs use the color of the current workspace]'
-	{-f,--dirs-first}'[list directories first (default)]'
-	{-F,--no-dirs-first}'[do not list directories first]'
+	{-f+,--sort-dirs}'[set sort-dirs mode]:dir_mode:->dir_modes'
 	{-g,--pager}'[enable the pager]'
 	{-G,--no-pager}'[disable the pager (default)]'
 	{-h,--help}'[show this help and exit]'
@@ -24,15 +24,15 @@ args=(
 	{-i,--no-case-sensitive}'[no case-sensitive file listing (default)]'
 	{-I,--case-sensitive}'[case-sensitive file listing]'
 	{-k+,--keybindings-file=}'[set an alternative keybindings file]:filename:_files'
-	{-l,--long-view}'[enable long/detailed view mode]'
-	{-L,--no-follow-symlinks}'[do not follow symbolic links when listing files]'
+	{-l,--long-view}'[enable long/detail view mode]'
+	{-L,--dereference}'[follow symbolic links when listing files]'
 	{-m,--dihist-map}'[enable the directory history map]'
 	{-o,--autols}'[list files automatically (default)]'
 	{-O,--no-autols}'[do not list files automatically]'
 	{-p+,--path=}'[set the starting path]:directory:_directories'
 	{-P+,--profile=}'[use/create PROFILE as profile]:profile:->profiles'
 	{-r,--no-refresh-on-empty-line}'[do not refresh the screen when pressing Enter on empty line]'
-	{-s,--splash}'[print the logo screen at startup]'
+	{-s,--splash}'[display the splash screen at startup]'
 	{-S,--stealth-mode}'[leave no trace on the host system]'
 	{-t,--disk-usage-analyzer}'[run in disk usage analyzer mode]'
 	{-T+,--trash-dir=}'[set an alternative trash directory]:directory:_directories'
@@ -46,32 +46,31 @@ args=(
 	'--case-sens-path-comp[do not ignore case when completing filenames]'
 	'--cd-on-quit[write last visited path to $XDG_CONFIG_HOME/clifm/.last]'
 	'--color-scheme=[set color scheme]:color:->colorschemes'
-	'--colorize-symlinks-as-target[colorize symbolic links using the target file color]'
+	'--colorize-symlinks-as-target[colorize symbolic links using the color of the target file]'
 	'--data-dir=[use PATH as data directory]:directory:_directories'
 	'--desktop-notifications[enable desktop notifications]'
 	'--disk-usage[display disk usage for the filesystem where the current directory resides]'
 	'--full-dir-size[display recursive directory sizes (long view)]'
 	'--fuzzy-algo=[fuzzy matching algorithm]:algo:->algos'
 	'--fuzzy-matching[enable fuzzy matches for filename/path completions and suggestions]'
-	'--fzfpreview-hidden[same as --fzftab, but with the preview window hidden. Toggle it via Alt-p]'
-	'--fzftab[use fzf to display completion matches]'
-	'--fzytab[use fzy to display completion matches]'
+	'--fzfpreview-hidden[same as --tabmode=fzf, but with the preview window hidden. Toggle it via Alt+p]'
 	'--icons[enable icons]'
 	'--icons-use-file-color[icon colors follows file colors]'
 	'--int-vars[enable internal variables]'
 	'--kitty-keys[ask the terminal to enable the kitty keyboard protocol]'
 	'--list-and-quit[list files and quit]'
-	'--lscolors[read file colors from LS_COLORS]'
+	'--lscolors[read file colors from $LS_COLORS]'
 	'--max-dirhist=[maximum number of visited directories to remember]:int:'
 	'--max-files=[list only up to NUM files]:int:'
 	'--mimelist-file=[set Lira configuration file to FILE]:filename:_files'
+	'--mime-type=[Determine the MIME-type of files and exit]:filename:_files'
 	'--mnt-udisks2[use udisks2 instead of udevil for the media command]'
 	'--no-bold[disable bold colors]'
 	'--no-cd-auto[force the use of cd to change directories]'
 	'--no-classify[Do not append filetype indicators]'
 	'--no-clear-screen[do not clear the screen when listing directories]'
-	'--no-color[Run without colors]'
-	'--no-columns[disable columned file listing]'
+	'--no-color[run without colors]'
+	'--no-dereference[do not follow symbolic links when listing files]'
 	'--no-file-cap[do not check file capabilities when listing files]'
 	'--no-file-ext[do not check file extensions when listing files]'
 	'--no-file-counter[disable the file counter for directories]'
@@ -105,11 +104,9 @@ args=(
 	'--share-selbox[make the Selection Box common to different profiles]'
 	'--shotgun-file=[set shotgun configuration file to FILE]:filename:_files'
 	'--si[display sizes in powers of 1000 instead of 1024]'
-	'--smenutab[use smenu to display completion matches]'
 	'--sort-reverse[sort in reverse order]'
 	'--stat=[run the '\''p'\'' command on FILE and exit]:filename:_files'
 	'--stat-full=[run the '\''pp'\'' command on FILE and exit]:filename:_files'
-	'--stdtab[use standard tab completion]'
 	'--time-style=[time/date style used in long view]:style:->styles'
 	'--trash-as-rm[the '\''r'\'' command executes '\''trash'\'' instead of '\''rm'\'']'
 	'--unicode[force the use of Unicode decorations]'
@@ -126,6 +123,14 @@ case "$state" in
 		local -a prof_files
 		prof_files=( $(basename -a $HOME/.config/clifm/profiles/*) )
 		_multi_parts / prof_files
+	;;
+
+	hidden_modes)
+		_values -s, 'hidden_modes' first last true false
+	;;
+
+	dir_modes)
+		_values -s, 'dir_modes' first last asfiles
 	;;
 
 	bells)
