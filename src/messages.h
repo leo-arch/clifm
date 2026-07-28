@@ -1032,13 +1032,16 @@ the editor (quit without saving to cancel the operation).\n\n\
 - Bulk remove files/dirs in the directory 'mydir' using vi\n\
     rr mydir :vi"
 
-#define SD_USAGE "Set sort-directories mode\n\n\
+#define SD_USAGE "Specify how to sort directories\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   sd, sort-dirs [first | last | asfiles]\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
 - List directories last (after files)\n\
     sd last\n\
-  Note: Cycle through sort-dir modes with Alt+g."
+- List directories as any other file\n\
+    sd asfiles\n\n\
+Note: If no argument is provided, the command cycles through the three\n\
+options (Alt+g is also available)."
 
 #define SEARCH_USAGE "Search for files using either glob or regular expressions\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
