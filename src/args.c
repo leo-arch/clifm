@@ -1405,10 +1405,10 @@ set_show_hidden(const char *val)
 	} else {
 #ifndef _BE_POSIX
 		fprintf(stderr, _("%s: '--show-hidden': Valid values "
-			"are 'true', 'first', 'last', or 'false'.\n"), PROGRAM_NAME);
+			"are 'true', 'first', 'last', and 'false'.\n"), PROGRAM_NAME);
 #else
 		fprintf(stderr, _("%s: '-a': Valid values "
-			"are 'true', 'first', 'last', or 'false'.\n"), PROGRAM_NAME);
+			"are 'true', 'first', 'last', and 'false'.\n"), PROGRAM_NAME);
 #endif /* !_BE_POSIX */
 		exit(EXIT_FAILURE);
 	}
@@ -1885,7 +1885,7 @@ parse_cmdline_args(const int argc, char **argv)
 			print_dirs_first_deprecation_warning(); break;
 		case LOPT_DISK_USAGE:
 			xargs.disk_usage = conf.disk_usage = 1; break;
-		case LOPT_FNFTAB:
+		case LOPT_FNFTAB: // Deprecated
 			set_fnftab(1); break;
 		case LOPT_FOLLOW_SYMLINKS_LONG: /* Deprecated */
 			print_follow_symlinks_long_deprecation_warning(); break;
@@ -1898,7 +1898,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_FZFPREVIEW: /* fallthrough */
 		case LOPT_FZFPREVIEW_HIDDEN:
 			set_fzfpreview(optc); break;
-		case LOPT_FZFTAB:
+		case LOPT_FZFTAB: // Deprecated
 			set_fzftab(1); break;
 
 #ifndef _NO_ICONS
@@ -2055,14 +2055,14 @@ parse_cmdline_args(const int argc, char **argv)
 #endif /* !_NO_LIRA */
 		case LOPT_SI:
 			xargs.si = 1; break;
-		case LOPT_SMENUTAB:
+		case LOPT_SMENUTAB: // Deprecated
 			set_smenutab(1); break;
 		case LOPT_SORT_REVERSE:
 			xargs.sort_reverse = conf.sort_reverse = 1; break;
 		case LOPT_STAT: /* fallthrough */
 		case LOPT_STAT_FULL:
 			set_stat(optc, optarg); break;
-		case LOPT_STDTAB:
+		case LOPT_STDTAB: // Deprecated
 			set_stdtab(1); break;
 		case LOPT_PTIME_STYLE:
 			xset_time_style(optarg, 1); break;
