@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 13, 2026" "clifm 1.28.7" "Clifm Manual"
+.TH "CLIFM" "1" "Jul 28, 2026" "clifm 1.28.10" "Clifm Manual"
 .SH NAME
 clifm - The Command-Line File Manager
 .SH SYNOPSIS
@@ -98,7 +98,7 @@ List one file per line
 Show hidden files (filenames starting with '.'). Supported values are: \fBfirst\fR, \fBlast\fR, \fBtrue\fR, and \fBfalse\fR. If no value is specified, it defaults to \fBtrue\fR.
 .TP
 \fB-A\fR, \fB--no-hidden\fR
-Do not show hidden files.
+Do not show hidden files (same as \fB--show-hidden=false\fR).
 .TP
 \fB-b\fR, \fB--bookmarks-file\fR=\fI\,FILE\/\fR
 Set an alternative bookmarks file.
@@ -113,13 +113,10 @@ Set an alternative configuration directory (if configuration files do not alread
 Do not display Entry List Numbers (ELNs) to the left of filenames (note that while ELNs are not printed, they remain accessible and can still be used as usual).
 .TP
 \fB-E\fR, \fB--eln-use-workspace-color\fR
-Color ELNs using the current workspace color.
+Colorize ELNs using the current workspace color.
 .TP
-\fB-f\fR, \fB--dirs-first\fR
-List directories first.
-.TP
-\fB-F\fR, \fB--no-dirs-first\fR
-Do not list directories first.
+\fB-f\fR, \fB--sort-dirs\fR=\fI\,VAL\/\fR
+Set directories sort order. Supported values: \fBfirst\fR (default), \fBlast\fR, \fBasfiles\fR (no distinction is made between dirs and non-dir files).
 .TP
 \fB-g\fR, \fB--pager\fR
 Enable \fBMas\fR, the built-in pager for file listing.
@@ -188,7 +185,7 @@ Disallow the use of external (shell) commands.
 Enable the light mode to speed up \fBclifm\fR (see the \fBNOTE ON SPEED\fR section below).
 .TP
 \fB-z\fR, \fB--sort\fR=\fI\,METHOD\/\fR
-Sort files by \fIMETHOD\fR, where \fIMETHOD\fR is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 =  extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, 13 = links, or 14 = type. Both numbers and names are accepted. For example, you can use \fB--sort=9\fR or \fB--sort=inode\fR.
+Sort files by \fIMETHOD\fR, where \fIMETHOD\fR is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 =  extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, 13 = links, or 14 = type. Both numbers and names are supported. For example, you can use \fB--sort=9\fR or \fB--sort=inode\fR.
 .TP
 \fB--bell\fR=\fI\,TYPE\/\fR
 Set the terminal bell type, where \fITYPE\fR is one of: 0 = none, 1 = audible, 2 = visible (requires readline >= 8.1), and 3 = flash. Defaults to \fB2\fR (\fBvisible\fR), and, if not available, \fB0\fR (\fBnone\fR). Only numbers are allowed.
@@ -235,7 +232,7 @@ Enable icons.
 \fB--icons-use-file-color\fR
 Instead of a specific color, icons use the color of the corresponding filename. Useful when building custom color schemes, this option implies \fB--icons\fR, and is effective only when compiled with support for icons-in-terminal or Nerdfonts (default). Note that when compiled with emoji-icons support this option is ignored, as Unicode icons have their own built-in colors.
 .TP
-\fB--int-vars
+\fB--int-vars\fR
 Allow the use of internal variables (e.g., `\fBVAR=/bin; cd $VAR\fR`).
 .TP
 \fB--list-and-quit\fR
@@ -252,7 +249,7 @@ Read file colors from the \fBLS_COLORS\fR environment variable (the FreeBSD \fBL
 Maximum number of visited directories to remember.
 .TP
 \fB--max-files\fR=\fI\,NUM\/\fR
-List only up to \fINUM\fR files. Use -1 or \fBunset\fR to remove this limit (default). See the \fBmf\fR command for a more detailed description.
+List only up to \fINUM\fR files. Use \fB-1\fR or \fBunset\fR to remove this limit (default). See the \fBmf\fR command for a more detailed description.
 .TP
 \fB--mime-type\fR \fI\,FILE...\/\fR
 Print the MIME type of files and exit. This must be the last option in the command line. For information on how MIME types are detected, consult the \fBMIME type source\fR section in the \fBmm\fR command description.
@@ -300,7 +297,7 @@ Do not check file capabilities when listing files (only meaningful for performan
 Do not check file extensions (mostly used to colorize specific filenames) when listing files.
 .TP
 \fB--no-file-counter\fR
-Disable the file counter for directories (speeding up the listing process: counting files in directories is particularly expensive).
+Disable the file counter for directories (specially useful for low-end systems: counting files in directories is particularly expensive).
 .TP
 \fB--no-fzfpreview\fR
 Disable file previews for tab completion (fzf mode only).
