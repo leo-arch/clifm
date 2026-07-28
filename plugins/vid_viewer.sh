@@ -3,11 +3,11 @@
 # Video thumbnails plugin for Clifm
 # Written by L. Abramovich
 # License: GPL2+
-# Dependencies: sed, tr, head, ffmpegthumbnailer, and sxiv, lsix, or feh
+# Dependencies: sed, tr, head, ffmpegthumbnailer, and either nsxiv, sxiv, lsix, or feh
 
 is_vid()
 {
-	if file --mime-type "$1" | grep -q "video/"; then
+	if clifm --mime-type "$1" | grep -q "video/"; then
 		echo "1"
 	else
 		echo "0"
@@ -26,7 +26,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	exit 0
 fi
 
-TMP_DIR=".vidthumbs.$(tr -dc A-Za-z0-9 </dev/urandom | head -c6)"
+TMP_DIR="${CLIFM_TMP_DIR:-/tmp}/.vidthumbs.$(tr -dc A-Za-z0-9 </dev/urandom | head -c6)"
 
 mkdir -- "$TMP_DIR" >&2
 
@@ -54,7 +54,9 @@ do
 	fi
 done
 
-if type sxiv >/dev/null 2>&1; then
+if type nsxiv >/dev/null 2>&1; then
+	nsxiv -aqtr -- "$TMP_DIR"
+elif type sxiv >/dev/null 2>&1; then
 	sxiv -aqtr -- "$TMP_DIR"
 elif type feh >/dev/null 2>&1; then
 	feh -tZk -- "$TMP_DIR"
