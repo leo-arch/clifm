@@ -824,9 +824,6 @@ Of course, you can use `\fBf hist\fR`, `\fBf h\fR`, and `\fBf !ELN\fR` (consult 
 .B  fc \fR[on | off | status]
 By default, \fBclifm\fR prints the number of files contained by listed directories next to directory names. However, since this is an expensive feature, it might be desirable (for example, when listing files on a remote machine) to disable this feature. Use the \fBoff\fR subcommand to disable it. To permanently disable it, use the \fBFileCounter\fR option in the configuration file.
 .TP
-.B ff, dirs-first \fR[on | off | status]
-Toggle list directories first.
-.TP
 .B ft, filter \fR[unset] [[!]\fIREGEX\fR,=\fRFILE-TYPE-CHAR\fR]
 Filter the current list of files, either by filename (via a regular expression) or file type (via a file type character).
 .sp
@@ -1291,6 +1288,17 @@ For more information consult the \fBBUILT-IN EXPANSIONS\fR section below.
 .TP
 .B sb, selbox
 Print the elements currently contained in the Selection Box.
+.TP
+.B sd, sort-dirs \fR[first | last | asfiles]
+Specify how to sort directories. Supported values are:
+.sp
+\fBfirst\fR: List directories before files
+.sp 0
+\fBlast\fR: List directories after files
+.sp 0
+\fBasfiles\fR: No disticntion is made between directories and non-directory files
+.sp
+If no argument is provided, the command cycles through the three options.
 .TP
 .B st, sort \fR[\fIMETHOD\fR] [rev]
 With no argument, print the current sort order. Else, sort files by METHOD, where METHOD is one of: 0=none, 1=name, 2=size, 3=atime, 4=btime, 5=ctime, 6=mtime, 7=version, 8=extension, 9=inode, 10=owner, 11=group, 12=blocks, 13=links, or 14=type (e.g., \fIst atime\fR or \fIst 3\fR). Methods 10 and 11 sort by owner and group ID names if using ID names in long view (see the \fBPropFields\fR option in the configuration file). Else, ID numbers are used. The default order is \fBversion\fR.
