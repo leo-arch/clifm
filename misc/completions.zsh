@@ -45,6 +45,7 @@ args=(
 	'--case-sens-dirjump[do not ignore case when querying the jump database]'
 	'--case-sens-path-comp[do not ignore case when completing filenames]'
 	'--cd-on-quit[write last visited path to $XDG_CONFIG_HOME/clifm/.last]'
+	'--color=[when to colorize output]:when:->when_color'
 	'--color-scheme=[set color scheme]:color:->colorschemes'
 	'--colorize-symlinks-as-target[colorize symbolic links using the color of the target file]'
 	'--data-dir=[use PATH as data directory]:directory:_directories'
@@ -69,7 +70,6 @@ args=(
 	'--no-cd-auto[force the use of cd to change directories]'
 	'--no-classify[Do not append filetype indicators]'
 	'--no-clear-screen[do not clear the screen when listing directories]'
-	'--no-color[run without colors]'
 	'--no-dereference[do not follow symbolic links when listing files]'
 	'--no-file-cap[do not check file capabilities when listing files]'
 	'--no-file-ext[do not check file extensions when listing files]'
@@ -131,6 +131,10 @@ case "$state" in
 
 	dir_modes)
 		_values -s, 'dir_modes' first last asfiles
+	;;
+
+	when_color)
+		_values -s, 'when_color' auto always never
 	;;
 
 	bells)

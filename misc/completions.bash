@@ -82,6 +82,7 @@ _clifm ()
         --case-sens-dirjump
         --case-sens-path-comp
         --cd-on-quit
+        --color
         --color-scheme
         --colorize-symlinks-as-target
         --data-dir
@@ -106,7 +107,6 @@ _clifm ()
         --no-cd-auto
         --no-classify
         --no-clear-screen
-        --no-color
         --no-dereference
         --no-file-cap
         --no-file-ext
@@ -159,6 +159,10 @@ _clifm ()
     elif [[ $prev == "-P" || $prev == "--profile" ]]; then
         local profiles=$(basename -a $(ls -Ad ~/.config/clifm/profiles/*))
         COMPREPLY=( $(compgen -W "$profiles" -- "$cur") )
+
+	elif [[ $prev == "--color" ]]; then
+		local args=$(echo -e "always\nauto\nnever")
+		COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "--color-scheme" ]]; then
         local schemes=$(basename -a $(ls -Ad ~/.config/clifm/colors/*) | cut -d"." -f1)
