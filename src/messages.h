@@ -1409,7 +1409,7 @@ c: Quit paging (printing remaining files)\n"
 #ifdef _BE_POSIX
 #define OPTIONS_LIST "\
 \n -1       List one file per line\
-\n -a[VAL]  List hidden files ('first', 'last', 'true', or 'false')\
+\n -a[VAL]  List hidden files ('first', 'last', 'true', or 'false'). Defaults to 'true'.\
 \n -A       Do not list hidden files (same as -afalse)\
 \n -b FILE  Set an alternative bookmarks file\
 \n -B NUM   Set tab-completion mode (NUM=[0-3])\
@@ -1434,7 +1434,7 @@ c: Quit paging (printing remaining files)\n"
 \n -l       Display extended file metadata (long view)\
 \n -L       Do not follow symbolic links when listing files\
 \n -m       Enable fuzzy matching\
-\n -M       Disable colors\
+\n -M[WHEN] Colorize output WHEN (auto, always, never). Defaults to 'auto'.\
 \n -n       Disable the command history\
 \n -N       Disable bold colors\
 \n -o PATH  Set a custom file opener (instead of the built-in Lira)\
@@ -1503,6 +1503,7 @@ on an empty line\
 database (via the 'j' command)\
 \n      --case-sens-path-comp\t Enable case-sensitive path completion\
 \n      --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
+\n      --color[=WHEN]\t\t Colorize output WHEN (always, auto, never). If WHEN is omitted, 'auto' is assumed.\
 \n      --color-scheme=NAME\t Use the color scheme NAME\
 \n      --color-links-as-target\t Colorize symbolic links according to the target file\
 \n      --data-dir=PATH\t\t Use PATH as the data directory (e.g., /usr/local/share)\
@@ -1529,7 +1530,6 @@ and paths\
 \n      --no-cd-auto\t\t Disable the autocd function\
 \n      --no-classify\t\t Do not append file type indicators\
 \n      --no-clear-screen\t\t Do not clear the screen when listing files\
-\n      --no-color\t\t Disable colors \
 \n      --no-dereference\t\t Do not follow symbolic links\
 \n      --no-file-cap\t\t Do not check file capabilities when listing files\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\

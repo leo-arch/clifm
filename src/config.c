@@ -4131,23 +4131,46 @@ set_force_color(const char *val)
 static void
 check_colors(void)
 {
-	const char *nc = getenv("NO_COLOR");
-	const char *cnc = getenv("CLIFM_NO_COLOR");
+	const int is_tty = isatty(STDOUT_FILENO);
+	/* For NO_COLOR, CLICOLOR_FORCE, and CLICOLOR see
+	 * https://bixense.com/clicolors */
+	const char *nc =  getenv("NO_COLOR");
+	const char *ccf = getenv("CLICOLOR_FORCE");
+	const char *cc  = getenv("CLICOLOR");
 
-	const char *ccf = getenv("CLICOLOR_FORCE"); /* See https://bixense.com/clicolors */
+	const char *cnc = getenv("CLIFM_NO_COLOR");
 	const char *cfc = getenv("CLIFM_FORCE_COLOR");
 
-	if (xargs.colorize == UNSET && !nc && !cnc && (ccf || cfc)) {
-		if (term_caps.color == 0)
-			/* The user is forcing the use of colors even when the terminal
-			 * reports no color capability. */
-			term_caps.color = cfc ? set_force_color(cfc) : 8;
-		conf.colorize = 1;
-	} else if (xargs.colorize == 0 || term_caps.color == 0 || nc || cnc) {
+	/* Environment (system-wide) */
+	if (term_caps.color == 0)
 		conf.colorize = 0;
-	} else {
-		conf.colorize = xargs.colorize == 1 ? 1 : DEF_COLORS; /* NOLINT */
+	else if (nc)
+		conf.colorize = 0;
+	else if (ccf)
+		conf.colorize = 1;
+	else if (is_tty && cc)
+		conf.colorize = 1;
+
+	/* Environment (clifm-specific) */
+	if (cnc) {
+		conf.colorize = 0;
+	} else if (cfc) {
+		/* The user is forcing the use of colors (even if the terminal
+		 * reports no color capability). */
+		term_caps.color = set_force_color(cfc);
+		conf.colorize = 1;
 	}
+
+	/* Command line (--color=[auto|always|never]) */
+	if (xargs.colorize == COLOR_NEVER)
+		conf.colorize = 0;
+	else if (xargs.colorize == COLOR_ALWAYS)
+		conf.colorize = 1;
+	else if (xargs.colorize == COLOR_AUTO)
+		conf.colorize = is_tty ? 1 : 0;
+
+	if (conf.colorize == UNSET)
+		conf.colorize = DEF_COLORS;
 
 	if (conf.colorize == 1) {
 		set_colors(conf.usr_cscheme ? conf.usr_cscheme
@@ -4156,6 +4179,10 @@ check_colors(void)
 		cur_color = tx_c;
 		return;
 	}
+
+#ifndef _NO_HIGHLIGHT
+	conf.highlight = 0;
+#endif
 
 	reset_filetype_colors();
 	reset_iface_colors();

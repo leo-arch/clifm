@@ -47,7 +47,7 @@
 #endif /* CLIFM_DATADIR */
 
 #ifdef _BE_POSIX
-# define OPTSTRING ":a::Ab:B:c:CdDeEf:gGhHiI:jJk:KlLmMnNo:Op:PqQrRsSt:TuUvV:w:WxXyYz:Z1"
+# define OPTSTRING ":a::Ab:B:c:CdDeEf:gGhHiI:jJk:KlLmM::nNo:Op:PqQrRsSt:TuUvV:w:WxXyYz:Z1"
 #else
 # ifdef RUN_CMD
 #  define OPTSTRING "+:a::Ab:c:C:D:eEf:gGhHiIk:lLmoOP:rsStT:vw:xyz:1"
@@ -83,7 +83,7 @@
 #define LOPT_ICONS                  222
 #define LOPT_ICONS_USE_FILE_COLOR   223
 //#define LOPT_NO_COLUMNS             224
-#define LOPT_NO_COLORS              225
+#define LOPT_NO_COLOR               225
 #define LOPT_MAX_FILES              226
 #define LOPT_TRASH_AS_RM            227
 #define LOPT_CASE_SENS_DIRJUMP      228
@@ -147,6 +147,7 @@
 #define LOPT_MIMETYPE               287
 #define LOPT_NO_DEREFERENCE         288
 #define LOPT_DIRS_FIRST             289
+#define LOPT_COLOR                  290
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -195,6 +196,7 @@ static struct option const longopts[] = {
 	{"case-sens-dirjump", no_argument, 0, LOPT_CASE_SENS_DIRJUMP},
 	{"case-sens-path-comp", no_argument, 0, LOPT_CASE_SENS_PATH_COMP},
 	{"cd-on-quit", no_argument, 0, LOPT_CD_ON_QUIT},
+	{"color", optional_argument, 0, LOPT_COLOR},
 	{"color-scheme", required_argument, 0, LOPT_COLOR_SCHEME},
 	{"color-links-as-target", no_argument, 0, LOPT_COLORIZE_LNK_AS_TARGET}, /* Deprecated */
 	{"colorize-symlinks-as-target", no_argument, 0, LOPT_COLORIZE_LNK_AS_TARGET},
@@ -230,7 +232,7 @@ static struct option const longopts[] = {
 	{"no-cd-auto", no_argument, 0, LOPT_NO_CD_AUTO},
 	{"no-classify", no_argument, 0, LOPT_NO_CLASSIFY},
 	{"no-clear-screen", no_argument, 0, LOPT_NO_CLEAR_SCREEN},
-	{"no-colors", no_argument, 0, LOPT_NO_COLORS},
+	{"no-colors", no_argument, 0, LOPT_NO_COLOR}, /* Deprecated */
 	{"no-dereference", no_argument, 0, LOPT_NO_DEREFERENCE},
 	{"no-dir-jumper", no_argument, 0, LOPT_NO_DIR_JUMPER},
 	{"no-file-cap", no_argument, 0, LOPT_NO_FILE_CAP},
@@ -1057,6 +1059,14 @@ print_dirs_first_deprecation_warning(void)
 	err('n', PRINT_PROMPT, _("%s: '--[no-]dirs-first' is deprecated. "
 		"Use -f,--sort-dirs=[first|last|asfiles] instead.\n"), PROGRAM_NAME);
 }
+
+static void
+print_no_color_deprecation_warning(void)
+{
+	err('n', PRINT_PROMPT, _("%s: '--no-color' is deprecated. "
+		"Use '--color=never' instead.\n"), PROGRAM_NAME);
+}
+
 #endif /* !_BE_POSIX */
 
 static void
@@ -1286,12 +1296,18 @@ set_color_scheme(const char *opt, const char *optname)
 }
 
 static void
-set_no_colors(void)
+set_color(const char *val)
 {
-	xargs.colorize = conf.colorize = 0;
-#ifndef _NO_HIGHLIGHT
-	xargs.highlight = conf.highlight = 0;
-#endif /* !_NO_HIGHLIGHT */
+	if (!val || !*val || *val == '-') {
+		xargs.colorize = COLOR_AUTO; /* No value. Defaults to 'auto'. */
+	} else if (*val == 'a' && strcmp(val, "auto") == 0) {
+		xargs.colorize = COLOR_AUTO;
+	} else if (*val == 'a' && strcmp(val, "always") == 0) {
+		xargs.colorize = COLOR_ALWAYS;
+	} else {
+		if (*val == 'n' && strcmp(val, "never") == 0)
+			xargs.colorize = COLOR_NEVER;
+	}
 }
 
 static void
@@ -1709,7 +1725,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'l': xargs.long_view = conf.long_view = 1; break;
 		case 'L': xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case 'm': xargs.fuzzy_match = conf.fuzzy_match = 1; break;
-		case 'M': set_no_colors(); break;
+		case 'M': set_color(optarg); break;
 		case 'n': xargs.history = 0; break;
 		case 'N': xargs.no_bold = 1; break;
 		case 'o': set_opener(optarg, "-o"); break;
@@ -1860,6 +1876,8 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.case_sens_path_comp = conf.case_sens_path_comp = 1; break;
 		case LOPT_CD_ON_QUIT:
 			xargs.cd_on_quit = conf.cd_on_quit = 1; break;
+		case LOPT_COLOR:
+			set_color(optarg); break;
 		case LOPT_COLOR_SCHEME:
 			set_color_scheme(optarg, "--color-scheme"); break;
 		case LOPT_COLORIZE_LNK_AS_TARGET:
@@ -1940,8 +1958,9 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.classify = conf.classify = 0; break;
 		case LOPT_NO_CLEAR_SCREEN:
 			xargs.clear_screen = conf.clear_screen = 0; break;
-		case LOPT_NO_COLORS:
-			set_no_colors(); break;
+		case LOPT_NO_COLOR: /* Deprecated */
+			print_no_color_deprecation_warning();
+			xargs.colorize = COLOR_NEVER; break;
 		case LOPT_NO_DEREFERENCE:
 			xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case LOPT_NO_DIR_JUMPER:

@@ -2862,8 +2862,7 @@ check_options(void)
 	if (term_caps.suggestions == 0)
 		xargs.suggestions = conf.suggestions = 0;
 #endif /* !_NO_SUGGESTIONS */
-	if (term_caps.color == 0)
-		xargs.colorize = conf.colorize = 0;
+
 	if (term_caps.pager == 0)
 		xargs.pager = conf.pager = 0;
 

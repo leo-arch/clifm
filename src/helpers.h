@@ -601,6 +601,11 @@ extern time_t curdir_mtime;
 #define PAGER_LONG  1
 #define PAGER_SHORT 2
 
+/* Values for --color (xargs.color) */
+#define COLOR_NEVER  0
+#define COLOR_ALWAYS 1
+#define COLOR_AUTO   2
+
 /* Values for SafeFilenames (conf.safe_filenames) */
 #define SAFENAMES_NOCHECK 0 /* The check is disabled */
 #define SAFENAMES_BASIC   1 /* Only basic checks are performed */
