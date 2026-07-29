@@ -199,6 +199,9 @@ Enable case sensitive path completion.
 \fB--cd-on-quit\fR
 Write the last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR for later access by the corresponding shell function at program exit. Consult the \fBSHELL FUNCTIONS\fR section below for more information.
 .TP
+\fB--color[\fR=\fI\,WHEN\/\fR]
+Colorize output WHEN: auto, always, never. If WHEN is omitted, \fBauto\fR is assumed. In \fBauto\fR mode, \fBclifm\fR emits color codes only when standard output is connected to a terminal.
+.TP
 \fB--color-scheme\fR=\fI\,NAME\/\fR
 Use the color scheme specified by \fINAME\fR.
 .TP
@@ -261,7 +264,7 @@ Set \fIFILE\fR as \fBLira\fR\'s configuration file (see the \fBFILE OPENER\fR se
 Use \fBudisks2\fR(1) instead of \fBudevil\fR(1) (default) for the \fBmedia\fR command.
 .TP
 \fB--no-bold\fR
-Disable bold colors (applies to all color schemes).
+Disable bold colors.
 .TP
 \fB--no-cd-auto\fR
 By default, \fBclifm\fR changes directories by just entering their filenames. This option forces the use of the \fBcd\fR command.
@@ -283,9 +286,6 @@ Use this option to disable file type classification. Note that this option also 
 .TP
 \fB--no-clear-screen\fR
 Do not clear the screen before listing files.
-.TP
-\fB--no-color\fR
-Disable colors.
 .TP
 \fB--no-dereference\fR
 Do not follow symbolic links when listing files.
