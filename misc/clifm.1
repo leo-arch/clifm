@@ -252,7 +252,7 @@ Maximum number of visited directories to remember.
 List only up to \fINUM\fR files. Use \fB-1\fR or \fBunset\fR to remove this limit (default). See the \fBmf\fR command for a more detailed description.
 .TP
 \fB--mime-type\fR \fI\,FILE...\/\fR
-Print the MIME type of files and exit. This must be the last option in the command line. For information on how MIME types are detected, consult the \fBMIME type source\fR section in the \fBmm\fR command description.
+Print the MIME type of files and exit. For information on how MIME types are detected, consult the \fBMIME type source\fR section in the \fBmm\fR command description.
 .TP
 \fB--mimelist-file\fR=\fI\,FILE\/\fR
 Set \fIFILE\fR as \fBLira\fR\'s configuration file (see the \fBFILE OPENER\fR section below for more information).
@@ -339,7 +339,7 @@ Disable the welcome message.
 List directories only.
 .TP
 \fB--open\fR=\fI\,FILE\/\fR
-Run as a standalone file opener: open \fIFILE\fR and exit, where \fIFILE\fR can be a regular file or a directory, using either standard notation (\fI/dir/file\fR), the file URI scheme (\fIfile:///dir/file\fR), or a URL (\fIwww.domain\fR or \fIhttps://domain\fR).
+Run as a standalone file opener: open \fIFILE\fR and exit, where \fIFILE\fR can be a regular file or a directory, using either standard notation (\fI/dir/file\fR), the file URI scheme (\fIfile:///dir/file\fR), or an URL (\fIwww.domain\fR or \fIhttps://domain\fR).
 .TP
 \fB--opener\fR=\fI\,APPLICATION\/\fR
 Use \fIAPPLICATION\fR (e.g., \fBrifle\fR or \fBxdg-open\fR) as file opener/launcher (instead of \fBLira\fR, \fBclifm\fR's default opener).
@@ -397,10 +397,10 @@ Display file sizes in SI units (powers of 1000) instead of IEC units (powers of 
 Sort files in reverse order (e.g., z-a instead of a-z).
 .TP
 \fB--stat\fR \fI\,FILE\/\fR...
-Run the \fBp\fR command on \fIFILE\fR(s) and exit. This must be the last option in the command line. Use \fB--ptime-style\fR to set a custom date/time format.
+Run the \fBp\fR command on \fIFILE\fR(s) and exit. Use \fB--ptime-style\fR to set a custom date/time format.
 .TP
 \fB--stat-full\fR \fI\,FILE\/\fR...
-Short for \fB--dereference --full-dir-size --stat\fR.
+Short for \fB--stat --dereference --full-dir-size\fR.
 .TP
 \fB--tabmode\fR=\fI\,MODE\/\fR
 Set tab completion mode. Available modes: \fBfzf\fR, \fBfnf\fR, \fBsmenu\fR, and \fBstandard\fR.
