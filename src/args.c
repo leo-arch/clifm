@@ -359,8 +359,8 @@ set_start_path(void)
 
 	if (cur_ws > MAX_WS - 1) {
 		cur_ws = DEF_CUR_WS;
-		err('w', PRINT_PROMPT, _("%s: '%zu': Invalid workspace."
-			"\nFalling back to workspace %zu.\n"),
+		err('w', PRINT_PROMPT, _("%s: '%zu': Invalid workspace. "
+			"Falling back to workspace %zu.\n"),
 			PROGRAM_NAME, cur_ws, cur_ws + 1);
 	}
 
@@ -380,7 +380,7 @@ set_start_path(void)
 		    workspaces[cur_ws].path, strerror(errno));
 
 		if (!pwd || !*pwd) {
-			err(0, NOPRINT_PROMPT, _("%s: Failed  to get"
+			err(0, NOPRINT_PROMPT, _("%s: Failed to get"
 				"current working directory.\n"), PROGRAM_NAME);
 			exit(EXIT_FAILURE);
 		}
@@ -773,7 +773,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 }
 
 static int
-set_sort_by_name(const char *name)
+set_sort_by_name(const char *name, const char *opt_str)
 {
 	size_t i;
 	for (i = 0; i <= SORT_TYPES; i++) {
@@ -782,21 +782,21 @@ set_sort_by_name(const char *name)
 			return sort_methods[i].num;
 	}
 
-	fprintf(stderr, _("%s: --sort: '%s': Invalid value\n"
+	fprintf(stderr, _("%s: Invalid value '%s' for '%s'\n"
 		"Valid values: atime, btime, ctime, mtime, extension, group, "
 		"inode, name,\n              none, owner, size, version, "
-		"blocks, links, type.\n"), PROGRAM_NAME, name);
+		"blocks, links, type\n"), PROGRAM_NAME, name, opt_str);
 	exit(EXIT_FAILURE);
 }
 
 static void
-set_sort(const char *arg)
+set_sort(const char *arg, const char *opt_str)
 {
-	const int n = !is_number(arg) ? set_sort_by_name(arg) : xatoi(arg);
+	const int n = !is_number(arg) ? set_sort_by_name(arg, opt_str) : xatoi(arg);
 
 	if (n < 0 || n > SORT_TYPES) {
-		fprintf(stderr, _("%s: --sort: '%s': Valid values are 0-%d\n"),
-			PROGRAM_NAME, arg, SORT_TYPES);
+		fprintf(stderr, _("%s: Invalid value '%s' for '%s'\n"
+			"Valid values are: 0-%d\n"), PROGRAM_NAME, arg, opt_str, SORT_TYPES);
 		exit(EXIT_FAILURE);
 	}
 
@@ -937,10 +937,10 @@ set_alt_dir(char *src, char **dest, const char *err_name)
 
 #ifndef _BE_POSIX
 static void
-set_sort_dirs(const char *val)
+set_sort_dirs(const char *val, const char *opt_str)
 {
 	if (!val || !*val || *val == '-')
-		err_arg_required("--sort-dirs"); /* noreturn */
+		err_arg_required(opt_str); /* noreturn */
 
 	if (*val == 'f' && strcmp(val, "first") == 0) {
 		xargs.sort_dirs = conf.sort_dirs = SORT_DIRS_FIRST;
@@ -949,8 +949,9 @@ set_sort_dirs(const char *val)
 	} else if (*val == 'a' && strcmp(val, "asfiles") == 0) {
 		xargs.sort_dirs = conf.sort_dirs = SORT_DIRS_AS_FILES;
 	} else {
-		fprintf(stderr, _("%s: '--sort-dirs': Valid values "
-			"are 'first', 'last', or 'asfiles'.\n"), PROGRAM_NAME);
+		fprintf(stderr, _("%s: Invalid value '%s' for '%s'\n"
+			"Valid values are: 'first', 'last', 'asfiles'.\n"),
+			PROGRAM_NAME, val, opt_str);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -995,8 +996,9 @@ set_fuzzy_algo(const char *opt)
 	const int a = opt ? xatoi(opt) : -1;
 
 	if (a < 1 || a > FUZZY_ALGO_MAX) {
-		fprintf(stderr, _("%s: '%s': Invalid fuzzy algorithm. Valid "
-			"values are either 1 or 2.\n"), PROGRAM_NAME, opt ? opt : "NULL");
+		fprintf(stderr, _("%s: '%s': Invalid fuzzy algorithm\n"
+			"Valid values are: '1' and '2'.\n"),
+			PROGRAM_NAME, opt ? opt : "NULL");
 		exit(EXIT_FAILURE);
 	}
 
@@ -1009,10 +1011,9 @@ set_bell_style(const char *opt)
 	const int a = xatoi(opt);
 
 	if (!is_number(opt) || a < 0 || a > 3) {
-		fprintf(stderr, _("%s: '%s': Invalid bell style. Valid values "
-			"are 0:none, 1:audible, 2:visible (requires readline >= 8.1), "
-			"3:flash. Defaults to 'visible', and, if not possible, 'none'.\n"),
-			PROGRAM_NAME, opt);
+		fprintf(stderr, _("%s: '%s': Invalid bell style\n"
+			"Valid values are: '0' (none), '1' (audible), '2' (visible), "
+			"'3' (flash).\n"), PROGRAM_NAME, opt);
 		exit(EXIT_FAILURE);
 	}
 
@@ -1057,7 +1058,7 @@ static void
 print_dirs_first_deprecation_warning(void)
 {
 	err('n', PRINT_PROMPT, _("%s: '--[no-]dirs-first' is deprecated. "
-		"Use -f,--sort-dirs=[first|last|asfiles] instead.\n"), PROGRAM_NAME);
+		"Use '-f,--sort-dirs=[first|last|asfiles]' instead.\n"), PROGRAM_NAME);
 }
 
 static void
@@ -1281,8 +1282,8 @@ set_workspace(const char *opt)
 	}
 
 ERROR:
-	fprintf(stderr, _("%s: '%s': Invalid workspace. Valid "
-		"values are 1-8.\n"), PROGRAM_NAME, opt);
+	fprintf(stderr, _("%s: '%s': Invalid workspace\n"
+		"Valid values are: 1-8\n"), PROGRAM_NAME, opt);
 	exit(EXIT_FAILURE);
 }
 
@@ -1296,7 +1297,7 @@ set_color_scheme(const char *opt, const char *optname)
 }
 
 static void
-set_color(const char *val)
+set_color(const char *val, const char *opt_str)
 {
 	if (!val || !*val || *val == '-') {
 		xargs.colorize = COLOR_AUTO; /* No value. Defaults to 'auto'. */
@@ -1304,9 +1305,13 @@ set_color(const char *val)
 		xargs.colorize = COLOR_AUTO;
 	} else if (*val == 'a' && strcmp(val, "always") == 0) {
 		xargs.colorize = COLOR_ALWAYS;
-	} else {
-		if (*val == 'n' && strcmp(val, "never") == 0)
+	} else if (*val == 'n' && strcmp(val, "never") == 0) {
 			xargs.colorize = COLOR_NEVER;
+	} else {
+		fprintf(stderr, _("%s: Invalid value '%s' for '%s'\n"
+			"Valid values are: 'auto', 'always', 'never'.\n"),
+			PROGRAM_NAME, val, opt_str);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -1407,14 +1412,11 @@ set_stat(const int optc)
 }
 
 static void
-set_show_hidden(const char *val)
+set_show_hidden(const char *val, const char *opt_str)
 {
 	if (!val || !*val || *val == '-') {
-		xargs.show_hidden = conf.show_hidden = HIDDEN_TRUE;
-		return;
-	}
-
-	if (*val == 't' && strcmp(val, "true") == 0) {
+		xargs.show_hidden = conf.show_hidden = HIDDEN_TRUE; /* Default value */
+	} else if (*val == 't' && strcmp(val, "true") == 0) {
 		xargs.show_hidden = conf.show_hidden = HIDDEN_TRUE;
 	} else if (*val == 'f' && strcmp(val, "false") == 0) {
 		xargs.show_hidden = conf.show_hidden = HIDDEN_FALSE;
@@ -1423,23 +1425,19 @@ set_show_hidden(const char *val)
 	} else if (*val == 'l' && strcmp(val, "last") == 0) {
 		xargs.show_hidden = conf.show_hidden = HIDDEN_LAST;
 	} else {
-#ifndef _BE_POSIX
-		fprintf(stderr, _("%s: '--show-hidden': Valid values "
-			"are 'true', 'first', 'last', and 'false'.\n"), PROGRAM_NAME);
-#else
-		fprintf(stderr, _("%s: '-a': Valid values "
-			"are 'true', 'first', 'last', and 'false'.\n"), PROGRAM_NAME);
-#endif /* !_BE_POSIX */
+		fprintf(stderr, _("%s: Invalid value '%s' for '%s'\n"
+			"Valid values are: 'true', 'first', 'last', 'false'.\n"),
+			PROGRAM_NAME, val, opt_str);
 		exit(EXIT_FAILURE);
 	}
 }
 
 #ifndef _BE_POSIX
 static void
-set_tabmode(const char *mode)
+set_tabmode(const char *mode, const char *opt_str)
 {
 	if (!mode || !*mode || *mode == '-')
-		err_arg_required("--tabmode"); /* noreturn */
+		err_arg_required(opt_str); /* noreturn */
 
 	if (*mode == 'f' && strcmp(mode, "fzf") == 0) {
 		set_fzftab(0);
@@ -1450,8 +1448,9 @@ set_tabmode(const char *mode)
 	} else if (*mode == 's' && strcmp(mode, "standard") == 0) {
 		set_stdtab(0);
 	} else {
-		fprintf(stderr, _("%s: --tabmode: '%s': Invalid value\n"
-			"Valid values: fzf, fnf, smenu, standard.\n"), PROGRAM_NAME, mode);
+		fprintf(stderr, _("%s: Invalid value '%s' for '%s'\n"
+			"Valid values are: 'fzf', 'fnf', 'smenu', 'standard'.\n"),
+			PROGRAM_NAME, mode, opt_str);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -1510,8 +1509,9 @@ set_desktop_notifications(const char *val)
 		xargs.desktop_notifications = conf.desktop_notifications =
 			DESKTOP_NOTIF_NONE;
 	} else {
-		fprintf(stderr, _("%s: '--desktop-notifications': Valid values "
-			"are 'kitty','system', or 'false'.\n"), PROGRAM_NAME);
+		fprintf(stderr, _("%s: Invalid value '%s' for '--desktop-notifications'\n"
+			"Valid values are: 'kitty', 'system', 'false'.\n"),
+			PROGRAM_NAME, val);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -1529,8 +1529,8 @@ xset_pager_view(const char *arg)
 	} else if (*arg == 's' && strcmp(arg, "short") == 0) {
 		xargs.pager_view = conf.pager_view = PAGER_SHORT;
 	} else {
-		fprintf(stderr, _("%s: --pager-view: '%s': Invalid value.\n"
-			"Valid values are 'auto', 'long', and 'short'.\n"),
+		fprintf(stderr, _("%s: Invalid value '%s' for '--pager-view'\n"
+			"Valid values are: 'auto', 'long', 'short'.\n"),
 			PROGRAM_NAME, arg);
 		exit(EXIT_FAILURE);
 	}
@@ -1540,14 +1540,13 @@ static void
 print_follow_symlinks_long_deprecation_warning(void)
 {
 	err('w', PRINT_PROMPT, "%s: '--follow-symlinks-long' is deprecated and "
-		"has no effect. It will be removed in a future release.\n",
-		PROGRAM_NAME);
+		"has no effect.\n", PROGRAM_NAME);
 }
 #endif /* !_BE_POSIX */
 
 #ifdef _BE_POSIX
 static void
-set_tab_mode(const char *opt)
+set_tab_mode(const char *opt, const char *opt_str)
 {
 	if (!opt || !*opt || opt[1])
 		return;
@@ -1560,7 +1559,8 @@ set_tab_mode(const char *opt)
 	case 2: set_smenutab(0); break;
 	case 3: set_fnftab(0); break;
 	default:
-		fprintf(stderr, _("%s: '%s': Valid values are 0-3\n"), PROGRAM_NAME, opt);
+		fprintf(stderr, _("%s: Invalid value '%s' for '%s'\n"
+			"Valid values are: 0-3\n"), PROGRAM_NAME, opt, opt_str);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -1684,13 +1684,13 @@ parse_cmdline_args(const int argc, char **argv)
 	while ((optc = getopt(argc, argv, OPTSTRING)) != EOF) {
 		switch (optc) {
 		case '1': xargs.columned = conf.columned = 0; break;
-		case 'a': set_show_hidden(optarg); break;
+		case 'a': set_show_hidden(optarg, "-a"); break;
 		case 'A': xargs.show_hidden = conf.show_hidden = HIDDEN_FALSE; break;
 		case 'b':
 			xargs.bm_file = 1;
 			set_alt_file(optarg, &alt_bm_file, "-b");
 			break;
-		case 'B': set_tab_mode(optarg); break;
+		case 'B': set_tab_mode(optarg, "-B"); break;
 		case 'c':
 			xargs.config = 1;
 			set_alt_file(optarg, &alt_config_file, "-c");
@@ -1725,7 +1725,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'l': xargs.long_view = conf.long_view = 1; break;
 		case 'L': xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case 'm': xargs.fuzzy_match = conf.fuzzy_match = 1; break;
-		case 'M': set_color(optarg); break;
+		case 'M': set_color(optarg, "-M"); break;
 		case 'n': xargs.history = 0; break;
 		case 'N': xargs.no_bold = 1; break;
 		case 'o': set_opener(optarg, "-o"); break;
@@ -1759,7 +1759,7 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.secure_cmds = xargs.secure_env = 1;
 			xsecure_env(SECURE_ENV_IMPORT);
 			break;
-		case 'z': set_sort(optarg); break;
+		case 'z': set_sort(optarg, "-z"); break;
 		case 'Z':
 			set_max_value(optarg, &xargs.max_files, &conf.max_files);
 			break;
@@ -1819,15 +1819,15 @@ parse_cmdline_args(const int argc, char **argv)
 		switch (optc) {
 		/* Short options */
 		case '1': xargs.columned = conf.columned = 0; break;
-		case 'a': set_show_hidden(optarg); break;
+		case 'a': set_show_hidden(optarg, "-a,--show-hidden"); break;
 		case 'A': xargs.show_hidden = conf.show_hidden = HIDDEN_FALSE; break;
 		case 'b':
 			xargs.bm_file = 1;
-			set_alt_file(optarg, &alt_bm_file, "-b");
+			set_alt_file(optarg, &alt_bm_file, "-b,--bookmarks-file");
 			break;
 		case 'c':
 			xargs.config = 1;
-			set_alt_file(optarg, &alt_config_file, "-c");
+			set_alt_file(optarg, &alt_config_file, "-c,--config-file");
 			break;
 
 #ifdef RUN_CMD
@@ -1842,14 +1842,16 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'D': set_alt_config_dir(optarg); break;
 		case 'e': xargs.no_eln = conf.no_eln = 1; break;
 		case 'E': xargs.eln_use_workspace_color = 1; break;
-		case 'f': set_sort_dirs(optarg); break;
+		case 'f': set_sort_dirs(optarg, "-f,--sort-dirs"); break;
 		case 'g': xargs.pager = conf.pager = 1; break;
 		case 'G': xargs.pager = conf.pager = 0; break;
 		case 'h': help_function(); break; /* noreturn */
 		case 'H': xargs.horizontal_list = 1; conf.listing_mode = HORLIST; break;
 		case 'i': xargs.case_sens_list = conf.case_sens_list = 0; break;
 		case 'I': xargs.case_sens_list = conf.case_sens_list = 1; break;
-		case 'k': set_alt_file(optarg, &alt_kbinds_file, "-k"); break;
+		case 'k':
+			set_alt_file(optarg, &alt_kbinds_file, "-k,--keybindings-file");
+			break;
 		case 'l': xargs.long_view = conf.long_view = 1; break;
 		case 'L': xargs.follow_symlinks = conf.follow_symlinks = 1; break;
 		case 'm': xargs.dirhist_map = conf.dirhist_map = 1; break;
@@ -1865,7 +1867,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'w': set_workspace(optarg); break;
 		case 'x': xargs.ext_cmd_ok = conf.ext_cmd_ok = 0; break;
 		case 'y': xargs.light_mode = conf.light_mode = 1; break;
-		case 'z': set_sort(optarg); break;
+		case 'z': set_sort(optarg, "-z,--sort"); break;
 
 		/* Only-long options */
 		case LOPT_BELL:
@@ -1877,7 +1879,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_CD_ON_QUIT:
 			xargs.cd_on_quit = conf.cd_on_quit = 1; break;
 		case LOPT_COLOR:
-			set_color(optarg); break;
+			set_color(optarg, "--color"); break;
 		case LOPT_COLOR_SCHEME:
 			set_color_scheme(optarg, "--color-scheme"); break;
 		case LOPT_COLORIZE_LNK_AS_TARGET:
@@ -2062,7 +2064,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_PTIME_STYLE:
 			xset_time_style(optarg, 1); break;
 		case LOPT_TABMODE:
-			set_tabmode(optarg); break;
+			set_tabmode(optarg, "--tabmode"); break;
 		case LOPT_TIME_STYLE:
 			xset_time_style(optarg, 0); break;
 		case LOPT_TRASH_AS_RM:
@@ -2080,7 +2082,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case ':':
 			err_arg_required(argv[optind - 1]); /* noreturn */
 		case '?':
-			/* optopt is negative whenever a short option is used with a
+			/* optopt is negative when a short option is used with an
 			 * Unicode character (e.g., "-µ"). In this case, the problematic
 			 * option is not argv[optind - 1], but argv[optind]. */
 			optind -= ((optopt < 0 && argv[optind]) ? 0 : 1);
