@@ -380,8 +380,8 @@ check_truecolor(void)
 {
 	const char *c = getenv("COLORTERM");
 
-	if (c && ((*c == 't' && strcmp(c + 1, "ruecolor") == 0)
-	|| (*c == '2' && strcmp(c + 1, "4bit") == 0) ) )
+	if (c && ((*c == 't' && strcmp(c, "truecolor") == 0)
+	|| (*c == '2' && strcmp(c, "24bit") == 0) ) )
 		return 1;
 
 	return 0;

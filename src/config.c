@@ -4114,8 +4114,8 @@ set_force_color(const char *val)
 	if (!val || !*val)
 		return fallback;
 
-	if ((*val == '2' && strcmp(val + 1, "4bit") == 0)
-	|| (*val == 't' && strcmp(val + 1, "ruecolor") == 0))
+	if ((*val == '2' && strcmp(val, "24bit") == 0)
+	|| (*val == 't' && strcmp(val, "truecolor") == 0))
 		return TRUECOLOR_NUM;
 
 	if (!is_number(val))
@@ -4131,10 +4131,14 @@ set_force_color(const char *val)
 static void
 check_colors(void)
 {
+	/* Note: $COLORTERM is checked before this function, by check_truecolor(),
+	 * in term.c. If set to either "24bit" or "truecolor", term_caps.color
+	 * is set to TRUECOLOR_NUM. */
+
 	const int is_tty = isatty(STDOUT_FILENO);
 	/* For NO_COLOR, CLICOLOR_FORCE, and CLICOLOR see
 	 * https://bixense.com/clicolors */
-	const char *nc =  getenv("NO_COLOR");
+	const char *nc =  getenv("NO_COLOR"); /* See https://no-color.org */
 	const char *ccf = getenv("CLICOLOR_FORCE");
 	const char *cc  = getenv("CLICOLOR");
 
@@ -4144,22 +4148,22 @@ check_colors(void)
 	/* Environment (system-wide) */
 	if (term_caps.color == 0)
 		conf.colorize = 0;
-	else if (nc)
+	if (nc)
 		conf.colorize = 0;
 	else if (ccf)
 		conf.colorize = 1;
-	else if (is_tty && cc)
-		conf.colorize = 1;
+	else if (cc) {
+		if (!is_tty || (cc[0] == '0' && !cc[1]))
+			conf.colorize = 0;
+		else
+			conf.colorize = 1;
+	}
 
 	/* Environment (clifm-specific) */
-	if (cnc) {
+	if (cnc)
 		conf.colorize = 0;
-	} else if (cfc) {
-		/* The user is forcing the use of colors (even if the terminal
-		 * reports no color capability). */
-		term_caps.color = set_force_color(cfc);
+	else if (cfc)
 		conf.colorize = 1;
-	}
 
 	/* Command line (--color=[auto|always|never]) */
 	if (xargs.colorize == COLOR_NEVER)
@@ -4167,12 +4171,18 @@ check_colors(void)
 	else if (xargs.colorize == COLOR_ALWAYS)
 		conf.colorize = 1;
 	else if (xargs.colorize == COLOR_AUTO)
-		conf.colorize = is_tty ? 1 : 0;
+		conf.colorize = (is_tty == 1);
 
-	if (conf.colorize == UNSET)
+	if (conf.colorize == UNSET) /* None of the above */
 		conf.colorize = DEF_COLORS;
 
 	if (conf.colorize == 1) {
+		if (cfc)
+			/* The user is forcing the use of colors (even when the terminal
+			 * reports no color capability). Let's set it to the value
+			 * specified by CLIFM_FORCE_COLOR. */
+			term_caps.color = set_force_color(cfc);
+
 		set_colors(conf.usr_cscheme ? conf.usr_cscheme
 			: (term_caps.color >= 256
 			? DEF_COLOR_SCHEME_256 : DEF_COLOR_SCHEME), 1);
