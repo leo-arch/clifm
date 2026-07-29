@@ -1969,8 +1969,21 @@ properties_function(char **args, const int follow_link, const int full_dirsize)
 	return exit_status;
 }
 
+static void
+stat_err_no_arg(const int full_stat)
+{
+#ifdef _BE_POSIX
+	const char *opt_str = full_stat ? "-J" : "-j";
+#else
+	const char *opt_str = full_stat ? "--stat-full" : "--stat";
+#endif /* _BE_POSIX */
+	fprintf(stderr, _("%s: '%s': Option requires an argument\n"
+		"Try '%s --help' for more information.\n"),
+		PROGRAM_NAME, opt_str, PROGRAM_NAME);
+}
+
 /* Print properties of the files passed from the command line.
- * If FULL_STAT is set to 1, run with 'pp'. Otherwise use 'p' instead.
+ * If FULL_STAT is set to 1, run with 'pp'. Otherwise use 'p'.
  * Used when running with either --stat or --stat-full. */
 __attribute__ ((noreturn))
 void
@@ -1989,41 +2002,35 @@ do_stat_and_exit(const int full_stat)
 	if (is_cmd_in_path("gdu", NULL) == 1)
 		bin_flags |= GNU_DU_BIN_GDU;
 # endif /* HAVE_GNU_DU */
+#endif /* USE_DU1 */
 
 	if (!tmp_dir)
 		tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
-#endif /* USE_DU1 */
 
 	fputs(df_c, stdout);
 	cur_ws = 0;
 	char tmp[PATH_MAX + 1] = "";
 	char *cwd = get_cwd(tmp, sizeof(tmp), 0);
-	if (cwd)
-		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
+	if (!cwd) {
+		fprintf(stderr, _("%s: Failed to get current working directory\n"),
+			PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+	workspaces[cur_ws].path = strdup(cwd);
 
 	int status = 0;
-	int start = -1;
-	int i;
-
-	for (i = 0; i < argc_bk; i++) {
-		if (argv_bk[i] && strncmp(argv_bk[i], "--stat", 6) == 0
-		&& argv_bk[i + 1] && *argv_bk[i + 1]) {
-			start = i + 1;
-			break;
-		}
-	}
+	/* optind is global (unistd.h) and set by getopt(3). */
+	int start = (optind < argc_bk && argv_bk[optind]) ? optind : -1;
 
 	if (start <= 0) {
-		fprintf(stderr, _("%s: '--stat': Option requires an argument\n"
-			"Try '%s --help' for more information.\n"),
-			PROGRAM_NAME, PROGRAM_NAME);
+		stat_err_no_arg(full_stat);
 		exit(EXIT_FAILURE);
 	}
 
-	int follow_links = (full_stat == 1 || xargs.follow_symlinks == 1);
-	int full_dirsize = (full_stat == 1 || xargs.full_dir_size == 1);
+	const int follow_links = (full_stat == 1 || xargs.follow_symlinks == 1);
+	const int full_dirsize = (full_stat == 1 || xargs.full_dir_size == 1);
 
-	for (i = start; i < argc_bk; i++) {
+	for (int i = start; i < argc_bk; i++) {
 		char *norm_path = *argv_bk[i] == '~'
 			? tilde_expand(argv_bk[i]) : NULL;
 

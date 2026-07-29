@@ -47,7 +47,7 @@
 #endif /* CLIFM_DATADIR */
 
 #ifdef _BE_POSIX
-# define OPTSTRING ":a::Ab:B:c:CdDeEf:gGhHiI:j:J:k:KlLmMnNo:O:p:P:qQrRsSt:TuUvV:w:WxXyYz:Z1"
+# define OPTSTRING ":a::Ab:B:c:CdDeEf:gGhHiI:jJk:KlLmMnNo:Op:PqQrRsSt:TuUvV:w:WxXyYz:Z1"
 #else
 # ifdef RUN_CMD
 #  define OPTSTRING "+:a::Ab:c:C:D:eEf:gGhHiIk:lLmoOP:rsStT:vw:xyz:1"
@@ -90,7 +90,7 @@
 #define LOPT_CASE_SENS_PATH_COMP    229
 #define LOPT_CWD_IN_TITLE           230
 #define LOPT_OPEN                   231
-#define LOPT_PREVIEW                231 /* Same value as LOPT_OPEN is intended */
+#define LOPT_PREVIEW                234
 #define LOPT_PRINT_SEL              232
 #define LOPT_NO_SUGGESTIONS         233
 //#define LOPT_AUTOJUMP               234
@@ -223,7 +223,7 @@ static struct option const longopts[] = {
 	{"max-files", required_argument, 0, LOPT_MAX_FILES},
 	{"max-path", required_argument, 0, LOPT_MAX_PATH}, /* Deprecated */
 	{"mimelist-file", required_argument, 0, LOPT_ALT_MIMEFILE},
-	{"mime-type", no_argument, 0, LOPT_MIMETYPE},
+	{"mime-type", no_argument, 0, LOPT_MIMETYPE}, /* Positional params */
 	{"mnt-udisks2", no_argument, 0, LOPT_MNT_UDISKS2},
 	{"no-apparent-size", no_argument, 0, LOPT_NO_APPARENT_SIZE},
 	{"no-bold", no_argument, 0, LOPT_NO_BOLD},
@@ -251,12 +251,12 @@ static struct option const longopts[] = {
 	{"no-warning-prompt", no_argument, 0, LOPT_NO_WARNING_PROMPT},
 	{"no-welcome-message", no_argument, 0, LOPT_NO_WELCOME_MESSAGE},
 	{"only-dirs", no_argument, 0, LOPT_ONLY_DIRS},
-	{"open", required_argument, 0, LOPT_OPEN},
+	{"open", no_argument, 0, LOPT_OPEN}, /* Positional params */
 	{"opener", required_argument, 0, LOPT_OPENER},
 	{"pager-view", required_argument, 0, LOPT_PAGER_VIEW},
 	{"physical-size", no_argument, 0, LOPT_NO_APPARENT_SIZE},
 	{"ptime-style", required_argument, 0, LOPT_PTIME_STYLE},
-	{"preview", required_argument, 0, LOPT_PREVIEW},
+	{"preview", no_argument, 0, LOPT_PREVIEW}, /* Positional params */
 	{"print-sel", no_argument, 0, LOPT_PRINT_SEL},
 	{"prop-fields", required_argument, 0, LOPT_PROP_FIELDS},
 	{"readonly", no_argument, 0, LOPT_READONLY},
@@ -272,8 +272,8 @@ static struct option const longopts[] = {
 	{"shotgun-file", required_argument, 0, LOPT_SHOTGUN_FILE},
 	{"si", no_argument, 0, LOPT_SI},
 	{"smenutab", no_argument, 0, LOPT_SMENUTAB},
-	{"stat", required_argument, 0, LOPT_STAT},
-	{"stat-full", required_argument, 0, LOPT_STAT_FULL},
+	{"stat", no_argument, 0, LOPT_STAT}, /* Positional params */
+	{"stat-full", no_argument, 0, LOPT_STAT_FULL}, /* Positional params */
 	{"stdtab", no_argument, 0, LOPT_STDTAB},
 	{"tabmode", required_argument, 0, LOPT_TABMODE},
 	{"time-style", required_argument, 0, LOPT_TIME_STYLE},
@@ -378,8 +378,8 @@ set_start_path(void)
 		    workspaces[cur_ws].path, strerror(errno));
 
 		if (!pwd || !*pwd) {
-			err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failure "
-				"retrieving the current working directory.\n"), PROGRAM_NAME);
+			err(0, NOPRINT_PROMPT, _("%s: Failed  to get"
+				"current working directory.\n"), PROGRAM_NAME);
 			exit(EXIT_FAILURE);
 		}
 
@@ -801,14 +801,23 @@ set_sort(const char *arg)
 	xargs.sort = conf.sort = n;
 }
 
-#ifndef _NO_LIRA
 /* Open/preview FILE according to MODE: either PREVIEW_FILE or OPEN_FILE */
 __attribute__ ((noreturn))
 static void
 open_preview_file(char *file, const int mode)
 {
+#ifdef _BE_POSIX
+	const char *mode_str = mode == OPEN_FILE ? "-O" : "-P";
+#else
+	const char *mode_str = mode == OPEN_FILE ? "--open" : "--preview";
+#endif /* _BE_POSIX */
+
+#ifdef _NO_LIRA
+	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, mode_str, _(NOT_AVAILABLE));
+	exit(EXIT_FAILURE);
+#else
 	if (!file)
-		exit(EXIT_FAILURE);
+		err_arg_required(mode_str); /* noreturn */
 
 	if (xargs.stealth_mode == 1) {
 		fprintf(stderr, _("%s: Running in stealth mode. Access to "
@@ -868,8 +877,8 @@ RUN:
 		conf.fast_magic = 1;
 
 	open_reg_exit(fpath, url, preview); /* noreturn */
+#endif /* _NO_LIRA */
 }
-#endif /* !_NO_LIRA */
 
 static int
 check_alt_dir(char *dir)
@@ -1370,16 +1379,11 @@ set_trash_as_rm(void)
 }
 
 static void
-set_stat(const int optc, const char *optval)
+set_stat(const int optc)
 {
-	if (!optval || !*optval || *optval == '-')
 #ifndef _BE_POSIX
-		err_arg_required(optc == LOPT_STAT ? "--stat" : "--stat-full");
-
 	xargs.stat = (optc == LOPT_STAT ? SIMPLE_STAT : FULL_STAT);
 #else
-		err_arg_required(optc == 'j' ? "-j" : "-J");
-
 	xargs.stat = (optc == 'j' ? SIMPLE_STAT : FULL_STAT);
 #endif /* !_BE_POSIX */
 
@@ -1546,6 +1550,7 @@ set_tab_mode(const char *opt)
 }
 #endif /* _BE_POSIX */
 
+__attribute__ ((noreturn))
 static void
 print_mimetypes_and_exit(char **files, const char *opt_str)
 {
@@ -1657,10 +1662,8 @@ parse_cmdline_args(const int argc, char **argv)
 {
 	opterr = optind = 0;
 	int optc;
-#ifndef _NO_LIRA
 	int open_prev_mode = 0;
-	char *open_prev_file = NULL;
-#endif /* !_NO_LIRA */
+	int run_mimetype = 0;
 
 	while ((optc = getopt(argc, argv, OPTSTRING)) != EOF) {
 		switch (optc) {
@@ -1699,10 +1702,10 @@ parse_cmdline_args(const int argc, char **argv)
 			exit(EXIT_FAILURE);
 #endif /* !_NO_ICONS */
 		case 'I': set_alt_trash_dir(optarg); break;
-		case 'j': set_stat(optc, optarg); break;
-		case 'J': set_stat(optc, optarg); break;
+		case 'j': set_stat(optc); break;
+		case 'J': set_stat(optc); break;
 		case 'k': set_alt_file(optarg, &alt_kbinds_file, "-k"); break;
-		case 'K': print_mimetypes_and_exit(argv + optind, "-K"); break;
+		case 'K': run_mimetype = 1; break;
 		case 'l': xargs.long_view = conf.long_view = 1; break;
 		case 'L': xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case 'm': xargs.fuzzy_match = conf.fuzzy_match = 1; break;
@@ -1710,25 +1713,9 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'n': xargs.history = 0; break;
 		case 'N': xargs.no_bold = 1; break;
 		case 'o': set_opener(optarg, "-o"); break;
-		case 'O':
-#ifdef _NO_LIRA
-			fprintf(stderr, "%s: open: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
-			exit(EXIT_FAILURE);
-#else
-			open_prev_file = optarg;
-			open_prev_mode = OPEN_FILE;
-			break;
-#endif /* _NO_LIRA */
+		case 'O': open_prev_mode = OPEN_FILE; break;
 		case 'p': set_alt_profile(optarg); break;
-		case 'P':
-#ifdef _NO_LIRA
-			fprintf(stderr, "%s: preview: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
-			exit(EXIT_FAILURE);
-#else
-			open_prev_file = optarg;
-			open_prev_mode = PREVIEW_FILE;
-			break;
-#endif /* _NO_LIRA */
+		case 'P': open_prev_mode = PREVIEW_FILE; break;
 		case 'q': xargs.list_and_quit = 1; break;
 		case 'Q': xargs.cd_on_quit = conf.cd_on_quit = 1; break;
 		case 'r': set_trash_as_rm(); break;
@@ -1777,18 +1764,22 @@ parse_cmdline_args(const int argc, char **argv)
 		}
 	}
 
-#ifndef _NO_LIRA
-	if (open_prev_mode != 0)
-		open_preview_file(open_prev_file, open_prev_mode); /* noreturn */
-#endif /* !_NO_LIRA */
+	if (run_mimetype == 1)
+		print_mimetypes_and_exit(argv + optind, "-K"); /* noreturn */
 
-	if (argv[optind]) { /* Starting paths passed as positional parameters. */
-		resolve_and_set_starting_paths(argv + optind);
-	} else {
-		if (xargs.list_and_quit == 1) {
-			conf.restore_last_path = 0;
-			set_start_path();
-		}
+	if (open_prev_mode != 0)
+		open_preview_file(argv[optind], open_prev_mode); /* noreturn */
+
+	int start_path_set = 0;
+	if (xargs.stat == 0 && argv[optind])
+		/* Starting paths passed as positional parameters. */
+		start_path_set = resolve_and_set_starting_paths(argv + optind);
+
+	if (start_path_set == 0 && xargs.list_and_quit == 1) {
+		/* Starting path not specified in the command line. Let's use
+		 * the current directory. */
+		conf.restore_last_path = 0;
+		set_start_path();
 	}
 }
 
@@ -1803,10 +1794,8 @@ parse_cmdline_args(const int argc, char **argv)
 	opterr = optind = 0;
 
 	int optc;
-#ifndef _NO_LIRA
 	int open_prev_mode = 0;
-	char *open_prev_file = NULL;
-#endif /* _NO_LIRA */
+	int run_mimetype = 0;
 
 	while ((optc = getopt_long(argc, argv, OPTSTRING,
 		longopts, NULL)) != EOF) {
@@ -1875,17 +1864,17 @@ parse_cmdline_args(const int argc, char **argv)
 			set_color_scheme(optarg, "--color-scheme"); break;
 		case LOPT_COLORIZE_LNK_AS_TARGET:
 			xargs.colorize_lnk_as_target = conf.colorize_lnk_as_target = 1; break;
-		case LOPT_CWD_IN_TITLE: // Deprecated
+		case LOPT_CWD_IN_TITLE: /* Deprecated */
 			print_cwd_in_title_deprecation_warning(); break;
 		case LOPT_DATA_DIR:
 			set_datadir(optarg); break;
 		case LOPT_DESKTOP_NOTIFICATIONS:
 			set_desktop_notifications(optarg); break;
-		case LOPT_DIRS_FIRST: // Deprecated
+		case LOPT_DIRS_FIRST: /* Deprecated */
 			print_dirs_first_deprecation_warning(); break;
 		case LOPT_DISK_USAGE:
 			xargs.disk_usage = conf.disk_usage = 1; break;
-		case LOPT_FNFTAB: // Deprecated
+		case LOPT_FNFTAB: /* Deprecated */
 			set_fnftab(1); break;
 		case LOPT_FOLLOW_SYMLINKS_LONG: /* Deprecated */
 			print_follow_symlinks_long_deprecation_warning(); break;
@@ -1898,7 +1887,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_FZFPREVIEW: /* fallthrough */
 		case LOPT_FZFPREVIEW_HIDDEN:
 			set_fzfpreview(optc); break;
-		case LOPT_FZFTAB: // Deprecated
+		case LOPT_FZFTAB: /* Deprecated */
 			set_fzftab(1); break;
 
 #ifndef _NO_ICONS
@@ -1938,7 +1927,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_ALT_MIMEFILE:
 			set_alt_file(optarg, &alt_mimelist_file, "--mimelist-file"); break;
 		case LOPT_MIMETYPE:
-			print_mimetypes_and_exit(argv + optind, "--mime-type"); break;
+			run_mimetype = 1; break;
 		case LOPT_MNT_UDISKS2:
 			xargs.mount_cmd = MNT_UDISKS2; break;
 		case LOPT_NO_APPARENT_SIZE:
@@ -1995,27 +1984,14 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.welcome_message = conf.welcome_message = 0; break;
 		case LOPT_ONLY_DIRS:
 			xargs.only_dirs = conf.only_dirs = 1; break;
-
-		case LOPT_OPEN: /* --open or --preview */
-#ifdef _NO_LIRA
-			fprintf(stderr, "%s: --open/--preview: %s\n",
-				PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#else
-		{
-			open_prev_file = optarg;
-			int n = *argv[optind - 1] == '-' ? 1 : 2;
-			if (*(argv[optind - n] + 2) == 'p')
-				open_prev_mode = PREVIEW_FILE; /* --preview */
-			else
-				open_prev_mode = OPEN_FILE; /* --open */
-		} break;
-#endif /* _NO_LIRA */
-
+		case LOPT_OPEN:
+			open_prev_mode = OPEN_FILE; break;
 		case LOPT_OPENER:
 			set_opener(optarg, "--opener"); break;
 		case LOPT_PAGER_VIEW:
 			xset_pager_view(optarg); break;
+		case LOPT_PREVIEW:
+			open_prev_mode = PREVIEW_FILE; break;
 		case LOPT_PRINT_SEL:
 			xargs.print_selfiles = conf.print_selfiles = 1; break;
 		case LOPT_PROP_FIELDS:
@@ -2055,14 +2031,14 @@ parse_cmdline_args(const int argc, char **argv)
 #endif /* !_NO_LIRA */
 		case LOPT_SI:
 			xargs.si = 1; break;
-		case LOPT_SMENUTAB: // Deprecated
+		case LOPT_SMENUTAB: /* Deprecated */
 			set_smenutab(1); break;
 		case LOPT_SORT_REVERSE:
 			xargs.sort_reverse = conf.sort_reverse = 1; break;
 		case LOPT_STAT: /* fallthrough */
 		case LOPT_STAT_FULL:
-			set_stat(optc, optarg); break;
-		case LOPT_STDTAB: // Deprecated
+			set_stat(optc); break;
+		case LOPT_STDTAB: /* Deprecated */
 			set_stdtab(1); break;
 		case LOPT_PTIME_STYLE:
 			xset_time_style(optarg, 1); break;
@@ -2095,10 +2071,11 @@ parse_cmdline_args(const int argc, char **argv)
 		}
 	}
 
-#ifndef _NO_LIRA
+	if (run_mimetype == 1)
+		print_mimetypes_and_exit(argv + optind, "--mime-type"); /* noreturn */
+
 	if (open_prev_mode != 0)
-		open_preview_file(open_prev_file, open_prev_mode); /* noreturn */
-#endif /* !_NO_LIRA */
+		open_preview_file(argv[optind], open_prev_mode); /* noreturn */
 
 	int start_path_set = 0;
 	if (xargs.stat == 0 && argv[optind])

@@ -92,9 +92,6 @@
 # ifndef _NO_MAGIC
 #  define _NO_MAGIC
 # endif /* !_NO_MAGIC */
-# ifndef NO_FAST_MAGIC
-#  define NO_FAST_MAGIC
-# endif /* !NO_FAST_MAGIC */
 #endif /* _BE_POSIX */
 
 /* _NO_LIRA implies _NO_MAGIC and NO_FAST_MAGIC */
