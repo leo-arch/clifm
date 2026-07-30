@@ -103,7 +103,7 @@ trash-sel:\e\C-t
 # 3. SETTINGS
 # ---------------------------
 
-sort-dirs:\eg
+group-dirs:\eg
 only-dirs:\e,
 sort-next:\ex
 sort-previous:\ez
