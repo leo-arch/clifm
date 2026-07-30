@@ -83,7 +83,7 @@
 #define LOPT_ICONS                  222
 #define LOPT_ICONS_USE_FILE_COLOR   223
 //#define LOPT_NO_COLUMNS             224
-#define LOPT_NO_COLOR               225
+#define LOPT_NO_COLOR               225 // deprecated
 #define LOPT_MAX_FILES              226
 #define LOPT_TRASH_AS_RM            227
 #define LOPT_CASE_SENS_DIRJUMP      228
@@ -99,7 +99,7 @@
 #define LOPT_NO_FILE_EXT            237
 //#define LOPT_NO_FOLLOW_SYMLINKS     238 // deprecated
 #define LOPT_INT_VARS               240
-#define LOPT_STDTAB                 241
+#define LOPT_STDTAB                 241 // deprecated
 #define LOPT_NO_WARNING_PROMPT      242
 #define LOPT_MNT_UDISKS2            243
 #define LOPT_SECURE_ENV             244
@@ -120,14 +120,14 @@
 #define LOPT_FZFPREVIEW             260 /* legacy: preview is now default */
 #define LOPT_FZFPREVIEW_HIDDEN      261
 #define LOPT_SHOTGUN_FILE           262
-#define LOPT_FZFTAB                 263
+#define LOPT_FZFTAB                 263 // deprecated
 #define LOPT_SI                     264
 #define LOPT_DATA_DIR               265
 #define LOPT_FUZZY_ALGO             266
 #define LOPT_SEL_FILE               267
 #define LOPT_NO_TRUNC_NAMES         268
 #define LOPT_NO_BOLD                269
-#define LOPT_FNFTAB                 270
+#define LOPT_FNFTAB                 270 // deprecated
 #define LOPT_STAT                   271
 #define LOPT_STAT_FULL              272
 #define LOPT_READONLY               273
@@ -163,7 +163,7 @@ static struct option const longopts[] = {
 	{"config-dir", required_argument, 0, 'D'},
 	{"no-eln", no_argument, 0, 'e'},
 	{"eln-use-workspace-color", no_argument, 0, 'E'},
-	{"sort-dirs", required_argument, 0, 'f'},
+	{"group-dirs", required_argument, 0, 'f'},
 	{"pager", no_argument, 0, 'g'},
 	{"no-pager", no_argument, 0, 'G'},
 	{"help", no_argument, 0, 'h'},
@@ -176,7 +176,6 @@ static struct option const longopts[] = {
 	{"dirhist-map", no_argument, 0, 'm'},
 	{"autols", no_argument, 0, 'o'},
 	{"no-autols", no_argument, 0, 'O'},
-	{"path", required_argument, 0, 'p'},
 	{"profile", required_argument, 0, 'P'},
 	{"no-refresh-on-emtpy-line", no_argument, 0, 'r'},
 	{"splash", no_argument, 0, 's'},
@@ -203,17 +202,17 @@ static struct option const longopts[] = {
 	{"cwd-in-title", no_argument, 0, LOPT_CWD_IN_TITLE},
 	{"data-dir", required_argument, 0, LOPT_DATA_DIR},
 	{"desktop-notifications", optional_argument, 0, LOPT_DESKTOP_NOTIFICATIONS},
-	{"dirs-first", no_argument, 0, LOPT_DIRS_FIRST},
-	{"no-dirs-first", no_argument, 0, LOPT_DIRS_FIRST},
+	{"dirs-first", no_argument, 0, LOPT_DIRS_FIRST}, /* Deprecated */
+	{"no-dirs-first", no_argument, 0, LOPT_DIRS_FIRST}, /* Deprecated */
 	{"disk-usage", no_argument, 0, LOPT_DISK_USAGE},
 	{"follow-symlinks-long", no_argument, 0, LOPT_FOLLOW_SYMLINKS_LONG}, /* Deprecated */
-	{"fnftab", no_argument, 0, LOPT_FNFTAB},
+	{"fnftab", no_argument, 0, LOPT_FNFTAB}, /* Deprecated */
 	{"full-dir-size", no_argument, 0, LOPT_FULL_DIR_SIZE},
 	{"fuzzy-matching", no_argument, 0, LOPT_FUZZY_MATCHING},
 	{"fuzzy-algo", required_argument, 0, LOPT_FUZZY_ALGO},
 	{"fzfpreview", no_argument, 0, LOPT_FZFPREVIEW}, /* Legacy: is default now */
 	{"fzfpreview-hidden", no_argument, 0, LOPT_FZFPREVIEW_HIDDEN},
-	{"fzftab", no_argument, 0, LOPT_FZFTAB},
+	{"fzftab", no_argument, 0, LOPT_FZFTAB}, /* Deprecated */
 	{"icons", no_argument, 0, LOPT_ICONS},
 	{"icons-use-file-color", no_argument, 0, LOPT_ICONS_USE_FILE_COLOR},
 	{"int-vars", no_argument, 0, LOPT_INT_VARS},
@@ -227,14 +226,14 @@ static struct option const longopts[] = {
 	{"mimelist-file", required_argument, 0, LOPT_ALT_MIMEFILE},
 	{"mime-type", no_argument, 0, LOPT_MIMETYPE}, /* Positional params */
 	{"mnt-udisks2", no_argument, 0, LOPT_MNT_UDISKS2},
-	{"no-apparent-size", no_argument, 0, LOPT_NO_APPARENT_SIZE},
+	{"no-apparent-size", no_argument, 0, LOPT_NO_APPARENT_SIZE}, /* Deprecated */
 	{"no-bold", no_argument, 0, LOPT_NO_BOLD},
 	{"no-cd-auto", no_argument, 0, LOPT_NO_CD_AUTO},
 	{"no-classify", no_argument, 0, LOPT_NO_CLASSIFY},
 	{"no-clear-screen", no_argument, 0, LOPT_NO_CLEAR_SCREEN},
 	{"no-colors", no_argument, 0, LOPT_NO_COLOR}, /* Deprecated */
 	{"no-dereference", no_argument, 0, LOPT_NO_DEREFERENCE},
-	{"no-dir-jumper", no_argument, 0, LOPT_NO_DIR_JUMPER},
+	{"no-dir-jumper", no_argument, 0, LOPT_NO_DIR_JUMPER}, /* Deprecated */
 	{"no-file-cap", no_argument, 0, LOPT_NO_FILE_CAP},
 	{"no-files-counter", no_argument, 0, LOPT_NO_FILE_COUNTER}, /* Deprecated */
 	{"no-file-counter", no_argument, 0, LOPT_NO_FILE_COUNTER},
@@ -273,10 +272,10 @@ static struct option const longopts[] = {
 	{"sel-file", required_argument, 0, LOPT_SEL_FILE},
 	{"shotgun-file", required_argument, 0, LOPT_SHOTGUN_FILE},
 	{"si", no_argument, 0, LOPT_SI},
-	{"smenutab", no_argument, 0, LOPT_SMENUTAB},
+	{"smenutab", no_argument, 0, LOPT_SMENUTAB}, /* Deprecated */
 	{"stat", no_argument, 0, LOPT_STAT}, /* Positional params */
 	{"stat-full", no_argument, 0, LOPT_STAT_FULL}, /* Positional params */
-	{"stdtab", no_argument, 0, LOPT_STDTAB},
+	{"stdtab", no_argument, 0, LOPT_STDTAB}, /* Deprecated */
 	{"tabmode", required_argument, 0, LOPT_TABMODE},
 	{"time-style", required_argument, 0, LOPT_TIME_STYLE},
 	{"unicode", no_argument, 0, LOPT_UNICODE},
@@ -937,20 +936,20 @@ set_alt_dir(char *src, char **dest, const char *err_name)
 
 #ifndef _BE_POSIX
 static void
-set_sort_dirs(const char *val, const char *opt_str)
+set_group_dirs(const char *val, const char *opt_str)
 {
 	if (!val || !*val || *val == '-')
 		err_arg_required(opt_str); /* noreturn */
 
 	if (*val == 'f' && strcmp(val, "first") == 0) {
-		xargs.sort_dirs = conf.sort_dirs = SORT_DIRS_FIRST;
+		xargs.group_dirs = conf.group_dirs = GROUP_DIRS_FIRST;
 	} else if (*val == 'l' && strcmp(val, "last") == 0) {
-		xargs.sort_dirs = conf.sort_dirs = SORT_DIRS_LAST;
-	} else if (*val == 'a' && strcmp(val, "asfiles") == 0) {
-		xargs.sort_dirs = conf.sort_dirs = SORT_DIRS_AS_FILES;
+		xargs.group_dirs = conf.group_dirs = GROUP_DIRS_LAST;
+	} else if (*val == 'f' && strcmp(val, "false") == 0) {
+		xargs.group_dirs = conf.group_dirs = GROUP_DIRS_FALSE;
 	} else {
 		fprintf(stderr, _("%s: Invalid value '%s' for '%s'\n"
-			"Valid values are: 'first', 'last', 'asfiles'.\n"),
+			"Valid values are: 'first', 'last', 'false'.\n"),
 			PROGRAM_NAME, val, opt_str);
 		exit(EXIT_FAILURE);
 	}
@@ -1842,7 +1841,7 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'D': set_alt_config_dir(optarg); break;
 		case 'e': xargs.no_eln = conf.no_eln = 1; break;
 		case 'E': xargs.eln_use_workspace_color = 1; break;
-		case 'f': set_sort_dirs(optarg, "-f,--sort-dirs"); break;
+		case 'f': set_group_dirs(optarg, "-f,--group-dirs"); break;
 		case 'g': xargs.pager = conf.pager = 1; break;
 		case 'G': xargs.pager = conf.pager = 0; break;
 		case 'h': help_function(); break; /* noreturn */

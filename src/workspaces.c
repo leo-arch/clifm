@@ -134,6 +134,7 @@ save_workspace_opts(const int n)
 
 	workspace_opts[n].color_scheme = cur_cscheme;
 	workspace_opts[n].file_counter = conf.file_counter;
+	workspace_opts[n].group_dirs = conf.group_dirs;
 	workspace_opts[n].light_mode = conf.light_mode;
 	workspace_opts[n].long_view = conf.long_view;
 	workspace_opts[n].max_files = conf.max_files;
@@ -143,7 +144,6 @@ save_workspace_opts(const int n)
 	workspace_opts[n].show_hidden = conf.show_hidden;
 	workspace_opts[n].sort = conf.sort;
 	workspace_opts[n].sort_reverse = conf.sort_reverse;
-	workspace_opts[n].sort_dirs = conf.sort_dirs;
 }
 
 static void
@@ -193,6 +193,7 @@ set_workspace_opts(const int n)
 	conf.light_mode = workspace_opts[n].light_mode;
 	conf.long_view = workspace_opts[n].long_view;
 	conf.file_counter = workspace_opts[n].file_counter;
+	conf.group_dirs = workspace_opts[n].group_dirs;
 	conf.max_files = workspace_opts[n].max_files;
 	conf.max_name_len = workspace_opts[n].max_name_len;
 	conf.only_dirs = workspace_opts[n].only_dirs;
@@ -200,7 +201,6 @@ set_workspace_opts(const int n)
 	conf.show_hidden = workspace_opts[n].show_hidden;
 	conf.sort = workspace_opts[n].sort;
 	conf.sort_reverse = workspace_opts[n].sort_reverse;
-	conf.sort_dirs = workspace_opts[n].sort_dirs;
 }
 
 #define IS_VALID_WS(n) ((n) >= 0 && (n) < MAX_WS && workspaces[(n)].path)

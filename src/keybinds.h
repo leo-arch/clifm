@@ -21,7 +21,7 @@ int  keybind_exec_cmd(char *str);
 int  kbinds_function(char **args);
 int  load_keybinds(void);
 void readline_kbinds(void);
-int  rl_cycle_sort_dirs(int count, int key);
+int  rl_cycle_group_dirs(int count, int key);
 int  rl_quit(int count, int key);
 int  rl_toggle_hidden_files(int count, int key);
 int  rl_toggle_light_mode(int count, int key);

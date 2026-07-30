@@ -516,6 +516,17 @@ files in the current directory:\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   fz"
 
+#define GD_USAGE "Specify how to group directories\n\n\
+\x1b[1mUSAGE\x1b[22m\n\
+  gd, group-dirs [first | last | asfiles]\n\
+\x1b[1mEXAMPLE\x1b[22m\n\
+- Group directories last (after files)\n\
+    gd last\n\
+- Do not group directories\n\
+    gd false\n\n\
+Note: If no argument is provided, the command cycles through the three\n\
+options (Alt+g is also available)."
+
 #define HELP_USAGE "Get help\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   help [TOPIC]\n\n\
@@ -1032,17 +1043,6 @@ the editor (quit without saving to cancel the operation).\n\n\
 - Bulk remove files/dirs in the directory 'mydir' using vi\n\
     rr mydir :vi"
 
-#define SD_USAGE "Specify how to sort directories\n\n\
-\x1b[1mUSAGE\x1b[22m\n\
-  sd, sort-dirs [first | last | asfiles]\n\
-\x1b[1mEXAMPLE\x1b[22m\n\
-- List directories last (after files)\n\
-    sd last\n\
-- List directories as any other file\n\
-    sd asfiles\n\n\
-Note: If no argument is provided, the command cycles through the three\n\
-options (Alt+g is also available)."
-
 #define SEARCH_USAGE "Search for files using either glob or regular expressions\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
   /PATTERN [-filetype] [-r] [DIR]\n\n\
@@ -1471,7 +1471,7 @@ c: Quit paging (printing remaining files)\n"
 \n  -D, --config-dir=DIR\t\t Set an alternative configuration directory\
 \n  -e, --no-eln\t\t\t Do not print ELNs (Entry List Numbers)\
 \n  -E, --eln-use-workspace-color\t Use the current workspace color for ELNs\
-\n  -f, --sort-dirs=MODE\t\t Set sort-directories mode: 'first' (default), 'last', or 'asfiles'\
+\n  -f, --group-dirs=MODE\t\t How to group directories: 'first' (default), 'last', or 'false'\
 \n  -g, --pager\t\t\t Enable the pager\
 \n  -G, --no-pager\t\t Disable the pager (default)\
 \n  -h, --help\t\t\t Show this help and exit\
@@ -1620,6 +1620,7 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  fc                 Toggle file-counter\n\
  ft, filter         Set a file filter\n\
  fz                 Toggle recursive directory sizes (long view only)\n\
+ gd, group-dirs     Set group-directories mode: first, last, false\n\
  hh, hidden         Toggle show-hidden-files\n\
  history            Manage the commands history\n\
  icons              Toggle icons\n\
@@ -1654,7 +1655,6 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  rr                 Remove files in bulk\n\
  s, sel             Select files\n\
  sb, selbox         Access the Selection Box\n\
- sd, sort-dirs      Set sort-directories mode: first, last, asfiles\n\
  st, sort           Change file sort order\n\
  stats              Print file statistics\n\
  t, trash           Move files to the trash can\n\
@@ -1679,7 +1679,7 @@ For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
  Alt+Right, Alt+f   Accept the first suggested word\n\
  Alt+c              Clear the current command line buffer\n\
  Alt+q              Delete the last entered word\n\
- Alt+g              Cycle through sort-directories modes\n\
+ Alt+g              Cycle through group-directories modes\n\
  Alt+l              Toggle long-view\n\
  Alt+Plus           Toggle follow-symlinks\n\
  Alt+.              Toggle show-hidden-files\n\
@@ -1898,6 +1898,7 @@ q | F12         I'm tired, quit"
 #define F_DESC       " (change to the next visited directory)"
 #define FC_DESC      " (toggle file-counter)"
 #define FT_DESC      " (set a file filter)"
+#define GD_DESC      " (set group-directories mode)"
 #define FZ_DESC      " (toggle recursive-directory-size: long view only)"
 #define HF_DESC      " (toggle hidden files)"
 #define HIST_DESC    " (manage the command history)"
@@ -1938,7 +1939,6 @@ q | F12         I'm tired, quit"
 #define RL_DESC      " (reload the configuration file)"
 #define RR_DESC      " (remove files in bulk)"
 #define SB_DESC      " (show the selection box)"
-#define SD_DESC      " (set sort-directories mode)"
 #define SEL_DESC     " (select files)"
 #define SR_DESC      " (toggle sort-reverse)"
 #define ST_DESC      " (change file sort order)"

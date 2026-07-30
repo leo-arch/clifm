@@ -296,12 +296,12 @@ gen_term_title_str(const int value)
 }
 
 static const char *
-get_sort_dirs_str(const int value)
+get_group_dirs_str(const int value)
 {
 	switch (value) {
-	case SORT_DIRS_FIRST: return "first";
-	case SORT_DIRS_LAST: return "last";
-	case SORT_DIRS_AS_FILES: return "asfiles";
+	case GROUP_DIRS_FIRST: return "first";
+	case GROUP_DIRS_LAST: return "last";
+	case GROUP_DIRS_FALSE: return "false";
 	default: return "unknown";
 	}
 }
@@ -429,6 +429,10 @@ dump_config(void)
 	n = DEF_FZF_PREVIEW;
 	print_config_value("FzfPreview", &conf.fzf_preview, &n, DUMP_CONFIG_BOOL);
 #endif /* !_NO_FZF */
+
+	print_config_value("GroupDirs",
+		get_group_dirs_str(conf.group_dirs),
+		get_group_dirs_str(DEF_GROUP_DIRS), DUMP_CONFIG_STR_NO_QUOTE);
 
 	s = DEF_HISTIGNORE;
 	print_config_value("HistIgnore", conf.histignore_regex,
@@ -577,10 +581,6 @@ dump_config(void)
 
 	print_config_value("Sort", num_to_sort_name(conf.sort, 0),
 		num_to_sort_name(DEF_SORT, 0), DUMP_CONFIG_STR_NO_QUOTE);
-
-	print_config_value("SortDirs",
-		get_sort_dirs_str(conf.sort_dirs),
-		get_sort_dirs_str(DEF_SORT_DIRS), DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_SORT_REVERSE;
 	print_config_value("SortReverse", &conf.sort_reverse, &n, DUMP_CONFIG_BOOL);
@@ -1043,7 +1043,7 @@ clear-msgs:\\et\n\
 copy-sel:\\e\\C-v\n\
 create-file:\\en\n\
 deselect-all:\\ed\n\
-sort-dirs:\\eg\n\
+group-dirs:\\eg\n\
 export-sel:\\e\\C-e\n\
 invert-selection:\\e[Z\n\
 launch-view:\\e-\n\
@@ -2042,7 +2042,7 @@ create_main_config_file(char *file)
 
 	    "# Print a usage tip at startup.\n\
 ;Tips=%s\n\n\
-;SortDirs=%s\n\n\
+;GroupDirs=%s\n\n\
 # Enable case sensitive listing for files in the current directory.\n\
 ;CaseSensitiveList=%s\n\n\
 # Enable case sensitive lookups for the directory jumper function (via \n\
@@ -2078,8 +2078,8 @@ create_main_config_file(char *file)
 		DEF_PRIORITY_SORT_CHAR,
 		DEF_PRIVATE_WS_SETTINGS == 1 ? "true" : "false",
 		DEF_TIPS == 1 ? "true" : "false",
-		DEF_SORT_DIRS == SORT_DIRS_FIRST ? "first"
-			: (DEF_SORT_DIRS == SORT_DIRS_LAST ? "last" : "asfiles"),
+		DEF_GROUP_DIRS == GROUP_DIRS_FIRST ? "first"
+			: (DEF_GROUP_DIRS == GROUP_DIRS_LAST ? "last" : "false"),
 		DEF_CASE_SENS_LIST == 1 ? "true" : "false",
 		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
 		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
@@ -2884,18 +2884,18 @@ set_file_filter(char *line)
 }
 
 static void
-set_sort_dirs(const char *val)
+set_group_dirs(const char *val)
 {
 	if (!val || !*val)
 		return;
 
 	if (*val == 'f' && strcmp(val, "first\n") == 0) {
-		conf.sort_dirs = SORT_DIRS_FIRST;
+		conf.group_dirs = GROUP_DIRS_FIRST;
 	} else if (*val == 'l' && strcmp(val, "last\n") == 0) {
-		conf.sort_dirs = SORT_DIRS_LAST;
+		conf.group_dirs = GROUP_DIRS_LAST;
 	} else {
-		if (*val == 'a' && strcmp(val, "asfiles\n") == 0)
-			conf.sort_dirs = SORT_DIRS_AS_FILES;
+		if (*val == 'f' && strcmp(val, "false\n") == 0)
+			conf.group_dirs = GROUP_DIRS_FALSE;
 	}
 }
 
@@ -3743,6 +3743,11 @@ read_config(void)
 				continue;
 		}
 
+		else if (xargs.group_dirs == UNSET && *line == 'G'
+		&& strncmp(line, "GroupDirs=", 10) == 0) {
+			set_group_dirs(line + 10);
+		}
+
 		else if (*line == 'H' && strncmp(line, "HistIgnore=", 11) == 0) {
 			set_histignore_pattern(line + 11);
 		}
@@ -3968,11 +3973,6 @@ read_config(void)
 				set_config_int_value(line + 5, &conf.sort, 0, SORT_TYPES);
 		}
 
-		else if (xargs.sort_dirs == UNSET && *line == 'S'
-		&& strncmp(line, "SortDirs=", 9) == 0) {
-			set_sort_dirs(line + 9);
-		}
-
 		else if (xargs.sort_reverse == UNSET && *line == 'S'
 		&& strncmp(line, "SortReverse=", 12) == 0) {
 			set_config_bool_value(line + 12, &conf.sort_reverse);
@@ -4095,7 +4095,7 @@ read_config(void)
 
 	if (xargs.disk_usage_analyzer == 1) {
 		conf.sort = STSIZE;
-		conf.sort_dirs = SORT_DIRS_AS_FILES;
+		conf.group_dirs = GROUP_DIRS_FALSE;
 		conf.long_view = conf.full_dir_size = 1;
 		conf.welcome_message = 0;
 	}

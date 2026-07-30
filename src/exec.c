@@ -333,32 +333,32 @@ SUCCESS:
 }
 
 static int
-sort_dirs_function(const char *arg)
+group_dirs_function(const char *arg)
 {
 	if (conf.autols == 0)
 		return FUNC_SUCCESS;
 
 	if (!arg)
-		return rl_cycle_sort_dirs(0, 0);
+		return rl_cycle_group_dirs(0, 0);
 
 	if (IS_HELP(arg)) {
-		puts(_(SD_USAGE));
+		puts(_(GD_USAGE));
 		return FUNC_SUCCESS;
 	}
 
 	if (*arg == 'f' && strcmp(arg, "first") == 0) {
-		conf.sort_dirs = SORT_DIRS_FIRST;
+		conf.group_dirs = GROUP_DIRS_FIRST;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Sort directories: first\n"));
+		print_reload_msg(NULL, NULL, _("Group directories: first\n"));
 	} else if (*arg == 'l' && strcmp(arg, "last") == 0) {
-		conf.sort_dirs = SORT_DIRS_LAST;
+		conf.group_dirs = GROUP_DIRS_LAST;
 		if (conf.autols == 1) reload_dirlist();
-		print_reload_msg(NULL, NULL, _("Sort directories: last\n"));
+		print_reload_msg(NULL, NULL, _("Group directories: last\n"));
 	} else {
-		if (*arg == 'a' && strcmp(arg, "asfiles") == 0) {
-			conf.sort_dirs = SORT_DIRS_AS_FILES;
+		if (*arg == 'f' && strcmp(arg, "false") == 0) {
+			conf.group_dirs = GROUP_DIRS_FALSE;
 			if (conf.autols == 1) reload_dirlist();
-			print_reload_msg(NULL, NULL, _("Sort directories: as-files\n"));
+			print_reload_msg(NULL, NULL, _("Group directories: false\n"));
 		}
 	}
 
@@ -2359,10 +2359,10 @@ exec_cmd(char **args)
 	|| strcmp(args[0], "filecounter") == 0))
 		return (exit_code = file_counter_function(args[1]));
 
-	/* #### SORT DIRECTORIES #### */
-	else if ((*args[0] == 's' && args[0][1] == 'd' && !args[0][2])
-	|| (*args[0] == 's' && strcmp(args[0], "sort-dirs") == 0))
-		return (exit_code = sort_dirs_function(args[1]));
+	/* #### GROUP DIRECTORIES #### */
+	else if ((*args[0] == 'g' && args[0][1] == 'd' && !args[0][2])
+	|| (*args[0] == 'g' && strcmp(args[0], "group-dirs") == 0))
+		return (exit_code = group_dirs_function(args[1]));
 
 	/* #### ONLY DIRECTORIES #### */
 	else if (*args[0] == 'o' && args[0][1] == 'd' && !args[0][2])

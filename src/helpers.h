@@ -591,10 +591,10 @@ extern time_t curdir_mtime;
 #define GLOB_CHARS "*?[{"
 #define GLOB_REGEX_CHARS "*?[{|^+$."
 
-/* Values for SortDirs (conf.sort_dirs) */
-#define SORT_DIRS_AS_FILES 0
-#define SORT_DIRS_FIRST    1
-#define SORT_DIRS_LAST     2
+/* Values for GroupDirs (conf.group_dirs) */
+#define GROUP_DIRS_FALSE 0
+#define GROUP_DIRS_FIRST 1
+#define GROUP_DIRS_LAST  2
 
 /* Possible values for PagerView (conf.pager_view) */
 #define PAGER_AUTO  0
@@ -1153,6 +1153,7 @@ struct config_t {
 	int fuzzy_match;
 	int fuzzy_match_algo;
 	int fzf_preview;
+	int group_dirs;
 	int highlight;
 	int icons;
 	int icons_gap;
@@ -1206,7 +1207,6 @@ struct config_t {
 	int show_hidden;
 	int skip_non_alnum_prefix;
 	int sort;
-	int sort_dirs;
 	int sort_reverse;
 	int splash_screen;
 	int suggest_filetype_color;
@@ -1451,6 +1451,7 @@ struct opts_t {
 	char *color_scheme;
 	int file_counter;
 	int full_dir_size;
+	int group_dirs;
 	int light_mode;
 	int long_view;
 	int max_files;
@@ -1459,7 +1460,6 @@ struct opts_t {
 	int pager;
 	int show_hidden;
 	int sort;
-	int sort_dirs;
 	int sort_reverse;
 };
 
@@ -1507,6 +1507,7 @@ struct param_t {
 #ifndef _NO_FZF
 	int fzftab;
 	int fnftab;
+	int group_dirs;
 	int smenutab;
 #endif /* !_NO_FZF */
 #ifndef _NO_HIGHLIGHT
@@ -1554,7 +1555,6 @@ struct param_t {
 	int show_hidden;
 	int si; /* Sizes in powers of 1000 instead of 1024 */
 	int sort;
-	int sort_dirs;
 	int sort_reverse;
 	int splash_screen;
 	int stat;

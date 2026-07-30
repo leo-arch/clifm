@@ -122,7 +122,7 @@ init_workspaces_opts(void)
 		workspace_opts[i].filter.rev = filter.rev;
 		workspace_opts[i].filter.type = filter.type;
 		workspace_opts[i].filter.env = filter.env;
-
+		workspace_opts[i].group_dirs = conf.group_dirs;
 		workspace_opts[i].light_mode = conf.light_mode;
 		workspace_opts[i].long_view = conf.long_view;
 		workspace_opts[i].max_files = conf.max_files;
@@ -132,7 +132,6 @@ init_workspaces_opts(void)
 		workspace_opts[i].show_hidden = conf.show_hidden;
 		workspace_opts[i].sort = conf.sort;
 		workspace_opts[i].sort_reverse = conf.sort_reverse;
-		workspace_opts[i].sort_dirs = conf.sort_dirs;
 	}
 }
 
@@ -183,6 +182,7 @@ init_conf_struct(void)
 	conf.fuzzy_match = UNSET;
 	conf.fuzzy_match_algo = UNSET;
 	conf.fzf_preview = UNSET;
+	conf.group_dirs = UNSET;
 #ifndef _NO_HIGHLIGHT
 	conf.highlight = UNSET;
 #else
@@ -246,7 +246,6 @@ init_conf_struct(void)
 	conf.skip_non_alnum_prefix = DEF_SKIP_NON_ALNUM_PREFIX;
 	conf.sort = UNSET;
 	conf.sort_reverse = 0;
-	conf.sort_dirs = UNSET;
 	conf.splash_screen = UNSET;
 	conf.suggest_filetype_color = DEF_SUG_FILETYPE_COLOR;
 	conf.suggestions = UNSET;
@@ -2776,8 +2775,8 @@ check_options(void)
 	if (conf.clear_screen == UNSET)
 		conf.clear_screen = SETOPT(xargs.clear_screen, DEF_CLEAR_SCREEN);
 
-	if (conf.sort_dirs == UNSET)
-		conf.sort_dirs = SETOPT(xargs.sort_dirs, DEF_SORT_DIRS);
+	if (conf.group_dirs == UNSET)
+		conf.group_dirs = SETOPT(xargs.group_dirs, DEF_GROUP_DIRS);
 
 	if (conf.autols == UNSET)
 		conf.autols = SETOPT(xargs.autols, DEF_AUTOLS);
