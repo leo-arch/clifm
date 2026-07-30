@@ -167,7 +167,7 @@ Display the splash screen at startup.
 In stealth mode (also known as incognito or private mode), no trace is left on the host system. No files are read or created, and all settings revert to their default values. However, most settings can still be controlled via command-line options and dedicated environment variables (see the \fBENVIRONMENT\fR section below). Additionally, refer to the \fBhistory\fR command and the \fB--no-history\fR command-line switch for more options.
 .TP
 \fB-t\fR, \fB--disk-usage-analyzer\fR
-Run in disk usage analyzer mode. This is equivalent to using \fB--sort=size --long-view --full-dir-size --no-dirs-first\fR. The recursive size of the current directory will be displayed after the list of files. You can toggle this mode in place by pressing \fBAlt+Tab\fR (or \fBCtrl+Alt+i\fR).
+Run in disk usage analyzer mode. This is equivalent to using \fB--sort=size --long-view --total-size --group-dirs=false\fR. The recursive size of the current directory will be displayed after the list of files. You can toggle this mode in place by pressing \fBAlt+Tab\fR (or \fBCtrl+Alt+i\fR).
 .TP
 \fB-T\fR, \fB--trash-dir\fR=\fI\,DIR\/\fR
 Set an alternative trash directory.
@@ -216,9 +216,6 @@ Enable desktop notifications. The notification style can be optionally specified
 .TP
 \fB--disk-usage\fR
 Show disk usage of the filesystem where the current directory resides, in the format \fIFREE % (FREE/TOTAL) TYPE DEVICE\fR.
-.TP
-\fB--full-dir-size\fR
-Display recursive directory sizes (long view only).
 .TP
 \fB--fuzzy-algo\fR=\fI\,VER\/\fR
 Fuzzy matching algorithm, where \fIVER\fR is either \fB1\fR (faster, but not Unicode aware), or \fB2\fR (slower, Unicode aware). Bear in mind however that the second algorithm (default) will fallback to the first one (because it is faster) whenever the query string contains only ASCII characters, to minimize the performance penalty.
@@ -400,13 +397,16 @@ Sort files in reverse order (e.g., z-a instead of a-z).
 Run the \fBp\fR command on \fIFILE\fR(s) and exit. Use \fB--ptime-style\fR to set a custom date/time format.
 .TP
 \fB--stat-full\fR \fI\,FILE\/\fR...
-Short for \fB--stat --dereference --full-dir-size\fR.
+Short for \fB--stat --dereference --total-size\fR.
 .TP
 \fB--tabmode\fR=\fI\,MODE\/\fR
 Set tab completion mode. Available modes: \fBfzf\fR, \fBfnf\fR, \fBsmenu\fR, and \fBstandard\fR.
 .TP
 \fB--time-style\fR=\fI\,STYLE\/\fR
 Time/date style used in long view. Available styles: \fBdefault\fR, \fBrelative\fR, \fBiso\fR, \fBlong-iso\fR, \fBfull-iso\fR, \fB+FORMAT\fR (FORMAT is interpreted like in \fBstrftime\fR(3)).
+.TP
+\fB--total-size\fR
+Display recursive directory sizes (long-view/--stat only).
 .TP
 \fB--trash-as-rm\fR
 Make the \fBr\fR command move files to the trash instead of removing them.

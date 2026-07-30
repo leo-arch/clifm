@@ -88,7 +88,6 @@ _clifm ()
         --data-dir
         --dektop-notifications
         --disk-usage
-        --full-dir-size
         --fuzzy-algo
         --fuzzy-matching
         --fzfpreview-hidden
@@ -146,6 +145,7 @@ _clifm ()
         --stat-full
         --tabmode
         --time-style
+        --total-size
         --trash-as-rm
         --unicode
         --virtual-dir

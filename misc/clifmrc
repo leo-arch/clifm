@@ -161,7 +161,7 @@
 ;PTimeStyle="+%Y-%m-%d %H:%M:%S.%N %z"
 
 # Display recursive directory sizes (long view only).
-;FullDirSize=false
+;TotalSize=false
 
 # Display apparent file sizes (logical size) instead of actual device
 # usage (physical size).
