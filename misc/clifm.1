@@ -394,7 +394,7 @@ Display file sizes in SI units (powers of 1000) instead of IEC units (powers of 
 Sort files in reverse order (e.g., z-a instead of a-z).
 .TP
 \fB--stat\fR \fI\,FILE\/\fR...
-Run the \fBp\fR command on \fIFILE\fR(s) and exit. Use \fB--ptime-style\fR to set a custom date/time format.
+Display information for \fIFILE\fR(s) and exit. Use \fB--ptime-style\fR to set a custom date/time format.
 .TP
 \fB--stat-full\fR \fI\,FILE\/\fR...
 Short for \fB--stat --dereference --total-size\fR.
@@ -421,7 +421,7 @@ Use \fIPATH\fR as \fBclifm\fR\'s virtual directory.
 Print filenames in virtual directories as absolute paths instead of just basenames.
 .TP
 \fB--vt100\fR
-Run in VT100 compatibility mode (use this option if running on a really ancient terminal emulator).
+Run in VT100-compatible mode (useful when running on a legacy terminal emulator).
 .PP
 Options precedence order: 1) command-line flags; 2) configuration file; 3) default values.
 

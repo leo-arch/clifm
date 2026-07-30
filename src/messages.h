@@ -1568,8 +1568,8 @@ PropFields in the config file)\
 \n      --shotgun-file=FILE\t Set FILE as Shotgun's configuration file\
 \n      --si\t\t\t Display file sizes in powers of 1000 (SI units) instead of 1024\
 \n      --sort-reverse\t\t Sort in reverse order, e.g., z-a instead of a-z\
-\n      --stat FILE...\t\t Run the 'p' command on FILE(s) and exit\
-\n      --stat-full FILE...\t Short for '--dereference --full-dir-size --stat'\
+\n      --stat FILE...\t\t Display information for files and exit\
+\n      --stat-full FILE...\t Short for '--stat --dereference --total-size'\
 \n      --tabmode=MODE\t\t Set tab completion mode to one of 'fzf', 'fnf', 'smenu', or 'standard'\
 \n      --time-style=STYLE\t Time/date style used in long view (see TimeStyle in the config file)\
 \n      --total-size\t\t Display recursive directory sizes (long-view/--stat only)\
@@ -1577,7 +1577,7 @@ PropFields in the config file)\
 \n      --unicode\t\t\t Force the use of Unicode decorations\
 \n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
 \n      --virtual-dir=DIR\t\t Absolute path to a directory to be used as virtual directory\
-\n      --vt100\t\t\t Run in vt100 compatibility mode\n"
+\n      --vt100\t\t\t Run in VT100-compatible mode\n"
 #endif /* _BE_POSIX */
 
 #define CLIFM_COMMANDS_HEADER "\
