@@ -208,6 +208,7 @@ static struct option const longopts[] = {
 	{"follow-symlinks-long", no_argument, 0, LOPT_FOLLOW_SYMLINKS_LONG}, /* Deprecated */
 	{"fnftab", no_argument, 0, LOPT_FNFTAB}, /* Deprecated */
 	{"full-dir-size", no_argument, 0, LOPT_FULL_DIR_SIZE},
+	{"total-size", no_argument, 0, LOPT_FULL_DIR_SIZE},
 	{"fuzzy-matching", no_argument, 0, LOPT_FUZZY_MATCHING},
 	{"fuzzy-algo", required_argument, 0, LOPT_FUZZY_ALGO},
 	{"fzfpreview", no_argument, 0, LOPT_FZFPREVIEW}, /* Legacy: is default now */

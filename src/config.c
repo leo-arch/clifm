@@ -414,9 +414,6 @@ dump_config(void)
 	n = DEF_FOLLOW_SYMLINKS;
 	print_config_value("FollowSymlinks", &conf.follow_symlinks, &n, DUMP_CONFIG_BOOL);
 
-	n = DEF_FULL_DIR_SIZE;
-	print_config_value("FullDirSize", &conf.full_dir_size, &n, DUMP_CONFIG_BOOL);
-
 #ifndef _NO_FZF
 	n = DEF_FUZZY_MATCH;
 	print_config_value("FuzzyMatching", &conf.fuzzy_match, &n,
@@ -641,6 +638,9 @@ dump_config(void)
 
 	n = DEF_TIPS;
 	print_config_value("Tips", &conf.tips, &n, DUMP_CONFIG_BOOL);
+
+	n = DEF_FULL_DIR_SIZE;
+	print_config_value("TotalSize", &conf.full_dir_size, &n, DUMP_CONFIG_BOOL);
 
 #ifndef _NO_TRASH
 	n = DEF_TRASRM;
@@ -1755,7 +1755,7 @@ create_main_config_file(char *file)
 
 "\t\t###########################################\n\
 \t\t#                  CLIFM                  #\n\
-\t\t#      The Command Line File Manager      #\n\
+\t\t#      The Command-Line File Manager      #\n\
 \t\t###########################################\n\n"
 
 	    "# This is the configuration file for Clifm\n\n"
@@ -1876,8 +1876,8 @@ create_main_config_file(char *file)
 ;PTimeStyle=\"\"\n\
 # Print files apparent size instead of actual device usage\n\
 ;ApparentSize=%s\n\
-# If running in long view, print directories total size\n\
-;FullDirSize=%s\n\n\
+# Display recursive directory sizes (long-view only)\n\
+;TotalSize=%s\n\n\
 # Log errors and warnings\n\
 ;LogMsgs=%s\n\
 # Log commands entered in the command line\n\
@@ -3721,6 +3721,7 @@ read_config(void)
 			set_config_bool_value(line + 15, &conf.follow_symlinks);
 		}
 
+		/* Old name for TotalSize (keep: no deprecation warning) */
 		else if (xargs.full_dir_size == UNSET && *line == 'F'
 		&& strncmp(line, "FullDirSize=", 12) == 0) {
 			set_config_bool_value(line + 12, &conf.full_dir_size);
@@ -4043,6 +4044,11 @@ read_config(void)
 		else if (xargs.tips == UNSET && *line == 'T'
 		&& strncmp(line, "Tips=", 5) == 0) {
 			set_config_bool_value(line + 5, &conf.tips);
+		}
+
+		else if (xargs.full_dir_size == UNSET && *line == 'T'
+		&& strncmp(line, "TotalSize=", 10) == 0) {
+			set_config_bool_value(line + 10, &conf.full_dir_size);
 		}
 
 #ifndef _NO_TRASH

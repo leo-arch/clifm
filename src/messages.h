@@ -1509,7 +1509,6 @@ database (via the 'j' command)\
 \n      --data-dir=PATH\t\t Use PATH as the data directory (e.g., /usr/local/share)\
 \n      --desktop-noti=STYLE\t Set the desktop notification style: 'kitty', 'system', or 'false' (default)\
 \n      --disk-usage\t\t Show disk usage (FREE/TOTAL (FREE %) TYPE DEVICE)\
-\n      --full-dir-size\t\t Display recursive directory sizes (long-view/--stat only)\
 \n      --fuzzy-algo=NUM\t\t Set fuzzy algorithm for fuzzy matching (1 or 2)\
 \n      --fuzzy-matching\t\t Enable fuzzy tab completion/suggestions for filenames \
 and paths\
@@ -1573,6 +1572,7 @@ PropFields in the config file)\
 \n      --stat-full FILE...\t Short for '--dereference --full-dir-size --stat'\
 \n      --tabmode=MODE\t\t Set tab completion mode to one of 'fzf', 'fnf', 'smenu', or 'standard'\
 \n      --time-style=STYLE\t Time/date style used in long view (see TimeStyle in the config file)\
+\n      --total-size\t\t Display recursive directory sizes (long-view/--stat only)\
 \n      --trash-as-rm\t\t The 'r' command moves files to the trash instead of removing them\
 \n      --unicode\t\t\t Force the use of Unicode decorations\
 \n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
