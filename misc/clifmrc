@@ -26,11 +26,11 @@
 # Both plain filenames and wildcards are supported for specifying hidden files.
 ;ReadDotHidden=false
 
-# Specify how to sort directories. Supported values:
-# first   = List dirs before files
-# last    = List dirs after files
-# asfiles = No distinction is made between dirs and non-dir files
-;SortDirs=first
+# Specify how to group directories. Supported values:
+# first = Group directories before files
+# last  = Group directories after files
+# false = Do not group directories
+;GroupDirs=first
 
 # Regular expression to filter files from the file list.
 # For example: "!.*~$" to exclude backup files (ending with ~), or "^\." to
