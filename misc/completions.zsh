@@ -16,7 +16,7 @@ args=(
 	{-D+,--config-dir=}'[set an alternative configuration directory]:directory:_directories'
 	{-e,--no-eln}'[do not print ELNs (entry list number)]'
 	{-E,--eln-use-workspace-color}'[ELNs use the color of the current workspace]'
-	{-f+,--sort-dirs}'[set sort-dirs mode]:dir_mode:->dir_modes'
+	{-f+,--group-dirs}'[set group-dirs mode]:dir_mode:->dir_modes'
 	{-g,--pager}'[enable the pager]'
 	{-G,--no-pager}'[disable the pager (default)]'
 	{-h,--help}'[show this help and exit]'
@@ -130,7 +130,7 @@ case "$state" in
 	;;
 
 	dir_modes)
-		_values -s, 'dir_modes' first last asfiles
+		_values -s, 'dir_modes' first last false
 	;;
 
 	when_color)

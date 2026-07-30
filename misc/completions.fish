@@ -13,7 +13,7 @@ complete -c clifm -s c -l config-file -r -d 'Set an alternative configuration fi
 complete -c clifm -s D -l config-dir -r -d 'Set an alternative configuration directory'
 complete -c clifm -s e -l no-eln -d 'Do not print ELNs (entry list number)'
 complete -c clifm -s E -l eln-use-workspace-color -d 'ELNs use the current workspace color'
-complete -c clifm -s f -l sort-dirs -r -d 'Set sort-dirs mode' -x -a 'first last asfiles'
+complete -c clifm -s f -l group-dirs -r -d 'Set group-dirs mode' -x -a 'first last false'
 complete -c clifm -s g -l pager -d 'Enable the pager'
 complete -c clifm -s G -l no-pager -d 'Disable the pager'
 complete -c clifm -s h -l help -d 'Show help and exit'

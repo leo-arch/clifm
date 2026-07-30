@@ -29,7 +29,7 @@ _clifm ()
         -E
         --eln-use-workspace-color
         -f
-        --sort-dirs
+        --group-dirs
         -g
         --pager
         -G
@@ -192,8 +192,8 @@ _clifm ()
 		local args=$(echo -e "none\nname\nsize\natime\nbtime\nctime\nmtime\nversion\nextension\ninode\nowner\ngroup\nblocks\nlinks\ntype")
         COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
-    elif [[ $prev == "-f" || $prev == "--sort-dirs" ]]; then
-		local args=$(echo -e "first\nlast\nasfiles")
+    elif [[ $prev == "-f" || $prev == "--group-dirs" ]]; then
+		local args=$(echo -e "first\nlast\nfalse")
         COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "-a" || $prev == "--show-hidden" ]]; then
