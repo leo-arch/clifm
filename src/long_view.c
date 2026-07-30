@@ -222,10 +222,20 @@ gen_size(const struct fileinfo *props, char *size_str,
 
 	const int no_dir_access =
 		(file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1);
-	if (S_ISCHR(props->mode) || S_ISBLK(props->mode) || no_dir_access == 1) {
+	if (no_dir_access == 1) {
 		bytes = snprintf(size_str, buf_rem_space, "%s%*c%s", dn_c, size_max
 			+ (prop_fields.size == PROP_SIZE_HUMAN),
 			no_dir_access == 1 ? UNKNOWN_CHR : '-', df_c);
+		return bytes > 0 ? (size_t)bytes : 0;
+	}
+
+	if (S_ISCHR(props->mode) || S_ISBLK(props->mode)) {
+		static char dev_str[128];
+		snprintf(dev_str, sizeof(dev_str), "%ju,%ju",
+			(uintmax_t)major(props->rdev), (uintmax_t)minor(props->rdev));
+		bytes = snprintf(size_str, buf_rem_space, "%s%*s%s",
+			dn_c, size_max + (prop_fields.size == PROP_SIZE_HUMAN),
+			dev_str, df_c);
 		return bytes > 0 ? (size_t)bytes : 0;
 	}
 

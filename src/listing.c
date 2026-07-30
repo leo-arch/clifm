@@ -34,10 +34,6 @@
 # include <time.h>
 #endif /* LIST_SPEED_TEST */
 
-#if defined(LINUX_FSINFO)
-# include <sys/sysmacros.h> /* major() macro */
-#endif /* LINUX_FSINFO */
-
 #if defined(TOURBIN_QSORT)
 # include "qsort.h"
 # define ENTLESS(i, j) (entrycmp(file_info + (i), file_info + (j)) < 0)
@@ -1117,6 +1113,8 @@ set_long_attribs(const filesn_t n, const struct stat *a)
 		file_info[n].gid = a->st_gid;
 	}
 
+	file_info[n].rdev = a->st_rdev;
+
 	if (conf.full_dir_size == 1 && file_info[n].dir == 1
 	&& file_info[n].type == DT_DIR) {
 		file_info[n].size = dir_size(file_info[n].name, 1,
@@ -1184,15 +1182,22 @@ compute_maxes(void)
 				maxes.file_counter = t;
 		}
 
-		if (prop_fields_size == PROP_SIZE_BYTES) {
-			t = DIGINUM_BIG(file_info[i].size);
+		if (file_info[i].type == DT_CHR || file_info[i].type == DT_BLK) {
+			t = DIGINUM(major(file_info[i].rdev)) /* major,minor */
+				+ DIGINUM(minor(file_info[i].rdev)) + 1;
 			if (t > maxes.size)
 				maxes.size = t;
 		} else {
-			if (prop_fields_size == PROP_SIZE_HUMAN) {
-				t = (int)file_info[i].human_size.len;
+			if (prop_fields_size == PROP_SIZE_BYTES) {
+				t = DIGINUM_BIG(file_info[i].size);
 				if (t > maxes.size)
 					maxes.size = t;
+			} else {
+				if (prop_fields_size == PROP_SIZE_HUMAN) {
+					t = (int)file_info[i].human_size.len;
+					if (t > maxes.size)
+						maxes.size = t;
+				}
 			}
 		}
 
@@ -3243,6 +3248,7 @@ set_long_attribs_link_target(const filesn_t n, const struct stat *a)
 	file_info[n].mode = a->st_mode;
 	file_info[n].uid = a->st_uid;
 	file_info[n].gid = a->st_gid;
+	file_info[n].rdev = a->st_rdev;
 	if (checks.id_names == 1)
 		set_id_names(n);
 

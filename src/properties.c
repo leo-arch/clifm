@@ -23,14 +23,6 @@
 #include <unistd.h>
 #include <grp.h>
 #include <pwd.h>
-
-#if defined(__linux__) || defined(__CYGWIN__)
-# include <sys/sysmacros.h> /* minor(), major() */
-#elif defined(__sun)
-# include <sys/mkdev.h> /* minor(), major() */
-/* For BSD systems, we need sys/types.h, already included in helpers.h */
-#endif /* __linux__ || __CYGWIN__ */
-
 #include <readline/tilde.h>
 
 #ifdef LINUX_FILE_ATTRS
@@ -103,13 +95,6 @@
 #  define CTIMNSEC st_ctime
 #  define MTIMNSEC st_mtime
 #endif /* !CLIFM_LEGACY */
-
-#ifndef major /* Not defined in Haiku */
-# define major(x) (((x) >> 8) & 0x7F)
-#endif /* major */
-#ifndef minor /* Not defined in Haiku */
-# define minor(x) ((x) & 0xFF)
-#endif /* minor */
 
 #if defined(LINUX_FILE_ATTRS)
 /* Print file attributes as lsattr(1) would.

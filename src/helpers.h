@@ -282,6 +282,19 @@ if (S_ISNWK(mode)) return 'n'; // HP/UX: network special file
 # include <stdint.h> /* uint8_t */
 #endif /* __linux__ */
 
+#if defined(__linux__) || defined(__CYGWIN__)
+# include <sys/sysmacros.h> /* minor(), major() */
+#elif defined(__sun)
+# include <sys/mkdev.h> /* minor(), major() */
+/* For BSD systems, we need sys/types.h, already included */
+#endif /* __linux__ || __CYGWIN__ */
+#ifndef major /* Not defined in Haiku */
+# define major(x) (((x) >> 8) & 0x7F)
+#endif /* major */
+#ifndef minor /* Not defined in Haiku */
+# define minor(x) ((x) & 0xFF)
+#endif /* minor */
+
 #if !defined(_BE_POSIX)
 # if defined(__GLIBC__) \
 || (defined(__FreeBSD__) && __FreeBSD_version >= 604000) \
@@ -1373,6 +1386,7 @@ struct fileinfo {
 	nlink_t linkn; /* 4 bytes on Solaris/BSD/HAIKU; 8 on Linux */
 	uid_t uid;
 	gid_t gid;
+	dev_t rdev;    /* Major/minor ID of block/char devices (long view) */
 	mode_t mode;   /* Store st_mode (for long view mode) */
 	mode_t type;   /* Store d_type value */
 	int dir;
@@ -1721,13 +1735,13 @@ struct props_t {
 };
 extern struct props_t prop_fields;
 
-#define ALL_CMDS        (1 << 0) // Check all commands (ignore parameters)
-#define NO_PARAM        (1 << 1) // Command takes no parameter
-#define PARAM_STR       (1 << 2) // Command takes a string (not filename)
-#define PARAM_FNAME     (1 << 3) // Command takes filenames
-#define PARAM_NUM       (1 << 4) // Command takes numbers
-#define NO_FNAME_NUM    (NO_PARAM | PARAM_STR) // Neither filename nor number
-#define PARAM_FNAME_NUM (PARAM_FNAME | PARAM_NUM) // Either filename or number
+#define ALL_CMDS        (1 << 0) /* Check all commands (ignore parameters) */
+#define NO_PARAM        (1 << 1) /* Command takes no parameter */
+#define PARAM_STR       (1 << 2) /* Command takes a string (not filename) */
+#define PARAM_FNAME     (1 << 3) /* Command takes filenames */
+#define PARAM_NUM       (1 << 4) /* Command takes numbers */
+#define NO_FNAME_NUM    (NO_PARAM | PARAM_STR) /* Neither filename nor number */
+#define PARAM_FNAME_NUM (PARAM_FNAME | PARAM_NUM) /* Either filename or number */
 
 struct cmdslist_t {
 	char *name;
