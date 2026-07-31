@@ -36,8 +36,8 @@ _clifm ()
         --no-pager
         -h
         --help
-		-H
-		--horizontal-list
+        -H
+        --horizontal-list
         -i
         --no-case-sensitive
         -I
@@ -54,8 +54,6 @@ _clifm ()
         --autols
         -O
         --no-autols
-        -p
-        --path
         -P
         --profile
         -r
@@ -78,7 +76,7 @@ _clifm ()
         --light-mode
         -z
         --sort
-		--bell
+        --bell
         --case-sens-dirjump
         --case-sens-path-comp
         --cd-on-quit
@@ -120,7 +118,7 @@ _clifm ()
         --no-tips
         --no-truncate-names
         --no-unicode
-		--no-warning-prompt
+        --no-warning-prompt
         --no-welcome-message
         --only-dirs
         --open

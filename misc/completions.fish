@@ -26,7 +26,6 @@ complete -c clifm -s L -l dereference -d 'Follow symbolic links when listing fil
 complete -c clifm -s m -l dirhist-map -d 'Enable the directory history map'
 complete -c clifm -s o -l autols -d 'List files automatically'
 complete -c clifm -s O -l no-autols -d 'Do not list files automatically'
-complete -c clifm -s p -l path -r -d 'Set starting path'
 complete -c clifm -s P -l profile -r -d 'Set profile' -x -a '(ls ~/.config/clifm/profiles/)'
 complete -c clifm -s r -l no-refresh-on-empty-line -d 'Do not refresh the screen when pressing Enter on an empty line'
 complete -c clifm -s s -l splash -d 'Display the splash screen at startup'

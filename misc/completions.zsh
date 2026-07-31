@@ -29,7 +29,6 @@ args=(
 	{-m,--dihist-map}'[enable the directory history map]'
 	{-o,--autols}'[list files automatically (default)]'
 	{-O,--no-autols}'[do not list files automatically]'
-	{-p+,--path=}'[set the starting path]:directory:_directories'
 	{-P+,--profile=}'[use/create PROFILE as profile]:profile:->profiles'
 	{-r,--no-refresh-on-empty-line}'[do not refresh the screen when pressing Enter on empty line]'
 	{-s,--splash}'[display the splash screen at startup]'
