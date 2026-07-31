@@ -1063,7 +1063,7 @@ ask_for_confirmation(char **args)
 		return i;
 	}
 
-	printf(_("%s to be trashed:\n"), FILE_STR(total));
+	puts(_("Files to move to Trash:"));
 
 	size_t count = 0;
 	for (i = 1; args[i]; i++) {
@@ -1079,8 +1079,12 @@ ask_for_confirmation(char **args)
 			name[l - 1] = '\0';
 
 		const int ret = lstat(name, &a);
-		print_file_name(name, ret == 0 && S_ISDIR(a.st_mode),
+		char *abbr = *name == '/' ? abbreviate_file_name(name) : name;
+
+		print_file_name(abbr ? abbr : name, ret == 0 && S_ISDIR(a.st_mode),
 			ret == 0 ? &a : NULL);
+
+		if (abbr != name) free(abbr);
 		free(name);
 	}
 
