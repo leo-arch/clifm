@@ -1475,17 +1475,7 @@ trash_func(char **args, int *t_cont)
 		return FUNC_SUCCESS;
 	}
 
-	int exit_status = trash_function(args);
-
-	if (is_sel > 0 && sel_n > 0) { /* If 'tr sel', deselect everything */
-		for (size_t i = sel_n; i-- > 0;)
-			free(sel_elements[i].name);
-		sel_n = 0;
-		if (save_sel() != 0)
-			exit_status = FUNC_FAILURE;
-	}
-
-	return exit_status;
+	return trash_function(args);
 #else
 	UNUSED(args);
 	xerror(_("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
