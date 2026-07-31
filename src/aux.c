@@ -85,6 +85,23 @@ press_any_key_to_continue(const int init_newline)
 	errno = saved_errno;
 }
 
+size_t
+get_max_confirm_files(void)
+{
+	const int max = conf.max_confirm_files;
+	if (max == MAX_CONFIRM_FILES_AUTO) /* Half terminal lines */
+		return (size_t)(term_lines >> 1); /* Divide by 2 */
+	if (max == MAX_CONFIRM_FILES_ALL) /* No limit */
+		return (size_t)SIZE_MAX;
+	if (max == MAX_CONFIRM_FILES_NONE)
+		return 0;
+	if (max < 0)
+		return 0;
+
+	/* Dispay exactly this number of files */
+	return (size_t)max;
+}
+
 /* Print the file named FNAME, quoted if it contains a space.
  * A slash is appended if FNAME is a directory (ISDIR >= 1). */
 void

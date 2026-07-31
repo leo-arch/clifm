@@ -21,7 +21,7 @@
 #endif /* MAC_OS_X_RENAMEAT_SYS_STDIO_H */
 
 #include "aux.h"        /* gen_date_suffix, count_dir, open_fwrite, open_fread,
-xatoi, url_encode, xnmalloc, print_file_name */
+xatoi, url_encode, xnmalloc, print_file_name, set_max_confirm_files */
 #include "checks.h"     /* is_file_in_cwd, is_number */
 #include "colors.h"     /* colors_list */
 #include "listing.h"    /* reload_dirlist */
@@ -1083,11 +1083,32 @@ static size_t
 ask_for_confirmation(char **args)
 {
 	struct stat a;
-	size_t i = 0;
+	size_t i;
 
-	fputs(_("File(s) to be trashed:\n"), stdout);
+	const size_t max = get_max_confirm_files();
 
+	for (i = 1; args[i]; i++);
+	size_t total = i - 1;
+
+	const char *file_str = total == 1 ? "file" : "files";
+
+	char prompt_msg[128];
+	snprintf(prompt_msg, sizeof(prompt_msg), _("Trash %zu %s?"),
+		total, file_str);
+
+	if (max == 0) {
+		if (rl_get_y_or_n(prompt_msg, conf.default_answer.trash) == 0)
+			return 0;
+		return i;
+	}
+
+	printf(_("%s to be trashed:\n"), file_str);
+
+	size_t count = 0;
 	for (i = 1; args[i]; i++) {
+		if (++count > max)
+			continue;
+
 		char *name = unescape_str(args[i]);
 		if (!name)
 			name = savestring(args[i], strlen(args[i]));
@@ -1100,7 +1121,10 @@ ask_for_confirmation(char **args)
 		free(name);
 	}
 
-	if (rl_get_y_or_n(_("Continue?"), conf.default_answer.trash) == 0)
+	if (count > max)
+		printf(_("... and %zu more files\n"), total - max);
+
+	if (rl_get_y_or_n(prompt_msg, conf.default_answer.trash) == 0)
 		return 0;
 
 	return i;

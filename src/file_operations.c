@@ -21,7 +21,8 @@
 # undef CHAR_MAX /* Silence redefinition error */
 #endif /* __TINYC__ */
 
-#include "aux.h" /* gen_default_answer, make_filename_unique */
+#include "aux.h" /* gen_default_answer, make_filename_unique,
+set_max_confirm_files */
 #include "checks.h"
 #include "colors.h"
 #include "file_operations.h"
@@ -1922,17 +1923,40 @@ list_removed_files(struct rm_info *info, const size_t start, const int cwd)
 static int
 rm_confirm(const struct rm_info *info, const size_t start, const int have_dirs)
 {
-	printf(_("File(s) to be removed%s:\n"),
+	const size_t max = get_max_confirm_files();
+
+	size_t total = 0;
+	for (size_t i = start; info[i].name; i++)
+		total++;
+
+	const char *file_str = total == 1 ? "file" : "files";
+
+	char prompt_msg[128];
+	snprintf(prompt_msg, sizeof(prompt_msg), _("Remove %zu %s?"),
+		total, file_str);
+
+	if (max == 0)
+		return rl_get_y_or_n(prompt_msg, conf.default_answer.remove);
+
+	printf(_("%s to be removed%s:\n"), file_str,
 		have_dirs > 0 ? _(" (recursively)") : "");
 
+	size_t count = 0;
+
 	for (size_t i = start; info[i].name; i++) {
+		if (++count > max)
+			continue;
+
 		char *name = abbreviate_file_name(info[i].name);
 		print_file_name(name, info[i].dir);
 		if (name != info[i].name)
 			free(name);
 	}
 
-	return rl_get_y_or_n(_("Continue?"), conf.default_answer.remove);
+	if (count > max)
+		printf(_("... and %zu more files\n"), total - max);
+
+	return rl_get_y_or_n(prompt_msg, conf.default_answer.remove);
 }
 
 static int

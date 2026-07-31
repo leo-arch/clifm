@@ -35,6 +35,7 @@ struct timespec get_birthtime(const char *filename);
 char *get_cwd(char *buf, const size_t buflen, const int check_workspace);
 mode_t get_dt(const mode_t mode);
 int  get_link_ref(const char *link);
+size_t get_max_confirm_files(void);
 int  get_rgb(const char *hex, int *attr, int *r, int *g, int *b);
 size_t hashme(const char *str, const int case_sensitive);
 char *hex2rgb(const char *hex);

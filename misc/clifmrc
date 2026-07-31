@@ -369,6 +369,14 @@
 # confirmation off for a single command. E.g., 'r -f FILE'.
 ;rmForce=false
 
+# Maximum number of filenames shown in confirmation prompts (e.g., when
+# removing or trashing files). Supported values:
+# none = Show no file list, only prompt for confirmation
+# all  = List all filenames
+# auto = The limit is set to half the terminal height (in lines)
+# >0   = List at most this number of filenames
+;MaxConfirmFiles=auto
+
 # Warn about unsafe filenames when creating/renaming files ('n' and 'm'
 # commands respectively). Supported values:
 # false =  No check is performed

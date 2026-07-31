@@ -201,6 +201,7 @@ init_conf_struct(void)
 	conf.log_cmds = DEF_LOG_CMDS;
 	conf.log_msgs = DEF_LOG_MSGS;
 	conf.long_view = UNSET;
+	conf.max_confirm_files = DEF_MAX_CONFIRM_FILES;
 	conf.max_dirhist = UNSET;
 	conf.max_files = DEF_MAX_FILES;
 	conf.max_hist = DEF_MAX_HIST;

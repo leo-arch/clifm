@@ -950,6 +950,11 @@ extern time_t curdir_mtime;
 #define SIMPLE_STAT 1
 #define FULL_STAT   2
 
+/* Values for MaxConfirmFiles option (conf.max_confirm_files) */
+#define MAX_CONFIRM_FILES_NONE 0
+#define MAX_CONFIRM_FILES_AUTO (-1)
+#define MAX_CONFIRM_FILES_ALL  (-2)
+
 /* Length to be added to a filename length if icons are enabled. */
 #define ICON_LEN (2 + conf.icons_gap) /* Fixed icon width + gap */
 
@@ -1177,6 +1182,7 @@ struct config_t {
 	int log_cmds;
 	int log_msgs;
 	int long_view;
+	int max_confirm_files;
 	int max_dirhist;
 	int max_hist;
 	int max_jump_total_rank;

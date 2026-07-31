@@ -524,6 +524,9 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_LOG_MSGS 0
 #define DEF_LOG_CMDS 0
 #define DEF_LONG_VIEW 0
+/* MAX_CONFIRM_FILES_AUTO, MAX_CONFIRM_FILES_NONE, MAX_CONFIRM_FILES_ALL,
+ * or a positive integer. */
+#define DEF_MAX_CONFIRM_FILES MAX_CONFIRM_FILES_AUTO
 #define DEF_MAX_DIRHIST 100
 #define DEF_MAX_FILES UNSET
 /* Either UNSET, a positive integer, or

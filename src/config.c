@@ -306,6 +306,16 @@ get_group_dirs_str(const int value)
 	}
 }
 
+static const char *
+get_max_confirm_files_str(const int val)
+{
+	if (val == MAX_CONFIRM_FILES_ALL) return "all";
+	if (val == MAX_CONFIRM_FILES_AUTO) return "auto";
+	if (val == MAX_CONFIRM_FILES_NONE) return "none";
+	if (val < 0) return "unknown";
+	return xitoa((long long)val);
+}
+
 /* Dump current value of config options (as defined in the config file),
  * highlighting those that differ from default values.
  * Note that values displayed here represent the CURRENT status of the
@@ -464,6 +474,11 @@ dump_config(void)
 
 	n = DEF_LONG_VIEW;
 	print_config_value("LongViewMode", &conf.long_view, &n, DUMP_CONFIG_BOOL);
+
+	print_config_value("MaxConfirmFiles",
+		get_max_confirm_files_str(conf.max_confirm_files),
+		get_max_confirm_files_str(DEF_MAX_CONFIRM_FILES),
+		DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_MAX_DIRHIST;
 	print_config_value("MaxDirhist", &conf.max_dirhist, &n, DUMP_CONFIG_INT);
@@ -2095,6 +2110,7 @@ create_main_config_file(char *file)
 	fprintf(config_fp,
 	";MaxHistory=%d\n\
 ;MaxDirhist=%d\n\
+;MaxConfirmFiles=%s\n\
 ;MaxLog=%d\n\
 ;HistIgnore=%s\n\
 ;DirhistIgnore=\"\"\n\
@@ -2135,6 +2151,7 @@ create_main_config_file(char *file)
 
 		DEF_MAX_HIST,
 		DEF_MAX_DIRHIST,
+		get_max_confirm_files_str(DEF_MAX_CONFIRM_FILES),
 		DEF_MAX_LOG,
 		DEF_HISTIGNORE,
 		DEF_ICONS == 1 ? "true" : "false",
@@ -3550,6 +3567,29 @@ set_term_title_value(const char *line)
 	set_config_bool_value(line, &conf.term_title);
 }
 
+static void
+set_max_confirm_files(char *line)
+{
+	if (!line || !*line || *line == '\n')
+		return;
+
+	char *p = strchr(line, '\n');
+	if (p)
+		*p = '\0';
+
+	if (*line == 'n' && strcmp(line, "none") == 0)
+		conf.max_confirm_files = MAX_CONFIRM_FILES_NONE;
+	else if (*line == 'a' && strcmp(line, "all") == 0)
+		conf.max_confirm_files = MAX_CONFIRM_FILES_ALL;
+	else if (*line == 'a' && strcmp(line, "auto") == 0)
+		conf.max_confirm_files = MAX_CONFIRM_FILES_AUTO;
+	else if (is_number(line)) {
+		const int n = xatoi(line);
+		if (n >= 0 && n <= INT_MAX)
+			conf.max_confirm_files = n;
+	}
+}
+
 /* The buffer to store read lines is PATH_MAX + 16. But for some reason
  * cppcheck does not expand PATH_MAX, so that it only sees 16 bytes, and
  * thereby a lot of out-of-bounds read. */
@@ -3799,6 +3839,10 @@ read_config(void)
 
 		else if (*line == 'L' && strncmp(line, "LogCmds=", 8) == 0) {
 			set_config_bool_value(line + 8, &conf.log_cmds);
+		}
+
+		else if (*line == 'M' && strncmp(line, "MaxConfirmFiles=", 16) == 0) {
+			set_max_confirm_files(line + 16);
 		}
 
 		else if (xargs.max_dirhist == UNSET && *line == 'M'
