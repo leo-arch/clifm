@@ -490,8 +490,12 @@ convert_filetype(mode_t *filetype)
 	case 'd': *filetype = DT_DIR; break;
 	case 'f': *filetype = DT_REG; break;
 	case 'l': *filetype = DT_LNK; break;
-	case 's': *filetype = DT_SOCK; break;
 	case 'p': *filetype = DT_FIFO; break;
+	case 's': *filetype = DT_SOCK; break;
+#ifdef SOLARIS_DOORS
+	case 'O': *filetype = DT_DOOR; break;
+	case 'P': *filetype = DT_PORT; break;
+#endif /* SOLARIS_DOORS */
 	default:
 		xerror(_("sel: '%c': Unrecognized file type.\n"
 			"Try 'sel --help' for more information.\n"), (char)*filetype);
