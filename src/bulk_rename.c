@@ -459,7 +459,7 @@ bulk_rename(char **args, size_t *renamed, const size_t reload_list)
 			reload_dirlist();
 
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-			_("%zu file(s) renamed\n"), *renamed);
+			_("%zu %s renamed\n"), *renamed, FILE_STR(*renamed));
 	}
 
 FREE_AND_EXIT:

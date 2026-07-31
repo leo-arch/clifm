@@ -557,7 +557,7 @@ set_file_perms(char **args)
 	}
 
 	if (n > 0)
-		printf(_("pc: Applied new permissions to %zu file(s)\n"), n);
+		printf(_("pc: Applied new permissions to %zu %s\n"), n, FILE_STR(n));
 
 	free(new_perms);
 	if (octal_str != new_perms)
@@ -755,7 +755,8 @@ set_file_owner(char **args)
 		if (exit_status == 0)
 			puts(_("oc: Nothing to do"));
 	} else {
-		printf(_("New ownership set for %zu file(s)\n"), new_o + new_g);
+		printf(_("New ownership set for %zu %s\n"),
+			new_o + new_g, FILE_STR(new_o + new_g));
 	}
 
 	free(new_own);

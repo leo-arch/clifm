@@ -1084,6 +1084,13 @@ extern time_t curdir_mtime;
 #define IS_HELP(s) (*(s) == '-' && (((s)[1] == 'h' && !(s)[2]) \
 	|| strcmp((s), "--help") == 0))
 
+#ifndef NO_PLURALIZATION
+/* This is bad for translations, but better than nothing. */
+# define FILE_STR(n) ((n) == 1 ? _("file") : _("files"))
+#else
+# define FILE_STR(n) (_("file(s)"))
+#endif /* !NO_PLURALIZATION */
+
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */

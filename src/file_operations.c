@@ -531,8 +531,8 @@ list_created_files(char **nfiles, const filesn_t nfiles_n)
 			free(f);
 	}
 
-	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) created\n"),
-		(size_t)nfiles_n);
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu %s created\n"),
+		(size_t)nfiles_n, FILE_STR(nfiles_n));
 }
 
 static int
@@ -1279,12 +1279,14 @@ vv_rename_files(char **args, const size_t copied)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) copied\n"), copied);
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu %s copied\n"),
+		copied, FILE_STR(copied));
 	if (renamed > 0) {
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-			_("%zu file(s) renamed\n"), renamed);
+			_("%zu %s renamed\n"), renamed, FILE_STR(renamed));
 	} else {
-		print_reload_msg(NULL, NULL, _("%zu file(s) renamed\n"), renamed);
+		print_reload_msg(NULL, NULL, _("%zu %s renamed\n"),
+			renamed, FILE_STR(renamed));
 	}
 
 	for (i = 0; tmp[i]; i++)
@@ -1392,9 +1394,11 @@ print_cp_mv_summary_msg(const char *c, const size_t n, const int cwd)
 		reload_dirlist();
 
 	if (IS_MVCMD(c))
-		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) moved\n"), n);
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu %s moved\n"),
+			n, FILE_STR(n));
 	else
-		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) copied\n"), n);
+		print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu %s copied\n"),
+			n, FILE_STR(n));
 
 	return FUNC_SUCCESS;
 }
@@ -1874,8 +1878,8 @@ list_removed_files(struct rm_info *info, const size_t start, const int cwd)
 	if (conf.autols == 1 && cwd == 1)
 		reload_dirlist();
 
-	const char *f = c == 1 ? "file" : "files";
-	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu %s removed\n"), c, f);
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu %s removed\n"),
+		c, FILE_STR(c));
 }
 
 /* Print files to be removed and ask the user for confirmation.
@@ -1889,16 +1893,14 @@ rm_confirm(const struct rm_info *info, const size_t start, const int have_dirs)
 	for (size_t i = start; info[i].name; i++)
 		total++;
 
-	const char *file_str = total == 1 ? "file" : "files";
-
 	char prompt_msg[128];
 	snprintf(prompt_msg, sizeof(prompt_msg), _("Remove %zu %s?"),
-		total, file_str);
+		total, FILE_STR(total));
 
 	if (max == 0)
 		return rl_get_y_or_n(prompt_msg, conf.default_answer.remove);
 
-	printf(_("%s to be removed%s:\n"), file_str,
+	printf(_("%s to be removed%s:\n"), FILE_STR(total),
 		have_dirs > 0 ? _(" (recursively)") : "");
 
 	size_t count = 0;
@@ -1915,7 +1917,7 @@ rm_confirm(const struct rm_info *info, const size_t start, const int have_dirs)
 
 	if (count > max) {
 		const size_t rem = total - max;
-		printf(_("... and %zu more %s\n"), rem, rem == 1 ? "file" : "files");
+		printf(_("... and %zu more %s\n"), rem, FILE_STR(rem));
 	}
 
 	return rl_get_y_or_n(prompt_msg, conf.default_answer.remove);
@@ -2239,7 +2241,8 @@ batch_link(char **args)
 		reload_dirlist();
 	}
 	print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-		_("%zu symbolic link(s) created\n"), symlinked);
+		_("%zu %s\n"), symlinked, symlinked == 1
+		? _("symbolic link created") : _("symbolic links created"));
 
 	return exit_status;
 }

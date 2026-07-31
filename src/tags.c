@@ -374,7 +374,7 @@ create_tags(char **args)
 			continue;
 		}
 
-		printf(_("%s: Successfully created tag\n"), args[i]);
+		printf(_("%s: Tag created\n"), args[i]);
 	}
 
 	reload_tags();
@@ -409,7 +409,7 @@ remove_tags(char **args)
 
 		const char *cmd[] = {"rm", "-r", "--", dir, NULL};
 		if (launch_execv(cmd, FOREGROUND, E_NOFLAG) == FUNC_SUCCESS) {
-			printf(_("'%s': Successfully removed tag\n"), args[i]);
+			printf(_("'%s': Tag removed\n"), args[i]);
 			reload_tags();
 		} else {
 			exit_status = FUNC_FAILURE;
@@ -539,7 +539,7 @@ tag_files(char **args)
 	free(tag_names);
 
 	if (n > 0)
-		printf(_("Successfully tagged %zu file(s)\n"), n);
+		printf(_("Tagged %zu %s\n"), n, FILE_STR(n));
 	return FUNC_SUCCESS;
 }
 
@@ -611,7 +611,7 @@ untag_files(char **args)
 	}
 
 	if (n > 0)
-		printf(_("Successfully untagged %zu file(s)\n"), n);
+		printf(_("Untagged %zu %s\n"), n, FILE_STR(n));
 
 	return exit_status;
 }
@@ -644,7 +644,7 @@ rename_tag(char **args)
 		return errno;
 	}
 
-	puts(_("Successfully renamed tag"));
+	puts(_("Tag renamed"));
 	reload_tags();
 	return FUNC_SUCCESS;
 }
@@ -720,7 +720,7 @@ merge_tags(char **args)
 	}
 
 	reload_tags();
-	printf(_("Successfully merged %s%s%s into %s%s%s\n"),
+	printf(_("Merged %s%s%s into %s%s%s\n"),
 		conf.colorize == 1 ? BOLD : "", src, df_c,
 		conf.colorize == 1 ? BOLD : "", dst, df_c);
 

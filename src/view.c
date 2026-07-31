@@ -472,8 +472,10 @@ preview_function(char **args)
 #endif /* READLINE >= 7.0 */
 
 	if (sel_n > seln_bk) {
-		print_reload_msg(NULL, NULL, _("%zu file(s) selected\n"), sel_n - seln_bk);
-		print_reload_msg(NULL, NULL, _("%zu total selected file(s)\n"), sel_n);
+		print_reload_msg(NULL, NULL, _("%zu %s selected\n"),
+			sel_n - seln_bk, FILE_STR(sel_n - seln_bk));
+		print_reload_msg(NULL, NULL, _("%zu total selected %s\n"),
+			sel_n, FILE_STR(sel_n));
 	}
 
 	return FUNC_SUCCESS;

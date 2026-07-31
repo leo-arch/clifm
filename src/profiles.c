@@ -377,7 +377,7 @@ profile_del(const char *prof)
 		return ret;
 	}
 
-	printf(_("Successfully removed profile %s%s%s\n"), BOLD, prof, df_c);
+	printf(_("Removed profile %s%s%s\n"), BOLD, prof, df_c);
 
 	if (profile_names) {
 		for (size_t i = 0; profile_names[i]; i++)
@@ -547,7 +547,7 @@ rename_profile(char **args)
 		len + 1, sizeof(char));
 	xstrsncpy(profile_names[src_pf_index], args[1], len + 1);
 
-	printf(_("pf: '%s': Profile successfully renamed to %s%s%s\n"),
+	printf(_("pf: '%s': Profile renamed to %s%s%s\n"),
 		args[0], BOLD, args[1], df_c);
 
 	return FUNC_SUCCESS;

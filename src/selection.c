@@ -672,8 +672,9 @@ print_sel_results(const int new_sel, const char *sel_path,
 	}
 
 	print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-		_("%d file(s) selected\n"), new_sel);
-	print_reload_msg(NULL, NULL, _("%zu total selected file(s)\n"), sel_n);
+		_("%d %s selected\n"), new_sel, FILE_STR(new_sel));
+	print_reload_msg(NULL, NULL, _("%zu total selected %s\n"), sel_n,
+		FILE_STR(sel_n));
 
 	return FUNC_SUCCESS;
 }
@@ -835,8 +836,9 @@ print_inversion_results(const int new_sel, const int desel, const int errors)
 		reload_dirlist();
 
 	print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-		_("%zu file(s) deselected\n"), desel);
-	print_reload_msg(NULL, NULL, _("%zu total selected file(s)\n"), sel_n);
+		_("%zu %s deselected\n"), desel, FILE_STR(desel));
+	print_reload_msg(NULL, NULL, _("%zu total selected %s\n"), sel_n,
+		FILE_STR(sel_n));
 }
 
 /* Invert the list of selections in the current directory. */
@@ -1048,7 +1050,8 @@ edit_selfile(void)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) selected\n"), sel_n);
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu %s selected\n"),
+		sel_n, FILE_STR(sel_n));
 	return ret;
 
 ERROR:
@@ -1165,9 +1168,9 @@ desel_entries(char **desel_elements, const size_t desel_n, const int desel_scree
 	} else {
 		if (error == 1) {
 			print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-				_("%d file(s) deselected\n"), dn);
+				_("%d %s deselected\n"), dn, FILE_STR(dn));
 			print_reload_msg(NULL, NULL,
-				_("%zu total selected file(s)\n"), sel_n);
+				_("%zu total selected %s\n"), sel_n, FILE_STR(sel_n));
 		}
 	}
 	free(desel_elements);
@@ -1340,10 +1343,12 @@ end_deselect(const int err, char ***args)
 
 	if (argsbk > 0) {
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-			_("%zu file(s) deselected\n"), desel_files);
-		print_reload_msg(NULL, NULL, _("%zu total selected file(s)\n"), sel_n);
+			_("%zu %s deselected\n"), desel_files, FILE_STR(desel_files));
+		print_reload_msg(NULL, NULL, _("%zu total selected %s\n"),
+			sel_n, FILE_STR(sel_n));
 	} else {
-		print_reload_msg(NULL, NULL, _("%zu selected file(s)\n"), sel_n);
+		print_reload_msg(NULL, NULL, _("%zu selected %s\n"),
+			sel_n, FILE_STR(sel_n));
 	}
 
 	return exit_status;
@@ -1362,8 +1367,8 @@ handle_desel_args(char **args)
 
 		if (ret == FUNC_SUCCESS) {
 			print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-				_("%zu file(s) deselected\n"), n);
-			print_reload_msg(NULL, NULL, _("0 total selected file(s)\n"));
+				_("%zu %s deselected\n"), n, FILE_STR(n));
+			print_reload_msg(NULL, NULL, _("0 total selected files\n"));
 		}
 		return ret;
 

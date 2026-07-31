@@ -55,7 +55,7 @@ confirm_removal(const size_t n)
 		return 1; /* Yes */
 
 	char msg[256]; /* Big enough, in case of translations. */
-	snprintf(msg, sizeof(msg), _("Remove %zu file(s)?"), n);
+	snprintf(msg, sizeof(msg), _("Remove %zu %s?"), n, FILE_STR(n));
 
 	return rl_get_y_or_n(msg, conf.default_answer.remove);
 }
@@ -71,11 +71,12 @@ print_removal_result(const size_t n)
 
 	if (cur == 0) {
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-			_("Trash can emptied: %zu file(s) removed\n"), n);
+			_("Trash can emptied: %zu %s removed\n"), n, FILE_STR(n));
 	} else {
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-			_("%zu file(s) removed from the trash can\n"), n);
-		print_reload_msg(NULL, NULL, _("%zu total trashed file(s)\n"), cur);
+			_("%zu %s removed from the trash can\n"), n, FILE_STR(n));
+		print_reload_msg(NULL, NULL, _("%zu total trashed %s\n"),
+			cur, FILE_STR(cur));
 	}
 }
 
@@ -767,8 +768,9 @@ const size_t untrashed_files)
 			reload_dirlist();
 		const size_t n = count_trashed_files();
 		print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-			_("%zu file(s) restored\n"), untrashed_files);
-		print_reload_msg(NULL, NULL, _("%zu total trashed file(s)\n"), n);
+			_("%zu %s restored\n"), untrashed_files, FILE_STR(untrashed_files));
+		print_reload_msg(NULL, NULL, _("%zu total trashed %s\n"),
+			n, FILE_STR(n));
 	}
 }
 
@@ -912,7 +914,7 @@ untrash_function(char **args)
 	} else {
 		if (conf.autols == 1)
 			reload_dirlist();
-		print_reload_msg(NULL, NULL, _("%zu trashed file(s)\n"), n);
+		print_reload_msg(NULL, NULL, _("%zu trashed %s\n"), n, FILE_STR(n));
 	}
 
 	return exit_status;
@@ -1051,11 +1053,9 @@ ask_for_confirmation(char **args)
 	for (i = 1; args[i]; i++);
 	size_t total = i - 1;
 
-	const char *file_str = total == 1 ? "file" : "files";
-
 	char prompt_msg[128];
 	snprintf(prompt_msg, sizeof(prompt_msg), _("Trash %zu %s?"),
-		total, file_str);
+		total, FILE_STR(total));
 
 	if (max == 0) {
 		if (rl_get_y_or_n(prompt_msg, conf.default_answer.trash) == 0)
@@ -1063,7 +1063,7 @@ ask_for_confirmation(char **args)
 		return i;
 	}
 
-	printf(_("%s to be trashed:\n"), file_str);
+	printf(_("%s to be trashed:\n"), FILE_STR(total));
 
 	size_t count = 0;
 	for (i = 1; args[i]; i++) {
@@ -1086,7 +1086,7 @@ ask_for_confirmation(char **args)
 
 	if (count > max) {
 		const size_t rem = total - max;
-		printf(_("... and %zu more %s\n"), rem, rem == 1 ? "file" : "files");
+		printf(_("... and %zu more %s\n"), rem, FILE_STR(rem));
 	}
 
 	if (rl_get_y_or_n(prompt_msg, conf.default_answer.trash) == 0)
@@ -1169,9 +1169,9 @@ trash_files_args(char **args)
 
 PRINT_TRASHED:
 	print_reload_msg(SET_SUCCESS_PTR, xs_cb,
-		_("%zu file(s) trashed\n"), trashed_files);
-	print_reload_msg(NULL, NULL, _("%zu total trashed file(s)\n"),
-		trash_n + trashed_files);
+		_("%zu %s trashed\n"), trashed_files, FILE_STR(trashed_files));
+	print_reload_msg(NULL, NULL, _("%zu total trashed %s\n"),
+		trash_n + trashed_files, FILE_STR(trash_n + trashed_files));
 
 	return exit_status;
 }
