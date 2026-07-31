@@ -40,20 +40,10 @@ set_max_confirm_files */
 
 /* Struct to store information about files to be removed via the 'r' command. */
 struct rm_info {
-	char   *name;
-	nlink_t links;
-#if defined(__sun) || defined(__OpenBSD__) || defined(__DragonFly__) \
-|| defined(__NetBSD__) || defined(__HAIKU__)
-	int     pad0;
-#endif /* __sun || __OpenBSD__ || __DragonFly__ || __NetBSD__ || __HAIKU__ */
-	time_t  mtime;
-	ino_t   ino;
-	dev_t   dev;
-	int     dir;
-	int     exists;
-#if defined(__OpenBSD__) || defined(__DragonFly__) || defined(__HAIKU__)
-	int     pad1;
-#endif /* __OpenBSD__ || __DragonFly__ || __HAIKU__ */
+	struct stat stat;
+	char *name;
+	int exists;
+	int dir;
 };
 
 /* Print/set the file creation mode mask (umask). */
@@ -1872,11 +1862,12 @@ print_removed_file_info(const struct rm_info info)
 {
 	char *p = abbreviate_file_name(info.name);
 
-	print_file_name(p ? p : info.name, info.dir);
+	print_file_name(p ? p : info.name, info.dir,
+		info.exists ? &info.stat : NULL);
 
 	/* Name removed, but file is still linked to another name (hardlink) */
-	if (info.dir == 0 && info.links > 1) {
-		const nlink_t l = info.links - 1;
+	if (info.dir == 0 && info.stat.st_nlink > 1) {
+		const nlink_t l = info.stat.st_nlink - 1;
 		xerror(_("r: '%s': File may still exist (%jd more "
 			"%s linked to this file before this operation)\n"), info.name,
 			(intmax_t)l, l > 1 ? _("names were") : _("name was"));
@@ -1915,7 +1906,8 @@ list_removed_files(struct rm_info *info, const size_t start, const int cwd)
 		}
 	}
 
-	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu file(s) removed\n"), c);
+	const char *f = c == 1 ? "file" : "files";
+	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu %s removed\n"), c, f);
 }
 
 /* Print files to be removed and ask the user for confirmation.
@@ -1948,13 +1940,15 @@ rm_confirm(const struct rm_info *info, const size_t start, const int have_dirs)
 			continue;
 
 		char *name = abbreviate_file_name(info[i].name);
-		print_file_name(name, info[i].dir);
+		print_file_name(name, info[i].dir, &info[i].stat);
 		if (name != info[i].name)
 			free(name);
 	}
 
-	if (count > max)
-		printf(_("... and %zu more files\n"), total - max);
+	if (count > max) {
+		const size_t rem = total - max;
+		printf(_("... and %zu more %s\n"), rem, rem == 1 ? "file" : "files");
+	}
 
 	return rl_get_y_or_n(prompt_msg, conf.default_answer.remove);
 }
@@ -1970,8 +1964,11 @@ check_rm_files(const struct rm_info *info, const size_t start,
 		if (lstat(info[i].name, &a) == -1)
 			continue;
 
-		if (info[i].mtime != a.st_mtime || info[i].dev != a.st_dev
-		|| info[i].ino != a.st_ino) {
+		const dev_t dev = info[i].stat.st_dev;
+		const ino_t ino = info[i].stat.st_ino;
+		const time_t mtime = info[i].stat.st_mtime;
+
+		if (dev != a.st_dev || ino != a.st_ino || mtime != a.st_mtime) {
 			xerror(_("%s: '%s': File changed on disk!\n"),
 				errname, info[i].name);
 			ret = FUNC_FAILURE;
@@ -1991,13 +1988,9 @@ static struct rm_info
 fill_rm_info_struct(char **filename, struct stat *a)
 {
 	struct rm_info info = {0};
-
 	info.name = *filename;
+	info.stat = *a;
 	info.dir = (S_ISDIR(a->st_mode));
-	info.links = a->st_nlink;
-	info.mtime = a->st_mtime;
-	info.dev = a->st_dev;
-	info.ino = a->st_ino;
 	info.exists = 1;
 
 	return info;
@@ -2051,7 +2044,7 @@ remove_files(char **args)
 		}
 
 		if (lstat(tmp, &a) != -1) {
-			rm_cmd[j] = savestring(tmp, strlen(tmp));
+			rm_cmd[j] = strdup(tmp);
 			info[j] = fill_rm_info_struct(&rm_cmd[j], &a);
 			if (info[j].dir == 1)
 				have_dirs++;

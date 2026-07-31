@@ -1067,7 +1067,7 @@ list_ok_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 
 		char *name = (*tmp == '.' && tmp[1] == '/') ? tmp + 2 : tmp;
 
-		print_file_name(name, 0);
+		print_file_name(name, 0, NULL);
 
 		if (tmp != p)
 			free(tmp);
@@ -1117,12 +1117,16 @@ ask_for_confirmation(char **args)
 		if (l > 1 && name[l - 1] == '/')
 			name[l - 1] = '\0';
 
-		print_file_name(name, lstat(name, &a) != -1 && S_ISDIR(a.st_mode));
+		const int ret = lstat(name, &a);
+		print_file_name(name, ret == 0 && S_ISDIR(a.st_mode),
+			ret == 0 ? &a : NULL);
 		free(name);
 	}
 
-	if (count > max)
-		printf(_("... and %zu more files\n"), total - max);
+	if (count > max) {
+		const size_t rem = total - max;
+		printf(_("... and %zu more %s\n"), rem, rem == 1 ? "file" : "files");
+	}
 
 	if (rl_get_y_or_n(prompt_msg, conf.default_answer.trash) == 0)
 		return 0;

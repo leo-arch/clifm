@@ -26,12 +26,13 @@
 #include <readline/readline.h>
 
 #include "aux.h"
-#include "misc.h"
+#include "colors.h" /* get_entry_color() */
 #include "checks.h" /* is_exec_cmd() */
 #include "file_operations.h" /* open_file() */
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
+#include "misc.h"
 #include "spawn.h" /* launch_execv() */
 
 /* Open the file FILE with APP (if not NULL, or with the default associated
@@ -103,9 +104,11 @@ get_max_confirm_files(void)
 }
 
 /* Print the file named FNAME, quoted if it contains a space.
- * A slash is appended if FNAME is a directory (ISDIR >= 1). */
+ * A slash is appended if FNAME is a directory (ISDIR >= 1).
+ * Entries are colorized using information provided by ATTR, and, if
+ * ATTR is NULL, information is retrieved via lstat(2). */
 void
-print_file_name(char *fname, const int isdir)
+print_file_name(char *fname, const int isdir, const struct stat *attr)
 {
 	char *tmp_name = NULL;
 	if (wc_xstrlen(fname) == 0)
@@ -113,14 +116,26 @@ print_file_name(char *fname, const int isdir)
 
 	const char *name = tmp_name ? tmp_name : fname;
 
+	const char *color = NULL;
+	if (attr) {
+		color = conf.colorize == 1 ? get_entry_color(fname, attr) : df_c;
+	} else {
+		struct stat a;
+		int ret = conf.colorize == 1 ? lstat(fname, &a) : -1;
+		color = ret == 0 ? get_entry_color(fname, &a) : df_c;
+	}
+
+	if (!color)
+		color = df_c;
+
+	const char *dir_slash = isdir >= 1 ? "/" : "";
 	if (detect_space(name) == 1) {
 		if (strchr(name, '\''))
-			printf("\"%s%s\"\n", name, isdir >= 1 ? "/" : "");
+			printf("\"%s%s%s\"%s\n", color, name, df_c, dir_slash);
 		else
-			printf("'%s%s'\n", name, isdir >= 1 ? "/" : "");
+			printf("'%s%s%s'%s\n", color, name, df_c, dir_slash);
 	} else {
-		fputs(name, stdout);
-		puts(isdir >= 1 ? "/" : "");
+		printf("%s%s%s%s\n", color, name, df_c, dir_slash);
 	}
 
 	free(tmp_name);
