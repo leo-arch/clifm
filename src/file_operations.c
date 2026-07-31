@@ -42,7 +42,6 @@ set_max_confirm_files */
 struct rm_info {
 	struct stat stat;
 	char *name;
-	int exists;
 	int dir;
 };
 
@@ -1865,10 +1864,8 @@ list_removed_files(struct rm_info *info, const size_t start, const int cwd)
 
 	struct stat a;
 	for (i = start; info[i].name; i++) {
-		if (lstat(info[i].name, &a) == -1 && errno == ENOENT) {
-			info[i].exists = 0;
+		if (lstat(info[i].name, &a) == -1 && errno == ENOENT)
 			c++;
-		}
 	}
 
 	if (c == 0) /* No file was removed */
@@ -1962,7 +1959,6 @@ fill_rm_info_struct(char **filename, struct stat *a)
 	info.name = *filename;
 	info.stat = *a;
 	info.dir = (S_ISDIR(a->st_mode));
-	info.exists = 1;
 
 	return info;
 }
