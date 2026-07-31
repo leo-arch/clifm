@@ -1037,45 +1037,6 @@ check_trash_file(char *file)
 	return FUNC_SUCCESS;
 }
 
-/* List successfully trashed files. */
-static void
-list_ok_trashed_files(char **args, const int *trashed, const size_t trashed_n)
-{
-	if (print_removed_files == 0)
-		return;
-
-	for (size_t i = 0; i < trashed_n; i++) {
-		if (!args[trashed[i]] || !*args[trashed[i]])
-			continue;
-
-		char *p = args[trashed[i]];
-		if (strchr(args[trashed[i]], '\\')
-		/* cppcheck-suppress redundantInitialization */
-		&& !(p = unescape_str(args[trashed[i]])) ) {
-			xerror(_("trash: '%s': Error unescaping filename\n"),
-				args[trashed[i]]);
-			continue;
-		}
-
-		char *tmp = abbreviate_file_name(p);
-		if (!tmp) {
-			xerror(_("trash: '%s': Error abbreviating filename\n"), p);
-			if (p && p != args[trashed[i]])
-				free(p);
-			continue;
-		}
-
-		char *name = (*tmp == '.' && tmp[1] == '/') ? tmp + 2 : tmp;
-
-		print_file_name(name, 0, NULL);
-
-		if (tmp != p)
-			free(tmp);
-		if (p && p != args[trashed[i]])
-			free(p);
-	}
-}
-
 /* Print filenames in ARGS and ask for confirmation.
  * Return the number of files to be trashed if the answer is afirmative,
  * or zero otherwise. */
@@ -1142,7 +1103,7 @@ trash_files_args(char **args)
 		return FUNC_FAILURE;
 
 	int exit_status = FUNC_SUCCESS, cwd = 0;
-	size_t i, trashed_files = 0, n = 0;
+	size_t i, trashed_files = 0;
 
 	if (conf.trash_force == 1) {
 		for (i = 1; args[i]; i++);
@@ -1151,8 +1112,6 @@ trash_files_args(char **args)
 		if (i == 0)
 			return FUNC_SUCCESS;
 	}
-
-	int *successfully_trashed = xnmalloc(i + 1, sizeof(int));
 
 	for (i = 1; args[i]; i++) {
 		if (trash_n + trashed_files >= MAX_TRASH) {
@@ -1180,10 +1139,6 @@ trash_files_args(char **args)
 		/* Once here, everything is fine: trash the file */
 		if (trash_file(deq_file) == FUNC_SUCCESS) {
 			trashed_files++;
-			if (print_removed_files == 1) {
-				/* Store indices of successfully trashed files */
-				successfully_trashed[n++] = (int)i;
-			}
 		} else {
 			cwd = 0;
 			exit_status = FUNC_FAILURE;
@@ -1209,18 +1164,15 @@ trash_files_args(char **args)
 			reload_dirlist();
 		}
 	} else { /* Error and no trashed file. */
-		free(successfully_trashed);
 		return exit_status;
 	}
 
 PRINT_TRASHED:
-	list_ok_trashed_files(args, successfully_trashed, n);
 	print_reload_msg(SET_SUCCESS_PTR, xs_cb,
 		_("%zu file(s) trashed\n"), trashed_files);
 	print_reload_msg(NULL, NULL, _("%zu total trashed file(s)\n"),
 		trash_n + trashed_files);
 
-	free(successfully_trashed);
 	return exit_status;
 }
 

@@ -2640,9 +2640,6 @@ check_options(void)
 	if (xargs.refresh_on_empty_line == UNSET)
 		xargs.refresh_on_empty_line = DEF_REFRESH_ON_EMPTY_LINE;
 
-	if (print_removed_files == UNSET)
-		print_removed_files = DEF_PRINT_REMOVED_FILES;
-
 	if (xargs.refresh_on_resize == UNSET)
 		xargs.refresh_on_resize = DEF_REFRESH_ON_RESIZE;
 

@@ -1857,26 +1857,6 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 }
 #undef IS_MVCMD
 
-static void
-print_removed_file_info(const struct rm_info info)
-{
-	char *p = abbreviate_file_name(info.name);
-
-	print_file_name(p ? p : info.name, info.dir,
-		info.exists ? &info.stat : NULL);
-
-	/* Name removed, but file is still linked to another name (hardlink) */
-	if (info.dir == 0 && info.stat.st_nlink > 1) {
-		const nlink_t l = info.stat.st_nlink - 1;
-		xerror(_("r: '%s': File may still exist (%jd more "
-			"%s linked to this file before this operation)\n"), info.name,
-			(intmax_t)l, l > 1 ? _("names were") : _("name was"));
-	}
-
-	if (p && p != info.name)
-		free(p);
-}
-
 /* Print the list of files removed via the most recent call to the 'r' command */
 static void
 list_removed_files(struct rm_info *info, const size_t start, const int cwd)
@@ -1896,15 +1876,6 @@ list_removed_files(struct rm_info *info, const size_t start, const int cwd)
 
 	if (conf.autols == 1 && cwd == 1)
 		reload_dirlist();
-
-	if (print_removed_files == 1) {
-		for (i = start; info[i].name; i++) {
-			if (!info[i].name || !*info[i].name || info[i].exists == 1)
-				continue;
-
-			print_removed_file_info(info[i]);
-		}
-	}
 
 	const char *f = c == 1 ? "file" : "files";
 	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("%zu %s removed\n"), c, f);

@@ -4699,7 +4699,6 @@ reset_variables(void)
 	fzftab = UNSET;
 #endif /* !_NO_FZF */
 	hist_status = UNSET;
-	print_removed_files = UNSET;
 	prompt_offset = UNSET;
 	prompt_notif = UNSET;
 

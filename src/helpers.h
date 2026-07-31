@@ -1968,7 +1968,6 @@ extern int
 	open_in_foreground, /* Overrides mimelist file value: used by mime_open */
 	prev_ws,
 	print_msg,
-	print_removed_files,
 	prompt_offset,
 	prompt_notif,
 	recur_perm_error_flag,
