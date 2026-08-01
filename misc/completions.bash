@@ -39,9 +39,9 @@ _clifm ()
         -H
         --horizontal-list
         -i
-        --no-case-sensitive
+        --ignore-case
         -I
-        --case-sensitive
+        --no-ignore-case
         -k
         --keybindings-file
         -l
@@ -77,8 +77,6 @@ _clifm ()
         -z
         --sort
         --bell
-        --case-sens-dirjump
-        --case-sens-path-comp
         --cd-on-quit
         --color
         --color-scheme
