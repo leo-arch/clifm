@@ -150,9 +150,11 @@
 #define LOPT_COLOR                  290
 #define LOPT_NO_CASE_SENS           291 /* Deprecated */
 #define LOPT_CASE_SENS              292 /* Deprecated */
+#define LOPT_NO_COLUMNS             293
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
+	{"oneline", no_argument, 0, '1'},
 	{"show-hidden", optional_argument, 0, 'a'},
 	{"no-hidden", no_argument, 0, 'A'},
 	{"bookmarks-file", required_argument, 0, 'b'},
@@ -189,8 +191,6 @@ static struct option const longopts[] = {
 	{"no-ext-cmds", no_argument, 0, 'x'},
 	{"light-mode", no_argument, 0, 'y'},
 	{"sort", required_argument, 0, 'z'},
-	{"no-columns", no_argument, 0, '1'}, /* Deprecated */
-	{"oneline", no_argument, 0, '1'},
 
 	/* Only-long options */
 	{"bell", required_argument, 0, LOPT_BELL},
@@ -237,6 +237,7 @@ static struct option const longopts[] = {
 	{"no-classify", no_argument, 0, LOPT_NO_CLASSIFY},
 	{"no-clear-screen", no_argument, 0, LOPT_NO_CLEAR_SCREEN},
 	{"no-colors", no_argument, 0, LOPT_NO_COLOR}, /* Deprecated */
+	{"no-columns", no_argument, 0, LOPT_NO_COLUMNS}, /* Deprecated */
 	{"no-dereference", no_argument, 0, LOPT_NO_DEREFERENCE},
 	{"no-dir-jumper", no_argument, 0, LOPT_NO_DIR_JUMPER}, /* Deprecated */
 	{"no-file-cap", no_argument, 0, LOPT_NO_FILE_CAP},
@@ -1062,7 +1063,7 @@ static void
 print_dirs_first_deprecation_warning(void)
 {
 	err('n', PRINT_PROMPT, _("%s: '--[no-]dirs-first' is deprecated. "
-		"Use '-f,--sort-dirs=[first|last|asfiles]' instead.\n"), PROGRAM_NAME);
+		"Use '-f,--group-dirs=[first|last|false]' instead.\n"), PROGRAM_NAME);
 }
 
 static void
@@ -1553,6 +1554,13 @@ print_follow_symlinks_long_deprecation_warning(void)
 	err('n', PRINT_PROMPT, "%s: '--follow-symlinks-long' is deprecated and "
 		"has no effect.\n", PROGRAM_NAME);
 }
+
+static void
+print_no_columns_deprecation_warning(void)
+{
+	err('n', PRINT_PROMPT, "%s: '--no-columns' is deprecated. "
+		"Use '-1,--oneline' instead.\n", PROGRAM_NAME);
+}
 #endif /* !_BE_POSIX */
 
 #ifdef _BE_POSIX
@@ -1883,10 +1891,19 @@ parse_cmdline_args(const int argc, char **argv)
 		/* Only-long options */
 		case LOPT_BELL:
 			set_bell_style(optarg); break;
-		case LOPT_CASE_SENS_DIRJUMP:
+		case LOPT_CASE_SENS: /* Deprecated */
+			print_case_sens_deprec_warn("--case-sensitive");
+			xargs.ignore_case = 0;
+			break;
+		case LOPT_NO_CASE_SENS: /* Deprecated */
+			print_case_sens_deprec_warn("--no-case-sensitive");
+			xargs.ignore_case = 1;
+			break;
+		case LOPT_CASE_SENS_DIRJUMP: /* Deprecated */
 			print_case_sens_deprec_warn("--case-sens-dirjump"); break;
-		case LOPT_CASE_SENS_PATH_COMP:
+		case LOPT_CASE_SENS_PATH_COMP: /* Deprecated */
 			print_case_sens_deprec_warn("--case-sens-path-comp"); break;
+
 		case LOPT_CD_ON_QUIT:
 			xargs.cd_on_quit = conf.cd_on_quit = 1; break;
 		case LOPT_COLOR:
@@ -1934,15 +1951,6 @@ parse_cmdline_args(const int argc, char **argv)
 			break;
 #endif /* !_NO_ICONS */
 
-		case LOPT_CASE_SENS: /* Deprecated */
-			print_case_sens_deprec_warn("--case-sensitive");
-			xargs.ignore_case = 0;
-			break;
-		case LOPT_NO_CASE_SENS: /* Deprecated */
-			print_case_sens_deprec_warn("--no-case-sensitive");
-			xargs.ignore_case = 1;
-			break;
-
 		case LOPT_INT_VARS:
 			xargs.int_vars = conf.int_vars = 1; break;
 		case LOPT_KITTY_KEYS:
@@ -1983,6 +1991,10 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_NO_COLOR: /* Deprecated */
 			print_no_color_deprecation_warning();
 			xargs.colorize = COLOR_NEVER; break;
+		case LOPT_NO_COLUMNS:
+			xargs.columned = conf.columned = 0;
+			print_no_columns_deprecation_warning();
+			break;
 		case LOPT_NO_DEREFERENCE:
 			xargs.follow_symlinks = conf.follow_symlinks = 0; break;
 		case LOPT_NO_DIR_JUMPER:
