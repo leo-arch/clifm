@@ -1454,7 +1454,7 @@ c: Quit paging (printing remaining files)\n"
 \n -v       Print version information and exit\
 \n -V DIR   Set a custom virtual directory\
 \n -w NUM   Start in workspace NUM (1-8)\
-\n -W       Keep the list of selected files in sight\
+\n -W       Keep the list of selected files visible\
 \n -x       Run in secure-environment mode\
 \n -X       Run in secure-environment mode (paranoid)\
 \n -y       Run in light mode\
@@ -1479,20 +1479,20 @@ c: Quit paging (printing remaining files)\n"
 \n  -i, --ignore-case\t\t Ignore case distinctions in filenames and paths (default)\
 \n  -I, --no-ignore-case\t\t Do not ignore case distinctions\
 \n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
-\n  -l, --long-view\t\t Display extended file metadata (long view)\
+\n  -l, --long-view\t\t Display extended file metadata next to filenames\
 \n  -L, --dereference\t\t Follow symbolic links when listing files (default)\
 \n  -m, --dirhist-map\t\t Enable the directory history map\
 \n  -o, --autols\t\t\t List files automatically (default)\
 \n  -O, --no-autols\t\t Do not list files automatically\
-\n  -P, --profile=NAME\t\t Use (or create) NAME as profile\
+\n  -P, --profile=NAME\t\t Run under the profile NAME\
 \n  -r, --no-refresh-on-empty-line Do not refresh the list of files when pressing Enter \
 on an empty line\
-\n  -s, --splash\t\t\t Enable the splash screen\
+\n  -s, --splash\t\t\t Display the splash screen at startup\
 \n  -S, --stealth-mode\t\t Run in incognito/private mode\
 \n  -t, --disk-usage-analyzer\t Run in disk-usage-analyzer mode\
 \n  -T, --trash-dir=DIR\t\t Set an alternative trash directory\
 \n  -v, --version\t\t\t Show version details and exit\
-\n  -w, --workspace=NUM\t\t Start in the workspace NUM\
+\n  -w, --workspace=NUM\t\t Start in the workspace NUM (1-8)\
 \n  -x, --no-ext-cmds\t\t Disallow the use of external commands\
 \n  -y, --light-mode\t\t Run in light mode\
 \n  -z, --sort=MODE\t\t Sort files by MODE (for available modes consult the manpage)"
@@ -1522,7 +1522,7 @@ and paths\
 \n      --mime-type FILE...\t Print MIME type of files and exit\
 \n      --mimelist-file=FILE\t Set FILE as Lira's configuration file\
 \n      --mnt-udisks2\t\t Use udisks2(1) instead of udevil(1) for the 'media' command\
-\n      --no-bold\t\t\t Disable bold colors (applies to all color schemes)\
+\n      --no-bold\t\t\t Disable bold colors\
 \n      --no-cd-auto\t\t Disable the autocd function\
 \n      --no-classify\t\t Do not append file type indicators\
 \n      --no-clear-screen\t\t Do not clear the screen when listing files\
@@ -1533,7 +1533,7 @@ and paths\
 \n      --no-fzfpreview\t\t Disable file previews for tab completion (fzf mode only)\
 \n      --no-highlight\t\t Disable syntax highlighting\
 \n      --no-history\t\t Do not write commands to the history file\
-\n      --no-open-auto\t\t Same as --no-cd-auto, but for files\
+\n      --no-open-auto\t\t Same as --no-cd-auto, but for non-directory files\
 \n      --no-refresh-on-resize\t Do not attempt to refresh the file list upon window resize\
 \n      --no-restore-last-path\t Do not record the last visited directory\
 \n      --no-suggestions\t\t Disable auto-suggestions\
@@ -1572,7 +1572,7 @@ PropFields in the config file)\
 \n      --total-size\t\t Display recursive directory sizes (long-view/--stat only)\
 \n      --trash-as-rm\t\t The 'r' command moves files to the trash instead of removing them\
 \n      --unicode\t\t\t Force the use of Unicode decorations\
-\n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
+\n      --virtual-dir-full-paths\t List files in virtual directories as absolute paths\
 \n      --virtual-dir=DIR\t\t Absolute path to a directory to be used as virtual directory\
 \n      --vt100\t\t\t Run in VT100-compatible mode\n"
 #endif /* _BE_POSIX */
@@ -1583,15 +1583,12 @@ Once the program is running, you can get help is several ways:\n\
 The 'help' command provides a quick introduction to Clifm: once in the command\n\
 prompt, enter 'help' or '?'.\n\
 Type 'cmd<TAB>' to get the list of available commands and a brief description.\n\
-To get help about some specific command, use the '-h,--help' parameter.\n\
-For example, 's -h'.\n\
+To get help about some specific command, use the '-h,--help' parameter.  For\n\
+example, 's -h'.\n\
 Type 'help <TAB>' to get the list of available help topics.\n\
 To jump into the COMMANDS section in the manpage, enter 'cmd' or press F2.\n\
 Use the 'kb' command to get a list of available key bindings.\n\
 Press F1 to access the complete manpage or F3 for the key-bindings help page.\n"
-
-#define HELP_END_NOTE "For a complete description consult the manpage and/or the \
-Wiki (https://github.com/leo-arch/clifm/wiki)."
 
 #define ASCII_LOGO "\
                             _______     _ \n\

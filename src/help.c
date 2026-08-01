@@ -550,6 +550,5 @@ help_function(void)
 #endif /* _BE_POSIX */
 
 	puts(_(CLIFM_GETTING_HELP));
-	puts(_(HELP_END_NOTE));
 	exit(FUNC_SUCCESS);
 }
