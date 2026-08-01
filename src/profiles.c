@@ -325,7 +325,7 @@ profile_add(const char *prof)
 	free(nmime_file);
 
 	if (exit_status == FUNC_SUCCESS) {
-		printf(_("Succesfully created profile %s%s%s\n"), BOLD, prof, df_c);
+		printf(_("Created profile %s%s%s\n"), BOLD, prof, df_c);
 
 		if (profile_names) {
 			for (size_t i = 0; profile_names[i]; i++)
@@ -534,12 +534,13 @@ rename_profile(char **args)
 		config_dir_gral, args[1]);
 
 	const int ret = renameat(XAT_FDCWD, src_pf_name, XAT_FDCWD, dst_pf_name);
+	const int saved_errno = errno;
 	closedir(dir);
 
 	if (ret == -1) {
 		xerror(_("pf: Cannot rename profile '%s': %s\n"),
-			args[0], strerror(errno));
-		return errno;
+			args[0], strerror(saved_errno));
+		return saved_errno;
 	}
 
 	const size_t len = strlen(args[1]);
@@ -547,8 +548,8 @@ rename_profile(char **args)
 		len + 1, sizeof(char));
 	xstrsncpy(profile_names[src_pf_index], args[1], len + 1);
 
-	printf(_("pf: '%s': Profile renamed to %s%s%s\n"),
-		args[0], BOLD, args[1], df_c);
+	printf(_("Profile %s%s%s renamed to %s%s%s\n"),
+		BOLD, args[0], df_c, BOLD, args[1], df_c);
 
 	return FUNC_SUCCESS;
 }

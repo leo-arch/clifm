@@ -967,11 +967,11 @@ Note: Use the 'oc' command to edit file ownership."
     pf list\n\
 - Switch to the profile 'myprofile'\n\
     pf set myprofile (or 'pf set <TAB>' to select from a list)\n\
-- Add a new profile named new_profile\n\
+- Add a new profile named 'new_profile'\n\
     pf add new_profile\n\
 - Remove the profile 'myprofile'\n\
     pf del myprofile (or 'pf del <TAB>' to select from a list)\n\
-- Rename the profile 'myprofile' as 'cool_name'\n\
+- Rename the profile 'myprofile' to 'cool_name'\n\
     pf rename myprofile cool_name"
 
 #define PROMPT_USAGE "Change the current prompt\n\n\
