@@ -520,18 +520,8 @@
 #             5. MISC                 #
 #=====================================#
 
-# Enable case-sensitive listing of files in the current directory.
-;CaseSensitiveList=false
-
-# Enable case-sensitive lookups for the directory jumper function (via
-# the 'j' command).
-;CaseSensitiveDirJump=false
-
-# Enable case-sensitive filename completion.
-;CaseSensitivePathComp=false
-
-# Enable case-sensitive search.
-;CaseSensitiveSearch=false
+# Ignore case distinctions in filenames and paths.
+;IgnoreCase=true
 
 # Use the faster built-in magic check; fall back to libmagic if no result
 # is found.
