@@ -1089,7 +1089,7 @@ injection. To enable this mode, use the --secure-cmds command line switch."
 
 #define SEL_USAGE "Select one or multiple files\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  s, sel [--invert] [FILE...] [(!)PATTERN] [-(d|f|l|s|p|b|c|r|R)] [:PATH]\n\n\
+  s, sel [-i,--invert] [FILE...] [(!)PATTERN] [-(d|f|l|s|p|b|c|r|R)] [:PATH]\n\n\
 Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 (s)ocket, fifo/(p)ipe, (b)lock device, (c)haracter device\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -1577,155 +1577,20 @@ PropFields in the config file)\
 \n      --vt100\t\t\t Run in VT100-compatible mode\n"
 #endif /* _BE_POSIX */
 
-#define CLIFM_COMMANDS_HEADER "\
-For a complete description of the commands \
-below, run 'cmd' (or press F2) or consult the manpage (F1).\n\
-You can also try the interactive help plugin (it depends on FZF): enter 'ih'.\n\
-Help topics are available as well. Type 'help <TAB>' to get a list of topics.\n\n\
-The following is a list of available commands with brief descriptions.\n\
-For more information about a specific command, run 'CMD -h' or 'CMD --help'.\n"
+#define CLIFM_GETTING_HELP "\n\
+GETTING HELP IN CLIFM\n\n\
+Once the program is running, you can get help is several ways:\n\
+The 'help' command provides a quick introduction to Clifm: once in the command\n\
+prompt, enter 'help' or '?'.\n\
+Type 'cmd<TAB>' to get the list of available commands and a brief description.\n\
+To get help about some specific command, use the '-h,--help' parameter.\n\
+For example, 's -h'.\n\
+Type 'help <TAB>' to get the list of available help topics.\n\
+To jump into the COMMANDS section in the manpage, enter 'cmd' or press F2.\n\
+Use the 'kb' command to get a list of available key bindings.\n\
+Press F1 to access the complete manpage or F3 for the key-bindings help page.\n"
 
-#define CLIFM_COMMANDS "\
- ELN/FILE/DIR       Auto-open/autocd files/directories\n\
- /PATTERN           Search for files\n\
- ;[CMD], :[CMD]     Run CMD using the system shell\n\
- ac, ad             (De)archive files\n\
- acd, autocd        Turn autocd on/off\n\
- actions            Manage actions/plugins\n\
- alias              Manage aliases\n\
- ao, auto-open      Turn auto-open on/off\n\
- auto               Set an autocommand for the current directory\n\
- b, back            Change to the previously visited directory\n\
- bb, bleach         Sanitize non-ASCII filenames\n\
- bd                 Change to a parent directory\n\
- bl                 Create symbolic links in bulk\n\
- bm, bookmarks      Manage bookmarks\n\
- br, bulk           Rename files in bulk\n\
- c, l, m, md, r     Copy, link, move, makedir, and remove\n\
- colors             Preview the current color scheme\n\
- cd                 Change directory\n\
- cl, columns        Toggle columns\n\
- cmd, commands      Jump to the COMMANDS section in the manpage\n\
- config             Open/edit the main configuration file\n\
- cs, colorscheme    Switch/edit color schemes\n\
- d, dup             Duplicate files\n\
- dh                 Access the directory history list\n\
- ds, desel          Deselect files\n\
- exp                Export filenames to a temporary file\n\
- ext                Turn external/shell commands on/off\n\
- f, forth           Change to the next visited directory\n\
- fc                 Toggle file-counter\n\
- ft, filter         Set a file filter\n\
- fz                 Toggle recursive directory sizes (long view only)\n\
- gd, group-dirs     Set group-directories mode: first, last, false\n\
- hh, hidden         Toggle show-hidden-files\n\
- history            Manage the commands history\n\
- icons              Toggle icons\n\
- k                  Toggle follow-links (long-view only)\n\
- kk                 Toggle max-filename-len\n\
- j                  Jump to a visited directory\n\
- kb, keybinds       Manage keybindings\n\
- le                 Edit symbolic link targets\n\
- ll, lv             Toggle long-view\n\
- lm                 Toggle light-mode\n\
- log                Manage logs\n\
- media              (Un)mount storage devices\n\
- mf                 Limit the number of listed files\n\
- mm, mime           Manage default opening applications\n\
- mp, mountpoints    Change to a mountpoint\n\
- msg, messages      Print system messages\n\
- n, new             Create new files/directories\n\
- net                Manage network/remote resources\n\
- o, open            Open a file\n\
- oc                 Change ownership of files interactively\n\
- ow                 Open a file with ...\n\
- opener             Set a custom file opener\n\
- p, pp, prop        Print file properties\n\
- pc                 Change permissions of files interactively\n\
- pf, profile        Manage profiles\n\
- pg, pager          Turn the file pager on/off\n\
- pin                Pin a directory\n\
- prompt             Switch/edit the prompt\n\
- q, quit, exit      Quit Clifm\n\
- rf, refresh        Refresh/clear the screen\n\
- rl, reload         Reload the main configuration file\n\
- rr                 Remove files in bulk\n\
- s, sel             Select files\n\
- sb, selbox         Access the Selection Box\n\
- st, sort           Change file sort order\n\
- stats              Print file statistics\n\
- t, trash           Move files to the trash can\n\
- tag                Tag files\n\
- te                 Toggle the executable bit on files\n\
- tips               Print tips\n\
- u, untrash         Restore trashed files (using a menu)\n\
- unpin              Unpin the pinned directory\n\
- vv                 Copy and rename files at once\n\
- ver, version       Print version information\n\
- view               Preview files in the current directory\n\
- ws                 Switch workspaces\n\
- x, X               Launch a new instance of Clifm (as root if 'X')\n\n\
- Shell built-in implementations\n\
- export             Export variables to the environment\n\
- pwd                Print the current working directory\n\
- umask              Get/set umask\n\
- unset              Remove variables from the environment\n"
-
-#define CLIFM_KEYBOARD_SHORTCUTS "DEFAULT KEYBOARD SHORTCUTS:\n\n\
- Right, Ctrl+f      Accept the entire suggestion\n\
- Alt+Right, Alt+f   Accept the first suggested word\n\
- Alt+c              Clear the current command line buffer\n\
- Alt+q              Delete the last entered word\n\
- Alt+g              Cycle through group-directories modes\n\
- Alt+l              Toggle long-view\n\
- Alt+Plus           Toggle follow-symlinks\n\
- Alt+.              Toggle show-hidden-files\n\
- Alt+,              Toggle list-directories-only\n\
- Alt+-              Preview files in the current directory (requires fzf)\n\
- Alt+m              List mountpoints\n\
- Alt+h              Show directory history\n\
- Alt+t              Clear messages\n\
- Ctrl+l             Clear the screen\n\
- Ctrl+y             Copy the current line buffer to the clipboard\n\
- Alt+s              Open the Selection Box\n\
- Alt+a              Select all files in the current directory\n\
- Shift+Tab          Invert selection\n\
- Alt+d              Deselect all files\n\
- Alt+e, Home        Change to the home directory\n\
- Alt+u, Shift+Up    Change to the parent directory\n\
- Alt+j, Shift+Left  Change to previously visited directory\n\
- Alt+k, Shift+Right Change to next visited directory\n\
- Alt+p              Change to the pinned directory\n\
- Alt+v              Toggle prepend-sudo\n\
- Alt+0              Run the file pager\n\
- Alt+[1-8]          Switch to workspace 1-8\n\
- Ctrl+Alt+o         Switch to the previous profile\n\
- Ctrl+Alt+p         Switch to the next profile\n\
- Ctrl+Alt+a         Archive selected files\n\
- Ctrl+Alt+e         Export selected files\n\
- Ctrl+Alt+r         Rename selected files\n\
- Ctrl+Alt+d         Remove selected files\n\
- Ctrl+Alt+t         Trash selected files\n\
- Ctrl+Alt+n         Move selected files to the current directory\n\
- Ctrl+Alt+v         Copy selected files to the current directory\n\
- Ctrl+Alt+l         Toggle max-filename-len\n\
- Alt+y              Toggle light-mode\n\
- Alt+z              Switch to the previous sort method\n\
- Alt+x              Switch to the next sort method\n\
- Alt+r              Sort in reverse order\n\
- Ctrl+Alt+x         Launch a new instance\n\
- F1                 Manual page\n\
- F2                 Commands help\n\
- F3                 Keybindings help\n\
- F6                 Open the mimelist file\n\
- F7                 Open the Shotgun configuration file\n\
- F8                 Open the current color scheme file\n\
- F9                 Open the keybindings file\n\
- F10                Open the configuration file\n\
- F11                Open the bookmarks file\n\
- F12                Quit\n"
-
-#define HELP_END_NOTE "For a full description consult the manpage and/or the \
+#define HELP_END_NOTE "For a complete description consult the manpage and/or the \
 Wiki (https://github.com/leo-arch/clifm/wiki)."
 
 #define ASCII_LOGO "\
@@ -1863,6 +1728,13 @@ q | F12         I'm tired, quit"
      ;kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkc \n\
         :c::::::::::::::::::::::::::::::::::."
 
+
+#define CLIFM_COMMANDS_HELP "\
+Type 'cmd<TAB>' to get the list of available commands and a brief description.\n\
+For further information, run 'cmd' or press F2 to access the COMMANDS section\n\
+in the manpage.\n\
+For details about some specific command, use the '-h,--help' parameter: e.g.,\n\
+'s -h'."
 
 /* Brief commands description */
 #define AC_DESC      " (archive/compress files)"

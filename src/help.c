@@ -289,7 +289,7 @@ print_bookmarks_topic(void)
 static int
 print_commands_topic(void)
 {
-	printf("%s%s", CLIFM_COMMANDS_HEADER, CLIFM_COMMANDS); return FUNC_SUCCESS;
+	puts(CLIFM_COMMANDS_HELP); return FUNC_SUCCESS;
 }
 
 static int
@@ -549,10 +549,7 @@ help_function(void)
 		_(SHORT_OPTIONS), _(LONG_OPTIONS_A), _(LONG_OPTIONS_B));
 #endif /* _BE_POSIX */
 
-	puts("\nBUILT-IN COMMANDS:\n");
-	puts(_(CLIFM_COMMANDS_HEADER));
-	puts(_(CLIFM_COMMANDS));
-	puts(_(CLIFM_KEYBOARD_SHORTCUTS));
+	puts(_(CLIFM_GETTING_HELP));
 	puts(_(HELP_END_NOTE));
 	exit(FUNC_SUCCESS);
 }
