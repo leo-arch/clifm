@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 29, 2026" "clifm 1.28.11" "Clifm Manual"
+.TH "CLIFM" "1" "Jul 31, 2026" "clifm 1.28.12" "Clifm Manual"
 .SH NAME
 clifm - The Command-Line File Manager
 .SH SYNOPSIS
@@ -130,11 +130,11 @@ Print this help and exit.
 \fB-H\fR, \fB--horizontal-list\fR
 List files horizontally (instead of vertically).
 .TP
-\fB-i\fR, \fB--no-case-sensitive\fR
-Ignore case distinctions when listing files.
+\fB-i\fR, \fB--ignore-case\fR
+Ignore case distinctions in filenames and paths (default).
 .TP
-\fB-I\fR, \fB--case-sensitive\fR
-Do not ignore case distinctions when listing files.
+\fB-I\fR, \fB--no-ignore-case\fR
+Do not ignore case distinctions.
 .TP
 \fB-k\fR, \fB--keybindings-file\fR=\fI\,FILE\/\fR
 Set an alternative keybindings file.
@@ -189,12 +189,6 @@ Sort files by \fIMETHOD\fR, where \fIMETHOD\fR is one of: 0 = none, 1 = name, 2 
 .TP
 \fB--bell\fR=\fI\,TYPE\/\fR
 Set the terminal bell type, where \fITYPE\fR is one of: 0 = none, 1 = audible, 2 = visible (requires readline >= 8.1), and 3 = flash. Defaults to \fB2\fR (\fBvisible\fR), and, if not available, \fB0\fR (\fBnone\fR). Only numbers are allowed.
-.TP
-\fB--case-sens-dirjump\fR
-Do not ignore case when consulting the jump database (via the \fBj\fR command).
-.TP
-\fB--case-sens-path-comp\fR
-Enable case sensitive path completion.
 .TP
 \fB--cd-on-quit\fR
 Write the last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR for later access by the corresponding shell function at program exit. Consult the \fBSHELL FUNCTIONS\fR section below for more information.
