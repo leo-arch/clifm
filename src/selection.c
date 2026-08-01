@@ -457,7 +457,7 @@ sel_regex(char *str, const char *sel_path, const mode_t filetype)
 		invert = 1;
 	}
 
-	int reg_flags = conf.case_sens_list == 1 ? (REG_NOSUB | REG_EXTENDED)
+	int reg_flags = conf.ignore_case == 0 ? (REG_NOSUB | REG_EXTENDED)
 			: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
 
 	if (regcomp(&regex, pattern, reg_flags) != FUNC_SUCCESS) {

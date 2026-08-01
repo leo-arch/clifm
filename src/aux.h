@@ -37,7 +37,7 @@ mode_t get_dt(const mode_t mode);
 int  get_link_ref(const char *link);
 size_t get_max_confirm_files(void);
 int  get_rgb(const char *hex, int *attr, int *r, int *g, int *b);
-size_t hashme(const char *str, const int case_sensitive);
+size_t hashme(const char *str, const int ignore_case);
 char *hex2rgb(const char *hex);
 int  is_cmd_in_path(const char *cmd, char **cmd_path);
 char *make_filename_unique(const char *file);

@@ -717,7 +717,7 @@ get_ext_color(const char *ext, size_t *val_len)
 
 	/* If the hash field at index 0 is set to zero, we have hash conflicts. */
 	if (ext_colors[0].hash != 0)
-		return check_ext_hash(hashme(ext, 0), val_len);
+		return check_ext_hash(hashme(ext, 1), val_len);
 
 	return check_ext_string(ext, val_len);
 }
@@ -1439,7 +1439,7 @@ store_extension_line(char *line)
 	ext_colors[ext_colors_n].value = xnmalloc(elen, sizeof(char));
 	snprintf(ext_colors[ext_colors_n].value, elen, "0;%s", code);
 	ext_colors[ext_colors_n].value_len = elen - 1;
-	ext_colors[ext_colors_n].hash = hashme(line, 0);
+	ext_colors[ext_colors_n].hash = hashme(line, 1);
 
 	if (xargs.no_bold == 1)
 		remove_bold_attr(ext_colors[ext_colors_n].value);
@@ -2756,7 +2756,7 @@ color_sort(const void *a, const void *b)
 	if (ret != 0)
 		return ret;
 
-	return conf.case_sens_list == 1 ? strcmp(pa->name, pb->name)
+	return conf.ignore_case == 0 ? strcmp(pa->name, pb->name)
 		: strcasecmp(pa->name, pb->name);
 }
 

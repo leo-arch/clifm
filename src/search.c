@@ -86,12 +86,12 @@ run_find(char *search_path, char *arg)
 	char *method = "-name";
 #else
 	char *method = conf.search_strategy == REGEX_ONLY
-		? (conf.case_sens_search == 1 ? "-regex" : "-iregex")
-		: (conf.case_sens_search == 1 ? "-name" : "-iname");
+		? (conf.ignore_case == 0 ? "-regex" : "-iregex")
+		: (conf.ignore_case == 0 ? "-name" : "-iname");
 # if defined(FIND_HAS_NO_REGEX)
 	name = define_find_name();
 	if (*name != 'g') /* GNU find (gfind) not found */
-		method = conf.case_sens_search == 1 ? "-name" : "-iname";
+		method = conf.ignore_case == 0 ? "-name" : "-iname";
 # endif /* FIND_HAS_NO_REGEX */
 #endif /* _BE_POSIX */
 
@@ -895,7 +895,7 @@ search_regex(char **args)
 
 	/* Get matches */
 	regex_t regex_files;
-	int reg_flags = conf.case_sens_search == 1 ? (REG_NOSUB | REG_EXTENDED)
+	int reg_flags = conf.ignore_case == 0 ? (REG_NOSUB | REG_EXTENDED)
 		: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
 	int ret = regcomp(&regex_files, search_query, reg_flags);
 

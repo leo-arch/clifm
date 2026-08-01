@@ -1476,8 +1476,8 @@ c: Quit paging (printing remaining files)\n"
 \n  -G, --no-pager\t\t Disable the pager (default)\
 \n  -h, --help\t\t\t Show this help and exit\
 \n  -H, --horizontal-list\t\t List files horizontally\
-\n  -i, --no-case-sensitive\t Ignore case when listing files (default)\
-\n  -I, --case-sensitive\t\t Do not ignore case when listing files\
+\n  -i, --ignore-case\t\t Ignore case distinctions in filenames and paths (default)\
+\n  -I, --no-ignore-case\t\t Do not ignore case distinctions\
 \n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
 \n  -l, --long-view\t\t Display extended file metadata (long view)\
 \n  -L, --dereference\t\t Follow symbolic links when listing files (default)\
@@ -1499,9 +1499,6 @@ on an empty line\
 
 #define LONG_OPTIONS_A "\
 \n      --bell=STYLE\t\t Set terminal bell style to: 0 (none), 1 (audible), 2 (visible), 3 (flash)\
-\n      --case-sens-dirjump\t Do not ignore case when consulting the jump \
-database (via the 'j' command)\
-\n      --case-sens-path-comp\t Enable case-sensitive path completion\
 \n      --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
 \n      --color[=WHEN]\t\t Colorize output WHEN (always, auto, never). If WHEN is omitted, 'auto' is assumed.\
 \n      --color-scheme=NAME\t Use the color scheme NAME\
@@ -1883,7 +1880,7 @@ q | F12         I'm tired, quit"
 #define BR_DESC      " (rename files in bulk)"
 #define C_DESC       " (copy files)"
 #define CD_DESC      " (change directory)"
-#define CI_DESC      " (toggle case-sensitive-sort)"
+#define CI_DESC      " (toggle ignore-case)"
 #define CL_DESC      " (toggle columns)"
 #define CMD_DESC     " (jump to the COMMANDS section in the manpage)"
 #define COLORS_DESC  " (preview the current color scheme)"

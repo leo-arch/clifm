@@ -156,10 +156,6 @@ init_conf_struct(void)
 	conf.autocmd_msg = DEF_AUTOCMD_MSG;
 	conf.autols = UNSET;
 	conf.bell_style = DEF_BELL_STYLE;
-	conf.case_sens_dirjump = UNSET;
-	conf.case_sens_path_comp = UNSET;
-	conf.case_sens_search = DEF_CASE_SENS_SEARCH;
-	conf.case_sens_list = UNSET;
 	conf.check_cap = DEF_CHECK_CAP;
 	conf.check_ext = DEF_CHECK_EXT;
 	conf.cd_on_quit = UNSET;
@@ -194,6 +190,7 @@ init_conf_struct(void)
 	conf.icons = 0;
 #endif /* !_NO_ICONS */
 	conf.icons_gap = DEF_ICONS_GAP;
+	conf.ignore_case = UNSET;
 	conf.int_vars = DEF_INT_VARS;
 	conf.light_mode = UNSET;
 	conf.link_creat_mode = DEF_LINK_CREATION_MODE;
@@ -2726,16 +2723,8 @@ check_options(void)
 	if (conf.print_selfiles == UNSET)
 		conf.print_selfiles = SETOPT(xargs.print_selfiles, DEF_PRINTSEL);
 
-	if (conf.case_sens_list == UNSET)
-		conf.case_sens_list = SETOPT(xargs.case_sens_list, DEF_CASE_SENS_LIST);
-
-	if (conf.case_sens_dirjump == UNSET)
-		conf.case_sens_dirjump =
-			SETOPT(xargs.case_sens_dirjump, DEF_CASE_SENS_DIRJUMP);
-
-	if (conf.case_sens_path_comp == UNSET)
-		conf.case_sens_path_comp =
-			SETOPT(xargs.case_sens_path_comp, DEF_CASE_SENS_PATH_COMP);
+	if (conf.ignore_case == UNSET)
+		conf.ignore_case = SETOPT(xargs.ignore_case, DEF_IGNORE_CASE);
 
 #ifndef _NO_TRASH
 	if (conf.tr_as_rm == UNSET)

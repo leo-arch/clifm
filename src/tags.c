@@ -139,7 +139,7 @@ list_files_in_tag(char *name)
 	snprintf(tmp, sizeof(tmp), "%s/%s", tags_dir, name);
 
 	struct dirent **t = NULL;
-	const int n = scandir(tmp, &t, NULL, conf.case_sens_list
+	const int n = scandir(tmp, &t, NULL, conf.ignore_case == 0
 		? xalphasort : alphasort_insensitive);
 	if (n == -1) {
 		xerror("tag: '%s': %s\n", tmp, strerror(errno));

@@ -28,7 +28,7 @@ int  rl_toggle_light_mode(int count, int key);
 int  rl_toggle_long_view(int count, int key);
 int  rl_toggle_max_filename_len(int count, int key);
 int  rl_toggle_only_dirs(int count, int key);
-int  rl_toggle_case_sensitive_sort(int count, int key);
+int  rl_toggle_ignore_case(int count, int key);
 
 __END_DECLS
 

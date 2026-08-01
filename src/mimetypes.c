@@ -139,7 +139,7 @@ parse_shared_mime_info_db(FILE *fp)
 		const size_t ext_len = end ? (size_t)(end - ext) : strlen(ext);
 
 		user_mimetypes[n].ext = savestring(ext, ext_len);
-		user_mimetypes[n].ext_hash = hashme(ext, conf.case_sens_list);
+		user_mimetypes[n].ext_hash = hashme(ext, conf.ignore_case);
 		user_mimetypes[n++].mimetype = savestring(mimetype, mimetype_len);
 	}
 
@@ -211,7 +211,7 @@ parse_mime_types_file(FILE *fp)
 				ext[--ext_len] = '\0';
 
 			user_mimetypes[n].ext = savestring(ext, ext_len);
-			user_mimetypes[n].ext_hash = hashme(ext, conf.case_sens_list);
+			user_mimetypes[n].ext_hash = hashme(ext, conf.ignore_case);
 			user_mimetypes[n++].mimetype = savestring(mimetype, mime_len);
 		}
 	}

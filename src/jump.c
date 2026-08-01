@@ -689,7 +689,7 @@ static char *
 get_needle(char *needle, const char *match, const char *query,
 	const int segment)
 {
-	char *ret = conf.case_sens_dirjump == 1 ? strstr(needle, query)
+	char *ret = conf.ignore_case == 0 ? strstr(needle, query)
 		: xstrcasestr(needle, query);
 
 	if (!ret || ((segment & LAST_SEGMENT) && strchr(ret, '/')))

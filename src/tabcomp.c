@@ -812,7 +812,7 @@ run_finder(const size_t height, const int offset, const char *lw,
 			conf.fzftab_options,
 			term_caps.unicode == 0 ? "--no-unicode" : "",
 			*height_str ? height_str : "", offset,
-			conf.case_sens_path_comp == 1 ? "+i" : "-i",
+			conf.ignore_case == 0 ? "+i" : "-i",
 			lw ? lw : "", conf.colorize == 0 ? "--color=bw" : "",
 			multi == 1 ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
@@ -827,14 +827,15 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 		 * for us. The issue has been reported, but there was no response.
 		 * See https://github.com/lotabout/skim/issues/494
 		 * As a workaround, run with --no-clear-start */
-/*		snprintf(cmd, sizeof(cmd), "sk %s " // skim
-			"%s %s --margin=0,0,0,%d "
+/*		snprintf(cmd, sizeof(cmd), "/bin/sk %s " // skim
+//			"%s %s --margin=0,0,0,%d "
+			"%s --margin=0,0,0,%d "
 			"--read0 --ansi "
 			"--query=\"%s\" %s %s %s %s %s "
 			"< %s > %s",
 			conf.fzftab_options,
-			*height_str ? height_str : "",
-			*height_str ? "--no-clear-start" : "", offset,
+			*height_str ? height_str : "", offset,
+//			*height_str ? "--no-clear-start" : "", offset,
 			lw ? lw : "", conf.colorize == 0 ? "--no-color" : "",
 			multi == 1 ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
@@ -1697,7 +1698,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 
 	else {
 		/* Honor case insensitive completion/fuzzy matches. */
-		if ((conf.case_sens_path_comp == 0 || conf.fuzzy_match == 1)
+		if ((conf.ignore_case == 1 || conf.fuzzy_match == 1)
 		&& query && strncmp(matches[0], *buf, *prefix_len) != 0) {
 			const int bk = rl_point;
 			rl_delete_text(bk - (int)*prefix_len, rl_end);

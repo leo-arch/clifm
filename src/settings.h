@@ -470,10 +470,6 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_AUTOCMD_MSG AUTOCMD_MSG_PROMPT
 #define DEF_AUTO_OPEN 1
 #define DEF_AUTOLS 1
-#define DEF_CASE_SENS_LIST 0
-#define DEF_CASE_SENS_DIRJUMP 0
-#define DEF_CASE_SENS_PATH_COMP 0
-#define DEF_CASE_SENS_SEARCH 0
 #define DEF_CD_ON_QUIT 0
 #define DEF_CHECK_CAP 1 /* Check files capabilities */
 #define DEF_CHECK_EXT 1 /* Check filenames extension (for color) */
@@ -513,6 +509,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_HISTIGNORE "^[q,Q]$|^quit$|^exit$|^ .*|^#.*|^[0-9]+$|^\\.+$"
 #define DEF_ICONS 0
 #define DEF_ICONS_GAP 1 /* Number of spaces between icons and filenames */
+#define DEF_IGNORE_CASE 1
 #define DEF_INT_VARS 0
 #define DEF_KITTY_KEYS 0 /* Kitty keyboard protocol */
 #define DEF_LIGHT_MODE 0

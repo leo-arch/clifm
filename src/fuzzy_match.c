@@ -91,7 +91,7 @@ contains_utf8(const char *s)
 static int
 fuzzy_match_v1(const char *s1, const char *s2, const size_t s1_len)
 {
-	const int cs = conf.case_sens_path_comp;
+	const int cs = conf.ignore_case == 0;
 	int included = 0;
 	const char *p = NULL;
 
@@ -173,7 +173,7 @@ fuzzy_match(const char *s1, const char *s2, const size_t s1_len, const int type)
 	if (type == FUZZY_FILES_ASCII || conf.fuzzy_match_algo == 1)
 		return fuzzy_match_v1(s1, s2, s1_len);
 
-	const int cs = conf.case_sens_path_comp;
+	const int cs = conf.ignore_case == 0;
 	int included = 0;
 	const char *p = NULL;
 

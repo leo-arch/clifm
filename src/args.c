@@ -148,6 +148,8 @@
 #define LOPT_NO_DEREFERENCE         288
 #define LOPT_DIRS_FIRST             289
 #define LOPT_COLOR                  290
+#define LOPT_NO_CASE_SENS           291 /* Deprecated */
+#define LOPT_CASE_SENS              292 /* Deprecated */
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -168,8 +170,8 @@ static struct option const longopts[] = {
 	{"no-pager", no_argument, 0, 'G'},
 	{"help", no_argument, 0, 'h'},
 	{"horizontal-list", no_argument, 0, 'H'},
-	{"no-case-sensitive", no_argument, 0, 'i'},
-	{"case-sensitive", no_argument, 0, 'I'},
+	{"ignore-case", no_argument, 0, 'i'},
+	{"no-ignore-case", no_argument, 0, 'I'},
 	{"keybindings-file", required_argument, 0, 'k'},
 	{"long-view", no_argument, 0, 'l'},
 	{"dereference", no_argument, 0, 'L'},
@@ -192,8 +194,10 @@ static struct option const longopts[] = {
 
 	/* Only-long options */
 	{"bell", required_argument, 0, LOPT_BELL},
-	{"case-sens-dirjump", no_argument, 0, LOPT_CASE_SENS_DIRJUMP},
-	{"case-sens-path-comp", no_argument, 0, LOPT_CASE_SENS_PATH_COMP},
+	{"no-case-sensitive", no_argument, 0, LOPT_NO_CASE_SENS}, /* Deprecated */
+	{"case-sensitive", no_argument, 0, LOPT_CASE_SENS}, /* Deprecated */
+	{"case-sens-dirjump", no_argument, 0, LOPT_CASE_SENS_DIRJUMP}, /* Deprecated */
+	{"case-sens-path-comp", no_argument, 0, LOPT_CASE_SENS_PATH_COMP}, /* Deprecated */
 	{"cd-on-quit", no_argument, 0, LOPT_CD_ON_QUIT},
 	{"color", optional_argument, 0, LOPT_COLOR},
 	{"color-scheme", required_argument, 0, LOPT_COLOR_SCHEME},
@@ -1537,9 +1541,16 @@ xset_pager_view(const char *arg)
 }
 
 static void
+print_case_sens_deprec_warn(const char *op)
+{
+	err('n', PRINT_PROMPT, "%s: '%s' is deprecated. "
+		"Use '--[no-]-ignore-case' instead.\n", PROGRAM_NAME, op);
+}
+
+static void
 print_follow_symlinks_long_deprecation_warning(void)
 {
-	err('w', PRINT_PROMPT, "%s: '--follow-symlinks-long' is deprecated and "
+	err('n', PRINT_PROMPT, "%s: '--follow-symlinks-long' is deprecated and "
 		"has no effect.\n", PROGRAM_NAME);
 }
 #endif /* !_BE_POSIX */
@@ -1847,8 +1858,8 @@ parse_cmdline_args(const int argc, char **argv)
 		case 'G': xargs.pager = conf.pager = 0; break;
 		case 'h': help_function(); break; /* noreturn */
 		case 'H': xargs.horizontal_list = 1; conf.listing_mode = HORLIST; break;
-		case 'i': xargs.case_sens_list = conf.case_sens_list = 0; break;
-		case 'I': xargs.case_sens_list = conf.case_sens_list = 1; break;
+		case 'i': xargs.ignore_case = conf.ignore_case = 1; break;
+		case 'I': xargs.ignore_case = conf.ignore_case = 0; break;
 		case 'k':
 			set_alt_file(optarg, &alt_kbinds_file, "-k,--keybindings-file");
 			break;
@@ -1873,9 +1884,9 @@ parse_cmdline_args(const int argc, char **argv)
 		case LOPT_BELL:
 			set_bell_style(optarg); break;
 		case LOPT_CASE_SENS_DIRJUMP:
-			xargs.case_sens_dirjump = conf.case_sens_dirjump = 1; break;
+			print_case_sens_deprec_warn("--case-sens-dirjump"); break;
 		case LOPT_CASE_SENS_PATH_COMP:
-			xargs.case_sens_path_comp = conf.case_sens_path_comp = 1; break;
+			print_case_sens_deprec_warn("--case-sens-path-comp"); break;
 		case LOPT_CD_ON_QUIT:
 			xargs.cd_on_quit = conf.cd_on_quit = 1; break;
 		case LOPT_COLOR:
@@ -1922,6 +1933,15 @@ parse_cmdline_args(const int argc, char **argv)
 			exit(EXIT_FAILURE);
 			break;
 #endif /* !_NO_ICONS */
+
+		case LOPT_CASE_SENS: /* Deprecated */
+			print_case_sens_deprec_warn("--case-sensitive");
+			xargs.ignore_case = 0;
+			break;
+		case LOPT_NO_CASE_SENS: /* Deprecated */
+			print_case_sens_deprec_warn("--no-case-sensitive");
+			xargs.ignore_case = 1;
+			break;
 
 		case LOPT_INT_VARS:
 			xargs.int_vars = conf.int_vars = 1; break;

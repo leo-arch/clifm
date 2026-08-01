@@ -341,7 +341,7 @@ xstrverscmp(const char *s1, const char *s2)
 	if (p1 == p2)
 		return 0;
 
-	if (!conf.case_sens_list) {
+	if (conf.ignore_case == 1) {
 		c1 = (unsigned char)TOLOWER(*p1);
 		p1++;
 		c2 = (unsigned char)TOLOWER(*p2);
@@ -359,7 +359,7 @@ xstrverscmp(const char *s1, const char *s2)
 			return diff;
 
 		state = next_state[state];
-		if (!conf.case_sens_list) {
+		if (conf.ignore_case == 1) {
 			c1 = (unsigned char)TOLOWER(*p1);
 			p1++;
 			c2 = (unsigned char)TOLOWER(*p2);
@@ -1277,7 +1277,7 @@ expand_tag(char ***args, const int tag_index)
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, tag);
 
 	struct dirent **t = NULL;
-	const int n = scandir(dir, &t, NULL, conf.case_sens_list
+	const int n = scandir(dir, &t, NULL, conf.ignore_case == 0
 		? xalphasort : alphasort_insensitive);
 	if (n == -1)
 		return 0;
@@ -2275,7 +2275,7 @@ expand_regex(char ***substr)
 	size_t n = 0;
 	regex_t regex;
 
-/*	int reg_flags = conf.case_sens_list == 1 ? (REG_NOSUB | REG_EXTENDED)
+/*	int reg_flags = conf.ignore_case == 0 ? (REG_NOSUB | REG_EXTENDED)
 			: (REG_NOSUB | REG_EXTENDED | REG_ICASE); */
 
 	const int reg_flags = (REG_NOSUB | REG_EXTENDED);
@@ -2656,7 +2656,7 @@ do_path_normalization(char **s, const size_t i, const int is_int_cmd)
  * pattern (first parameter) by a find(1) command.
  * The replaced pattern will be expanded later by expand_word().
  *
- * Case-sensitivity depends on the value of conf.case_sens_list
+ * Case-sensitivity depends on the value of conf.ignore_case
  *
  * The first parameter is assumed to be '-x' or '-X'. In the first case, the
  * pattern is taken as a wildcard pattern, otherwise as a regular expression.
@@ -2688,7 +2688,7 @@ make_sel_recursive(char ***substr)
 
 	const int use_regex = (s[2][0] && s[2][1] == 'R');
 	char *method = NULL;
-	if (conf.case_sens_list == 1)
+	if (conf.ignore_case == 0)
 		method = use_regex ? "-regex" : "-name";
 	else
 		method = use_regex ? "-iregex" : "-iname";

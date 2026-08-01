@@ -596,7 +596,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	/* An alias name can be the same as the beginning of the alias definition,
 	 * so that this check must always be true in case of aliases. */
 	if (suggestion.type == ALIAS_SUG || (last_word && cur_comp_type == TCMP_PATH
-	&& (conf.case_sens_path_comp ? strncmp(last_word, str, wlen)
+	&& (conf.ignore_case == 0 ? strncmp(last_word, str, wlen)
 	: strncasecmp(last_word, str, wlen)) != 0) ) {
 		flags |= BAEJ_SUGGESTION;
 		baej = 1;
@@ -988,7 +988,7 @@ check_filenames(char *str, size_t len, const int first_word,
 			continue;
 
 		if (full_word == 1) {
-			if ((conf.case_sens_path_comp ? strcmp(str, file_info[i].name)
+			if ((conf.ignore_case == 0 ? strcmp(str, file_info[i].name)
 			: strcasecmp(str, file_info[i].name)) == 0)
 				return FULL_MATCH;
 			continue;
@@ -1006,7 +1006,7 @@ check_filenames(char *str, size_t len, const int first_word,
 
 		/* No fuzzy matching if not at the end of the line. */
 		if (conf.fuzzy_match == 0 || rl_point < rl_end) {
-			if (conf.case_sens_path_comp ? (*str == *file_info[i].name
+			if (conf.ignore_case == 0 ? (*str == *file_info[i].name
 			&& strncmp(str, file_info[i].name, len) == 0)
 			: (TOUPPER(*str) == TOUPPER(*file_info[i].name)
 			&& strncasecmp(str, file_info[i].name, len) == 0)) {
@@ -1070,7 +1070,7 @@ check_history(const char *str, const size_t len)
 		&& TOUPPER(str[1]) != TOUPPER(history[i].cmd[1]))
 			continue;
 
-		if ((conf.case_sens_path_comp ? strncmp(str, history[i].cmd, len)
+		if ((conf.ignore_case == 0 ? strncmp(str, history[i].cmd, len)
 		: strncasecmp(str, history[i].cmd, len)) == 0) {
 			if (history[i].len > len) {
 				suggestion.type = HIST_SUG;
@@ -1227,13 +1227,13 @@ check_jumpdb(const char *str, const size_t len, const int print)
 		&& TOUPPER(str[1]) != TOUPPER(jump_db[i].path[1]))
 			continue;
 		if (print == 0) {
-			if ((conf.case_sens_path_comp ? strcmp(str, jump_db[i].path)
+			if ((conf.ignore_case == 0 ? strcmp(str, jump_db[i].path)
 			: strcasecmp(str, jump_db[i].path)) == 0)
 				return FULL_MATCH;
 			continue;
 		}
 
-		if (len > 0 && (conf.case_sens_path_comp
+		if (len > 0 && (conf.ignore_case == 0
 		? strncmp(str, jump_db[i].path, len)
 		: strncasecmp(str, jump_db[i].path, len)) == 0) {
 			if (jump_db[i].len <= len)
@@ -1325,13 +1325,13 @@ check_aliases(const char *str, const size_t len, const int print)
 			continue;
 
 		if (print == 0) {
-			if ((conf.case_sens_path_comp ? strcmp(p, str)
+			if ((conf.ignore_case == 0 ? strcmp(p, str)
 			: strcasecmp(p, str)) == 0)
 				return FULL_MATCH;
 			continue;
 		}
 
-		if ((conf.case_sens_path_comp ? strncmp(p, str, len)
+		if ((conf.ignore_case == 0 ? strncmp(p, str, len)
 		: strncasecmp(p, str, len)) != 0)
 			continue;
 		if (!aliases[i].cmd || !*aliases[i].cmd)
@@ -1601,7 +1601,7 @@ check_prompts(char *word, const size_t len)
 
 	for (; i-- > 0;) {
 		if (TOUPPER(*w) == TOUPPER(*prompts[i].name)
-		&& (conf.case_sens_list ? strncmp(prompts[i].name, w, l)
+		&& (conf.ignore_case == 0 ? strncmp(prompts[i].name, w, l)
 		: strncasecmp(prompts[i].name, w, l)) == 0) {
 			suggestion.type = PROMPT_SUG;
 			char *p = escape_str(prompts[i].name);
@@ -1729,7 +1729,7 @@ check_profiles(char *word, const size_t len)
 
 	size_t i;
 	for (i = 0; profile_names[i]; i++) {
-		if (conf.case_sens_list == 0
+		if (conf.ignore_case == 1
 		? (TOUPPER(*w) == TOUPPER(*profile_names[i])
 		&& strncasecmp(w, profile_names[i], l) == 0)
 		: (*w == *profile_names[i]
@@ -1784,7 +1784,7 @@ check_remotes(char *word, const size_t len)
 
 	size_t i;
 	for (i = 0; remotes[i].name; i++) {
-		if (conf.case_sens_list == 0
+		if (conf.ignore_case == 1
 		? (TOUPPER(*w) == TOUPPER(*remotes[i].name)
 		&& strncasecmp(w, remotes[i].name, l) == 0)
 		: (*w == *remotes[i].name
@@ -1819,7 +1819,7 @@ check_color_schemes(char *word, const size_t len)
 
 	size_t i;
 	for (i = 0; color_schemes[i]; i++) {
-		if (conf.case_sens_list == 0
+		if (conf.ignore_case == 1
 		? (TOUPPER(*w) == TOUPPER(*color_schemes[i])
 		&& strncasecmp(w, color_schemes[i], l) == 0)
 		: (*w == *color_schemes[i]
@@ -1858,7 +1858,7 @@ check_bookmark_names(char *word, const size_t len)
 		if (!bookmarks[i].name || !*bookmarks[i].name)
 			continue;
 
-		if (conf.case_sens_list == 0
+		if (conf.ignore_case == 1
 		? (TOUPPER(*w) == TOUPPER(*bookmarks[i].name)
 		&& strncasecmp(w, bookmarks[i].name, l) == 0)
 		: (*w == *bookmarks[i].name
@@ -1900,7 +1900,7 @@ check_backdir(char *start)
 	char *ds = strchr(lb, '\\') ? unescape_str(lb) : lb;
 
 	/* Find the query string in the list of parent directories. */
-	char *p = ds ? (conf.case_sens_path_comp == 1 ? strstr(bk_cwd, ds)
+	char *p = ds ? (conf.ignore_case == 0 ? strstr(bk_cwd, ds)
 		: xstrcasestr(bk_cwd, ds)) : NULL;
 	if (p) {
 		char *pp = strchr(p, '/');
@@ -2105,7 +2105,7 @@ rl_suggestions(const unsigned char c)
 		 * of aliases. */
 		} else {
 			if (suggestion.type != ALIAS_SUG && c != ' '
-			&& (conf.case_sens_path_comp ? (*word == *suggestion_buf
+			&& (conf.ignore_case == 0 ? (*word == *suggestion_buf
 			&& strncmp(word, suggestion_buf, wlen) == 0)
 			: (TOUPPER(*word) == TOUPPER(*suggestion_buf)
 			&& strncasecmp(word, suggestion_buf, wlen) == 0) ) ) {

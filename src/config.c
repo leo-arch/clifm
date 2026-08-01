@@ -354,22 +354,6 @@ dump_config(void)
 		DUMP_CONFIG_BOOL);
 #endif /* !_NO_SUGGESTIONS */
 
-	n = DEF_CASE_SENS_DIRJUMP;
-	print_config_value("CaseSensitiveDirjump", &conf.case_sens_dirjump,
-		&n, DUMP_CONFIG_BOOL);
-
-	n = DEF_CASE_SENS_LIST;
-	print_config_value("CaseSensitiveList", &conf.case_sens_list, &n,
-		DUMP_CONFIG_BOOL);
-
-	n = DEF_CASE_SENS_PATH_COMP;
-	print_config_value("CaseSensitivePathComp", &conf.case_sens_path_comp,
-		&n, DUMP_CONFIG_BOOL);
-
-	n = DEF_CASE_SENS_SEARCH;
-	print_config_value("CaseSensitiveSearch", &conf.case_sens_search, &n,
-		DUMP_CONFIG_BOOL);
-
 	n = DEF_CD_ON_QUIT;
 	print_config_value("CdOnQuit", &conf.cd_on_quit, &n, DUMP_CONFIG_BOOL);
 
@@ -452,6 +436,9 @@ dump_config(void)
 	n = DEF_ICONS_GAP;
 	print_config_value("IconsGap", &conf.icons_gap, &n, DUMP_CONFIG_INT);
 #endif /* !_NO_ICONS */
+
+	n = DEF_IGNORE_CASE;
+	print_config_value("IgnoreCase", &conf.ignore_case, &n, DUMP_CONFIG_BOOL);
 
 	print_config_value("InformAutocmd", get_ia_value_str(conf.autocmd_msg),
 		get_ia_value_str(DEF_AUTOCMD_MSG), DUMP_CONFIG_STR_NO_QUOTE);
@@ -2058,16 +2045,8 @@ create_main_config_file(char *file)
 	    "# Print a usage tip at startup.\n\
 ;Tips=%s\n\n\
 ;GroupDirs=%s\n\n\
-# Enable case sensitive listing for files in the current directory.\n\
-;CaseSensitiveList=%s\n\n\
-# Enable case sensitive lookups for the directory jumper function (via \n\
-# the 'j' command).\n\
-;CaseSensitiveDirJump=%s\n\n\
-# Enable case sensitive completion for filenames.\n\
-;CaseSensitivePathComp=%s\n\n\
-# Enable case sensitive search.\n\
-;CaseSensitiveSearch=%s\n\
-# Skip non-alphanumeric characters when sorting files ('version' or 'name').\n\
+# Ignore case distinctions in filenames and paths.\n\
+;IgnoreCase=%s\n\n\
 ;SkipNonAlnumPrefix=%s\n\n\
 # Mas, the file list pager. Possible values are:\n\
 # 0/false: Disable the pager\n\
@@ -2095,10 +2074,7 @@ create_main_config_file(char *file)
 		DEF_TIPS == 1 ? "true" : "false",
 		DEF_GROUP_DIRS == GROUP_DIRS_FIRST ? "first"
 			: (DEF_GROUP_DIRS == GROUP_DIRS_LAST ? "last" : "false"),
-		DEF_CASE_SENS_LIST == 1 ? "true" : "false",
-		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
-		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
-		DEF_CASE_SENS_SEARCH == 1 ? "true" : "false",
+		DEF_IGNORE_CASE == 1 ? "true" : "false",
 		DEF_SKIP_NON_ALNUM_PREFIX == 1 ? "true" : "false",
 		DEF_PAGER == 1 ? "true" : "false",
 		DEF_PAGER_VIEW == PAGER_AUTO ? "auto"
@@ -3590,6 +3566,13 @@ set_max_confirm_files(char *line)
 	}
 }
 
+static void
+print_case_sens_deprecation_warning(const char *op)
+{
+	err('n', PRINT_PROMPT, _("%s: '%s' is deprecated. "
+		"Use 'IgnoreCase=[true|false]' instead.\n"), PROGRAM_NAME, op);
+}
+
 /* The buffer to store read lines is PATH_MAX + 16. But for some reason
  * cppcheck does not expand PATH_MAX, so that it only sees 16 bytes, and
  * thereby a lot of out-of-bounds read. */
@@ -3658,24 +3641,29 @@ read_config(void)
 		}
 #endif /* !_NO_SUGGESTIONS */
 
-		else if (xargs.case_sens_dirjump == UNSET && *line == 'C'
+		else if (xargs.ignore_case == UNSET && *line == 'I'
+		&& strncmp(line, "IgnoreCase=", 11) == 0) {
+			set_config_bool_value(line + 11, &conf.ignore_case);
+		}
+
+		else if (*line == 'C'
 		&& strncmp(line, "CaseSensitiveDirJump=", 21) == 0) {
-			set_config_bool_value(line + 21, &conf.case_sens_dirjump);
+			print_case_sens_deprecation_warning("CaseSensitiveDirJump");
 		}
 
 		else if (*line == 'C'
 		&& strncmp(line, "CaseSensitiveSearch=", 20) == 0) {
-			set_config_bool_value(line + 20, &conf.case_sens_search);
+			print_case_sens_deprecation_warning("CaseSensitiveSearch");
 		}
 
-		else if (xargs.case_sens_list == UNSET && *line == 'C'
+		else if (*line == 'C'
 		&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
-			set_config_bool_value(line + 18, &conf.case_sens_list);
+			print_case_sens_deprecation_warning("CaseSensitiveList");
 		}
 
-		else if (xargs.case_sens_path_comp == UNSET && *line == 'C'
+		else if (*line == 'C'
 		&& strncmp(line, "CaseSensitivePathComp=", 22) == 0) {
-			set_config_bool_value(line + 22, &conf.case_sens_path_comp);
+			print_case_sens_deprecation_warning("CaseSensitivePathComp");
 		}
 
 		else if (xargs.cd_on_quit == UNSET && *line == 'C'

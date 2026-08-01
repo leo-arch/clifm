@@ -131,7 +131,7 @@ namecmp(const char *s1, const char *s2)
 	 * byte of both strings. */
 		char ac = *s1, bc = *s2;
 
-		if (conf.case_sens_list == 0) {
+		if (conf.ignore_case == 1) {
 			ac = (char)TOLOWER(*s1);
 			bc = (char)TOLOWER(*s2);
 		}
@@ -143,7 +143,7 @@ namecmp(const char *s1, const char *s2)
 			return 1;
 	}
 
-	if (conf.case_sens_list == 0)
+	if (conf.ignore_case == 1)
 		return strcoll(s1, s2);
 
 	return strcmp(s1, s2);
@@ -164,7 +164,7 @@ sort_by_extension(const struct fileinfo *pa, const struct fileinfo *pb)
 		if (!e2)
 			return 1;
 
-		return conf.case_sens_list == 1
+		return conf.ignore_case == 0
 			? strcmp(e1, e2) : strcasecmp(e1, e2);
 	}
 

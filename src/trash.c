@@ -487,7 +487,7 @@ load_trashed_files(int *n, int *status)
 
 	struct dirent **tfiles = NULL;
 	*n = scandir(trash_files_dir, &tfiles,
-		skip_files, conf.case_sens_list == 1 ? xalphasort
+		skip_files, conf.ignore_case == 0 ? xalphasort
 		: alphasort_insensitive);
 
 	if (*n <= -1) {
@@ -957,7 +957,7 @@ list_trashed_files(void)
 
 	struct dirent **trash_files = NULL;
 	const int files_n = scandir(trash_files_dir, &trash_files,
-		skip_files, conf.case_sens_list == 1
+		skip_files, conf.ignore_case == 0
 		? xalphasort : alphasort_insensitive);
 
 	if (files_n == -1) {

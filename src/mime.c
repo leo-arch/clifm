@@ -64,7 +64,7 @@ check_user_mimetypes(const char *file)
 	if (!ext || ext == file || !*(++ext))
 		return NULL;
 
-	const size_t hash = hashme(ext, conf.case_sens_list);
+	const size_t hash = hashme(ext, conf.ignore_case);
 
 	static filesn_t n = 0;
 	if (n == 0)

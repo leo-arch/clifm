@@ -101,7 +101,7 @@ get_bd_matches(const char *str, int *n, const int mode)
 	while (1) {
 		char *p = NULL;
 		if (str && *str) { /* Non-empty query string. */
-			p = conf.case_sens_path_comp
+			p = conf.ignore_case == 0
 				? strstr(cwd, str) : xstrcasestr(cwd, str);
 			if (!p)
 				break;

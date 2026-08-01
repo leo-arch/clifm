@@ -1153,10 +1153,6 @@ struct config_t {
 	int autocmd_msg;
 	int autols;
 	int bell_style;
-	int case_sens_dirjump;
-	int case_sens_path_comp;
-	int case_sens_search;
-	int case_sens_list; /* File list */
 	int cd_on_quit;
 	int check_cap;
 	int check_ext;
@@ -1182,6 +1178,7 @@ struct config_t {
 	int highlight;
 	int icons;
 	int icons_gap;
+	int ignore_case;
 	int int_vars;
 	int light_mode;
 	int link_creat_mode;
@@ -1505,9 +1502,6 @@ struct param_t {
 	int autols;
 	int bell_style;
 	int bm_file;
-	int case_sens_dirjump;
-	int case_sens_path_comp;
-	int case_sens_list;
 	int clear_screen;
 	int colorize_lnk_as_target;
 	int colorize;
@@ -1546,6 +1540,7 @@ struct param_t {
 	int icons;
 #endif /* !_NO_ICONS */
 	int icons_use_file_color;
+	int ignore_case;
 	int int_vars;
 	int kitty_keys; /* kitty keyboard protocol */
 	int list_and_quit;

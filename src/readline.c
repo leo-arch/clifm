@@ -985,7 +985,7 @@ filter_open_cmd(const char *dirname, const char *d_name, char *buf, mode_t type)
 static inline int
 check_match(const char *s1, const char *s2, const size_t s1_len)
 {
-	if (conf.case_sens_path_comp == 0) {
+	if (conf.ignore_case == 1) {
 		return TOUPPER(*s1) != TOUPPER(*s2) ? 0
 			: (strncasecmp(s1, s2, s1_len) == 0);
 	}
@@ -1301,7 +1301,7 @@ bookmarks_generator(const char *text, int state)
 		if (!name || !*name)
 			continue;
 
-		if ((conf.case_sens_list == 1 ? strncmp(name, text + prefix, len)
+		if ((conf.ignore_case == 0 ? strncmp(name, text + prefix, len)
 		: strncasecmp(name, text + prefix, len)) != 0)
 			continue;
 
@@ -1646,7 +1646,7 @@ bm_paths_generator(const char *text, int state)
 		char *bname = bookmarks[i].name;
 		char *bpath = bookmarks[i++].path;
 
-		if (!bname || !bpath || (conf.case_sens_list == 1 ? strcmp(bname, text)
+		if (!bname || !bpath || (conf.ignore_case == 0 ? strcmp(bname, text)
 		: strcasecmp(bname, text)) != 0)
 			continue;
 
@@ -1684,7 +1684,7 @@ env_vars_generator(const char *text, int state)
 	}
 
 	while ((var = environ[i++]) != NULL) {
-		if (conf.case_sens_path_comp ? strncmp(var, text, len) == 0
+		if (conf.ignore_case == 0 ? strncmp(var, text, len) == 0
 		: strncasecmp(var, text, len) == 0) {
 			const char *eq = strchr(var, '=');
 			if (!eq || eq == var)
@@ -1718,7 +1718,7 @@ environ_generator(const char *text, int state)
 	}
 
 	while ((var = environ[i++]) != NULL) {
-		if (conf.case_sens_path_comp ? strncmp(var, text + 1, len) == 0
+		if (conf.ignore_case == 0 ? strncmp(var, text + 1, len) == 0
 		: strncasecmp(var, text + 1, len) == 0) {
 			const char *eq = strrchr(var, '=');
 			if (!eq || eq == var)
@@ -1765,7 +1765,7 @@ jump_generator(const char *text, int state)
 			continue;
 		/* Filter by parent */
 		if (rl_line_buffer[1] == 'p') {
-			if ((conf.case_sens_dirjump == 1
+			if ((conf.ignore_case == 0
 			? strstr(workspaces[cur_ws].path, name)
 			: xstrcasestr(workspaces[cur_ws].path, name)) == NULL)
 				continue;
@@ -1773,14 +1773,14 @@ jump_generator(const char *text, int state)
 		/* Filter by child */
 		else {
 			if (rl_line_buffer[1] == 'c') {
-				if ((conf.case_sens_dirjump == 1
+				if ((conf.ignore_case == 0
 				? strstr(name, workspaces[cur_ws].path)
 				: xstrcasestr(name, workspaces[cur_ws].path)) == NULL)
 					continue;
 			}
 		}
 
-		if ((conf.case_sens_dirjump == 1 ? strstr(name, text)
+		if ((conf.ignore_case == 0 ? strstr(name, text)
 		: xstrcasestr(name, text)) != NULL)
 			return strdup(name);
 	}
@@ -1852,7 +1852,7 @@ filenames_gen_text(const char *text, int state)
 	if (state == 0) {
 		i = 0;
 		len = strlen(text);
-		cmp_func = conf.case_sens_path_comp == 1 ? strncmp : strncasecmp;
+		cmp_func = conf.ignore_case == 0 ? strncmp : strncasecmp;
 		fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(text) == 1)
 			? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 		if (rl_line_buffer) {
@@ -1919,7 +1919,7 @@ dirhist_generator(const char *text, int state)
 			if (fuzzy_match(text, name, len, fuzzy_str_type) > 0)
 				return strdup(name);
 		} else {
-			if ((conf.case_sens_path_comp == 1 ? strstr(name, text)
+			if ((conf.ignore_case == 0 ? strstr(name, text)
 			: xstrcasestr(name, text)) != NULL)
 				return strdup(name);
 		}
@@ -2066,7 +2066,7 @@ file_templates_generator(const char *text, int state)
 	}
 
 	while ((name = file_templates[i++]) != NULL) {
-		if (conf.case_sens_path_comp ? strncmp(name, text, len) == 0
+		if (conf.ignore_case == 0 ? strncmp(name, text, len) == 0
 		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
 	}
@@ -2104,7 +2104,7 @@ nets_generator(const char *text, int state)
 	}
 
 	while ((name = remotes[i++].name) != NULL) {
-		if ((conf.case_sens_path_comp ? strncmp(name, text, len)
+		if ((conf.ignore_case == 0 ? strncmp(name, text, len)
 		: strncasecmp(name, text, len)) == 0) {
 			if (is_unmount == 1) { /* List only mounted resources */
 				if (i > 0 && remotes[i - 1].mounted == 1)
@@ -2226,7 +2226,7 @@ prompts_generator(const char *text, int state)
 	}
 
 	while (i < prompts_n && (name = prompts[i++].name) != NULL) {
-		if ((conf.case_sens_list == 1 ? strncmp(name, text, len)
+		if ((conf.ignore_case == 0 ? strncmp(name, text, len)
 		: strncasecmp(name, text, len)) == 0)
 			return strdup(name);
 	}

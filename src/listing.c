@@ -204,7 +204,7 @@ set_icon_name_hashes(void)
 	name_icon_hashes = xnmalloc(i + 1, sizeof(size_t));
 
 	for (; i-- > 0;)
-		name_icon_hashes[i] = hashme(icon_filenames[i].name, 0);
+		name_icon_hashes[i] = hashme(icon_filenames[i].name, 1);
 }
 
 /* Create a list of hashes for directory names associated to icons. */
@@ -215,7 +215,7 @@ set_dir_name_hashes(void)
 	dir_icon_hashes = xnmalloc(i + 1, sizeof(size_t));
 
 	for (; i-- > 0;)
-		dir_icon_hashes[i] = hashme(icon_dirnames[i].name, 0);
+		dir_icon_hashes[i] = hashme(icon_dirnames[i].name, 1);
 }
 
 static void
@@ -226,7 +226,7 @@ set_ext_name_hashes(void)
 	ext_icon_hashes = xnmalloc(i + 1,  sizeof(size_t));
 
 	for (; i-- > 0;)
-		ext_icon_hashes[i] = hashme(icon_ext[i].name, 0);
+		ext_icon_hashes[i] = hashme(icon_ext[i].name, 1);
 
 #ifdef CHECK_ICONS
 	const size_t total = sizeof(icon_ext) / sizeof(icon_ext[0]);
@@ -253,7 +253,7 @@ get_name_icon(const filesn_t n)
 	if (!file_info[n].name)
 		return 0;
 
-	const size_t name_hash = hashme(file_info[n].name, 0);
+	const size_t name_hash = hashme(file_info[n].name, 1);
 
 	/* This division will be replaced by a constant integer at compile
 	 * time, so that it won't even be executed at runtime. */
@@ -287,7 +287,7 @@ get_dir_icon(const filesn_t n)
 	if (!file_info[n].name)
 		return;
 
-	const size_t dir_hash = hashme(file_info[n].name, 0);
+	const size_t dir_hash = hashme(file_info[n].name, 1);
 
 	size_t i = sizeof(icon_dirnames) / sizeof(icon_dirnames[0]);
 	for (; i-- > 0;) {
@@ -424,7 +424,7 @@ get_ext_icon(const char *restrict ext, const filesn_t n)
 	if (!ext || !*(++ext))
 		return;
 
-	const size_t ext_hash = hashme(ext, 0);
+	const size_t ext_hash = hashme(ext, 1);
 
 	const size_t i = ext_table_lookup(ext_hash);
 	if (i != SIZE_MAX) {
