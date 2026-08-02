@@ -520,8 +520,10 @@ check_term(void)
 	 * Clifm from 'fzf --preview', i.e. tab completion), or if not required
 	 * (--ls, --stat, --stat-full, and --open). */
 	if (xargs.list_and_quit == 1 || xargs.stat > 0 || xargs.open == 1
-	|| isatty(STDOUT_FILENO) == 0)
+	|| isatty(STDOUT_FILENO) == 0) {
+		if (xargs.unicode == 1) term_caps.unicode = 1;
 		return;
+	}
 
 #ifdef __FreeBSD__
 	if (!(flags & GUI))
