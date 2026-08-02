@@ -338,7 +338,7 @@ open_bookmark(char **cmd)
 			continue;
 
 		if (!bookmarks[i].path) {
-			xerror(_("'%s': Invalid bookmark\n"), p);
+			xerror(_("bookmarks: '%s': Invalid bookmark\n"), p);
 			goto END;
 		}
 
@@ -347,7 +347,7 @@ open_bookmark(char **cmd)
 		goto END;
 	}
 
-	xerror(_("'%s': No such bookmark\n"), p);
+	xerror(_("bookmarks: '%s': No such bookmark\n"), p);
 
 END:
 	if (p != cmd[1])
