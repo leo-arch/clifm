@@ -113,7 +113,8 @@ parse_shared_mime_info_db(FILE *fp)
 		}
 
 		if (strcmp(line_ptr, "</mime-type>") == 0) { // End of block
-			header_start = mimetype_len = 0;
+			header_start = 0;
+			mimetype_len = 0;
 			*mimetype = '\0';
 			continue;
 		}
