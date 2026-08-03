@@ -501,7 +501,7 @@ get_mnt_input(const int mode, int *info)
 }
 
 static int
-print_mnt_info(const size_t n)
+print_mount_info(const size_t n)
 {
 	const int exit_status = print_dev_info(n);
 
@@ -641,7 +641,7 @@ media_menu(const int mode)
 		goto EXIT;
 
 	if (info == 1) {
-		exit_status = print_mnt_info(n);
+		exit_status = print_mount_info(n);
 		media_menu(mode);
 		return exit_status;
 	}

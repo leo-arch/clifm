@@ -9,7 +9,6 @@
 
 #include "helpers.h"
 
-#include <sys/statvfs.h>
 #include <unistd.h> /* open(2), readlinkat(2) */
 #include <errno.h>
 #include <string.h>
@@ -26,13 +25,12 @@
 # include <sys/xattr.h>
 #endif /* LINUX_FILE_XATTRS */
 
-#if defined(LINUX_FSINFO) || defined(HAVE_STATFS) || defined(__sun)
-# include "fsinfo.h"
-#endif /* LINUX_FSINFO || HAVE_STATFS || __sun */
-
 #if defined(LIST_SPEED_TEST)
 # include <time.h>
 #endif /* LIST_SPEED_TEST */
+
+/* This header includes sys/statvfs.h */
+#include "fsinfo.h" /* get_mnt_info() */
 
 #if defined(TOURBIN_QSORT)
 # include "qsort.h"
@@ -622,27 +620,6 @@ print_div_line(void)
 	fflush(stdout);
 }
 
-#ifdef LINUX_FSINFO
-static char *
-get_devname(const char *file)
-{
-	struct stat b;
-	if (stat(file, &b) == -1)
-		return DEV_NO_NAME;
-
-#if defined(__CYGWIN__) || defined(__ANDROID__)
-	/* There's no sys filesystem on Cygwin/Termux (used by get_dev_name()),
-	 * so let's try with the proc filesystem. */
-	return get_dev_name_mntent(file);
-#else
-	if (major(b.st_dev) == 0)
-		return get_dev_name_mntent(file);
-
-	return get_dev_name(b.st_dev);
-#endif /* __CYGWIN__ || __ANDROID__ */
-}
-#endif /* LINUX_FSINFO */
-
 /* Print free/total space for the filesystem where the current directory
  * resides, plus device name and filesystem type name if available. */
 static void
@@ -652,7 +629,7 @@ print_disk_usage(void)
 		return;
 
 	struct statvfs a;
-	if (statvfs(workspaces[cur_ws].path, &a) != FUNC_SUCCESS) {
+	if (statvfs(workspaces[cur_ws].path, &a) != 0) {
 		err('w', PRINT_PROMPT, "statvfs: %s\n", strerror(errno));
 		return;
 	}
@@ -669,30 +646,11 @@ print_disk_usage(void)
 
 	char *devname = NULL;
 	char *fstype = NULL;
-
-#ifdef _BE_POSIX
-	fstype = DEV_NO_NAME;
-	devname = DEV_NO_NAME;
-#elif defined(__NetBSD__)
-	fstype = a.f_fstypename;
-	devname = a.f_mntfromname;
-#elif defined(__sun)
-	fstype = a.f_basetype;
-	devname = get_dev_mountpoint(workspaces[cur_ws].path);
-#elif defined(LINUX_FSINFO)
-	int remote = 0;
-	fstype = get_fs_type_name(workspaces[cur_ws].path, &remote);
-	devname = get_devname(workspaces[cur_ws].path);
-#elif defined(HAVE_STATFS)
-	get_dev_info(workspaces[cur_ws].path, &devname, &fstype);
-#else
-	fstype = DEV_NO_NAME;
-	devname = DEV_NO_NAME;
-#endif /* _BE_POSIX */
+	(void)get_mnt_info(workspaces[cur_ws].path, &devname, &fstype, &a);
 
 	print_reload_msg(NULL, NULL, _("%d%% free (%s/%s) %s %s\n"),
 		free_percentage, free_space ? free_space : "?", size ? size : "?",
-		fstype, devname);
+		fstype ? fstype : "?", devname ? devname : "?");
 
 /* NOTE: If the f_blocks, f_bfree, f_files, f_ffree, f_bavail, and f_favail
  * fields of the statvfs struct are all zero, the filesystem is likely
@@ -1145,6 +1103,11 @@ get_ind_char(const filesn_t index, char **ind_chr)
 			*ind_chr = NO_PERM_STR;
 			return xf_cb;
 		}
+	}
+
+	if (file_info[index].mountpoint == 1) {
+		*ind_chr = term_caps.unicode == 1 ? MOUNTPOINT_STR_U : MOUNTPOINT_STR;
+		return dm_c;
 	}
 
 	*ind_chr = " ";
@@ -3118,7 +3081,7 @@ get_birth_time(const filesn_t n, const struct stat *a)
 }
 
 static inline void
-load_file_gral_info(const struct stat *a, const filesn_t n)
+load_file_gral_info(const struct stat *a, const filesn_t n, struct stat *parent_st)
 {
 	if (check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0) {
 		file_info[n].user_access = 0;
@@ -3166,6 +3129,11 @@ load_file_gral_info(const struct stat *a, const filesn_t n)
 	file_info[n].size = FILE_TYPE_NON_ZERO_SIZE(a->st_mode) ? FILE_SIZE(*a) : 0;
 	file_info[n].uid = a->st_uid;
 	file_info[n].gid = a->st_gid;
+
+	file_info[n].mountpoint = (conf.show_mounts == 1
+		&& file_info[n].type == DT_DIR
+		&& parent_st->st_dev != 0 && parent_st->st_ino != 0
+		&& (parent_st->st_dev != a->st_dev || parent_st->st_ino == a->st_ino));
 
 	if (checks.id_names == 1)
 		set_id_names(n);
@@ -3574,6 +3542,10 @@ list_dir(void)
 	const int conf_long_view = conf.long_view;
 	const int xargs_disk_usage_analyzer = xargs.disk_usage_analyzer;
 
+	struct stat parent_st;
+	if (conf.show_mounts == 0 || stat(".", &parent_st) == -1)
+		parent_st = (struct stat){0};
+
 	while ((ent = readdir(dir))) {
 		const char *ename = ent->d_name;
 		/* Skip self and parent directories */
@@ -3668,7 +3640,7 @@ list_dir(void)
 			? NULL : file_info[n].name + ext_index;
 
 		if (stat_ok == 1) {
-			load_file_gral_info(&attr, n);
+			load_file_gral_info(&attr, n, &parent_st);
 		} else {
 			file_info[n].type = DT_UNKNOWN;
 			file_info[n].stat_err = 1;

@@ -511,8 +511,6 @@ extern time_t curdir_mtime;
 # define LINUX_FSINFO
 #endif
 
-#define DEV_NO_NAME "-" /* String used when no filesystem name/type is found */
-
 #define TRUECOLOR_NUM 16777216
 
 /* This is a more or less arbitrary value, but better than some huge value
@@ -1228,6 +1226,7 @@ struct config_t {
 	int search_strategy;
 	int share_selbox;
 	int show_hidden;
+	int show_mounts;
 	int skip_non_alnum_prefix;
 	int sort;
 	int sort_reverse;
@@ -1409,6 +1408,7 @@ struct fileinfo {
 	int du_status; /* Exit status of du(1) for dir full sizes */
 	int utf8;      /* Name contains at least one UTF-8 character */
 	int stat_err;  /* stat(2) failed for this entry */
+	int mountpoint;
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__APPLE__) || defined(__sun) || defined(__HAIKU__) \
 || (defined(__arm__) && !defined(__ANDROID__))
@@ -1575,6 +1575,7 @@ struct param_t {
 	int sel_file;
 	int share_selbox;
 	int show_hidden;
+	int show_mounts;
 	int si; /* Sizes in powers of 1000 instead of 1024 */
 	int sort;
 	int sort_reverse;
@@ -2228,6 +2229,7 @@ extern char
 	em_c[MAX_COLOR + 2], /* Error msg */
 	li_c[MAX_COLOR + 2], /* Sel indicator */
 	li_cb[MAX_COLOR],    /* Sel indicator (for the file list) */
+	dm_c[MAX_COLOR],     /* Mountpoint indicator */
 	nm_c[MAX_COLOR + 2], /* Notice msg */
 	ti_c[MAX_COLOR + 2], /* Trash indicator */
 	tx_c[MAX_COLOR + 2], /* Text */

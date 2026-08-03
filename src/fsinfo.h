@@ -10,19 +10,12 @@
 #ifndef FSINFO_H
 #define FSINFO_H
 
+#include <sys/statvfs.h>
+#define DEV_NO_NAME "-" /* String used when no filesystem name/type is found */
+
 __BEGIN_DECLS
 
-#if defined(LINUX_FSINFO)
-char *get_fs_type_name(const char *file, int *remote);
-#if !defined(__CYGWIN__) && !defined(__ANDROID__)
-char *get_dev_name(const dev_t dev);
-#endif /* !__CYGWIN__ && !__ANDROID__ */
-char *get_dev_name_mntent(const char *file);
-#elif defined(HAVE_STATFS)
-void get_dev_info(const char *file, char **devname, char **devtype);
-#elif defined(__sun)
-char *get_dev_mountpoint(const char *file);
-#endif /* LINUX_FSINFO */
+int get_mnt_info(const char *file, char **devname, char **fstype, struct statvfs *a);
 
 __END_DECLS
 

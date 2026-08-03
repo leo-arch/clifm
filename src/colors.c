@@ -790,7 +790,7 @@ reset_iface_colors(void)
 	*db_c = '\0'; *dd_c = '\0'; *de_c = '\0'; *dg_c = '\0';
 	*dk_c = '\0'; *dn_c = '\0'; *do_c = '\0'; *dp_c = '\0';
 	*dr_c = '\0'; *dt_c = '\0'; *du_c = '\0'; *dw_c = '\0';
-	*dxd_c = '\0'; *dxr_c = '\0'; *dz_c = '\0';
+	*dxd_c = '\0'; *dxr_c = '\0'; *dz_c = '\0'; *dm_c = '\0';
 }
 
 /* Import the color scheme NAME from DATADIR (usually /usr/local/share).
@@ -1254,6 +1254,7 @@ set_iface_colors(char **colors, const size_t num_colors)
 		{"ws2", ws2_c, 3, n}, {"ws3", ws3_c, 3, n}, {"ws4", ws4_c, 3, n},
 		{"ws5", ws5_c, 3, n}, {"ws6", ws6_c, 3, n}, {"ws7", ws7_c, 3, n},
 		{"ws8", ws8_c, 3, n}, {"xs", xs_c, 2, n}, {"xf", xf_c, 2, n},
+		{"dm", dm_c, 2, y},
 	};
 
 	const size_t mappings_n = sizeof(mappings) / sizeof(struct color_mapping_t);
@@ -1688,11 +1689,12 @@ set_default_colors(void)
 	if (!*de_c) xstrsncpy(de_c, CVAR(DE), sizeof(de_c));
 	if (!*dg_c) xstrsncpy(dg_c, *du_c ? CVAR(DG) : CVAR(DU), sizeof(dg_c));
 	if (!*dk_c) xstrsncpy(dk_c, CVAR(DK), sizeof(dk_c));
+	if (!*dm_c) xstrsncpy(dm_c, CVAR(DM), sizeof(dm_c));
 	if (!*dn_c) xstrsncpy(dn_c, CVAR(DN), sizeof(dn_c));
 	if (!*do_c) xstrsncpy(do_c, CVAR(DO), sizeof(do_c));
 	if (!*dp_c) xstrsncpy(dp_c, CVAR(DP), sizeof(dp_c));
 	if (!*dr_c) xstrsncpy(dr_c, CVAR(DR), sizeof(dr_c));
-	if (!*dt_c) /* Unset: dim the current color */
+	if (!*dt_c) /* Timestamp mark: unset: dim the current color */
 		xstrsncpy(dt_c, dim_c, sizeof(dt_c));
 	if (!*du_c) {
 		/* Before the introduction of the du color code, user IDs were
@@ -2415,7 +2417,7 @@ disable_bold(void)
 	remove_bold_attr(ac_c); remove_bold_attr(df_c); remove_bold_attr(dl_c);
 	remove_bold_attr(el_c); remove_bold_attr(fc_c); remove_bold_attr(lc_c);
 	remove_bold_attr(mi_c); remove_bold_attr(ts_c); remove_bold_attr(tt_c);
-	remove_bold_attr(wc_c); remove_bold_attr(wp_c);
+	remove_bold_attr(wc_c); remove_bold_attr(wp_c); remove_bold_attr(dm_c);
 
 	/* Suggestions */
 	remove_bold_attr(sb_c); remove_bold_attr(sc_c); remove_bold_attr(sd_c);
@@ -2973,6 +2975,9 @@ print_interface_colors(void)
 	printf(_("%sColor%s (lc) Symbolic link indicator (e.g., %s36%s"
 		"%s%s%ssymlink) (%s1%s)\n"), lc_c, df_c, el_c, df_c, lc_c,
 		term_caps.unicode == 1 ? LINK_STR_U : LINK_STR, df_c, BOLD, df_c);
+	printf(_("%sColor%s (dm) Mountpoint indicator (e.g., %s24%s"
+		"%s%s%sdir/)\n"), dm_c, df_c, el_c, df_c, dm_c,
+		term_caps.unicode == 1 ? MOUNTPOINT_STR_U : MOUNTPOINT_STR, df_c);
 	printf(_("%sColor%s (li) Selected file indicator (e.g., %s12%s"
 		"%s%s%sfilename)\n"), li_cb, df_c, el_c, df_c, li_cb,
 		term_caps.unicode == 1 ? SELFILE_STR_U : SELFILE_STR, df_c);

@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2016-2026 L. Abramovich <leo.clifm@outlook.com>
 */
 
-/* settings.h - User settings default values */
+/* settings.h - Default values for user settings */
 
 #ifndef SETTINGS_H
 #define SETTINGS_H
@@ -13,7 +13,8 @@
 /* User settings */
 
 /* Clifm provides 2 default color schemes: 16 and 256-color. The 256-color
- * version is used if supported by the running terminal. */
+ * version is used if supported by the running terminal. Otherwise, it
+ * falls back to the 16-color version. */
 
 		/* ############################################
 		 * # 1. Default color definitions (16 colors) #
@@ -21,15 +22,15 @@
 
 /* DEF_FILE_COLORS and DEF_IFACE_COLORS are only used to construct the
  * default color scheme file in case it can be found neither in the local dir
- * (usually $HOME/.config/clifm/colors/) nor in the data dir, (usually
- * /usr/local/share/clifm/colors/). */
+ * (usually $HOME/.config/clifm/colors) nor in the data dir (usually
+ * /usr/share/clifm/colors). */
 #define DEF_FILE_COLORS "bd=1;33:ca=30;41:cd=1:di=1;34:ed=2;34:\
 ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=30;46:nd=4;1;31:nf=:\
 no=31;47:or=2;4;36:ow=34;40:pi=4;45;37:so=45;37:su=37;41:sg=30;43:st=37;44:\
 tw=37;42:uf=2;4;37:"
 
 #define DEF_IFACE_COLORS "ac=:db=:dd=:de=:df=0:dg=2;35:dk=:dl=2;37:\
-dn=2;37:do=:dp=:dr=:dt=:du=35:dw=:dxd=:dxr=:dz=:\
+dm=:dn=2;37:do=:dp=:dr=:dt=:du=35:dw=:dxd=:dxr=:dz=:\
 el=36:em=1;31:fc=2;37:hb=36:hc=2;31:lc=:\
 hd=36:he=0;36:hn=0:hp=36:hq=33:hr=31:hs=32:hv=32:\
 li=1;32:mi=1;36:nm=1;32:ro=:sb=2;33:sc=2;36:sd=2;37:\
@@ -109,7 +110,8 @@ xf=1;31:xs=32:"
 #define DEF_AC_C  "\001\x1b[2;37m\002"   /* Autocmd indicator */
 #define DEF_DF_C  "\x1b[0m"      /* Reset attributes: default terminal color */
 #define DEF_DL_C  "\x1b[2;37m"   /* Dividing line */
-#define DEF_EL_C  "\x1b[0;36m"   /* ELN's */
+#define DEF_DM_C  "\x1b[0;33m"   /* Mountpoint indicator */
+#define DEF_EL_C  "\x1b[0;36m"   /* ELNs */
 #define DEF_EM_C  "\001\x1b[1;31m\002" /* Error msg indicator */
 #define DEF_FC_C  "\x1b[0;2;37m" /* File counter */
 #define DEF_LI_C  "\001\x1b[1;32m\002" /* Sel files indicator (prompt) */
@@ -199,7 +201,7 @@ ed=2;34:ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=7;36:nd=1;31:nf=:no=4;31;47:\
 or=4;2;36:ow=48;5;235;38;5;33:pi=38;5;5;48;5;238:sg=30;43:so=1;38;5;5;48;5;238:\
 st=37;44:su=37;41:tw=37;42:uf=4;2;37:"
 
-#define DEF_IFACE_COLORS_256 "ac=:db=:dd=:de=:df=0:dg=2;35:dk=:dl=38;5;243:dn=:\
+#define DEF_IFACE_COLORS_256 "ac=:db=:dd=:de=:df=0:dg=2;35:dk=:dl=38;5;243:dm=:dn=:\
 do=:dp=:dr=:dt=:du=35:dw=:dxd=:dxr=:dz=:el=36:em=1;31:fc=38;5;246:hb=36:hc=2;37:\
 hd=36:he=36:hn=:hp=36:hq=LY:hr=31:hs=32:hv=32:lc=38;5;43:li=1;32:mi=1;36:\
 nm=1;32:ro=:si=1;34:sb=2;33:sc=2;36:sd=38;5;240:sf=4;2;36:sh=38;5;240:sp=38;5;239:\
@@ -273,8 +275,9 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 /* Interface */
 #define DEF_AC_C256  "\001\x1b[38;5;247m\002" /* Autocmd indicator */
 #define DEF_DF_C256  "\x1b[0m"      /* Reset attributes: default terminal color */
-#define DEF_DL_C256  "\x1b[38;5;243m"   /* Dividing line */
-#define DEF_EL_C256  "\x1b[0;36m"   /* ELN's */
+#define DEF_DL_C256  "\x1b[38;5;243m" /* Dividing line */
+#define DEF_DM_C256  "\x1b[38;5;136m" /* Mountpoint indicator */
+#define DEF_EL_C256  "\x1b[0;36m"   /* ELNs */
 #define DEF_EM_C256  "\001\x1b[1;31m\002" /* Error msg indicator */
 #define DEF_FC_C256  "\x1b[0;38;5;247m" /* File counter */
 #define DEF_LI_C256  "\001\x1b[1;32m\002" /* Sel files indicator (prompt) */
@@ -397,11 +400,16 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 #define SELFILE_CHR   'S' /* Prompt indicator */
 #define SELFILE_STR   "*" /* Selected file mark for file list (ASCII) */
-#define SELFILE_STR_U "┃" /* Unicode alternative */
+#define SELFILE_STR_U "┃" /* Unicode */
 
 /* Symbolic link mark for listed files (if ColorLinksAsTarget is enabled). */
 #define LINK_STR   "@" /* ASCII */
-#define LINK_STR_U "@" /* Unicode alternative */
+#define LINK_STR_U "@" /* Unicode */
+
+/* Indicator for mountpoints (--mounts) */
+#define MOUNTPOINT_STR   "+" /* ASCII */
+#define MOUNTPOINT_STR_U "+" /* Unicode */
+//#define MOUNTPOINT_STR_U "≡" /* Unicode */
 
 #define TRUNC_FILE_CHR '~'
 
@@ -423,12 +431,20 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 
 /* String used for the messages pointer (e.g.: "-> 2 file(s) removed")
  * Note: The color used for this string is 'mi' (in the color scheme file). */
-#define MSG_PTR_STR   "->"
-#define MSG_PTR_STR_U "→"  /* Unicode alternative */
+#define MSG_PTR_STR   "->" /* ASCII */
+#define MSG_PTR_STR_U "→"  /* Unicode */
+
+/* Pointer character to display symlink targets (p/pp command). */
+#define LNK_PTR   "->" /* ASCII */
+#define LNK_PTR_U "→"  /* Unicode */
 
 /* Used only by the 'pp' command on a symbolic link */
-#define MSG_PTR_STR_LEFT   "<-"
-#define MSG_PTR_STR_LEFT_U "←"
+#define LNK_PTR_LEFT   "<-" /* ASCII */
+#define LNK_PTR_LEFT_U "←"  /* Unicode */
+
+/* Pointer character to display mountpoints (p/pp command). */
+#define MNT_PTR   "=>" /* ASCII */
+#define MNT_PTR_U "⇒"  /* Unicode */
 
 /* Pointer used for successful operations (color used is 'xs')*/
 #define SUCCESS_PTR_STR_U "✔"
@@ -580,6 +596,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 /* Supported values: HIDDEN_FALSE, HIDDEN_TRUE, HIDDEN_FIRST, and HIDDEN_LAST */
 #define DEF_SHOW_HIDDEN HIDDEN_FALSE
 #define DEF_SHOW_BACKUP_FILES 1
+#define DEF_SHOW_MOUNTS 0
 #define DEF_SKIP_NON_ALNUM_PREFIX 1
 #define DEF_SI 0 /* If 1, compute sizes in powers of 1000 instead of 1024 */
 /* Supported sort options:

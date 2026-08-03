@@ -69,6 +69,7 @@
 #include "aux.h"
 #include "checks.h" /* check_file_access(), is_number() */
 #include "colors.h" /* get_dir_color(), get_regfile_color() */
+#include "fsinfo.h" /* get_mnt_info() */
 #include "messages.h"
 # include "mime.h"  /* xmagic() */
 #include "misc.h"
@@ -1038,12 +1039,60 @@ print_file_perms(const struct stat *attr, const char file_type_char,
 }
 
 static void
+print_mnt_info(const char *file, const struct stat *a)
+{
+	if (!file || !a || conf.show_mounts == 0
+	|| (!S_ISDIR(a->st_mode) && !S_ISLNK(a->st_mode)))
+		return;
+
+	const size_t plen = strlen(file) + 4;
+	char *parent = xnmalloc(plen, sizeof(char));
+	snprintf(parent, plen, "%s/..", file);
+
+	struct stat b;
+	const int ret = stat(parent, &b);
+	free(parent);
+	if (ret == -1)
+		return;
+
+	char *dup_file = strdup(file);
+	if (!dup_file)
+		return;
+
+	char *ptr = normalize_path(dup_file, plen - 4);
+	free(dup_file);
+	const char *abs_path = ptr ? ptr : file;
+
+	if (a->st_dev != b.st_dev || a->st_ino == b.st_ino) {
+		char *devname = NULL;
+		char *fstype = NULL;
+#if defined(__NetBSD__) || defined(__sun)
+		struct statvfs c;
+		if (statvfs(abs_path, &c) == 0) {
+			(void)get_mnt_info(abs_path, &devname, &fstype, &c);
+		} else {
+			devname = UNKNOWN_STR; fstype = UNKNOWN_STR;
+		}
+#else
+		(void)get_mnt_info(abs_path, &devname, &fstype, NULL);
+
+		printf(_(" %s%s%s %s [%s]"), *dm_c ? dm_c : dn_c,
+			term_caps.unicode == 1 ? MNT_PTR_U : MNT_PTR, df_c,
+			devname ? devname : UNKNOWN_STR,
+			fstype ? fstype : UNKNOWN_STR);
+#endif
+	}
+
+	free(ptr);
+}
+
+static void
 print_link_target_name(const char *link_name, const char *link_target,
 	const char *color)
 {
 	const char *name = link_name ? link_name : UNKNOWN_STR;
 	if (!link_target || !*link_target) {
-		printf(_("\tName: %s%s%s\n"), color, name, df_c);
+		printf(_("\tName: %s%s%s"), color, name, df_c);
 		return;
 	}
 
@@ -1053,15 +1102,16 @@ print_link_target_name(const char *link_name, const char *link_target,
 		snprintf(quoted_target, sizeof(quoted_target), "'%s'", link_target);
 
 	const char *target = *quoted_target ? quoted_target : link_target;
-	char *ptr = term_caps.unicode == 1 ? MSG_PTR_STR_LEFT_U : MSG_PTR_STR_LEFT;
-	printf(_("\tName: %s%s%s %s%s%s %s%s%s\n"),
+	char *ptr = term_caps.unicode == 1 ? LNK_PTR_LEFT_U : LNK_PTR_LEFT;
+	printf(_("\tName: %s%s%s %s%s%s %s%s%s"),
 		color, target, df_c, dn_c, ptr, df_c, ln_c, name, df_c);
 }
 
 static void
 print_filename(const char *filename, const char *color, const int follow_link,
-	const mode_t mode, const char *target)
+	const struct stat *attr, const char *target)
 {
+	const mode_t mode = attr ? attr->st_mode : 0;
 	char *fixed_name = wc_xstrlen(filename) == 0
 		? replace_invalid_chars(filename) : NULL;
 
@@ -1076,14 +1126,14 @@ print_filename(const char *filename, const char *color, const int follow_link,
 	if (follow_link == 1) { /* 'pp' command */
 		print_link_target_name(name, target, color);
 		free(fixed_name);
-		return;
+		goto END;
 	}
 
 	/* 'p' command */
 	if (!S_ISLNK(mode)) {
-		printf(_("\tName: %s%s%s\n"), color, name, df_c);
+		printf(_("\tName: %s%s%s"), color, name, df_c);
 		free(fixed_name);
-		return;
+		goto END;
 	}
 
 	char quoted_target[PATH_MAX * sizeof(wchar_t) + 3];
@@ -1098,23 +1148,29 @@ print_filename(const char *filename, const char *color, const int follow_link,
 	if (target && *target && *target != '/' && *target != '~')
 		ret = realpath(filename, resolved_target);
 
+	char *lnk_ptr = term_caps.unicode == 1 ? LNK_PTR_U : LNK_PTR;
+
 	struct stat a;
 	const char *t = (ret && *resolved_target) ? resolved_target : target;
 	if (t && lstat(t, &a) != -1) {
 		const char *link_color = get_link_color(t, &a);
-		printf(_("\tName: %s%s%s %s%s%s %s%s%s\n"), ln_c, name, df_c,
-			dn_c, SET_MSG_PTR, df_c, link_color, target_str, df_c);
+		printf(_("\tName: %s%s%s %s%s%s %s%s%s"), ln_c, name, df_c,
+			dn_c, lnk_ptr, df_c, link_color, target_str, df_c);
 	} else { /* Broken link */
 		if (target) {
-			printf(_("\tName: %s%s%s %s%s%s %s%s%s (broken symlink)\n"), or_c,
-				name, df_c, dn_c, SET_MSG_PTR, df_c, uf_c, target_str, df_c);
+			printf(_("\tName: %s%s%s %s%s%s %s%s%s (broken symlink)"), or_c,
+				name, df_c, dn_c, lnk_ptr, df_c, uf_c, target_str, df_c);
 		} else {
-			printf(_("\tName: %s%s%s %s%s ???%s\n"), or_c, name, df_c,
-				dn_c, SET_MSG_PTR, df_c);
+			printf(_("\tName: %s%s%s %s%s ???%s"), or_c, name, df_c,
+				dn_c, lnk_ptr, df_c);
 		}
 	}
 
 	free(fixed_name);
+
+END:
+	print_mnt_info(filename, attr);
+	putchar('\n');
 }
 
 #ifdef LINUX_FILE_CAPS
@@ -1903,7 +1959,7 @@ do_stat(const char *filename, const int follow_link, const int full_dirsize)
 	HIDE_CURSOR;
 
 	print_file_perms(&attr, file_type, ctype, xattr);
-	print_filename(filename, color, follow_link, attr.st_mode, target);
+	print_filename(filename, color, follow_link, &attr, target);
 	print_file_details(filename, &attr, file_type, file_perm, xattr);
 	print_file_mime(file_name);
 	print_timestamps(file_name, &attr);

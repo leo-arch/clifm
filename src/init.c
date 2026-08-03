@@ -241,6 +241,7 @@ init_conf_struct(void)
 	conf.search_strategy = DEF_SEARCH_STRATEGY;
 	conf.share_selbox = UNSET;
 	conf.show_hidden = UNSET;
+	conf.show_mounts = UNSET;
 	conf.skip_non_alnum_prefix = DEF_SKIP_NON_ALNUM_PREFIX;
 	conf.sort = UNSET;
 	conf.sort_reverse = 0;
@@ -2743,6 +2744,9 @@ check_options(void)
 
 	if (conf.show_hidden == UNSET)
 		conf.show_hidden = SETOPT(xargs.show_hidden, DEF_SHOW_HIDDEN);
+
+	if (conf.show_mounts == UNSET)
+		conf.show_mounts = SETOPT(xargs.show_mounts, DEF_SHOW_MOUNTS);
 
 	if (conf.file_counter == UNSET)
 		conf.file_counter = SETOPT(xargs.file_counter, DEF_FILE_COUNTER);

@@ -151,6 +151,7 @@
 #define LOPT_NO_CASE_SENS           291 /* Deprecated */
 #define LOPT_CASE_SENS              292 /* Deprecated */
 #define LOPT_NO_COLUMNS             293
+#define LOPT_MOUNTS                 294
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -231,6 +232,7 @@ static struct option const longopts[] = {
 	{"mimelist-file", required_argument, 0, LOPT_ALT_MIMEFILE},
 	{"mime-type", no_argument, 0, LOPT_MIMETYPE}, /* Positional params */
 	{"mnt-udisks2", no_argument, 0, LOPT_MNT_UDISKS2},
+	{"mounts", no_argument, 0, LOPT_MOUNTS},
 	{"no-apparent-size", no_argument, 0, LOPT_NO_APPARENT_SIZE}, /* Deprecated */
 	{"no-bold", no_argument, 0, LOPT_NO_BOLD},
 	{"no-cd-auto", no_argument, 0, LOPT_NO_CD_AUTO},
@@ -1978,6 +1980,8 @@ parse_cmdline_args(const int argc, char **argv)
 			run_mimetype = 1; break;
 		case LOPT_MNT_UDISKS2:
 			xargs.mount_cmd = MNT_UDISKS2; break;
+		case LOPT_MOUNTS:
+			xargs.show_mounts = conf.show_mounts = 1; break;
 		case LOPT_NO_APPARENT_SIZE:
 			xargs.apparent_size = conf.apparent_size = 0; break;
 		case LOPT_NO_BOLD:

@@ -23,6 +23,8 @@
 # include <string.h> /* strstr() */
 #endif /* LINUX_FSINFO */
 
+#include "fsinfo.h" /* DEV_NO_NAME */
+
 #if defined(LINUX_FSINFO)
 
 # if defined(__ANDROID__)
@@ -83,7 +85,7 @@ get_ext_fs_type(const char *file)
 /* Return a pointer to a constant string with the name of the filesystem
  * where the file FILE resides. REMOTE is set to 1 if the corresponding
  * filesystem is a remote one. */
-char *
+static char *
 get_fs_type_name(const char *file, int *remote)
 {
 	struct statfs a;
@@ -235,7 +237,7 @@ get_fs_type_name(const char *file, int *remote)
  * NOTE: It performs the same function as get_dev_name(), but it's 3X slower,
  * so that we use it only when the major device number is zero, in which case
  * it cannot be found in /sys/dev/block (as done by get_dev_name()). */
-char *
+static char *
 get_dev_name_mntent(const char *file)
 {
 	if (!file || !*file)
@@ -266,9 +268,9 @@ get_dev_name_mntent(const char *file)
 	return (*name ? name : DEV_NO_NAME);
 }
 
-#if !defined(__CYGWIN__) && !defined(__ANDROID__)
-#define MAX_DEVNAMES 64
-#define MAX_DEVNAME_LEN 32
+# if !defined(__CYGWIN__) && !defined(__ANDROID__)
+# define MAX_DEVNAMES 64
+# define MAX_DEVNAME_LEN 32
 
 struct devs_t {
 	char name[MAX_DEVNAME_LEN];
@@ -294,7 +296,7 @@ get_dev_name_cached(const dev_t dev)
 }
 
 /* Return a pointer to the name of the block device whose ID is DEV. */
-char *
+static char *
 get_dev_name(const dev_t dev)
 {
 	char *dname = get_dev_name_cached(dev);
@@ -341,15 +343,34 @@ get_dev_name(const dev_t dev)
 
 	return (*name ? name : DEV_NO_NAME);
 }
-#undef MAX_DEVNAMES
-#undef MAX_DEVNAME_LEN
+# undef MAX_DEVNAMES
+# undef MAX_DEVNAME_LEN
 
 #endif /* !__CYGWIN__ && !__ANDROID__ */
+
+static char *
+get_devname(const char *file)
+{
+	struct stat b;
+	if (stat(file, &b) == -1)
+		return DEV_NO_NAME;
+
+#if defined(__CYGWIN__) || defined(__ANDROID__)
+	/* There's no sys filesystem on Cygwin/Termux (used by get_dev_name()),
+	 * so let's try with the proc filesystem. */
+	return get_dev_name_mntent(file);
+#else
+	if (major(b.st_dev) == 0)
+		return get_dev_name_mntent(file);
+
+	return get_dev_name(b.st_dev);
+#endif /* __CYGWIN__ || __ANDROID__ */
+}
 
 #elif defined(HAVE_STATFS)
 /* Update DEVNAME and DEVTYPE to make it point to the device name and device
  * type of the filesystem where the file FILE resides. */
-void
+static void
 get_dev_info(const char *file, char **devname, char **devtype)
 {
 	static struct statfs a;
@@ -364,7 +385,7 @@ get_dev_info(const char *file, char **devname, char **devtype)
 }
 
 #elif defined(__sun)
-char *
+static char *
 get_dev_mountpoint(const char *file)
 {
 	if (!file || !*file)
@@ -394,7 +415,39 @@ get_dev_mountpoint(const char *file)
 
 	return (*name ? name : DEV_NO_NAME);
 }
-
-#else
-void *_skip_me_fsinfo;
 #endif /* LINUX_FSINFO */
+
+/* Update DEVNAME and DEVTYPE to make it point to the device name and device
+ * type of the filesystem where the file FILE resides.
+ * The statvfs struct is only required for NetBSD and Sun. It can be NULL
+ * in the case of other platforms. */
+int
+get_mnt_info(const char *file, char **devname, char **fstype, struct statvfs *a)
+{
+	if (!file || !devname || !fstype)
+		return FUNC_FAILURE;
+
+	UNUSED(a);
+
+#ifdef _BE_POSIX
+	*fstype = DEV_NO_NAME;
+	*devname = DEV_NO_NAME;
+#elif defined(__NetBSD__)
+	*fstype = a ? a->f_fstypename : DEV_NO_NAME;
+	*devname = a ? a->f_mntfromname : DEV_NO_NAME;
+#elif defined(__sun)
+	*fstype = a ? a->f_basetype : DEV_NO_NAME;
+	*devname = get_dev_mountpoint(file);
+#elif defined(LINUX_FSINFO)
+	int remote = 0;
+	*fstype = get_fs_type_name(file, &remote);
+	*devname = get_devname(file);
+#elif defined(HAVE_STATFS)
+	get_dev_info(file, devname, fstype);
+#else
+	*fstype = DEV_NO_NAME;
+	*devname = DEV_NO_NAME;
+#endif /* _BE_POSIX */
+
+	return FUNC_SUCCESS;
+}
