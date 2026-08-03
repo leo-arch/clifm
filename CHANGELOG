@@ -1,4 +1,4 @@
-1.28 (Rubber Chicken)
+1.28 (Rubber Chicken) - May 27, 2026
 
 BUG FIXES
 * When mounting a remote, a directory named '"' is created in the current directory if 'Mountpoint' is set to the empty string ("").

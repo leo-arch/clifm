@@ -1152,7 +1152,7 @@ set_locale(void)
 		return;
 
 	err('w', PRINT_PROMPT, _("%s: Locale is not UTF-8. To avoid "
-		"encoding issues, set a UTF-8 locale. For example: "
+		"encoding issues, set an UTF-8 locale. For example: "
 		"'export LANG=es_AR.UTF-8'.\n"), PROGRAM_NAME);
 }
 

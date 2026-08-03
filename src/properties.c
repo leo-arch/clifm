@@ -1075,12 +1075,12 @@ print_mnt_info(const char *file, const struct stat *a)
 		}
 #else
 		(void)get_mnt_info(abs_path, &devname, &fstype, NULL);
+#endif
 
 		printf(_(" %s%s%s %s [%s]"), *dm_c ? dm_c : dn_c,
 			term_caps.unicode == 1 ? MNT_PTR_U : MNT_PTR, df_c,
 			devname ? devname : UNKNOWN_STR,
 			fstype ? fstype : UNKNOWN_STR);
-#endif
 	}
 
 	free(ptr);
