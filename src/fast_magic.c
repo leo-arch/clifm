@@ -1921,7 +1921,7 @@ is_cdxl_video(const uint8_t *s, const size_t slen)
 		return 0;
 
 	if (chunk_size <= ((uint32_t)palette_size
-	+ (uint32_t)sound_size * (1 + !!(s[1] & 0x10))
+	+ (uint32_t)sound_size * (uint32_t)(1 + !!(s[1] & 0x10))
 	+ cdxl_header_size))
 		return 0;
 
@@ -3714,12 +3714,12 @@ is_atari_wnd(const uint8_t *s, const size_t slen)
 	if (!s || slen < 2)
 		return 0;
 
-	const uint8_t width = s[0] + 1;
-	const uint8_t height = s[1];
-	const uint8_t stride = (width + 3) >> 2;
+	const size_t width = (size_t)s[0] + 1;
+	const size_t height = (size_t)s[1];
+	const size_t stride = (width + 3) >> 2;
 
 	if (stride > 40 || height == 0 || height > 192
-	|| (size_t)stride * (size_t)height > 3070)
+	|| stride * height > 3070)
 		return 0;
 
 	return 1;
@@ -3747,8 +3747,8 @@ is_atari_paintshop(const uint8_t *s, const size_t slen)
 	if (!s || slen < 14)
 		return 0;
 
-	const uint16_t width = BE_U16(s + 10) + 1;
-	const uint16_t height = BE_U16(s + 12) + 1;
+	const size_t width = (size_t)BE_U16(s + 10) + 1;
+	const size_t height = (size_t)BE_U16(s + 12) + 1;
 	if (width != 0 && width <= 640 && height != 0 && height <= 400)
 		return 1;
 
@@ -3931,7 +3931,7 @@ is_neochrome_animation(const uint8_t *s, const size_t slen)
 		return 0;
 
 	const uint16_t width = BE_U16(s + 4);
-	const uint16_t x_offset = BE_U16(s + 10) + 1;
+	const size_t x_offset = (size_t)BE_U16(s + 10) + 1;
 	const uint32_t reserved = BE_U32(s + 18);
 	if (width % 8 == 0 && x_offset % 16 == 0 && reserved == 0)
 		return 1;
@@ -3950,8 +3950,8 @@ is_animaster(const uint8_t *s, const size_t slen)
 	const uint16_t frame_len = BE_U16(s + 2);
 	const uint8_t max_width  = s[4];
 	const uint8_t max_height = s[5];
-	const uint16_t frame_width  = BE_U16(s + 38) + 1;
-	const uint16_t frame_height = BE_U16(s + 40) + 1;
+	const size_t frame_width  = (size_t)BE_U16(s + 38) + 1;
+	const size_t frame_height = (size_t)BE_U16(s + 40) + 1;
 
 	if (max_width > 0 && max_width == frame_width
 	&& max_height > 0 && max_height == frame_height
@@ -7148,8 +7148,8 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 
 	/* RECOIL: recoil.c:RECOIL_DecodeEnvision */
 	if (nread > 1505 && sig[2] + 1 <= 204) {
-		const uint8_t cols = sig[1] + 1;
-		const uint8_t rows = sig[2] + 1;
+		const size_t cols = (size_t)sig[1] + 1;
+		const size_t rows = (size_t)sig[2] + 1;
 		const size_t offset = 8 + cols * rows + 463;
 		if (nread >= offset
 		&& (size_t)file_size == offset + (size_t)sig[offset - 1] * 1033)
