@@ -98,6 +98,7 @@ _clifm ()
         --mimelist-file
         --mime-type
         --mnt-udisk2
+        --mounts
         --no-bold
         --no-cd-auto
         --no-classify

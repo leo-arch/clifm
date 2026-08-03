@@ -59,6 +59,7 @@ complete -c clifm -l max-files -r -d 'Set the maximum number of listed files on 
 complete -c clifm -l mimelist-file -r -d 'Set a custom configuration file for Lira'
 complete -c clifm -l mime-type -r -d 'Determine the MIME-type of files and exit'
 complete -c clifm -l mnt-udisks2 -d 'Use \'udisks2\' instead of \'udevil\' for the \'media\' command'
+complete -c clifm -l mounts -d 'Prepend indicator (+) to directories that are mountpoints'
 complete -c clifm -l no-bold -d 'Disable bold colors'
 complete -c clifm -l no-cd-auto -d 'Disable the autocd function'
 complete -c clifm -l no-classify -d 'Do not append file type indicators'

@@ -62,6 +62,7 @@ args=(
 	'--mimelist-file=[set Lira configuration file to FILE]:filename:_files'
 	'--mime-type=[Determine the MIME-type of files and exit]:filename:_files'
 	'--mnt-udisks2[use udisks2 instead of udevil for the media command]'
+	'--mount[prepend indicator (+) to directories that are mountpoints]'
 	'--no-bold[disable bold colors]'
 	'--no-cd-auto[force the use of cd to change directories]'
 	'--no-classify[Do not append filetype indicators]'

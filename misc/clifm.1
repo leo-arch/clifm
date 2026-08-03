@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jul 31, 2026" "clifm 1.28.12" "Clifm Manual"
+.TH "CLIFM" "1" "Aug 3, 2026" "clifm 1.28.13" "Clifm Manual"
 .SH NAME
 clifm - The Command-Line File Manager
 .SH SYNOPSIS
@@ -254,6 +254,9 @@ Set \fIFILE\fR as \fBLira\fR\'s configuration file (see the \fBFILE OPENER\fR se
 \fB--mnt-udisks2\fR
 Use \fBudisks2\fR(1) instead of \fBudevil\fR(1) (default) for the \fBmedia\fR command.
 .TP
+\fB--mounts\fR
+Prepend indicator (+) to directories that are mountpoints.  Tip: the \fBp/pp\fR command identifies mounted device for these directories in the form \fBDIR/ -> DEVNAME [FSTYPE]\fR.  The color used for this indicator is defined by the \fBdm\fR color code (see the \fBTHEMING\fR section below).
+.TP
 \fB--no-bold\fR
 Disable bold colors.
 .TP
@@ -294,7 +297,7 @@ Disable the file counter for directories (specially useful for low-end systems: 
 Disable file previews for tab completion (fzf mode only).
 .TP
 \fB--no-highlight\fR
-Disable syntax highlighting (to customize highlighting colors, see the \fBCOLOR CODES\fR section below).
+Disable syntax highlighting (to customize highlighting colors, see the \fBTHEMING\fR section below).
 .TP
 \fB--no-history\fR
 Do not write commands to the history file (see also the \fBHistIgnore\fR option in the configuration file).
@@ -1776,6 +1779,7 @@ The following codes are used for different interface elements (in the \fBInterfa
  dl  = dividing line
  el  = ELN color
  lc  = symbolic link indicator (\fBColorizeSymlinksAsTarget\fR only)
+ dm  = mountpoint indicator
  mi  = misc indicators (disk usage, sort method, bulk rename, jump database list)
  ts  = matching suffix for possible tab completed entries
  tt  = tilde for truncated filenames
@@ -2411,7 +2415,7 @@ The value taken by \fBSuggestionStrategy\fR is a string containing one or more o
 
 \fBNote\fR: The check for program names in \fBPATH\fR is always executed at last, except when the \fBExternalCommands\fR option is disabled, in which case suggestions for them are simply not displayed.
 
-Suggestions will be printed using one of the following color codes (see the \fBCOLOR CODES\fR section above):
+Suggestions will be printed using one of the following color codes (see the \fBTHEMING\fR section above):
 
 \fBsf\fR: Used for file and directory names.  This includes suggestions for ELNs, bookmarks names, files in the current directory, and possible completions.  Default value: 2;4;36 (dimmed underlined cyan)
 
@@ -3005,7 +3009,7 @@ Same as \fBCLICOLOR_FORCE\fR, but accepts a specific color value (8, 16, 256, tr
 If set to either \fBtruecolor\fR or \fB24bit\fR, \fBclifm\fR assumes the terminal emulator to be capable of displaying true colors (and thereby also 256 colors), despite what the \fBterminfo\fR(5) database reports.
 .TP
 .B CLIFM_FILE_COLORS
-A colon separated list of file type color codes in the same form specified above in the \fBCOLOR CODES\fR section.
+A colon separated list of file type color codes in the same form specified above in the \fBTHEMING\fR section.
 .TP
 .B CLIFM_EXT_COLORS
 Same as above, but for file extensions.
