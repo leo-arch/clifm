@@ -1522,6 +1522,7 @@ and paths\
 \n      --mime-type FILE...\t Print MIME type of files and exit\
 \n      --mimelist-file=FILE\t Set FILE as Lira's configuration file\
 \n      --mnt-udisks2\t\t Use udisks2(1) instead of udevil(1) for the 'media' command\
+\n      --mounts\t\t\t Prepend indicator (+) to directories that are mountpoints\
 \n      --no-bold\t\t\t Disable bold colors\
 \n      --no-cd-auto\t\t Disable the autocd function\
 \n      --no-classify\t\t Do not append file type indicators\
