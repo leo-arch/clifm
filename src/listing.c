@@ -634,6 +634,17 @@ print_disk_usage(void)
 		return;
 	}
 
+	dev_t dev = 0;
+#ifdef __HAIKU__
+	struct stat b;
+	if (stat(workspaces[cur_ws].path, &b) != 0) {
+		err('w', PRINT_PROMPT, "stat: %s\n", strerror(errno));
+		return;
+	}
+	dev = b.st_dev;
+#endif /* __HAIKU__ */
+
+
 	const off_t free_s = (off_t)a.f_bavail * (off_t)a.f_frsize;
 	const off_t total = (off_t)a.f_blocks * (off_t)a.f_frsize;
 /*	if (total == 0) return; // This is what MC does */
@@ -646,7 +657,7 @@ print_disk_usage(void)
 
 	char *devname = NULL;
 	char *fstype = NULL;
-	(void)get_mnt_info(workspaces[cur_ws].path, &devname, &fstype, &a);
+	(void)get_mnt_info(workspaces[cur_ws].path, &devname, &fstype, &a, dev);
 
 	print_reload_msg(NULL, NULL, _("%d%% free (%s/%s) %s %s\n"),
 		free_percentage, free_space ? free_space : "?", size ? size : "?",

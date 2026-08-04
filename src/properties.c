@@ -1069,13 +1069,13 @@ print_mnt_info(const char *file, const struct stat *a)
 #if defined(__NetBSD__) || defined(__sun)
 		struct statvfs c;
 		if (statvfs(abs_path, &c) == 0) {
-			(void)get_mnt_info(abs_path, &devname, &fstype, &c);
+			(void)get_mnt_info(abs_path, &devname, &fstype, &c, a->st_dev);
 		} else {
 			devname = UNKNOWN_STR; fstype = UNKNOWN_STR;
 		}
 #else
-		(void)get_mnt_info(abs_path, &devname, &fstype, NULL);
-#endif
+		(void)get_mnt_info(abs_path, &devname, &fstype, NULL, a->st_dev);
+#endif /* __NetBSD__ || __sun */
 
 		printf(_(" %s%s%s %s [%s]"), *dm_c ? dm_c : dn_c,
 			term_caps.unicode == 1 ? MNT_PTR_U : MNT_PTR, df_c,

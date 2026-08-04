@@ -21,6 +21,8 @@
 #elif defined(__sun)
 # include <sys/mnttab.h> /* getmntent() */
 # include <string.h> /* strstr() */
+#elif defined(__HAIKU__)
+# include <fs_info.h> /* fs_stat_dev() */
 #endif /* LINUX_FSINFO */
 
 #include "fsinfo.h" /* DEV_NO_NAME */
@@ -415,6 +417,28 @@ get_dev_mountpoint(const char *file)
 
 	return (*name ? name : DEV_NO_NAME);
 }
+#elif defined(__HAIKU__)
+static void
+get_dev_info_haiku(const dev_t dev, char **devname, char **fstype)
+{
+	static char dev_buf[256];
+	static char fs_buf[256];
+
+	*dev_buf = '\0';
+	*fs_buf = '\0':
+
+	fs_info fi;
+	if (fs_stat_dev(dev, &fi) < 0) {
+		*devname = DEV_NO_NAME;
+		*fstype = DEV_NO_NAME;
+		return;
+	}
+
+	xstrsncpy(dev_buf, fi.device_name, sizeof(dev_buf));
+	xstrsncpy(fs_buf, fi.fsh_name, sizeof(fs_buf));
+	*devname = *dev_buf ? dev_buf : DEV_NO_NAME;
+	*fstype = *fs_buf ? fs_buf : DEV_NO_NAME;
+}
 #endif /* LINUX_FSINFO */
 
 /* Update DEVNAME and DEVTYPE to make it point to the device name and device
@@ -422,12 +446,14 @@ get_dev_mountpoint(const char *file)
  * The statvfs struct is only required for NetBSD and Sun. It can be NULL
  * in the case of other platforms. */
 int
-get_mnt_info(const char *file, char **devname, char **fstype, struct statvfs *a)
+get_mnt_info(const char *file, char **devname, char **fstype,
+	struct statvfs *a, const dev_t dev)
 {
 	if (!file || !devname || !fstype)
 		return FUNC_FAILURE;
 
 	UNUSED(a);
+	UNUSED(dev);
 
 #ifdef _BE_POSIX
 	*fstype = DEV_NO_NAME;
@@ -444,6 +470,8 @@ get_mnt_info(const char *file, char **devname, char **fstype, struct statvfs *a)
 	*devname = get_devname(file);
 #elif defined(HAVE_STATFS)
 	get_dev_info(file, devname, fstype);
+#elif defined(__HAIKU__)
+	get_dev_info_haiku(dev, devname, fstype);
 #else
 	*fstype = DEV_NO_NAME;
 	*devname = DEV_NO_NAME;

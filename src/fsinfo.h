@@ -15,7 +15,8 @@
 
 __BEGIN_DECLS
 
-int get_mnt_info(const char *file, char **devname, char **fstype, struct statvfs *a);
+int get_mnt_info(const char *file, char **devname, char **fstype,
+	struct statvfs *a, const dev_t dev);
 
 __END_DECLS
 
