@@ -425,7 +425,7 @@ get_dev_info_haiku(const dev_t dev, char **devname, char **fstype)
 	static char fs_buf[256];
 
 	*dev_buf = '\0';
-	*fs_buf = '\0':
+	*fs_buf = '\0';
 
 	fs_info fi;
 	if (fs_stat_dev(dev, &fi) < 0) {
