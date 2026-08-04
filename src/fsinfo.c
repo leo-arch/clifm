@@ -421,8 +421,8 @@ get_dev_mountpoint(const char *file)
 static void
 get_dev_info_haiku(const dev_t dev, char **devname, char **fstype)
 {
-	static char dev_buf[256];
-	static char fs_buf[256];
+	static char dev_buf[256]; /* device_name is 128 bytes long (see fs_info.h) */
+	static char fs_buf[64]; /* fsh_name is B_OS_NAME_LENGHT (32) (also fs_info.h) */
 
 	*dev_buf = '\0';
 	*fs_buf = '\0';
@@ -444,7 +444,9 @@ get_dev_info_haiku(const dev_t dev, char **devname, char **fstype)
 /* Update DEVNAME and DEVTYPE to make it point to the device name and device
  * type of the filesystem where the file FILE resides.
  * The statvfs struct is only required for NetBSD and Sun. It can be NULL
- * in the case of other platforms. */
+ * in the case of other platforms.
+ * Also, dev (st_dev of FILE) is only required by Haiku. Can be zero for
+ * other platforms. */
 int
 get_mnt_info(const char *file, char **devname, char **fstype,
 	struct statvfs *a, const dev_t dev)
