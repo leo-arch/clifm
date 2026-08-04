@@ -1458,6 +1458,36 @@ unset_prompt_values(const size_t n)
 	prompts[n].warning_prompt_enabled = DEF_WARNING_PROMPT;
 }
 
+static int
+create_prompts_file(const char *file)
+{
+	if (!file || !*file)
+		return FUNC_FAILURE;
+
+	int fd;
+	FILE *fp = open_fwrite(file, &fd);
+	if (!fp) {
+		err('w', PRINT_PROMPT, "%s: Cannot create prompts file: '%s': %s\n"
+			PROGRAM_NAME, file, strerror(errno));
+		return FUNC_FAILURE;
+	}
+
+	fprintf(fp, "\
+##########################\n\
+# Prompts file for %s #\n\
+##########################\n\
+\n\
+[clifm]\n\
+Notifications=true\n\
+RegularPrompt=\"%%{reset}\\I[\\S%%{reset}]\\l \\A \\u:\\H %%{cyan}\\w%%{reset}\\n<\\z%%{reset}> %%{blue}%%{reset} \"\n\
+EnableWarningPrompt=true\n\
+WarningPrompt=\"%%{reset}%%{b:red}(!)%%{n:dim} > \"\n\n",
+	PROGRAM_NAME);
+
+	fclose(fp);
+	return FUNC_SUCCESS;
+}
+
 static char *
 set_prompts_file(void)
 {
@@ -1474,21 +1504,24 @@ set_prompts_file(void)
 		return f;
 
 	if (!data_dir || !*data_dir)
-		goto ERROR;
+		goto CREATE_FILE;
 
 	char t[PATH_MAX + 1];
 	snprintf(t, sizeof(t), "%s/%s/prompts.clifm", data_dir, PROGRAM_NAME);
 	if (stat(t, &a) == -1 || !S_ISREG(a.st_mode))
-		goto ERROR;
+		goto CREATE_FILE;
 
 	const char *cmd[] = {"cp", "--", t, f, NULL};
 	int ret = launch_execv(cmd, FOREGROUND, E_NOFLAG);
 	if (ret == FUNC_SUCCESS)
 		return f;
 
-ERROR:
-	free(f);
-	return NULL;
+CREATE_FILE:
+	if (create_prompts_file(f) == FUNC_FAILURE) {
+		free(f);
+		return NULL;
+	}
+	return f;
 }
 
 static char *
