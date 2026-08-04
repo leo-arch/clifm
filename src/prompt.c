@@ -302,6 +302,11 @@ gen_exit_status(void)
 	const size_t code_len = (size_t)DIGINUM(exit_code);
 	const size_t len = code_len + 3 + ((size_t)MAX_COLOR * 2);
 
+	/* Some systems, like Haiku, use negative error codes. In this case,
+	 * since we don't want to display negative values, let's use
+	 * a general-purpose error code: 1. */
+	if (exit_code < 0) exit_code = 1;
+
 	char *temp = xnmalloc(len, sizeof(char));
 	snprintf(temp, len, "%s%d\001%s\002",
 		(exit_code == 0) ? (conf.colorize == 1 ? xs_c : "")

@@ -1734,8 +1734,8 @@ get_cur_colorscheme(const char *colorscheme)
 	}
 
 	if (!cur_cscheme) {
-		err('w', PRINT_PROMPT, _("%s: colors: %s: No such color scheme. "
-			"Falling back to default\n"), PROGRAM_NAME, colorscheme);
+		err('w', PRINT_PROMPT, _("%s: colors: '%s': No such color scheme "
+			"(falling back to default)\n"), PROGRAM_NAME, colorscheme);
 
 		if (def_cscheme)
 			cur_cscheme = def_cscheme;
