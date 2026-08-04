@@ -1769,7 +1769,7 @@ create_main_config_file(char *file)
 ;ColorScheme=%s\n\n"
 
 	    "# Display number of files contained by directories when listing files.\n\
-;FilesCounter=%s\n\n"
+;FileCounter=%s\n\n"
 
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally.\n\
 ;ListingMode=%d\n\n"
@@ -2086,11 +2086,16 @@ create_main_config_file(char *file)
 	fprintf(config_fp,
 	";MaxHistory=%d\n\
 ;MaxDirhist=%d\n\
+# How many files to display in confirmation prompts, Supported values:\n\
+# all, none, auto (half terminal lines), or a positive integer.\n\
 ;MaxConfirmFiles=%s\n\
 ;MaxLog=%d\n\
+# A regular expression to exclude commands from history.\n\
 ;HistIgnore=%s\n\
+# Same as HistIgnore, but for the directory history list.\n\
 ;DirhistIgnore=\"\"\n\
 ;Icons=%s\n\
+# Number of spaces between icons and filenames (supported values: 0, 1, or 2).\n\
 ;IconPad=%d\n\
 ;Umask=077\n\
 ;DiskUsage=%s\n\n"
