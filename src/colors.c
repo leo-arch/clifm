@@ -777,12 +777,12 @@ reset_iface_colors(void)
 	*sb_c = '\0'; *sc_c = '\0'; *sd_c = '\0'; *sf_c = '\0';
 	*sh_c = '\0'; *sp_c = '\0'; *sx_c = '\0'; *sz_c = '\0';
 
-	*ac_c = '\0'; *df_c = '\0'; *dl_c = '\0'; *el_c = '\0';
-	*em_c = '\0'; *fc_c = '\0'; *li_c = '\0'; *li_cb = '\0';
-	*mi_c = '\0'; *nm_c = '\0'; *ro_c = '\0'; *si_c = '\0';
-	*ti_c = '\0'; *tt_c = '\0'; *ts_c = '\0'; *tx_c = '\0';
-	*wc_c = '\0'; *wm_c = '\0'; *wp_c = '\0'; *xf_c = '\0';
-	*xf_cb = '\0'; *xs_c = '\0'; *xs_cb = '\0';
+	*ac_c = '\0'; *df_c = '\0'; *dl_c = '\0'; *dm_c = '\0';
+	*el_c = '\0'; *em_c = '\0'; *fc_c = '\0'; *li_c = '\0';
+	*li_cb = '\0'; *mi_c = '\0'; *nm_c = '\0'; *ro_c = '\0';
+	*si_c = '\0'; *ti_c = '\0'; *tt_c = '\0'; *ts_c = '\0';
+	*tx_c = '\0'; *wc_c = '\0'; *wm_c = '\0'; *wp_c = '\0';
+	*xf_c = '\0'; *xf_cb = '\0'; *xs_c = '\0'; *xs_cb = '\0';
 
 	*ws1_c = '\0'; *ws2_c = '\0'; *ws3_c = '\0'; *ws4_c = '\0';
 	*ws5_c = '\0'; *ws6_c = '\0'; *ws7_c = '\0'; *ws8_c = '\0';
@@ -790,7 +790,7 @@ reset_iface_colors(void)
 	*db_c = '\0'; *dd_c = '\0'; *de_c = '\0'; *dg_c = '\0';
 	*dk_c = '\0'; *dn_c = '\0'; *do_c = '\0'; *dp_c = '\0';
 	*dr_c = '\0'; *dt_c = '\0'; *du_c = '\0'; *dw_c = '\0';
-	*dxd_c = '\0'; *dxr_c = '\0'; *dz_c = '\0'; *dm_c = '\0';
+	*dxd_c = '\0'; *dxr_c = '\0'; *dz_c = '\0';
 }
 
 /* Import the color scheme NAME from DATADIR (usually /usr/local/share).
@@ -971,13 +971,9 @@ print_ext_conflict(const char *a, const char *b)
 }
 
 /* Make sure hashes for filename extensions do not conflict.
- * CS_CHECK is 0 when this function is called at startup: if a hash conflict
- * is found, the hash field at index zero (of the ext_colors struct) is set
- * to 0 to indicate that we must use regular string comparison (slower).
- * CS_CHECK is 1 when the function is invoked by the 'cs check-ext' command.
  * It returns FUNC_FAILURE in case of conflicts, or FUNC_SUCCESS otherwise. */
 static int
-check_ext_color_hash_conflicts(const int cs_check)
+list_ext_color_hash_conflicts(void)
 {
 	size_t conflicts = 0;
 
@@ -992,22 +988,10 @@ check_ext_color_hash_conflicts(const int cs_check)
 				 * same color. Most likely a duplicate entry: let it be. */
 				continue;
 
-			if (cs_check == 1) {
-				print_ext_conflict(ext_colors[i].name, ext_colors[j].name);
-				conflicts++;
-				continue;
-			}
-
-			ext_colors[0].hash = 0;
-			err('w', PRINT_PROMPT, _("%s: File extension conflicts "
-				"found. Run 'cs check-ext' to see the details.\n"),
-				PROGRAM_NAME);
-			return FUNC_FAILURE;
+			print_ext_conflict(ext_colors[i].name, ext_colors[j].name);
+			conflicts++;
 		}
 	}
-
-	if (cs_check == 0)
-		return FUNC_SUCCESS;
 
 	if (conflicts > 0) {
 		if (xargs.lscolors != LS_COLORS_GNU)
@@ -1016,6 +1000,39 @@ check_ext_color_hash_conflicts(const int cs_check)
 	}
 
 	puts(_("cs: No conflicts found"));
+	return FUNC_SUCCESS;
+}
+
+/* Return FUNC_FAILURE if at least two equal extension hashes are found.
+ * Otherwise, FUNC_SUCCESS is returned.
+ * If a hash conflict is found, the hash field at index zero (of the ext_colors
+ * struct) is set to 0 to indicate that we must use regular string comparison
+ * (slower) instead of binary search.
+ * The ext_colors struct must be sorted by hash. */
+static int
+check_ext_color_hash_conflicts(void)
+{
+	if (!ext_colors)
+		return FUNC_FAILURE;
+
+	for (size_t i = 0; i + 1 < ext_colors_n; i++) {
+		if (ext_colors[i].hash != ext_colors[i + 1].hash)
+			continue;
+
+		/* Two equal hashes: check names for duplicates */
+		if (ext_colors[i].value_len == ext_colors[i + 1].value_len
+		&& strcmp(ext_colors[i].value, ext_colors[i + 1].value) == 0)
+			/* Two extensions with the same hash, but pointing to the
+			 * same color. Most likely a duplicate entry: let it be. */
+			continue;
+
+		ext_colors[0].hash = 0;
+		err('w', PRINT_PROMPT, _("%s: File extension conflicts "
+			"found. Run 'cs check-ext' to see the details.\n"),
+			PROGRAM_NAME);
+		return FUNC_FAILURE;
+	}
+
 	return FUNC_SUCCESS;
 }
 
@@ -1046,7 +1063,7 @@ cschemes_function(char **args)
 	}
 
 	if (args[1] && *args[1] == 'c' && strcmp(args[1], "check-ext") == 0)
-		return check_ext_color_hash_conflicts(1);
+		return list_ext_color_hash_conflicts();
 
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(CS_USAGE));
@@ -1512,10 +1529,8 @@ split_extension_colors(const char *extcolors)
 
 	p = NULL;
 
-	if (ext_colors) {
+	if (ext_colors)
 		ext_colors[ext_colors_n] = (struct ext_t){0};
-		check_ext_color_hash_conflicts(0);
-	}
 }
 
 #define CVAR(s) (term_caps.color >= 256 ? DEF_ ## s ## _C256 : DEF_ ## s ## _C) /* NOLINT */
@@ -1572,13 +1587,15 @@ set_default_colors(void)
 	if (xargs.lscolors > 0)
 		set_extra_colors();
 
-	if (!ext_colors)
+	if (!ext_colors) {
 		split_extension_colors(term_caps.color >= 256
 			? DEF_EXT_COLORS_256 : DEF_EXT_COLORS);
+	}
 
 	if (ext_colors && ext_colors_n > 0) {
 		qsort(ext_colors, ext_colors_n, sizeof(*ext_colors),
 			(QSFUNC *)hash_sort);
+		check_ext_color_hash_conflicts();
 	}
 
 	/* If a definition for TEMP exists in the color scheme file, BK_C should
