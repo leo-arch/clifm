@@ -140,9 +140,11 @@ char
 	ICON_POSTSCRIPT[] = EMOJI_POSTSCRIPT,
 	ICON_POWERSHELL[] = EMOJI_POWERSHELL,
 	ICON_POWERPOINT[] = EMOJI_PRESENTATION,
+	ICON_PUPPET[] = EMOJI_PUPPET,
 	ICON_PURESCRIPT[] = EMOJI_PURESCRIPT,
 	ICON_PYTHON[] = EMOJI_PYTHON,
 	ICON_R[] = EMOJI_R,
+	ICON_RAZOR[] = EMOJI_RAZOR,
 	ICON_REACT[] = EMOJI_ELECTRON,
 	ICON_README[] = EMOJI_TEXT,
 	ICON_ROM[] = EMOJI_ROM,
@@ -309,9 +311,11 @@ char
 	ICON_POSTSCRIPT[] = FILE_POSTSCRIPT,
 	ICON_POWERSHELL[] = FILE_POWERSHELL,
 	ICON_POWERPOINT[] = FILE_POWERPOINT,
+	ICON_PUPPET[] = FILE_PUPPET,
 	ICON_PURESCRIPT[] = FILE_PURESCRIPT,
 	ICON_PYTHON[] = MFIZZ_PYTHON,
 	ICON_R[] = FILE_R,
+	ICON_RAZOR[] = FA_FILE_O, /* No Razor icon */
 	ICON_REACT[] = FILE_REACT,
 	ICON_README[] = OCT_BOOK,
 	ICON_ROM[] = FA_MICROCHIP,
@@ -478,9 +482,11 @@ char
 	ICON_POSTSCRIPT[] = NERD_POSTSCRIPT,
 	ICON_POWERSHELL[] = NERD_POWERSHELL,
 	ICON_POWERPOINT[] = NERD_PPTDOC,
+	ICON_PUPPET[] = NERD_PUPPET,
 	ICON_PURESCRIPT[] = NERD_PURESCRIPT,
 	ICON_PYTHON[] = NERD_PYTHON,
 	ICON_R[] = NERD_R,
+	ICON_RAZOR[] = NERD_RAZOR,
 	ICON_REACT[] = NERD_REACT,
 	ICON_README[] = NERD_BOOK,
 	ICON_ROM[] = NERD_ROM,
@@ -1088,6 +1094,7 @@ struct icons_t const icon_ext[] = {
 	{"ps1", ICON_POWERSHELL, WHITE},
 	{"psd1", ICON_POWERSHELL, WHITE},
 	{"psm1", ICON_POWERSHELL, WHITE},
+	{"pp", ICON_PUPPET, MAGENTA},
 	{"purs", ICON_PURESCRIPT, WHITE},
 	{"pxd", ICON_PYTHON, GREEN},
 	{"py", ICON_PYTHON, GREEN},
@@ -1142,7 +1149,6 @@ struct icons_t const icon_ext[] = {
 	{"rdf", ICON_REDIS, RED},
 	{"aof", ICON_REDIS, RED},
 	{"cr", ICON_CRYSTAL, WHITE}, // nf-dev-crystal
-	{"fnl", ICON_FENNEL, GREEN}, // No IIT icon
 	{"hack", ICON_HACK, YELLOW}, nf-seti-hacklang
 	{"qml", ICON_QT, GREEN}, // No IIT icon
 	{"qrc", ICON_QT, GREEN},
@@ -1167,11 +1173,12 @@ struct icons_t const icon_ext[] = {
 #endif
 	{"bst", ICON_TEX, WHITE}, // BibTeX Style Document
 	{"cls", ICON_TEX, WHITE}, // LaTeX Document Class File
+	{"cshtml", ICON_RAZOR, CYAN}, // ASP.NET Razor Webpage
 	{"htm", ICON_HTML, YELLOW}, // Hypertext Markup Language File
 	{"html", ICON_HTML, YELLOW}, // Hypertext Markup Language File
 	{"jmd", ICON_MARKDOWN, WHITE}, // Jupyter Markdown File
-	{"jsp", ICON_HTML, YELLOW}, // Jakarta Server Page
-	{"jspx", ICON_HTML, YELLOW}, // XML Jakarta Server Page
+//	{"jsp", ICON_HTML, YELLOW}, // Jakarta Server Page
+//	{"jspx", ICON_HTML, YELLOW}, // XML Jakarta Server Page
 	{"latex", ICON_TEX, WHITE}, // LaTeX Document
 	{"ltx", ICON_TEX, WHITE}, // LaTeX Document
 	{"markdown", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
@@ -1180,6 +1187,7 @@ struct icons_t const icon_ext[] = {
 	{"mkd", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
 	{"opf", ICON_XML, YELLOW}, // OEB Package Format (FlipViewer FlipBook File)
 	{"opml", ICON_XML, YELLOW}, // Outline Processor Markup Language File
+	{"razor", ICON_RAZOR, CYAN}, // Razor Component File
 	{"rdf", ICON_XML, YELLOW}, // Resource Description Framework File
 	{"rdoc", ICON_MARKDOWN, WHITE}, // Ruby Document
 	{"sgml", ICON_XML, YELLOW}, // Standard Generalized Markup Language File

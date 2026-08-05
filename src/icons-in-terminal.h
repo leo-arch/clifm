@@ -90,6 +90,7 @@
 #define FILE_OCAML "\ue77d"
 #define FILE_OPENOFFICE "\ue847"
 #define FILE_POLYMER "\ue88e" /* No svelte icon. Let's use this for it. */
+#define FILE_PUPPET "\ue8e1"
 #define FILE_POSTSCRIPT "\ue7b8"
 #define FILE_POWERSHELL "\ue83d"
 #define FILE_POWERPOINT "\ue84f"
