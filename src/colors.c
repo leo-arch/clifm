@@ -930,33 +930,6 @@ set_colorscheme(char *arg)
 	free(p);
 	return FUNC_FAILURE;
 }
-#endif /* !CLIFM_SUCKLESS */
-
-static char *
-get_color_scheme_name(void)
-{
-	if (cur_cscheme && *cur_cscheme)
-		return cur_cscheme;
-
-	if (term_caps.color >= 256)
-		return _("built-in (256 colors)");
-
-	return _("built-in (8 colors)");
-}
-
-static int
-print_colors_tip(const int stealth)
-{
-	xerror(_("%s: %s.\nTIP: To edit the "
-		"color scheme use the following environment "
-		"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
-		"and CLIFM_EXT_COLORS.\nFor example:\n\n"
-		"CLIFM_FILE_COLORS=\"di=31:ln=33:\" CLIFM_IFACE_COLORS=\"el=35:fc=34:\" "
-		"CLIFM_EXT_COLORS=\"*.c=1;33:*.odt=4;35:\" clifm\n\n"
-		"Consult the manpage for more information.\n"),
-		PROGRAM_NAME, stealth == 1 ? STEALTH_DISABLED : NOT_AVAILABLE);
-	return FUNC_FAILURE;
-}
 
 static void
 print_ext_conflict(const char *a, const char *b)
@@ -1002,6 +975,33 @@ list_ext_color_hash_conflicts(void)
 	puts(_("cs: No conflicts found"));
 	return FUNC_SUCCESS;
 }
+#endif /* !CLIFM_SUCKLESS */
+
+static char *
+get_color_scheme_name(void)
+{
+	if (cur_cscheme && *cur_cscheme)
+		return cur_cscheme;
+
+	if (term_caps.color >= 256)
+		return _("built-in (256 colors)");
+
+	return _("built-in (8 colors)");
+}
+
+static int
+print_colors_tip(const int stealth)
+{
+	xerror(_("%s: %s.\nTIP: To edit the "
+		"color scheme use the following environment "
+		"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
+		"and CLIFM_EXT_COLORS.\nFor example:\n\n"
+		"CLIFM_FILE_COLORS=\"di=31:ln=33:\" CLIFM_IFACE_COLORS=\"el=35:fc=34:\" "
+		"CLIFM_EXT_COLORS=\"*.c=1;33:*.odt=4;35:\" clifm\n\n"
+		"Consult the manpage for more information.\n"),
+		PROGRAM_NAME, stealth == 1 ? STEALTH_DISABLED : NOT_AVAILABLE);
+	return FUNC_FAILURE;
+}
 
 /* Return FUNC_FAILURE if at least two equal extension hashes are found.
  * Otherwise, FUNC_SUCCESS is returned.
@@ -1019,7 +1019,6 @@ check_ext_color_hash_conflicts(void)
 		if (ext_colors[i].hash != ext_colors[i + 1].hash)
 			continue;
 
-		/* Two equal hashes: check names for duplicates */
 		if (ext_colors[i].value_len == ext_colors[i + 1].value_len
 		&& strcmp(ext_colors[i].value, ext_colors[i + 1].value) == 0)
 			/* Two extensions with the same hash, but pointing to the
