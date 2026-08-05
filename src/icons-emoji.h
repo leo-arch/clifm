@@ -60,6 +60,7 @@
 #define EMOJI_ELM EMOJI_CODE
 #define EMOJI_ENCRYPTED "🔒"
 #define EMOJI_ERLANG EMOJI_CODE
+#define EMOJI_FENNEL EMOJI_CODE
 #define EMOJI_FILE "📄"
 #define EMOJI_FOLDER "📁"
 #define EMOJI_FOLDER_OPEN "📁"

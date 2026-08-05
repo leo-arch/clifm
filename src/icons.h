@@ -81,6 +81,7 @@ char
 	ICON_EMACS[] = EMOJI_SHELL,
 	ICON_ERLANG[] = EMOJI_ERLANG,
 	ICON_EXCEL[] = EMOJI_STYLESHEET,
+	ICON_FENNEL[] = EMOJI_FENNEL,
 	ICON_FONT[] = EMOJI_FONT,
 	ICON_FORTRAN[] = EMOJI_FORTRAN,
 	ICON_FREECAD[] = EMOJI_FREECAD,
@@ -249,6 +250,7 @@ char
 	ICON_EMACS[] = FILE_EMACS,
 	ICON_ERLANG[] = DEV_ERLANG,
 	ICON_EXCEL[] = FILE_EXCEL,
+	ICON_FENNEL[] = FA_FILE_O, /* No Fennel icon */
 	ICON_FONT[] = FILE_FONT,
 	ICON_FORTRAN[] = FILE_FORTRAN,
 	ICON_FREECAD[] = FA_CUBE, /* No FreeCAD icon */
@@ -417,6 +419,7 @@ char
 	ICON_EMACS[] = NERD_EMACS,
 	ICON_ERLANG[] = NERD_ERLANG,
 	ICON_EXCEL[] = NERD_EXCELDOC,
+	ICON_FENNEL[] = NERD_FENNEL,
 	ICON_FONT[] = NERD_FONT,
 	ICON_FORTRAN[] = NERD_FORTRAN,
 	ICON_FREECAD[] = NERD_FREECAD,
@@ -1015,6 +1018,7 @@ struct icons_t const icon_ext[] = {
 	{"f90", ICON_FORTRAN, MAGENTA},
 	{"f#", ICON_FSHARP, CYAN},
 	{"fish", ICON_SHELL, WHITE},
+	{"fnl", ICON_FENNEL, WHITE},
 	{"for", ICON_FORTRAN, MAGENTA},
 	{"fs", ICON_FSHARP, CYAN},
 	{"fsi", ICON_FSHARP, CYAN},
@@ -1172,7 +1176,6 @@ struct icons_t const icon_ext[] = {
 	{"ltx", ICON_TEX, WHITE}, // LaTeX Document
 	{"markdown", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
 	{"md", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
-	{"mdown", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
 	{"mdx", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
 	{"mkd", ICON_MARKDOWN, WHITE}, // Markdown Documentation File
 	{"opf", ICON_XML, YELLOW}, // OEB Package Format (FlipViewer FlipBook File)

@@ -78,6 +78,7 @@
 #define NERD_ELM           ""
 #define NERD_EMACS         ""
 #define NERD_ERLANG        ""
+#define NERD_FENNEL        ""
 #define NERD_FORTRAN       "󱈚"
 #define NERD_FSHARP        ""
 #define NERD_GIMP          ""
