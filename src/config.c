@@ -2010,8 +2010,12 @@ create_main_config_file(char *file)
 # append file type indicator to filenames.\n\
 ;Classify=%s\n\n"
 
-		"# Colorize symbolic links according to their target filename.\n\
+	    "# Colorize symbolic links according to their target filename.\n\
 ;ColorLinksAsTarget=%s\n\n"
+
+	    "# Show the current working directory in the terminal title.\n\
+;CwdInTitle=%s\n\n"
+
 
 	    "# Share the Selection Box among different profiles.\n\
 ;ShareSelbox=%s\n\n"
@@ -2066,6 +2070,7 @@ create_main_config_file(char *file)
 		DEF_LIGHT_MODE == 1 ? "true" : "false",
 		DEF_CLASSIFY == 1 ? "true" : "false",
 		DEF_COLORIZE_LNK_AS_TARGET == 1 ? "true" : "false",
+		DEF_CWD_IN_TITLE == 1 ? "true" : "false",
 		DEF_SHARE_SELBOX == 1 ? "true" : "false",
 		DEF_TERM_CMD,
 		DEF_SORT_REVERSE == 1 ? "true" : "false",
@@ -3696,6 +3701,11 @@ read_config(void)
 		else if (!conf.usr_cscheme && *line == 'C'
 		&& strncmp(line, "ColorScheme=", 12) == 0) {
 			set_colorscheme(line + 12);
+		}
+
+		else if (xargs.cwd_in_title == UNSET && *line == 'C'
+		&& strncmp(line, "CwdInTitle=", 12) == 0) {
+			set_config_bool_value(line + 12, &xargs.cwd_in_title);
 		}
 
 		else if (*line == 'c' && strncmp(line, "cpCmd=", 6) == 0) {
