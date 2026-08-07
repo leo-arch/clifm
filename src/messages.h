@@ -1419,7 +1419,7 @@ c: Quit paging (printing remaining files)\n"
 \n -D       List directories only\
 \n -e       Force the use of the 'o/open' command to open files\
 \n -E       Force the use of 'cd' to change directories\
-\n -f       Display recursive directories sizes (long-view only)\
+\n -f       Display recursive directory sizes (long view only)\
 \n -F       Disable the file counter (directories)\
 \n -g       Display file sizes in powers of 1000 (SI units) instead of 1024\
 \n -G       Display physical file sizes (disk usage) instead of logical sizes (apparent size)\
@@ -1479,7 +1479,7 @@ c: Quit paging (printing remaining files)\n"
 \n  -i, --ignore-case\t\t Ignore case distinctions in filenames and paths (default)\
 \n  -I, --no-ignore-case\t\t Do not ignore case distinctions\
 \n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
-\n  -l, --long-view\t\t Display extended file metadata next to filenames\
+\n  -l, --long-view\t\t Display extended file metadata\
 \n  -L, --dereference\t\t Follow symbolic links when listing files (default)\
 \n  -m, --dirhist-map\t\t Enable the directory history map\
 \n  -o, --autols\t\t\t List files automatically (default)\
@@ -1523,6 +1523,7 @@ and paths\
 \n      --mimelist-file=FILE\t Set FILE as Lira's configuration file\
 \n      --mnt-udisks2\t\t Use udisks2(1) instead of udevil(1) for the 'media' command\
 \n      --mounts\t\t\t Prepend indicator (+) to directories that are mountpoints\
+\n      --names-last\t\t Print filenames after metadata instead of before (long view)\
 \n      --no-bold\t\t\t Disable bold colors\
 \n      --no-cd-auto\t\t Disable the autocd function\
 \n      --no-classify\t\t Do not append file type indicators\

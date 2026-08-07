@@ -554,6 +554,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_MIN_NAME_TRUNC 20
 #define DEF_MOUNT_CMD MNT_UDEVIL
 #define DEF_MV_CMD MV_MV
+#define DEF_NAMES_LAST 0
 #define DEF_NOELN 0
 #define DEF_ONLY_DIRS 0
 #define DEF_PAGER 0

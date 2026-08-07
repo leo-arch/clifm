@@ -148,7 +148,7 @@ construct_and_print_filename(const struct fileinfo *props,
 	}
 
 	/* Calculate pad for each filename */
-	int pad = max_namelen - (int)cur_len;
+	int pad = conf.names_last == 1 ? 0 : max_namelen - (int)cur_len;
 	if (pad < 0)
 		pad = 0;
 
@@ -615,7 +615,8 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 	const int file_counter =
 		(conf.file_counter != 0 && maxes->file_counter != 0);
 
-	construct_and_print_filename(props, maxes->name);
+	if (conf.names_last != 1)
+		construct_and_print_filename(props, maxes->name);
 
 	/* Let's print fields according to the value of PropFields in the
 	 * config file (prop_fields_str). */
@@ -663,6 +664,13 @@ print_entry_props(const struct fileinfo *props, const struct maxes_t *maxes,
 
 	buf[len] = '\0';
 	fputs(buf, stdout);
+
+	if (conf.names_last == 1) {
+		putchar(' ');
+		if (conf.prop_fields_gap > 1) putchar(' ');
+		construct_and_print_filename(props, maxes->name);
+	}
+
 	putchar('\n');
 
 	return FUNC_SUCCESS;

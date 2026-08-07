@@ -571,7 +571,7 @@ rebind_kb(const char *func_name, const char *kb)
 			fputs(line, tmp_fp);
 		} else if (found == 0 && strncmp(line, func_name, func_len) == 0
 		&& line[func_len] == ':') {
-				/* Replace function with the new key binding. */
+				/* Bind function to the new key binding. */
 				fprintf(tmp_fp, "%s:%s\n", func_name, kb);
 				found = 1;
 		} else {
@@ -691,7 +691,7 @@ bind_kb_func(const char *func_name)
 	}
 
 	const char *msg = unset_key == 1 ? _("Unset this function?")
-		: _("Bind function to this new key?");
+		: _("Bind function to this key?");
 
 	if (rl_get_y_or_n(msg, 0) == 0) {
 		free(kb);

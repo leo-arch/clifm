@@ -212,6 +212,7 @@ init_conf_struct(void)
 	conf.min_jump_rank = DEF_MIN_JUMP_RANK;
 	conf.min_name_trunc = DEF_MIN_NAME_TRUNC;
 	conf.mv_cmd = DEF_MV_CMD;
+	conf.names_last = UNSET;
 	conf.no_eln = UNSET;
 	conf.only_dirs = UNSET;
 	conf.pager = UNSET;
@@ -2695,6 +2696,9 @@ check_options(void)
 
 	if (xargs.secure_env_full == UNSET)
 		xargs.secure_env_full = DEF_SECURE_ENV_FULL;
+
+	if (conf.names_last == UNSET)
+		conf.names_last = SETOPT(xargs.names_last, DEF_NAMES_LAST);
 
 	if (conf.no_eln == UNSET)
 		conf.no_eln = SETOPT(xargs.no_eln, DEF_NOELN);

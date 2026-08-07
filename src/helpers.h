@@ -1197,6 +1197,7 @@ struct config_t {
 	int min_jump_rank;
 	int min_name_trunc;
 	int mv_cmd;
+	int names_last;
 	int no_eln;
 	int only_dirs;
 	int pager;
@@ -1550,6 +1551,7 @@ struct param_t {
 	int max_dirhist;
 	int max_files;
 	int mount_cmd;
+	int names_last;
 	int no_bold;
 	int no_dirjump;
 	int no_eln;
