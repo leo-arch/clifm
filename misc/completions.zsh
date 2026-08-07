@@ -56,6 +56,7 @@ args=(
 	'--int-vars[enable internal variables]'
 	'--kitty-keys[ask the terminal to enable the kitty keyboard protocol]'
 	'--list-and-quit[list files and quit]'
+	'--ls[same as --list-and-quit, but in a more ls-like style]'
 	'--lscolors[read file colors from $LS_COLORS]'
 	'--max-dirhist=[maximum number of visited directories to remember]:int:'
 	'--max-files=[list only up to NUM files]:int:'

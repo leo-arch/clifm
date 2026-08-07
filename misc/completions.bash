@@ -92,6 +92,7 @@ _clifm ()
         --int-vars
         --kitty-keys
         --list-and-quit
+        --ls
         --lscolors
         --max-dirhist
         --max-files
