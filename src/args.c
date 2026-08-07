@@ -153,6 +153,7 @@
 #define LOPT_NO_COLUMNS             293
 #define LOPT_MOUNTS                 294
 #define LOPT_NAMES_LAST             295
+#define LOPT_LS                     296
 
 /* Link long (--option) and short options (-o) for the getopt_long function. */
 static struct option const longopts[] = {
@@ -225,7 +226,7 @@ static struct option const longopts[] = {
 	{"int-vars", no_argument, 0, LOPT_INT_VARS},
 	{"kitty-keys", no_argument, 0, LOPT_KITTY_KEYS},
 	{"list-and-quit", no_argument, 0, LOPT_LIST_AND_QUIT},
-	{"ls", no_argument, 0, LOPT_LIST_AND_QUIT},
+	{"ls", no_argument, 0, LOPT_LS},
 	{"lscolors", no_argument, 0, LOPT_LSCOLORS},
 	{"max-dirhist", required_argument, 0, LOPT_MAX_DIRHIST},
 	{"max-files", required_argument, 0, LOPT_MAX_FILES},
@@ -1963,6 +1964,15 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.list_and_quit = 1;
 			xargs.no_dirjump = 1;
 			xargs.restore_last_path = conf.restore_last_path = 0;
+			break;
+		case LOPT_LS:
+			xargs.list_and_quit = 1;
+			xargs.no_dirjump = 1;
+			xargs.restore_last_path = conf.restore_last_path = 0;
+			xargs.clear_screen = 0;
+			xargs.no_eln = 1;
+			xargs.names_last = 1;
+			xargs.classify = 0;
 			break;
 		case LOPT_LSCOLORS:
 			xargs.lscolors = 1; break;

@@ -1414,7 +1414,7 @@ c: Quit paging (printing remaining files)\n"
 \n -b FILE  Set an alternative bookmarks file\
 \n -B NUM   Set tab-completion mode (NUM=[0-3])\
 \n -c FILE  Set an alternative main configuration file\
-\n -C       Do not clear the screen when changing directories\
+\n -C       Do not clear the screen before listing files\
 \n -d       Print disk usage (free/total)\
 \n -D       List directories only\
 \n -e       Force the use of the 'o/open' command to open files\
@@ -1515,7 +1515,7 @@ and paths\
 \n      --int-vars\t\t Enable the use of internal variables\
 \n      --kitty-keys\t\t Ask the terminal to enable the kitty keyboard protocol\
 \n      --list-and-quit\t\t List files and quit\
-\n      --ls\t\t\t Short for --list-and-quit\
+\n      --ls\t\t\t Same as --list-and-quit, but in a more ls-like style\
 \n      --lscolors\t\t Read file colors from LS_COLORS or LSCOLORS (FreeBSD style)\
 \n      --max-dirhist=NUM\t\t Maximum number of visited directories to recall\
 \n      --max-files=NUM\t\t List only up to NUM files\
@@ -1527,7 +1527,7 @@ and paths\
 \n      --no-bold\t\t\t Disable bold colors\
 \n      --no-cd-auto\t\t Disable the autocd function\
 \n      --no-classify\t\t Do not append file type indicators\
-\n      --no-clear-screen\t\t Do not clear the screen when listing files\
+\n      --no-clear-screen\t\t Do not clear the screen before listing files\
 \n      --no-dereference\t\t Do not follow symbolic links\
 \n      --no-file-cap\t\t Do not check file capabilities when listing files\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\
