@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Aug 3, 2026" "clifm 1.28.13" "Clifm Manual"
+.TH "CLIFM" "1" "Aug 7, 2026" "clifm 1.28.14" "Clifm Manual"
 .SH NAME
 clifm - The Command-Line File Manager
 .SH SYNOPSIS
@@ -140,7 +140,7 @@ Do not ignore case distinctions.
 Set an alternative keybindings file.
 .TP
 \fB-l\fR, \fB--long-view\fR
-Print file extended metadata next to filenames.  The displayed fields can be customized using \fB--prop-fields\fR (or the \fBPropFields\fR option in the configuration file).  Set a custom time/date format with \fB--time-style\fR (or the \fBTimeStyle\fR option in the configuration file).
+Print file extended metadata.  The displayed fields can be customized using \fB--prop-fields\fR (or the \fBPropFields\fR option in the configuration file).  Set a custom time/date format with \fB--time-style\fR (or the \fBTimeStyle\fR option in the configuration file).
 .TP
 \fB-L\fR, \fB--dereference\fR
 Follow symbolic links when listing files (default).  Use \fB--no-dereference\fR to disable.
@@ -256,6 +256,9 @@ Use \fBudisks2\fR(1) instead of \fBudevil\fR(1) (default) for the \fBmedia\fR co
 .TP
 \fB--mounts\fR
 Prepend indicator (+) to directories that are mountpoints.  Tip: the \fBp/pp\fR command identifies mounted device for these directories in the form \fBDIR/ -> DEVNAME [FSTYPE]\fR.  The color used for this indicator is defined by the \fBdm\fR color code (see the \fBTHEMING\fR section below).  N.B.: Linux bind mounts are not supported.
+.TP
+\fB--names-last\fR
+Print filenames after metadata instead of before (long view).
 .TP
 \fB--no-bold\fR
 Disable bold colors.

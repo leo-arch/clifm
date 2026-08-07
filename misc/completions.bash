@@ -99,6 +99,7 @@ _clifm ()
         --mime-type
         --mnt-udisk2
         --mounts
+        --names-last
         --no-bold
         --no-cd-auto
         --no-classify
