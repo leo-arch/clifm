@@ -559,13 +559,25 @@ rebind_kb(const char *func_name, const char *kb)
 	}
 
 	int found = 0;
+	const size_t kb_len = strlen(kb);
 	const size_t func_len = strlen(func_name);
 	char line[NAME_MAX];
 	while (fgets(line, sizeof(line), orig_fp) != NULL) {
-		if (found == 0 && strncmp(line, func_name, func_len) == 0
-		&& line[func_len] == ':') {
-			fprintf(tmp_fp, "%s:%s\n", func_name, kb);
-			found = 1;
+		if (found == 0) {
+			if (strncmp(line, func_name, func_len) == 0
+			&& line[func_len] == ':') {
+				/* Replace function with the new key binding. */
+				fprintf(tmp_fp, "%s:%s\n", func_name, kb);
+				found = 1;
+			} else {
+				/* Unset other functions bound to the same keyseq. */
+				char *ptr = strstr(line, kb);
+				if (ptr && ptr != kb && ptr[kb_len] == '\n'
+				&& *(ptr - 1) == ':') {
+					*ptr = '-'; ptr[1] = '\n'; ptr[2] = '\0';
+				}
+				fputs(line, tmp_fp);
+			}
 		} else {
 			fputs(line, tmp_fp);
 		}

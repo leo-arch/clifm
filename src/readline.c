@@ -4540,11 +4540,13 @@ initialize_readline(void)
 	/* Set the name of the program using readline. Mostly used for
 	 * conditional constructs in the inputrc file. */
 	rl_readline_name = PROGRAM_NAME;
-	/* Keep signal/control-char handling consistent with CliFM's custom
+	/* Keep signal/control-char handling consistent with Clifm's custom
 	 * Ctrl+c clear-line implementation. */
 	rl_catch_signals = 0;
 
+	/* Initialize the keyboard bindings function. */
 	disable_rl_conflicting_kbinds();
+	readline_kbinds();
 	set_rl_init_file();
 
 	/* The character that introduces a history event. Defaults to '!'.
@@ -4612,9 +4614,6 @@ initialize_readline(void)
 	 * "user file", because "user\ file" does not exist, and, in this
 	 * latter case, readline won't find any matches. */
 	rl_filename_dequoting_function = unescape_str_wrapper;
-
-	/* Initialize the keyboard bindings function. */
-	readline_kbinds();
 
 	/* Copy the list of quote chars to a global variable to be used
 	 * later by some of the program functions like split_str(),
