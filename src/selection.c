@@ -728,11 +728,11 @@ construct_sel_filename(const char *dir, const char *name)
 }
 
 static int
-select_filename(char *arg, const char *dir, int *errors)
+select_filename(char *arg, const char *dir, int *errors, const int unescape)
 {
 	int new_sel = 0;
 
-	if (strchr(arg, '\\')) {
+	if (unescape == 1 && strchr(arg, '\\')) {
 		char *deq_str = unescape_str(arg);
 		if (deq_str) {
 			xstrsncpy(arg, deq_str, strlen(deq_str) + 1);
@@ -872,7 +872,7 @@ invert_selection(void)
 
 	for (filesn_t i = 0; i < g_files_num; i++) {
 		if (file_info[i].sel == 0) {
-			new_sel += select_filename(file_info[i].name, NULL, &errors);
+			new_sel += select_filename(file_info[i].name, NULL, &errors, 0);
 			file_info[i].sel = 1;
 		} else {
 			file_info[i].sel = 0;
@@ -932,7 +932,7 @@ sel_function(char **args)
 		}
 
 		if (!pattern)
-			new_sel += select_filename(args[i], dir, &error);
+			new_sel += select_filename(args[i], dir, &error, 1);
 		else
 			new_sel += select_pattern(args[i], dir, filetype, &error);
 	}
