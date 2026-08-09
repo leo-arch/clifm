@@ -1377,7 +1377,7 @@ url_encode(const char *str, const int file_uri)
 	return buf;
 }
 
-/* Returns a url-decoded version of STR. */
+/* Returns an url-decoded version of STR. */
 char *
 url_decode(const char *str)
 {
@@ -1392,11 +1392,15 @@ url_decode(const char *str)
 
 	for (; *pstr; pstr++) {
 		if (*pstr == '%') {
-			if (pstr[1] && pstr[2]) {
+			if (pstr[1] && pstr[2] && IS_HEX_DIGIT(pstr[1])
+			&& IS_HEX_DIGIT(pstr[2])) {
 				/* Decode URL code. Example: %20 to space char. */
 				*pbuf = (char)(from_hex(pstr[1]) << 4 | from_hex(pstr[2]));
 				pbuf++;
 				pstr += 2;
+			} else { /* Invalid encoding: reject. */
+				free(buf);
+				return NULL;
 			}
 		} else {
 			*pbuf = *pstr;
