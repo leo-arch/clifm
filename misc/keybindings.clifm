@@ -28,28 +28,28 @@
 
 # Alt+j
 previous-dir:\ej
-# Shift+Left (rxvt)
-previous-dir:\e[d
 # Shift+Left (xterm)
 previous-dir:\e[1;2D
+# Shift+Left (rxvt)
+previous-dir:\e[d
 # Shift+Left (others)
 previous-dir:\e[2D
 
 # Alt+k
 next-dir:\ek
-# Shift+Right (rxvt)
-next-dir:\e[c
 # Shift+Right (xterm)
 next-dir:\e[1;2C
+# Shift+Right (rxvt)
+next-dir:\e[c
 # Shift+Right (others)
 next-dir:\e[2C
 
 # Alt+u
 parent-dir:\eu
-# Shift+Up (rxvt)
-parent-dir:\e[a
 # Shift+Up (xterm)
 parent-dir:\e[1;2A
+# Shift+Up (rxvt)
+parent-dir:\e[a
 # Shift+Up (others)
 parent-dir:\e[2A
 
