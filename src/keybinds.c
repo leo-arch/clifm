@@ -567,7 +567,7 @@ rebind_kb(const char *func_name, const char *kb)
 		char *ptr = strstr(line, kb);
 		if (ptr && ptr != kb && ptr[kb_len] == '\n'
 		&& *(ptr - 1) == ':') {
-			*ptr = '-'; ptr[1] = '\n'; ptr[2] = '\0';
+			*ptr = '\n'; ptr[1] = '\0';
 			fputs(line, tmp_fp);
 		} else if (found == 0 && strncmp(line, func_name, func_len) == 0
 		&& line[func_len] == ':') {
