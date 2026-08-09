@@ -175,10 +175,10 @@ translate_emacs_style_keyseq(const char *key)
 static const char *
 xtranslate_key(const char *key)
 {
-	if (!key || !*key)
-		return NULL;
+	if (!key)
+		return "";
 
-	if (*key == '-' && !key[1])
+	if (!*key || (*key == '-' && !key[1]))
 		return _("not bound");
 
 	const char *t = (strstr(key, "C-") || strstr(key, "M-"))
@@ -312,8 +312,8 @@ check_clifm_kb(const char *kb, const char *func_name)
 				? kbinds[i].function : "unnamed";
 			const char *t = xtranslate_key(kbinds[i].key);
 
-			fprintf(stderr, _("kb: %s: Key already in use by '%s'.\n"),
-				t ? t : kbinds[i].key, func);
+			fprintf(stderr, _("kb: %s%s%s: Key already in use by '%s'.\n"),
+				BOLD, t ? t : kbinds[i].key, df_c, func);
 		}
 
 		conflicts++;
@@ -349,8 +349,8 @@ check_rl_kbinds(const char *kb)
 			} else {
 				if (strcmp(kb, keys[j]) == 0) {
 					const char *t = xtranslate_key(kb);
-					fprintf(stderr, _("kb: %s: Key already in use by '%s' "
-						"(readline)\n"), t ? t : kb, name);
+					fprintf(stderr, _("kb: %s%s%s: Key already in use by '%s' "
+						"(readline)\n"), BOLD, t ? t : kb, df_c, name);
 					conflicts++;
 				}
 			}
@@ -569,11 +569,14 @@ rebind_kb(const char *func_name, const char *kb)
 		&& *(ptr - 1) == ':') {
 			*ptr = '\n'; ptr[1] = '\0';
 			fputs(line, tmp_fp);
-		} else if (found == 0 && strncmp(line, func_name, func_len) == 0
+		} else if (strncmp(line, func_name, func_len) == 0
 		&& line[func_len] == ':') {
+			if (found == 0) {
 				/* Bind function to the new key binding. */
-				fprintf(tmp_fp, "%s:%s\n", func_name, kb);
+				fprintf(tmp_fp, "%s:%s\n", func_name,
+					(*kb == '-' && !kb[1]) ? "" : kb);
 				found = 1;
+			}
 		} else {
 			fputs(line, tmp_fp);
 		}
@@ -676,18 +679,25 @@ bind_kb_func(const char *func_name)
 	printf(_("Enter a keybinding for %s%s%s (current: %s%s%s)\n"),
 		BOLD, func_name, df_c, BOLD, cur_key, df_c);
 	puts(_("(Enter:accept, Ctrl+d:abort, Ctrl+c:clear-line)"));
-	puts(_("To unset the function enter '-'"));
+	puts(_("To unset the function enter '-'\n"
+		"Note: This will replace existing bindings for this function"));
 
 	char *kb = get_new_keybind();
 	if (kb == NULL)
 		return FUNC_SUCCESS;
+
+	if (strcmp(kb, func_key) == 0) {
+		free(kb);
+		puts(_("kb: Keys are the same. Nothing to do."));
+		return FUNC_SUCCESS;
+	}
 
 	const int unset_key = (*kb == '-' && !kb[1]);
 	if (unset_key == 0 && check_kb_conflicts(kb) == 0) {
 		/* If any conflict was found (check_kb_conflicts() is greater than
 		 * zero), the function already displayed the keybinding translation. */
 		const char *translation = xtranslate_key(kb);
-		printf(_("New key: %s\n"), translation ? translation : kb);
+		printf(_("New key: %s%s%s\n"), BOLD, translation ? translation : kb, df_c);
 	}
 
 	const char *msg = unset_key == 1 ? _("Unset this function?")
@@ -732,6 +742,8 @@ list_kbinds(void)
 			continue;
 
 		const char *translation = xtranslate_key(kbinds[i].key);
+		if (!translation)
+			continue;
 
 		if (i > 0 && kbinds[i - 1].function
 		&& strcmp(kbinds[i].function, kbinds[i - 1].function) == 0
@@ -740,8 +752,12 @@ list_kbinds(void)
 
 		xstrsncpy(prev_key, translation, sizeof(prev_key));
 
-		printf("%-*s (%s)\n", i_flen, kbinds[i].function,
-			translation ? translation : kbinds[i].key);
+		const char *color =
+			(!*translation || strcmp(translation, "not bound") == 0)
+			? df_c : mi_c;
+
+		printf("%-*s (%s%s%s)\n", i_flen, kbinds[i].function,
+			color, translation, df_c);
 	}
 
 	return FUNC_SUCCESS;
@@ -796,7 +812,7 @@ list_rl_kbinds(void)
 				continue;
 			}
 
-			printf("(%s) ", t ? t : keys[j]);
+			printf("(%s%s%s) ", mi_c, t ? t : keys[j], df_c);
 
 			if (t)
 				xstrsncpy(prev, t, sizeof(prev));
@@ -888,7 +904,7 @@ load_keybinds(void)
 
 		char *tmp = NULL;
 		tmp = strchr(line, ':');
-		if (!tmp || !tmp[1])
+		if (!tmp)
 			continue;
 
 		/* Now copy left and right values of each keybinding to the
