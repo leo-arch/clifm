@@ -729,6 +729,22 @@ bind_kb_func(const char *func_name)
 }
 
 static int
+validate_kb_func(const char *func)
+{
+	if (!func || !*func)
+		return 0;
+
+	const size_t flen = strlen(func);
+	for (size_t i = 0; kb_cmds[i].name; i++) {
+		if (flen == kb_cmds[i].len && *func == *kb_cmds[i].name
+		&& strcmp(func, kb_cmds[i].name) == 0)
+			return 1;
+	}
+
+	return 0;
+}
+
+static int
 list_kbinds(void)
 {
 	if (kbinds_n == 0) {
@@ -747,7 +763,8 @@ list_kbinds(void)
 	char prev_key[KEY_BUF_SIZE] = "";
 
 	for (size_t i = 0; i < kbinds_n; i++) {
-		if (!kbinds[i].key || !kbinds[i].function)
+		if (!kbinds[i].key || !kbinds[i].function
+		|| validate_kb_func(kbinds[i].function) == 0)
 			continue;
 
 		const char *translation = xtranslate_key(kbinds[i].key);
@@ -3112,11 +3129,14 @@ set_keybinds_from_file(void)
 		{"previous-profile", rl_profile_previous},
 #endif // _NO_PROFILES
 		{"quit", rl_quit}, {"lock", rl_lock}, {"refresh-screen", rl_refresh},
-		{"clear-line", rl_clear_line}, {"toggle-hidden", rl_toggle_hidden_files},
+		{"clear-line", rl_clear_line},
+		{"toggle-case-sensitive-sort", rl_toggle_ignore_case}, /* Deprecated */
+		{"toggle-disk-usage", rl_toggle_disk_usage},
+		{"toggle-hidden", rl_toggle_hidden_files},
+		{"toggle-max-name-len", rl_toggle_max_filename_len},
+		{"toggle-light", rl_toggle_light_mode},
 		{"toggle-long", rl_toggle_long_view},
 		{"toggle-follow-symlinks", rl_toggle_follow_symlinks},
-		{"toggle-light", rl_toggle_light_mode},
-		{"toggle-case-sensitive-sort", rl_toggle_ignore_case}, /* Deprecated */
 		{"toggle-ignore-case", rl_toggle_ignore_case},
 		{"invert-selection", rl_invert_selection},
 		{"dirs-first", rl_cycle_group_dirs}, /* Deprecated */
@@ -3130,8 +3150,6 @@ set_keybinds_from_file(void)
 		{"show-dirhist", rl_dirhist}, {"bookmarks", rl_bookmarks},
 		{"mountpoints", rl_mountpoints}, {"selbox", rl_selbox},
 		{"prepend-sudo", rl_prepend_sudo},
-		{"toggle-disk-usage", rl_toggle_disk_usage},
-		{"toggle-max-name-len", rl_toggle_max_filename_len},
 		{"cmd-hist", rl_cmdhist_tab},
 
 		{"plugin1", rl_plugin1}, {"plugin2", rl_plugin2},
