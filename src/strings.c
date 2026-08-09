@@ -1084,7 +1084,7 @@ check_fused_param(const char *str)
 	int ok = 1;
 
 	while (*p) {
-		if (p != str && *p == '-' && *(p - 1) >= '1' && *(p - 1) <= '9') {
+		if (p != str && *p == '-' && *(p - 1) >= '0' && *(p - 1) <= '9') {
 			c++;
 		} else if (*p == ' ') {
 			break;
