@@ -1767,6 +1767,8 @@ set_sel_devino(const int do_stat)
 int
 get_sel_files(void)
 {
+	devino_set_restart(&sel_set);
+
 	if (xargs.stealth_mode == 1 && sel_n > 0)
 		return set_sel_devino(1);
 
@@ -1808,11 +1810,17 @@ get_sel_files(void)
 		if (!*line || *line == '#' || len == 0)
 			continue;
 
-		if (fstatat(XAT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) == -1)
+		char *l = line;
+		if (IS_FILE_URI(l, len)) l += FILE_URI_PREFIX_LEN;
+		char *file = url_decode(l);
+
+		if (!file || fstatat(XAT_FDCWD, file, &a, AT_SYMLINK_NOFOLLOW) == -1) {
+			free(file);
 			continue;
+		}
 
 		sel_elements = xnrealloc(sel_elements, sel_n + 2, sizeof(struct sel_t));
-		sel_elements[sel_n].name = savestring(line, len);
+		sel_elements[sel_n].name = file;
 		sel_elements[sel_n].dev = a.st_dev;
 		sel_elements[sel_n].ino = a.st_ino;
 		sel_elements[sel_n++].size = (off_t)UNSET;

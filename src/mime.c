@@ -994,7 +994,7 @@ expand_app_fields(char ***cmd, size_t *n, const char *fpath, int *exec_flags)
 
 		/* Expand %u to the file URI for the original filename */
 		if (*a[i] == '%' && a[i][1] == 'u') {
-			char *p = url_encode(fpath, 1);
+			char *p = url_encode(fpath, 1, NULL);
 			if (p) {
 				copy_field(&a[i], p);
 				free(p);
@@ -1484,7 +1484,7 @@ build_command(char **app_fields, char **files, int *exec_flags)
 		if (*app_fields[i] == '%' && app_fields[i][1] == 'u') {
 			if (files[1])
 				continue;
-			char *encoded_path = url_encode(files[0], 1);
+			char *encoded_path = url_encode(files[0], 1, NULL);
 			if (encoded_path) {
 				cmd[n++] = encoded_path;
 				f_flag = 1;
@@ -1953,7 +1953,7 @@ print_info_name_mime(const char *filename, const char *mime)
 static int
 print_mime_info(char **app, char **fpath, char **mime)
 {
-	char *uri = url_encode(*fpath, 1);
+	char *uri = url_encode(*fpath, 1, NULL);
 	printf(_("URI:       %s\n"), uri ? uri : _("unknown"));
 	free(uri);
 

@@ -18,6 +18,7 @@ __BEGIN_DECLS
 
 int  devino_set_init(devino_set_t *s, size_t initial_cap);
 void devino_set_destroy(devino_set_t *s);
+void devino_set_restart(devino_set_t *s);
 int  devino_set_insert(devino_set_t *s, const dev_t dev, const ino_t ino);
 int  devino_set_contains(const devino_set_t *s, const dev_t dev, const ino_t ino);
 

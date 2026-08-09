@@ -93,6 +93,16 @@ devino_set_destroy(devino_set_t *s)
 	s->size = 0;
 }
 
+void
+devino_set_restart(devino_set_t *s)
+{
+	if (!s)
+		return;
+
+	devino_set_destroy(s);
+	(void)devino_set_init(s, 0);
+}
+
 static inline size_t
 idx_for(const devino_set_t *s, const uint64_t h, const size_t probe)
 {

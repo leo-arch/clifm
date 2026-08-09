@@ -1333,17 +1333,20 @@ to_hex(const char c)
 /* Return an URL-encoded version of STR, prefixed with "file://" if
  * FILE_URI is set to 1. */
 char *
-url_encode(const char *str, const int file_uri)
+url_encode(const char *str, const int file_uri, char *pool)
 {
 	if (!str || !*str)
 		return NULL;
 
-	const size_t len = (strlen(str) * 3) + 1 + (file_uri == 1 ? 7 : 0);
-	char *buf = xnmalloc(len, sizeof(char));
-	/* The max lenght of our buffer is 3 times the length of STR (plus
-	 * 7 (length of "file://") if FILE_URI is set to 1, plus 1 extra byte
-	 * for the null byte terminator): each byte in STR will be, if
-	 * encoded, %XX (3 chars). */
+	char *buf = pool;
+	if (!buf) {
+		/* The max lenght of our buffer is 3 times the length of STR (plus
+		 * 7 (length of "file://") if FILE_URI is set to 1, plus 1 extra byte
+		 * for the null byte terminator): each byte in STR will be, if
+		 * encoded, %XX (3 chars). */
+		const size_t len = (strlen(str) * 3) + 1 + (file_uri == 1 ? 7 : 0);
+		buf = xnmalloc(len, sizeof(char));
+	}
 
 	/* Copies of STR and BUF pointers to be able to increase and/or decrease
 	 * them without losing the original memory location. */

@@ -55,7 +55,7 @@ void print_file_name(char *fname, const int isdir, const struct stat *attr);
 void rl_ring_bell(void);
 void set_fzf_preview_border_type(void);
 int  should_expand_eln(const char *text, char *cmd_name);
-char *url_encode(const char *str, const int file_uri);
+char *url_encode(const char *str, const int file_uri, char *pool);
 char *url_decode(const char *str);
 int  utf8_bytes(unsigned char c);
 filesn_t xatof(const char *s);

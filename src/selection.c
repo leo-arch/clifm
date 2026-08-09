@@ -54,8 +54,8 @@ save_sel(void)
 		return (xargs.stealth_mode == 1 ? FUNC_SUCCESS : FUNC_FAILURE);
 
 	if (sel_n == 0) {
-		if (unlinkat(XAT_FDCWD, sel_file, 0) == -1) {
-			xerror("sel: '%s': %s\n", sel_file, strerror(errno));
+		if (unlinkat(XAT_FDCWD, sel_file, 0) == -1 && errno != ENOENT) {
+			xerror("asel: '%s': %s\n", sel_file, strerror(errno));
 			return FUNC_FAILURE;
 		}
 		return FUNC_SUCCESS;
@@ -68,11 +68,29 @@ save_sel(void)
 		return FUNC_FAILURE;
 	}
 
+	size_t buf_len = PATH_MAX * 3 + 7 + 1;
+	char *buf = xnmalloc(buf_len, sizeof(char));
 	for (size_t i = 0; i < sel_n; i++) {
-		fputs(sel_elements[i].name, fp);
-		fputc('\n', fp);
+		const char *name = sel_elements[i].name;
+		if (!name)
+			continue;
+
+		/* At most, each char will become %XX, plus "file://" and a NUL byte. */
+		size_t need = strlen(name) * 3 + 7 + 1;
+		if (need > buf_len) {
+			while (buf_len < need) buf_len *= 2;
+			buf = xnrealloc(buf, buf_len, sizeof(char));
+		}
+
+		char *enc = url_encode(sel_elements[i].name, 1, buf);
+		if (enc) {
+			fputs(enc, fp);
+			fputc('\n', fp);
+			/* enc points to buf, no need to free(). */
+		}
 	}
 
+	free(buf);
 	fclose(fp);
 	return FUNC_SUCCESS;
 }

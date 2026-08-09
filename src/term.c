@@ -64,7 +64,7 @@ report_cwd(const char *dir)
 	if (!dir || !*dir)
 		return;
 
-	char *uri = url_encode(dir, 0);
+	char *uri = url_encode(dir, 0, NULL);
 	if (!uri || !*uri) {
 		free(uri);
 		return;
