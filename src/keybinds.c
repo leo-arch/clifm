@@ -563,23 +563,32 @@ rebind_kb(const char *func_name, const char *kb)
 	const size_t func_len = strlen(func_name);
 	char line[NAME_MAX];
 	while (fgets(line, sizeof(line), orig_fp) != NULL) {
-		/* Unset other functions bound to the new keyseq to avoid dups. */
-		char *ptr = strstr(line, kb);
-		if (ptr && ptr != kb && ptr[kb_len] == '\n'
-		&& *(ptr - 1) == ':') {
-			*ptr = '\n'; ptr[1] = '\0';
+		/* Skip comments and empty lines. */
+		if (*line == '#' || *line == '\n') {
 			fputs(line, tmp_fp);
-		} else if (strncmp(line, func_name, func_len) == 0
-		&& line[func_len] == ':') {
+			continue;
+		}
+
+		/* Unset other functions bound to the new keyseq to avoid conflicts. */
+		char *p = strstr(line, kb);
+		if (p && p > line && p[kb_len] == '\n' && p[-1] == ':') {
+			*p = '\n'; p[1] = '\0';
+			fputs(line, tmp_fp);
+			continue;
+		}
+
+		/* Bind function to the new key sequence. Once found, subsequent
+		 * entries for this function are ignored. */
+		if (strncmp(line, func_name, func_len) == 0 && line[func_len] == ':') {
 			if (found == 0) {
-				/* Bind function to the new key binding. */
 				fprintf(tmp_fp, "%s:%s\n", func_name,
 					(*kb == '-' && !kb[1]) ? "" : kb);
 				found = 1;
 			}
-		} else {
-			fputs(line, tmp_fp);
+			continue;
 		}
+
+		fputs(line, tmp_fp);
 	}
 
 	if (found == 1) {
