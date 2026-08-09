@@ -45,8 +45,6 @@
 # define MAX_PMOD_PATHS 8
 static size_t p_mod_paths_n = 0;
 
-static time_t g_selfile_mtime = 0;
-
 struct p_mod_paths_t {
 	char path[PATH_MAX];
 	char *name;
@@ -1491,14 +1489,6 @@ initialize_prompt_data(const int prompt_flag, size_t *ac_matches)
 #ifndef _NO_TRASH
 	update_trash_indicator();
 #endif /* !_NO_TRASH */
-
-	/* If the selections file was modified since the last check, reload
-	 * selections. */
-	struct stat a;
-	if (sel_file && (stat(sel_file, &a) == -1 || a.st_mtime != g_selfile_mtime)) {
-		get_sel_files();
-		g_selfile_mtime = a.st_mtime;
-	}
 
 	*ac_matches = conf.autocmd_msg == AUTOCMD_MSG_PROMPT
 		? count_autocmd_matches() : 0;

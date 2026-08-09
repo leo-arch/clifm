@@ -64,6 +64,7 @@
 #ifndef _NO_ICONS
 # include "icons.h"
 #endif /* !_NO_ICONS */
+#include "init.h" /* get_sel_files () */
 #include "messages.h"
 #include "misc.h"
 #include "properties.h" /* print_analysis_stats() */
@@ -3431,6 +3432,24 @@ vt_stat(const int fd, char *restrict path, struct stat *attr)
 	return 0;
 }
 
+/* If the selections file was modified since the last check, reload selections. */
+static void
+check_sel_files(void)
+{
+	static time_t selfile_mtime_last = 0;
+	struct stat a;
+
+	if (!sel_file || stat(sel_file, &a) == -1) {
+		get_sel_files();
+		selfile_mtime_last = 0;
+	} else {
+		if (a.st_mtime != selfile_mtime_last) {
+			get_sel_files();
+			selfile_mtime_last = a.st_mtime;
+		}
+	}
+}
+
 /* List files in the current working directory. Uses file type colors
  * and columns. Return 0 on success or 1 on error. */
 int
@@ -3446,10 +3465,12 @@ list_dir(void)
 		fflush(stdout);
 	}
 
-	/* Hide the cursor to minimize flickering: it will be unhidden immediately
-	 * before printing the next prompt (prompt.c) */
-	if (xargs.list_and_quit != 1)
+	if (xargs.list_and_quit != 1) {
+		/* Hide the cursor to minimize flickering: it will be unhidden immediately
+		 * before printing the next prompt (prompt.c) */
 		HIDE_CURSOR;
+		check_sel_files();
+	}
 
 	int autocmd_ret = 0;
 	if (autocmds_n > 0 && dir_changed == 1) {
