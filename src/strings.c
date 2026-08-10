@@ -567,7 +567,7 @@ replace_invalid_chars(const char *name)
 
 		const int ret = check_control_char((const unsigned char *)q);
 		if (ret > 0) {
-			*n++ = INVALID_CHR;
+			*n++ = INVALID_FILENAME_CHAR;
 			q += ret;
 			continue;
 		}
@@ -576,7 +576,7 @@ replace_invalid_chars(const char *name)
 			wchar_t wc;
 			size_t bytes = mbrtowc(&wc, q, (size_t)(qlimit - q), &mbstate);
 			if (bytes == (size_t)-1 || bytes == (size_t)-2) {
-				*n++ = INVALID_CHR; /* Invalid UTF-8 */
+				*n++ = INVALID_FILENAME_CHAR; /* Invalid UTF-8 */
 				q++;
 			} else { /* Valid UTF-8 */
 				for (; bytes > 0; --bytes)
