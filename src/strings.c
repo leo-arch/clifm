@@ -2303,10 +2303,10 @@ expand_regex(char ***substr)
 
 		const char *t = dstr ? dstr : (*substr)[i];
 
-		/* Prepend an initial '^' and append and ending '$' to prevent
-		 * accidental file expansions. For example, a file named file.txt
-		 * must not be expanded given the pattern "ile.t". In other words,
-		 * we force the use of ".*PATTERN.*" instead of just "PATTERN". */
+		/* Add leading '^' and trailing '$' to prevent accidental file
+		 * expansions. For example, a file named file.txt must not be expanded
+		 * given the pattern "ile.t". In other words, we force the use of
+		 * "^PATTERN$" instead of just "PATTERN". */
 		const size_t l = strlen(t) + 3;
 		char *rstr = xnmalloc(l, sizeof(char));
 		snprintf(rstr, l, "^%s$", t);
