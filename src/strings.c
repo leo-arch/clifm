@@ -2310,9 +2310,9 @@ expand_regex(char ***substr)
 		const size_t l = strlen(t) + 3;
 		char *rstr = xnmalloc(l, sizeof(char));
 		snprintf(rstr, l, "^%s$", t);
-		free(dstr);
 
-		const int ret = check_regex(rstr);
+		const int ret = check_regex(dstr);
+		free(dstr);
 
 		if (ret != FUNC_SUCCESS
 		|| regcomp(&regex, rstr, reg_flags) != FUNC_SUCCESS) {
