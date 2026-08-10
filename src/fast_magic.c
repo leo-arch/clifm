@@ -1607,12 +1607,12 @@ is_sixel_image(const uint8_t *s, const size_t slen)
 				return 0;
 			num++;
 		} else {
-			if (dcs[i] == ';')
+			if (dcs[i] == ';' && IS_DIGIT(dcs[i - 1]))
 				sc++;
 		}
 	}
 
-	if (dcs[i] != 'q' || sc > 3 || num > 3)
+	if (dcs[i] != 'q' || sc < 2 || sc > 3 || num < 3)
 		return 0;
 
 	return 1;
