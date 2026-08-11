@@ -112,7 +112,7 @@ print_file_name(char *fname, const int isdir, const struct stat *attr)
 {
 	char *tmp_name = NULL;
 	if (wc_xstrlen(fname) == 0)
-		tmp_name = replace_invalid_chars(fname);
+		tmp_name = replace_invalid_chars(fname, 0);
 
 	const char *name = tmp_name ? tmp_name : fname;
 

@@ -2635,7 +2635,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	char *wname = NULL;
 	const size_t wlen = wc_xstrlen(ent);
 	if (wlen == 0) /* Invalid chars found. */
-		wname = replace_invalid_chars(ent);
+		wname = replace_invalid_chars(ent, 0);
 
 	const char *color = ret == -1 ? uf_c : get_entry_color(ent, &attr);
 

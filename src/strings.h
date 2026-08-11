@@ -27,7 +27,7 @@ char *home_tilde(const char *new_path, int *free_buf);
 char **parse_input_str(char *str);
 char *quote_str(const char *str);
 char *remove_quotes(char *str);
-char *replace_invalid_chars(const char *name);
+char *replace_invalid_chars(const char *name, const char c);
 char *replace_slashes(const char *str, const char c);
 char *replace_substr(char *haystack, const char *needle, const char *rep);
 char *savestring(const char *restrict str, const size_t size);

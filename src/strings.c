@@ -545,15 +545,18 @@ check_control_char(const unsigned char *s)
 	return 0;
 }
 
-/* Replace invalid characters in NAME by INVALID_CHAR ('^').
+/* Replace invalid characters in NAME by C.
+ * If C is zero, INVALID_FILENAME_CHAR ('^') is used.
  * This function is called only if wc_xstrlen() returns zero, in which case
  * we have either a non-printable char or an invalid multi-byte sequence. */
 char *
-replace_invalid_chars(const char *name)
+replace_invalid_chars(const char *name, const char c)
 {
 	size_t len = strlen(name);
 	char *n = xnmalloc(len + 1, sizeof(char));
 	char *p = n;
+
+	const char replacement_char = c == 0 ? INVALID_FILENAME_CHAR : c;
 
 	mbstate_t mbstate = {0};
 	const char *q = name;
@@ -567,7 +570,7 @@ replace_invalid_chars(const char *name)
 
 		const int ret = check_control_char((const unsigned char *)q);
 		if (ret > 0) {
-			*n++ = INVALID_FILENAME_CHAR;
+			*n++ = replacement_char;
 			q += ret;
 			continue;
 		}
@@ -576,7 +579,7 @@ replace_invalid_chars(const char *name)
 			wchar_t wc;
 			size_t bytes = mbrtowc(&wc, q, (size_t)(qlimit - q), &mbstate);
 			if (bytes == (size_t)-1 || bytes == (size_t)-2) {
-				*n++ = INVALID_FILENAME_CHAR; /* Invalid UTF-8 */
+				*n++ = replacement_char; /* Invalid UTF-8 */
 				q++;
 			} else { /* Valid UTF-8 */
 				for (; bytes > 0; --bytes)
@@ -2306,7 +2309,7 @@ expand_regex(char ***substr)
 		/* Add leading '^' and trailing '$' to prevent accidental file
 		 * expansions. For example, a file named file.txt must not be expanded
 		 * given the pattern "ile.t". In other words, we force the use of
-		 * "^PATTERN$" instead of just "PATTERN". */
+		 * ".*PATTERN.*" instead of just "PATTERN". */
 		const size_t l = strlen(t) + 3;
 		char *rstr = xnmalloc(l, sizeof(char));
 		snprintf(rstr, l, "^%s$", t);
@@ -3228,9 +3231,9 @@ savestring(const char *restrict str, const size_t size)
 	return ptr;
 }
 
-/* Take a string and returns the same string escaped.
+/* Take a string and return the same string escaped.
  * If there is nothing to be escaped, the original string is returned. In
- * either cases, the returned string must be free'd by the caller. */
+ * either case, the returned string must be free'd by the caller. */
 char *
 escape_str(const char *str)
 {

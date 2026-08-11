@@ -981,7 +981,7 @@ get_longest_filename(const filesn_t n, const size_t eln_len)
 		size_t file_len = file_info[i].len;
 		if (file_len == 0) {
 			/* Invalid chars found. Reconstruct and recalculate length. */
-			char *wname = replace_invalid_chars(file_info[i].name);
+			char *wname = replace_invalid_chars(file_info[i].name, 0);
 			file_len = wname ? wc_xstrlen(wname) : 0;
 			free(wname);
 		}
@@ -1404,7 +1404,7 @@ construct_filename(const filesn_t i, struct wtrunc_t *wtrunc,
 	/* file_info[i].len is zero whenever an invalid character was found in
 	 * the filename. Let's recalculate the name length. */
 	if (namelen == 0) {
-		wtrunc->wname = replace_invalid_chars(file_info[i].name);
+		wtrunc->wname = replace_invalid_chars(file_info[i].name, 0);
 		namelen = file_info[i].len = wc_xstrlen(wtrunc->wname);
 		name = wtrunc->wname;
 	}
@@ -1834,7 +1834,7 @@ calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
 	size_t file_len = file_info[i].len;
 	if (file_len == 0) {
 		/* Invalid chars found. Reconstruct and recalculate length. */
-		char *wname = replace_invalid_chars(file_info[i].name);
+		char *wname = replace_invalid_chars(file_info[i].name, 0);
 		file_len = wname ? wc_xstrlen(wname) : 0;
 		free(wname);
 	}

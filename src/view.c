@@ -382,7 +382,7 @@ build_matches_with_args(const char *text, const int start, const int end)
 				name = abbrev_name;
 		}
 
-		char *p = (!is_sel && strchr(name, '\\')) ? unescape_str(name) : NULL;
+		char *p = strchr(name, '\\') ? unescape_str(name) : NULL;
 		matches[i + 1] = p ? p : strdup(name);
 
 		if (abbrev_name && abbrev_name != g_args[i])

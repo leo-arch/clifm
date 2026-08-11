@@ -1342,14 +1342,21 @@ get_new_filename(char *cur_name)
 	snprintf(n_prompt, sizeof(n_prompt), _("Enter new name (Ctrl+d to quit)\n"
 		"\001%s\002>\001%s\002 "), mi_c, tx_c);
 
+	char *old_name = cur_name;
+	if (cur_name && wc_xstrlen(cur_name) == 0)
+		old_name = replace_invalid_chars(cur_name, '?');
+
 	char *new_name = NULL;
 	while (!new_name) {
 		int quoted = 0;
-		new_name = get_newname(n_prompt, cur_name, &quoted);
+		new_name = get_newname(n_prompt, old_name, &quoted);
 		UNUSED(quoted);
 
-		if (!new_name) /* The user pressed Ctrl+d */
+		if (!new_name) { /* The user pressed Ctrl+d */
+			if (old_name && old_name != cur_name)
+				free(old_name);
 			return NULL;
+		}
 
 		if (is_blank_str(new_name) == 1) {
 			free(new_name);
@@ -1363,6 +1370,8 @@ get_new_filename(char *cur_name)
 
 	char *n = normalize_path(new_name, len);
 	free(new_name);
+	if (old_name && old_name != cur_name)
+		free(old_name);
 
 	return n;
 }

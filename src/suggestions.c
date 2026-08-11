@@ -494,7 +494,7 @@ truncate_name(const char *str)
 	|| suggestion.type == FILE_SUG) {
 		const size_t wlen = wc_xstrlen(str);
 		if (wlen == 0)
-			wname = replace_invalid_chars(str);
+			wname = replace_invalid_chars(str, 0);
 	}
 
 	return wname;

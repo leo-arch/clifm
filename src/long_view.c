@@ -107,7 +107,7 @@ construct_and_print_filename(const struct fileinfo *props,
 	size_t plen = props->len;
 	char *wname = NULL;
 	if (plen == 0) {
-		wname = replace_invalid_chars(props->name);
+		wname = replace_invalid_chars(props->name, 0);
 		plen = wc_xstrlen(wname);
 	}
 

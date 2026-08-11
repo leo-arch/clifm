@@ -1113,7 +1113,7 @@ print_filename(const char *filename, const char *color, const int follow_link,
 {
 	const mode_t mode = attr ? attr->st_mode : 0;
 	char *fixed_name = wc_xstrlen(filename) == 0
-		? replace_invalid_chars(filename) : NULL;
+		? replace_invalid_chars(filename, 0) : NULL;
 
 	char quoted_name[(NAME_MAX * sizeof(wchar_t)) + 3];
 	*quoted_name = '\0';
