@@ -605,8 +605,16 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	if (conf.highlight == 0)
 		rl_redisplay();
-	curcol = prompt_offset + (rl_line_buffer
-		? (int)wc_xstrlen(rl_line_buffer) : 0);
+
+	int blen = rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) : -1;
+	if (blen == 0) { /* Non-printable or invalid multi-byte sequence. */
+		/* Ask the terminal via the CPR escape sequence. */
+		get_cursor_position(&curcol, NULL);
+	} else if (blen == -1) {
+		curcol = prompt_offset;
+	} else {
+		curcol = prompt_offset + blen;
+	}
 
 	if (term_cols > 0) {
 		while (curcol > term_cols)
