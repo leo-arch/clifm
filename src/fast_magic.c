@@ -2552,6 +2552,25 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[7] == 'G' && sig[8] == 'I' && sig[9] == 'N' && sig[10] == ' ')
 		return check_key_magic(sig, nread);
 
+	if (nread > 12 && sig[0] == 0x85 && sig[1] <= 0x04 && sig[3] == 0x03) {
+		if (memcmp(sig, "\x85\x01\x0c\x03", 4) == 0 /* 2048b RSA encrypted */
+		|| memcmp(sig, "\x85\x01\x8c\x03", 4) == 0  /* 3072b RSA encrypted */
+		|| memcmp(sig, "\x85\x02\x0c\x03", 4) == 0 /* 4096b RSA encrypted */
+		|| memcmp(sig, "\x85\x04\x0c\x03", 4) == 0 /* 8192b RSA encrypted */
+		|| memcmp(sig, "\x85\x01\x0e\x03", 4) == 0 /* 1024b Elgamal encrypted */
+		|| memcmp(sig, "\x85\x02\x0e\x03", 4) == 0 /* 2048b Elgamal encrypted */
+		|| memcmp(sig, "\x85\x03\x0e\x03", 4) == 0) /* 3072b Elgamal encrypted */
+			return "application/pgp-encrypted";
+	}
+
+	if (nread > 4 && sig[0] == 0x01 && sig[1] == 'g' && sig[2] == 'p'
+	&& sig[3] == 'g')
+		return "application/pgp-encrypted";
+
+	if (nread > 11 && BE_U32(sig) == 32 && sig[4] == 0x01 && sig[8] == 'K'
+	&& sig[9] == 'B' && sig[10] == 'X' && sig[11] == 'f')
+		return "application/x-gpg-keybox";
+
 	if (nread > 3 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x01) {
 		const uint8_t s3 = sig[3];
 		if (s3 == 0xB3 || s3 == 0xB8 || s3 == 0xBA) return "video/mpeg";
@@ -4428,13 +4447,13 @@ get_mimetype_from_companion_file(const char *filename)
 /* Return 1 if there is at least one NUL byte in the first MAX bytes of the
  * buffer S, or zero otherwise. */
 static int
-check_null(const uint8_t *s, const size_t max)
+check_byte(const uint8_t *s, uint8_t byte, const size_t max)
 {
 	if (!s)
 		return 0;
 
 	for (size_t i = 0; i < max; i++) {
-		if (s[i] == 0x00)
+		if (s[i] == byte)
 			return 1;
 	}
 
@@ -6714,7 +6733,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& !sig[3])
 		return "image/x-commodore-starpainter"; /* .zs */
 	if (nread >= 10 && sig[0] > 0 && sig[1] > 0
-	&& file_size == 2 + (sig[0] * (sig[1] << 3)) && check_null(sig + 2, 10))
+	&& file_size == 2 + (sig[0] * (sig[1] << 3)) && check_byte(sig + 2, 0, 10))
 		return "image/x-commodore-starpainter"; /* .gr */
 
 	/* RECOIL: recoil.c (RECOIL_DecodeHim) */
@@ -7035,7 +7054,8 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	}
 	/* RECOIL: recoil.c:RECOIL_DecodeAtari8Spr */
 	if (file_size >= 3 && file_size <= 42
-	&& 2 + (size_t)sig[0] == (size_t)file_size)
+	&& 2 + (size_t)sig[0] == (size_t)file_size
+	&& check_byte(sig + 1, 0, (size_t)file_size - 1))
 		return "image/x-atari-mad-studio-spr"; /* .spr */
 	/* RECOIL: recoil.c:RECOIL_DecodeMpl */
 	if (file_size >= 13 && sig[0] > 0 && sig[0] <= 40
