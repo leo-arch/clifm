@@ -1256,6 +1256,11 @@ check_key_magic(const uint8_t *s, const size_t slen)
 			return "text/x-pem-file";
 	}
 
+	if (p[0] == 'O') {
+		if (l >= 20 && memcmp(p, "OPENSSH PRIVATE KEY-", 20) == 0)
+			return "application/x-pem-file";
+	}
+
 	if (p[0] == 'P') {
 		if (l >= 22 && (memcmp(p, "PGP PRIVATE KEY BLOCK-", 22) == 0
 		|| memcmp(p, "PGP PUBLIC KEY BLOCK-", 21) == 0))
@@ -1266,6 +1271,10 @@ check_key_magic(const uint8_t *s, const size_t slen)
 			return "application/pgp-signature";
 		if (l >= 12 && memcmp(p, "PGP MESSAGE-", 12) == 0)
 			return "application/pgp-encrypted";
+		if (l >= 12 && memcmp(p, "PRIVATE KEY-", 12) == 0)
+			return "text/x-ssh-private-key";
+		if (l >= 11 && memcmp(p, "PUBLIC KEY-", 11) == 0)
+			return "text/x-ssh-public-key";
 	}
 
 	if (p[0] == 'R') {
@@ -2551,6 +2560,26 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == '-' && sig[4] == '-' && sig[5] == 'B' && sig[6] == 'E'
 	&& sig[7] == 'G' && sig[8] == 'I' && sig[9] == 'N' && sig[10] == ' ')
 		return check_key_magic(sig, nread);
+
+	if (nread > 8 && sig[0] == 's' && sig[1] == 's' && sig[2] == 'h'
+	&& (memcmp(sig, "ssh-dss ", 8) == 0 || memcmp(sig, "ssh-rsa ", 8) == 0))
+		return "text/x-ssh-public-key";
+
+	if (nread > 34 && sig[0] == 's' && sig[1] == 'k' && sig[2] == '-'
+	&& (memcmp(sig, "sk-ecdsa-sha2-nistp256@openssh.com", 34) == 0
+	|| memcmp(sig, "sk-ssh-ed25519@openssh.com", 26) == 0))
+		return "text/x-ssh-public-key";
+
+	if (nread > 19 && sig[0] == 'e' && sig[1] == 'c' && sig[2] == 'd'
+	&& sig[3] == 's' && sig[4] == 'a'
+	&& (memcmp(sig, "ecdsa-sha2-nistp256", 19) == 0
+	|| memcmp(sig, "ecdsa-sha2-nistp384", 19) == 0
+	|| memcmp(sig, "ecdsa-sha2-nistp521", 19) == 0))
+		return "text/x-ssh-public-key";
+
+	if (nread > 20 && sig[0] == 'P' && sig[1] == 'u' && sig[2] == 'T'
+	&& memcmp(sig, "PuTTY-User-Key-File-", 20) == 0)
+		return "application/x-putty-private-key";
 
 	if (nread > 12 && sig[0] == 0x85 && sig[1] <= 0x04 && sig[3] == 0x03) {
 		if (memcmp(sig, "\x85\x01\x0c\x03", 4) == 0 /* 2048b RSA encrypted */
