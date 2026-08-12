@@ -2574,9 +2574,10 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread >= 16 && sig[0] == 'S' && sig[1] == 'Q'
 	&& memcmp(sig, "SQLite format 3\0", 16) == 0)
 		return "application/vnd.sqlite3";
-
 	if (nread > 4 && LE_U32(sig) == 0x002DE218)
-		return "application/vnd.sqlite3";
+		return "application/vnd.sqlite3"; /* .db-shm */
+	if (nread > 4 && (BE_U32(sig) & 0xFFFFFFFE) == 0x377F0682)
+		return "application/vnd.sqlite3"; /* .db-wal */
 
 	if (nread > 5 && sig[0] == 0x93 && sig[1] == 'N' && sig[2] == 'U'
 	&& sig[3] == 'M' && sig[4] == 'P' && sig[5] == 'Y')
