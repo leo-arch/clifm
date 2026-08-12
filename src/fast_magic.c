@@ -2354,6 +2354,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[23] == 'T')
 		return "image/x-gimp-pat";
 
+	if (nread > 13 && sig[0] == 'G' && sig[1] == 'I' && sig[2] == 'M'
+	&& sig[3] == 'P' && sig[4] == ' ') {
+		if (memcmp(sig + 5, "Gradient", 8) == 0) return "text/x-gimp-ggr";
+		if (memcmp(sig + 5, "Palette", 7) == 0) return "text/x-gimp-gpl";
+	}
+
 	if (nread > 7 && sig[0] == 0x89 && sig[1] == 'H' && sig[2] == 'D'
 	&& sig[3] == 'F' && sig[4] == 0x0D && sig[5] == 0x0a && sig[6] == 0x1A
 	&& sig[7] == 0x0A)
@@ -2567,6 +2573,9 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 
 	if (nread >= 16 && sig[0] == 'S' && sig[1] == 'Q'
 	&& memcmp(sig, "SQLite format 3\0", 16) == 0)
+		return "application/vnd.sqlite3";
+
+	if (nread > 4 && LE_U32(sig) == 0x002DE218)
 		return "application/vnd.sqlite3";
 
 	if (nread > 5 && sig[0] == 0x93 && sig[1] == 'N' && sig[2] == 'U'
