@@ -4404,6 +4404,20 @@ get_mimetype_from_companion_file(const char *filename)
 	return NULL;
 }
 
+static int
+check_null(const uint8_t *s, const size_t max)
+{
+	if (!s)
+		return 0;
+
+	for (size_t i = 0; i < max; i++) {
+		if (s[i] == 0x00)
+			return 1;
+	}
+
+	return 0;
+}
+
 static const char *
 check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	const off_t file_size)
@@ -6677,7 +6691,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& !sig[3])
 		return "image/x-commodore-starpainter"; /* .zs */
 	if (nread >= 10 && sig[0] > 0 && sig[1] > 0
-	&& file_size == 2 + (sig[0] * (sig[1] << 3)))
+	&& file_size == 2 + (sig[0] * (sig[1] << 3)) && check_null(sig + 2, 10))
 		return "image/x-commodore-starpainter"; /* .gr */
 
 	/* RECOIL: recoil.c (RECOIL_DecodeHim) */
