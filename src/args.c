@@ -1604,7 +1604,8 @@ print_mimetypes_and_exit(char **files, const char *opt_str)
 	for (size_t i = 0; files[i]; i++) {
 		char *s = strchr(files[i], '\\') ? unescape_str(files[i]) : files[i];
 		if (!s) {
-			fprintf(stderr, _("%s: Error unescaping path\n"), files[i]);
+			fprintf(stderr, _("%s: '%s': Error unescaping path\n"),
+				PROGRAM_NAME, files[i]);
 			ret = EXIT_FAILURE;
 			continue;
 		}
@@ -1614,14 +1615,16 @@ print_mimetypes_and_exit(char **files, const char *opt_str)
 			free(s);
 
 		if (!file) {
-			fprintf(stderr, _("%s: Error resolving path\n"), files[i]);
+			fprintf(stderr, _("%s: '%s': Error resolving path\n"),
+				PROGRAM_NAME, files[i]);
 			ret = EXIT_FAILURE;
 			continue;
 		}
 
 		if (lstat(file, &a) == -1) {
 			ret = errno;
-			fprintf(stderr, "%s: %s\n", files[i], strerror(errno));
+			fprintf(stderr, "%s: '%s': %s\n",
+				PROGRAM_NAME, files[i], strerror(errno));
 			free(file);
 			continue;
 		}
@@ -1629,7 +1632,8 @@ print_mimetypes_and_exit(char **files, const char *opt_str)
 		if (xargs.follow_symlinks == 1 && S_ISLNK(a.st_mode)) {
 			*resolved_target = '\0';
 			if (!realpath(file, resolved_target)) {
-				fprintf(stderr, "%s: %s\n", files[i], strerror(errno));
+				fprintf(stderr, "%s: '%s': %s\n",
+					PROGRAM_NAME, files[i], strerror(errno));
 				free(file);
 				continue;
 			}
@@ -1638,7 +1642,8 @@ print_mimetypes_and_exit(char **files, const char *opt_str)
 		const char *f = *resolved_target ? resolved_target : file;
 		char *mimetype = xmagic(f, MIME_TYPE);
 		if (!mimetype) {
-			fprintf(stderr, _("%s: Error getting MIME type\n"), files[i]);
+			fprintf(stderr, _("%s: '%s': Error getting MIME type\n"),
+				PROGRAM_NAME, files[i]);
 			ret = EXIT_FAILURE;
 		} else {
 			printf("%s: %s\n", files[i], mimetype);
