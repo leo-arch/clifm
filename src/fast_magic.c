@@ -2518,6 +2518,10 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0x18)
 		return "application/x-lz4";
 
+	if (nread > 8 && sig[0] == 'm' && sig[1] == 'o' && sig[2] == 'z'
+	&& memcmp(sig, "mozLz40\x00", 8) == 0)
+		return "application/x-lz4+json";
+
 	if (nread > 3 && sig[0] == 'L' && sig[1] == 'R' && sig[2] == 'Z'
 	&& sig[3] == 'I')
 		return "application/x-lrzip";
@@ -4404,6 +4408,8 @@ get_mimetype_from_companion_file(const char *filename)
 	return NULL;
 }
 
+/* Return 1 if there is at least one NUL byte in the first MAX bytes of the
+ * buffer S, or zero otherwise. */
 static int
 check_null(const uint8_t *s, const size_t max)
 {
