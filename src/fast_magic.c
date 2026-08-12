@@ -112,7 +112,7 @@ extract_mimetype_from_zip(const uint8_t *str, const size_t str_len,
 	/* It is guaranteed that STR starts with "PK\x03\x04" and that
 	 * "mimetype" is found at offset 0x1E (30). */
 	if (!str || str_len < name_offset)
-		return NULL;
+		goto FALLBACK;
 
 	/* A buffer with enough room to hold a MIME-type string.
 	 * See RFC-6838 (https://datatracker.ietf.org/doc/html/rfc6838#section-3)
@@ -125,7 +125,7 @@ extract_mimetype_from_zip(const uint8_t *str, const size_t str_len,
 
 	if (mimetype_len == 0 || mimetype_len > sizeof(buf) - 1
 	|| mimetype_len + name_offset > str_len)
-		return NULL;
+		goto FALLBACK;
 
 	/* Position the pointer right after the 'mimetype' tag. */
 	const uint8_t *s = str + name_offset;
@@ -134,7 +134,7 @@ extract_mimetype_from_zip(const uint8_t *str, const size_t str_len,
 	for (size_t i = 0; i < mimetype_len; i++) {
 		const int is_subtype = (slashes > 0);
 		if (s[i] != '/' && !IS_VALID_MIMETYPE_CHAR(s[i], is_subtype))
-			return NULL;
+			goto FALLBACK;
 		if (s[i] == '/' && i > 0 && i < mimetype_len - 1)
 			slashes++;
 		buf[i] = (char)s[i];
@@ -144,9 +144,16 @@ extract_mimetype_from_zip(const uint8_t *str, const size_t str_len,
 
 	/* A MIME type has the form "type/subtype": only a single slash is allowed. */
 	if (slashes != 1)
-		return NULL;
+		goto FALLBACK;
 
 	return buf;
+
+FALLBACK:
+#ifdef FMAGIC_NO_NULL
+	return "application/zip";
+#else
+	return NULL;
+#endif
 }
 
 static const char *
