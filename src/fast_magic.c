@@ -2561,8 +2561,9 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[7] == 'G' && sig[8] == 'I' && sig[9] == 'N' && sig[10] == ' ')
 		return check_key_magic(sig, nread);
 
-	if (nread > 8 && sig[0] == 's' && sig[1] == 's' && sig[2] == 'h'
-	&& (memcmp(sig, "ssh-dss ", 8) == 0 || memcmp(sig, "ssh-rsa ", 8) == 0))
+	if (nread > 12 && sig[0] == 's' && sig[1] == 's' && sig[2] == 'h'
+	&& (memcmp(sig, "ssh-dss ", 8) == 0 || memcmp(sig, "ssh-rsa ", 8) == 0
+	|| memcmp(sig, "ssh-ed25519 ", 12) == 0))
 		return "text/x-ssh-public-key";
 
 	if (nread > 34 && sig[0] == 's' && sig[1] == 'k' && sig[2] == '-'
@@ -4209,21 +4210,21 @@ is_atari_16color_palette(const uint8_t *s, const size_t slen)
 static int
 is_mad_studio_mpl(const uint8_t *s, const size_t slen, const off_t file_size)
 {
-	if (slen < 13)
+	if (slen < 14 /* Min header size */
+	|| s[0] > 40 /* Max player height (bit 0) */
+	|| (s[13] != 32 && s[13] != 0)) /* Third color enable flag (bit 13) */
 		return 0;
 
-	const uint8_t height = s[0];
-	const size_t bitmap_offset = (size_t)file_size - ((size_t)height << 2);
-
-	if (bitmap_offset != 9 && bitmap_offset != 14)
+	/* Height x 4 (4 players), plus 14 (header size) == file size */
+	const size_t height = (size_t)s[0];
+	if ((height << 2) + 14 != (size_t)file_size)
 		return 0;
 
-	uint8_t max = 0;
-
+	/* Check bits 1-4 (max 48) */
 	for (size_t i = 1; i < 5; i++)
-		if (max < s[i]) max = s[i];
+		if (s[i] > 48) return 0;
 
-	return (max + 8 <= 56);
+	return 1;
 }
 
 /* See https://www.clicketyclick.dk/databases/xbase/format/dbf.html#DBF_NOTE_21_TARGET */
@@ -7068,6 +7069,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread >= 26 && BE_U32(sig) == 0x16161624 && !sig[4] && !sig[12])
 		return "image/x-oric-hrs";
 
+	/* See https://github.com/Gury8/Mad-Studio/blob/main/docs/mad-studio-file-formats.pdf */
 	/* RECOIL: recoil.c:RECOIL_DecodeMsl */
 	if (file_size >= 3 && file_size <= 36
 	&& (size_t)sig[0] + 2 == (size_t)file_size && is_msl_image(sig, nread) == 1)
@@ -7087,8 +7089,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& check_byte(sig + 1, 0, (size_t)file_size - 1))
 		return "image/x-atari-mad-studio-spr"; /* .spr */
 	/* RECOIL: recoil.c:RECOIL_DecodeMpl */
-	if (file_size >= 13 && sig[0] > 0 && sig[0] <= 40
-	&& (size_t)file_size > ((size_t)sig[0] << 2)
+	if (file_size >= 14 && file_size <= 174 && sig[0] > 0 && sig[0] <= 40
 	&& is_mad_studio_mpl(sig, nread, file_size) == 1)
 		return "image/x-atari-mad-studio-mpl"; /* .mpl */
 	/* RECOIL: recoil.c:RECOIL_DecodeTl4 */
@@ -7907,6 +7908,7 @@ struct tokens_t tokens[] = {
 
 	{"<html", 5, HTML, 10}, {"<HTML", 5, HTML, 10},
 	{"<head", 5, HTML, 4}, {"<HEAD", 5, HTML, 4},
+	{"<title", 6, HTML, 4}, {"<TITLE", 6, HTML, 4},
 	{"<body", 5, HTML, 4}, {"<BODY", 5, HTML, 4},
 	{"<meta", 5, HTML, 2}, {"<META", 5, HTML, 2},
 	{"<link", 5, HTML, 2}, {"<LINK", 5, HTML, 2},
