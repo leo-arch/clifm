@@ -2208,6 +2208,25 @@ check_moss_archive(const uint8_t *s, const size_t slen)
 	return NULL;
 }
 
+static int
+is_terminfo(const uint8_t *s, const size_t slen)
+{
+	if (!s || slen <= 64)
+		return 0;
+
+	if (!IS_ALNUM(s[12]) || (!IS_ALNUM(s[13]) && s[13] != '.'))
+		return 0;
+
+	size_t i;
+	for (i = 14; i < 64 && s[i] != '|'; i++) {
+		if (!IS_ALNUM(s[i]) && s[i] != '+' && s[i] != '-'
+		&& s[i] != '.' && s[i] != '_')
+			return 0;
+	}
+
+	return (s[i] == '|');
+}
+
 static const char *
 check_modern_formats(const uint8_t *sig, const size_t nread,
 	const off_t file_size)
@@ -3215,6 +3234,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 4 && (BE_U32(sig) == 0xF11E041C || LE_U32(sig) == 0xF11E041C))
 		return "application/x-file"; /* file(1) magic file (binary) */
 
+	/* file(1): magic/Magdir/terminfo */
+	if (nread > 64 && sig[14] > 32 && ((sig[0] == 0x1A && sig[1] == 0x01)
+	|| (sig[0] == 0x1E && sig[1] == 0x02)) && is_terminfo(sig, nread) == 1)
+		return (sig[1] == 0x01 ? "application/x-terminfo"
+			: "application/x-terminfo2");
+
 	if (nread >= 32 && sig[0] == 0xFF && sig[1] == 0xFE && sig[4] == 'S'
 	&& memcmp(sig, "\xff\xfe\xff\x0e\x53\x00\x6b\x00\x65\x00\x74\x00\x63\x00\x68\x00\x55\x00\x70\x00\x20\x00\x4d\x00\x6f\x00\x64\x00\x65\x00\x6c\x00", 32) == 0)
 		return "application/vnd.sketchup.skp";
@@ -4207,6 +4232,8 @@ is_atari_16color_palette(const uint8_t *s, const size_t slen)
 	return 1;
 }
 
+/* Based on Recoil and MadStudio source code
+ * (https://github.com/Gury8/Mad-Studio/blob/main/src/pmg.pas) */
 static int
 is_mad_studio_mpl(const uint8_t *s, const size_t slen, const off_t file_size)
 {
