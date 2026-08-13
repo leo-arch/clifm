@@ -7440,19 +7440,39 @@ fs_type_check(const struct stat *a)
 static const char *
 open_error(const char *file, const int err_no)
 {
-	if (!file)
+	struct stat st;
+	if (!file || lstat(file, &st) == -1)
 		return FMAGIC_ERROR;
 
-	struct stat st;
-	if (lstat(file, &st) != -1) {
-		/* We cannot read the file, but we can stat it */
-		if (err_no == EACCES && S_ISREG(st.st_mode))
-			return _("regular file, no read permission");
-
+	/* We cannot read the file, but we can stat it */
+	if (!S_ISREG(st.st_mode))
 		return fs_type_check(&st);
+
+	if (st.st_size <= 0)
+		return "inode/x-empty";
+
+	const int read_error = (err_no == EPERM || err_no == EACCES);
+
+	const int x = (access(file, X_OK) == 0);
+	const int w = (access(file, W_OK) == 0);
+	static char buf[256] = "";
+	int bytes = 0;
+
+	if (w == 1) {
+		bytes += snprintf(buf + bytes, sizeof(buf) - (size_t)bytes,
+			"writable, ");
+	}
+	if (x == 1 && (size_t)bytes < sizeof(buf) - 1) {
+		bytes += snprintf(buf + bytes, sizeof(buf) - (size_t)bytes,
+			"executable, ");
+	}
+	if ((size_t)bytes < sizeof(buf) - 1) {
+		snprintf(buf + bytes, sizeof(buf) - (size_t)bytes,
+			read_error == 1 ? "regular file, no read permission"
+			: "regular file");
 	}
 
-	return FMAGIC_ERROR;
+	return (*buf ? buf : "regular file");
 }
 
 static void

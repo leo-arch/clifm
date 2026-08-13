@@ -1787,7 +1787,7 @@ mime_open_url(const char *url)
 	if (!url || !*url)
 		return FUNC_FAILURE;
 
-	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "lira";
+	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "mime";
 
 	char *app = get_app("text/html", 0);
 	if (!app) /* The error message may not be printed by get_app(). Fix. */
@@ -2035,7 +2035,7 @@ mime_open(char **args)
 	if (!args[1] || IS_HELP(args[1]))
 		return print_mime_help();
 
-	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "lira";
+	err_name = (xargs.open == 1 || xargs.preview == 1) ? PROGRAM_NAME : "mime";
 
 	if (*args[1] == 'i' && strcmp(args[1], "import") == 0)
 		return import_mime();
