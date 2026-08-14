@@ -2779,7 +2779,7 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 
 	/* http://fileformats.archiveteam.org/wiki/PGF_(Progressive_Graphics_File) */
 	if (nread > 3 && sig[0] == 'P' && sig[1] == 'G' && sig[2] == 'F'
-	&& sig[3] < 0x0A) /* 3rd byte is version (currently 6) */
+	&& (sig[3] < 0x0A || IS_DIGIT(sig[3]))) /* 3rd byte is version (currently 6) */
 		return "image/x-pgf";
 
 	if (nread >= 2 && (sig[0] & 0x0F) == 8 && (sig[0] & 0x80) == 0
@@ -3142,10 +3142,13 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		return "text/x-gcode-gx"; /* MIME-info */
 
 	/* http://fileformats.archiveteam.org/wiki/ICalendar */
-	if (nread > 24 && sig[0] == 'B' && sig[5] == ':' && sig[6] == 'V'
-	&& memcmp(sig, "BEGIN:VCALENDAR", 15) == 0) {
-		if (sig[24] == '2') return "text/calendar";
-		return "text/x-vcalendar";
+	if (nread > 24 && sig[0] == 'B' && sig[5] == ':' && sig[6] == 'V') {
+		if (memcmp(sig, "BEGIN:VCALENDAR", 15) == 0) {
+			if (sig[24] == '2') return "text/calendar";
+			return "text/x-vcalendar";
+		}
+		if (memcmp(sig, "BEGIN:VCARD", 11) == 0)
+			return "text/vcard";
 	}
 
 	if (nread > 5 && sig[0] == '#' && sig[1] == 'V' && sig[2] == 'R'
@@ -3239,6 +3242,10 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	|| (sig[0] == 0x1E && sig[1] == 0x02)) && is_terminfo(sig, nread) == 1)
 		return (sig[1] == 0x01 ? "application/x-terminfo"
 			: "application/x-terminfo2");
+
+	/* file(1): magic/Magdir/mail.news */
+	if (nread > 4 && LE_U32(sig) == 0x223E9F78)
+		return "application/vnd.ms-tnef";
 
 	if (nread >= 32 && sig[0] == 0xFF && sig[1] == 0xFE && sig[4] == 'S'
 	&& memcmp(sig, "\xff\xfe\xff\x0e\x53\x00\x6b\x00\x65\x00\x74\x00\x63\x00\x68\x00\x55\x00\x70\x00\x20\x00\x4d\x00\x6f\x00\x64\x00\x65\x00\x6c\x00", 32) == 0)
@@ -7715,8 +7722,8 @@ struct tokens_t tokens[] = {
 	{"use ", 4, RUST|PERL, 1},
 	{"/*!", 3, RUST|DLANG, 1},
 
-	{"require '", 9, RUBY, MAX_SCORE},
-	{"require \"", 9, RUBY|LUA, 10},
+	{"require '", 9, RUBY|PERL, 10},
+	{"require \"", 9, RUBY|LUA|PERL, 10},
 	{"elsif", 5, RUBY|PERL, 10},
 	{"include ", 8, RUBY|OCAML|MAKE, 2},
 	{"rescue ", 7, RUBY|ELIXIR, 2},
