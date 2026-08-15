@@ -469,8 +469,8 @@ get_file_icon(const char *name, const struct stat *a, const char **color)
 		}
 
 		if (color) *color = *dir_ico_c ? dir_ico_c : DEF_DIR_ICON_COLOR;
-		return (count_dir(name, CPOP) - 2 <= 0)
-			? DEF_EMPTY_DIR_ICON : DEF_DIR_ICON;
+		const int is_empty = !(a->st_nlink > 2 || count_dir(name, CPOP) - 2 > 0);
+		return (is_empty == 1) ? DEF_EMPTY_DIR_ICON : DEF_DIR_ICON;
 	}
 
 	if (S_ISREG(a->st_mode)) {
