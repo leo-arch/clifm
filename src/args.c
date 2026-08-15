@@ -1527,6 +1527,22 @@ set_desktop_notifications(const char *val)
 }
 
 static void
+set_ls_mode(void)
+{
+	xargs.list_and_quit = 1;
+	xargs.no_dirjump = 1;
+	xargs.no_eln = 1;
+	xargs.names_last = 1;
+	xargs.restore_last_path = conf.restore_last_path = 0;
+	xargs.clear_screen = 0;
+	xargs.classify = 0;
+	xargs.show_hidden = 0;
+	xargs.follow_symlinks = 0;
+	xargs.group_dirs = GROUP_DIRS_FALSE;
+	xargs.sort = SNAME;
+}
+
+static void
 xset_pager_view(const char *arg)
 {
 	if (!arg || !*arg || *arg == '-')
@@ -1971,14 +1987,7 @@ parse_cmdline_args(const int argc, char **argv)
 			xargs.restore_last_path = conf.restore_last_path = 0;
 			break;
 		case LOPT_LS:
-			xargs.list_and_quit = 1;
-			xargs.no_dirjump = 1;
-			xargs.restore_last_path = conf.restore_last_path = 0;
-			xargs.clear_screen = 0;
-			xargs.no_eln = 1;
-			xargs.names_last = 1;
-			xargs.classify = 0;
-			break;
+			set_ls_mode(); break;
 		case LOPT_LSCOLORS:
 			xargs.lscolors = 1; break;
 		case LOPT_MAX_DIRHIST:
