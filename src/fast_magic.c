@@ -2822,9 +2822,8 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'p' && sig[4] == ' ' && memcmp(sig, "gimp xcf ", 9) == 0)
 		return "image/x-xcf";
 
-	if (nread > 3 && sig[0] == 0xC5 && sig[1] == 0xD0 && sig[2] == 0xD3
-	&& sig[3] == 0xC6) /* Encapsulated postscript */
-		return "image/x-eps";
+	if (nread > 36 && BE_U32(sig) == 0xC5D0D3C6 && LE_U32(sig + 32) > 0)
+		return "image/x-eps"; /* Encapsulated postscript */
 	if (nread > 17 && sig[0] == '%' && sig[1] == '!' && sig[15] == 'E'
 	&& sig[16] == 'P' && sig[17] == 'S')
 		return "image/x-eps";
@@ -3032,6 +3031,16 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == 'F' && sig[1] == 'L' && sig[2] == '3'
 	&& sig[3] == '2')
 		return "image/x-fl32";
+
+	/* http://fileformats.archiveteam.org/wiki/FLIF */
+	if (nread > 5 && sig[0] == 'F' && sig[1] == 'L' && sig[2] == 'I'
+	&& sig[3] == 'F' && sig[5] >= '0' && sig[5] <= '3')
+		return "image/x-flif";
+
+	/* http://fileformats.archiveteam.org/wiki/FPF_(FLIR) */
+	if (nread > 21 && sig[0] == 'F' && sig[1] == 'P' && sig[2] == 'F'
+	&& memcmp(sig, "FPF Public Image Format\0", 21) == 0)
+		return "image/x-flir-fpf"; /* exiftool */
 
 	if (nread > 8 && LE_U32(sig) <= 2047 && LE_U32(sig + 4) <= 2047
 	&& is_aai_image(sig, nread, file_size) == 1)
