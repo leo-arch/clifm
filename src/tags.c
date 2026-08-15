@@ -115,7 +115,7 @@ print_tagged_file(char *name, const char *tag)
 
 	putchar(' ');
 	char *abbr_name = abbreviate_file_name(tmp);
-	colors_list(abbr_name ? abbr_name : tmp, 0, 0, 1);
+	colors_list(abbr_name ? abbr_name : tmp, 0, 0, 1, 0);
 	if (abbr_name != tmp)
 		free(abbr_name);
 

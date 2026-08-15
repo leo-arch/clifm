@@ -32,6 +32,9 @@
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
 #endif /* !_NO_HIGHLIGHT */
+#ifndef _NO_ICONS
+# include "listing.h" /* print_file_icon() */
+#endif /* !_NO_ICONS */
 #include "misc.h"
 #include "spawn.h" /* launch_execv() */
 
@@ -127,6 +130,11 @@ print_file_name(char *fname, const int isdir, const struct stat *attr)
 
 	if (!color)
 		color = df_c;
+
+#ifndef _NO_ICONS
+	if (conf.icons == 1)
+		print_file_icon(fname, attr, color);
+#endif /* !_NO_ICONS */
 
 	const char *dir_slash = isdir >= 1 ? "/" : "";
 	if (detect_space(name) == 1) {

@@ -945,14 +945,14 @@ sel_function(char **args)
 }
 
 void
-list_selected_files(void)
+list_selected_files(const int clear_screen)
 {
 	if (sel_n == 0) {
 		puts(_("sel: No selected files"));
 		return;
 	}
 
-	if (conf.clear_screen > 0)
+	if (conf.clear_screen > 0 && clear_screen)
 		CLEAR;
 
 	if (conf.pager == 0)
@@ -1009,7 +1009,7 @@ list_selected_files(void)
 		counter++;
 
 		printf("%s%*zu%s ", el_c, epad, i + 1, df_c);
-		colors_list(sel_elements[i].name, NO_ELN, NO_PAD, PRINT_NEWLINE);
+		colors_list(sel_elements[i].name, NO_ELN, NO_PAD, PRINT_NEWLINE, 1);
 
 		int ret = 0;
 		const off_t s = get_sel_file_size(i, &ret);
@@ -1411,7 +1411,7 @@ deselect(char **args)
 		return handle_desel_args(args);
 
 	/* No arguments: print the deselection screen. */
-	list_selected_files();
+	list_selected_files(1);
 
 	size_t desel_n = 0;
 	char **desel_elements = get_desel_input(&desel_n);

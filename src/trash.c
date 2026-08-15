@@ -394,7 +394,7 @@ print_trashfiles(struct dirent ***ent, const int files_n)
 	const uint8_t tpad = DIGINUM(files_n);
 	for (size_t i = 0; i < (size_t)files_n; i++) {
 		printf("%s%*zu%s ", el_c, tpad, i + 1, df_c);
-		colors_list((*ent)[i]->d_name, NO_ELN, NO_PAD, PRINT_NEWLINE);
+		colors_list((*ent)[i]->d_name, NO_ELN, NO_PAD, PRINT_NEWLINE, 1);
 	}
 
 	flags &= ~STATE_COMPLETING;
@@ -968,9 +968,6 @@ list_trashed_files(void)
 		puts(_("trash: No trashed files"));
 		return FUNC_SUCCESS;
 	}
-
-	if (conf.clear_screen > 0)
-		CLEAR;
 
 	HIDE_CURSOR;
 

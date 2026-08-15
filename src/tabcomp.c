@@ -152,7 +152,7 @@ print_filename(char *to_print, char *full_pathname)
 	|| t == TCMP_FILE_TYPES_FILES || t == TCMP_MIME_LIST
 	|| t == TCMP_BM_PATHS || t == TCMP_GLOB || t == TCMP_UNTRASH
 	|| t == TCMP_TRASHDEL || t == TCMP_FILE_TEMPLATES)) {
-		colors_list(to_print, NO_ELN, NO_PAD, NO_NEWLINE);
+		colors_list(to_print, NO_ELN, NO_PAD, NO_NEWLINE, 0);
 	} else {
 		for (s = to_print + tab_offset; *s; s++)
 			putchar(*s);

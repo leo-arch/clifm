@@ -923,7 +923,7 @@ dirjump(char **args, const int mode)
 		found = 1;
 
 		if (jump_opt == JLIST) {
-			colors_list(entry[j].match, 0, 0 , 1);
+			colors_list(entry[j].match, 0, 0 , 1, 0);
 			continue;
 		}
 

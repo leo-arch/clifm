@@ -918,7 +918,7 @@ print_current_target(char *target)
 
 	struct stat a;
 	if (lstat(target, &a) != -1) {
-		colors_list(target, NO_ELN, NO_PAD, PRINT_NEWLINE);
+		colors_list(target, NO_ELN, NO_PAD, PRINT_NEWLINE, 0);
 	} else if (*target) {
 		printf(_("%s%s%s (broken link)\n"), uf_c, target, df_c);
 	} else {
@@ -1001,7 +1001,7 @@ edit_link(char *link)
 
 	printf(_("'%s' relinked to "), link);
 	fflush(stdout);
-	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
+	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE, 0);
 	free(new_path);
 
 	return FUNC_SUCCESS;

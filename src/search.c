@@ -530,7 +530,8 @@ print_glob_matches(struct search_t *matches, const char *search_path)
 			name_pad = 0;
 
 		colors_list(matches[i].name, NO_ELN, name_pad,
-		    (last_column == 1 || i == found - 1) ? 1 : NO_NEWLINE);
+		    (last_column == 1 || i == found - 1) ? 1 : NO_NEWLINE,
+		    !search_path ? 0 : 1);
 	}
 
 	tab_offset = tab_offset_bk;
@@ -780,9 +781,11 @@ print_regex_entry(struct search_t list, const int namepad, const int elnpad,
 			conf.icons == 1 ? file_info[index].icon_color : "",
 			conf.icons == 1 ? file_info[index].icon : "",
 			df_c, conf.icons == 1 ? ' ' : 0);
-	}
 
-	colors_list(list.name, NO_ELN, namepad, newline);
+		colors_list(list.name, NO_ELN, namepad, newline, 0);
+	} else {
+		colors_list(list.name, NO_ELN, namepad, newline, 1);
+	}
 }
 
 static size_t

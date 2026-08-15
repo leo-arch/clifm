@@ -18,7 +18,7 @@
 __BEGIN_DECLS
 
 int  deselect(char **args);
-void list_selected_files(void);
+void list_selected_files(const int clear_screen);
 int  sel_function(char **args);
 int  select_file(char *file);
 int  save_sel(void);

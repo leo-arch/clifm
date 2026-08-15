@@ -2591,9 +2591,10 @@ get_entry_color(const char *ent, const struct stat *attr)
  * -1:  Error getting ELN
  * 0:   ELN should not be printed. E.g., when listing files not in CWD */
 void
-colors_list(char *ent, const int eln, const int pad, const int new_line)
+colors_list(char *ent, const int eln, const int pad, const int new_line,
+	const int print_icon)
 {
-	char index[MAX_INT_STR + 1];
+	char index[MAX_INT_STR + 2];
 	*index = '\0';
 
 	if (eln > 0)
@@ -2642,8 +2643,22 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	char *name = wname ? wname : ent;
 	char *tmp = (flags & IN_SELBOX_SCREEN) ? abbreviate_file_name(name) : name;
 
-	printf("%s%s%s%s%s%s%s%-*s", eln_color, index, df_c, color,
-		tmp + tab_offset, df_c, new_line ? "\n" : "", pad, "");
+#ifndef _NO_ICONS
+	if (conf.icons == 1 && print_icon == 1) {
+		if (*index)
+			printf("%s%s%s", eln_color, index, df_c);
+		print_file_icon(ent, &attr, color);
+		printf("%s%s%s%s%-*s", color, tmp + tab_offset, df_c,
+			new_line ? "\n" : "", pad, "");
+	} else
+#else
+	UNUSED(print_icon);
+#endif /* !_NO_ICONS */
+	{
+		printf("%s%s%s%s%s%s%s%-*s", eln_color, index, df_c, color,
+			tmp + tab_offset, df_c, new_line ? "\n" : "", pad, "");
+	}
+
 	free(wname);
 
 	if ((flags & IN_SELBOX_SCREEN) && tmp != name)

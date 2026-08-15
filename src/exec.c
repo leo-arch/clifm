@@ -2112,7 +2112,7 @@ exec_cmd(char **args)
 
 	else if (*args[0] == 's' && (strcmp(args[0], "sb") == 0
 	|| strcmp(args[0], "selbox") == 0)) {
-		list_selected_files(); return FUNC_SUCCESS;
+		list_selected_files(0); return FUNC_SUCCESS;
 	}
 
 	else if (*args[0] == 'd' && (strcmp(args[0], "ds") == 0

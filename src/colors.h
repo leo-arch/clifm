@@ -38,7 +38,8 @@
 __BEGIN_DECLS
 
 void color_codes(void);
-void colors_list(char *ent, const int eln, const int pad, const int new_line);
+void colors_list(char *ent, const int eln, const int pad, const int new_line,
+	const int print_icon);
 int  cschemes_function(char **args);
 #ifndef CLIFM_SUCKLESS
 size_t get_colorschemes(void);

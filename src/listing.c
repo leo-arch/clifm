@@ -441,6 +441,85 @@ init_icons_hashes(void)
 	set_ext_name_hashes();
 	ext_table_init();
 }
+
+static const char *
+get_file_icon(const char *name, const struct stat *a, const char **color)
+{
+	if (!name || !a)
+		goto DEFAULT_ICON;
+
+	if (check_file_access(a->st_mode, a->st_uid, a->st_gid) == 0) {
+		if (color) *color = S_ISDIR(a->st_mode)
+			? DEF_NOPERM_ICON_COLOR_DIR : DEF_NOPERM_ICON_COLOR_FILE;
+		return DEF_NOPERM_ICON;
+	}
+
+	if (S_ISLNK(a->st_mode)) {
+		if (color) *color = DEF_LINK_ICON_COLOR;
+		return DEF_LINK_ICON;
+	}
+
+	if (S_ISDIR(a->st_mode)) {
+		const size_t hash = hashme(name, 1);
+		size_t i = sizeof(icon_dirnames) / sizeof(icon_dirnames[0]);
+		for (; i-- > 0;) {
+			if (hash != dir_icon_hashes[i]) continue;
+			if (color) *color = *dir_ico_c ? dir_ico_c : icon_dirnames[i].color;
+			return icon_dirnames[i].icon;
+		}
+
+		if (color) *color = *dir_ico_c ? dir_ico_c : DEF_DIR_ICON_COLOR;
+		return (count_dir(name, CPOP) - 2 <= 0)
+			? DEF_EMPTY_DIR_ICON : DEF_DIR_ICON;
+	}
+
+	if (S_ISREG(a->st_mode)) {
+		if (IS_EXEC(a->st_mode)) {
+			if (color) *color = DEF_EXEC_ICON_COLOR;
+			return DEF_EXEC_ICON;
+		}
+
+		const size_t hash = hashme(name, 1);
+		size_t i = sizeof(icon_filenames) / sizeof(icon_filenames[0]);
+		for (; i-- > 0;) {
+			if (hash != name_icon_hashes[i]) continue;
+			if (color) *color = icon_filenames[i].color;
+			return icon_filenames[i].icon;
+		}
+
+		const char *ext = strrchr(name, '.');
+		if (!ext || !*(++ext)) goto DEFAULT_ICON;
+
+		const size_t ext_hash = hashme(ext, 1);
+		i = ext_table_lookup(ext_hash);
+		if (i != SIZE_MAX) {
+			if (color) *color = icon_ext[i].color;
+			return icon_ext[i].icon;
+		}
+	}
+
+DEFAULT_ICON:
+	if (color) *color = DEF_FILE_ICON_COLOR;
+	return DEF_FILE_ICON;
+}
+
+void
+print_file_icon(const char *name, const struct stat *a, const char *file_color)
+{
+	if (conf.icons != 1)
+		return;
+
+	const char *color = NULL;
+	const char *icon = get_file_icon(name, a, &color);
+	if (xargs.icons_use_file_color == 1)
+		color = file_color ? file_color : DEF_FILE_ICON_COLOR;
+
+	if (color) fputs(color, stdout);
+	if (icon)  fputs(icon, stdout);
+	if (color) fputs(df_c, stdout);
+	if (icon)  fputc(' ', stdout);
+}
+
 #endif /* !_NO_ICONS */
 
 #if defined(TOURBIN_QSORT)
@@ -694,7 +773,7 @@ print_sel_files(const unsigned short t_rows)
 		char *p = abbreviate_file_name(sel_elements[i].name);
 		if (!p)
 			continue;
-		colors_list(p, 0, NO_PAD, PRINT_NEWLINE);
+		colors_list(p, 0, NO_PAD, PRINT_NEWLINE, 0);
 		if (p != sel_elements[i].name)
 			free(p);
 	}
