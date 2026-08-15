@@ -394,7 +394,7 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define UNK_PCHR     UNKNOWN_CHR
 
 /* When any of 'nf' or 'nd' color codes is unset, prepend this character
- * (a single one) to unaccessible files or directories in the file list
+ * (a single one) to inaccessible files or directories in the file list
  * (only if not running in light mode and icons are disabled). */
 #define NO_PERM_STR "!"
 
@@ -412,6 +412,11 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 //#define MOUNTPOINT_STR_U "≡" /* Unicode */
 
 #define TRUNC_FILE_CHR '~'
+
+/* Characters used in the jump list (j cmd) to mark entries as permanently
+ * or temporarily preserved. */
+#define JUMP_ENTRY_PERMANENT_CHR '+'
+#define JUMP_ENTRY_KEEP_CHR      '*'
 
 /* Character used to mark files with extended attributes (long view) */
 #define XATTR_CHAR '@'

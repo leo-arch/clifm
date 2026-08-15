@@ -923,13 +923,11 @@ extern time_t curdir_mtime;
 /* Flags to skip fuzzy matching based on what we're comparing. */
 #define FUZZY_FILES_ASCII 0
 #define FUZZY_FILES_UTF8  1
-/*#define FUZZY_BM_NAMES    2 */
 #define FUZZY_HISTORY     3
 #define FUZZY_ALGO_MAX    2 /* We have two fuzzy algorithms */
 
 #define JUMP_ENTRY_PURGED        (-1)
 #define JUMP_ENTRY_PERMANENT     2
-#define JUMP_ENTRY_PERMANENT_CHR '+'
 
 #define MAX_TIME_STR 256
 #define MAX_NAMELEN_AUTO (-2) /* Macro for MaxFilenameLen=N% */

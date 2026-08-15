@@ -519,7 +519,7 @@ print_jump_table(const int reduce, const time_t now)
 
 		const char *dir_color = get_directory_color(tmp_jump[i].path);
 		const int keep = tmp_jump[i].keep;
-		const char keep_char = keep == 1 ? '*'
+		const char keep_char = keep == 1 ? JUMP_ENTRY_KEEP_CHR
 			: ((keep == JUMP_ENTRY_PERMANENT)
 			? JUMP_ENTRY_PERMANENT_CHR : 0);
 
@@ -529,7 +529,7 @@ print_jump_table(const int reduce, const time_t now)
 			max_last, (intmax_t)tmp_jump[i].last_visit,
 		    conf.colorize == 1 ? BOLD : "", max_rank, tmp_jump[i].rank,
 		    color != uf_c ? color : "",
-		    keep == 1 ? li_c : (keep == 2 ? mi_c : ""),
+		    keep == 1 ? nm_c : (keep == 2 ? em_c : ""),
 		    keep > 0 ? keep_char : 0,
 		    (keep > 0 && color != uf_c) ? color : "",
 		    (conf.colorize == 0 && color == uf_c) ? '!' : 0,
@@ -538,8 +538,8 @@ print_jump_table(const int reduce, const time_t now)
 
 	free(tmp_jump);
 
-	printf(_("\nTotal rank: %d/%d\n"
-		"Total visits: %zu\n"
+	printf(_("\nTotal rank:    %d/%d\n"
+		"Total visits:  %zu\n"
 		"Total entries: %zu\n"), ranks_sum,
 	    conf.max_jump_total_rank, visits_sum, jump_n);
 
