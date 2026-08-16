@@ -264,7 +264,7 @@ check_ole2_clsid(const uint8_t *s, const size_t slen, const size_t offset)
 		switch (bequad80) {
 		case 0x131a020000000000: return "application/vnd.visio";
 		case 0x141a020000000000: return "application/vnd.visio";
-		case 0x84100C0000000000: return "application/x-msi";
+		case 0x84100C0000000000: return "application/vnd.ms-msi";
 		case 0x82100C0000000000: return "application/x-ms-mst";
 		case 0x86100C0000000000: return "application/x-wine-extension-msp";
 		case 0x0009020000000000: return "application/msword";
@@ -6537,6 +6537,15 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 3 && sig[0] == '1' && sig[1] == 'g' && sig[2] == 'i'
 	 && sig[3] == 'M')
 		return "application/x-ms-mig";
+
+	/* file(1): magic/Magdir/filesystems */
+	if (nread > 128 && (LE_U32(sig) & 0x804000E9) == 0x000000E9
+	&& !(LE_U16(sig + 11) & 0x001F) && (sig[21] & 0xF0) == 0xF0) {
+		const uint16_t v = LE_U16(sig + 11);
+		if (v > 32 && v < 32769 && v + 4 < nread
+		&& (LE_U32(sig + v) & 0x00ffffF0) == 0x00ffffF0)
+			return "application/x-ima";
+	}
 
 	/* file(1): magic/Magdir/windows */
 	if (nread > 8 && sig[0] == 'T' && sig[1] == 'A' && sig[2] == 'P'
