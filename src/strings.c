@@ -82,6 +82,10 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #define IS_WORD(x, y) (((x) == '$' && ((y) == '(' || (y) == '{')) \
 || ((x) == '`' && (y) != ' ') || (x) == '~' || (x) == '$')
 
+#ifdef HAVE_WORDEXP
+static int g_sel_is_recursive = 0;
+#endif
+
 /* QUOTED_WORDS stores indices of words quoted in the command line so that we
  * can keep track of them and prevent expanding them when spliting the
  * input string (in parse_input_str()). */
@@ -2043,6 +2047,16 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 	const int is_sel_cmd =
 		(strcmp((*substr)[0], "s") == 0 || strcmp((*substr)[0], "sel") == 0);
 
+	char *old_ifs = NULL;
+	if (g_sel_is_recursive == 1) {
+		/* Why? wordexp(2) splits the output of find(1) using $IFS, and
+		 * if unset, its falls back to ' ', '\t', '\n' as field separators.
+		 * This makes wordexp(2) split filenames containing spaces. To avoid
+		 * this, let's set IFS to newline only. Hacky, but works. */
+		old_ifs = xgetenv("IFS", 1);
+		setenv("IFS", "\n", 1);
+	}
+
 	for (size_t w = 0; w < word_n; w++) {
 		if (is_sel_cmd == 1) {
 			/* If the command is 'sel', perform only command substitution
@@ -2108,6 +2122,14 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 
 		old_pathc += (wordbuf.we_wordc - 1);
 		wordfree(&wordbuf);
+	}
+
+	if (g_sel_is_recursive == 1) {
+		if (old_ifs)
+			setenv("IFS", old_ifs, 1);
+		else
+			unsetenv("IFS");
+		free(old_ifs);
 	}
 
 	return 0;
@@ -2714,6 +2736,8 @@ make_sel_recursive(char ***substr)
 		s[3] = NULL;
 		if (args_n > 0) args_n--;
 	}
+
+	g_sel_is_recursive = 1;
 }
 #endif /* HAVE_WORDEXP */
 
@@ -2855,6 +2879,7 @@ parse_input_str(char *str)
 #endif /* !_NO_TRASH*/
 
 #ifdef HAVE_WORDEXP
+	g_sel_is_recursive = 0;
 	/* Handle 'sel pattern -[rR]' (recursive selection via find(1)) */
 	if (((substr[0][0] == 's' && !substr[0][1])
 	|| strcmp(substr[0], "sel") == 0) && substr[1] && *substr[1] && substr[2]
