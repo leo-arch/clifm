@@ -1040,7 +1040,7 @@ Available checks:
   3. Contains leading or trailing whitespace
   4. Contains leading tilde
   5. Contains embedded control characters (0x00-0x1f in the ASCII table)
-  6. Contains invalid UTF-8 bytes (0xc0, 0xc1, and 0xf5-0xff)
+  6. Contains bytes that cannot start valid UTF-8 code points (0xc0, 0xc1, and 0xf5-0xff)
   7. It is too long (longer than NAME_MAX, usually 255 bytes)
   8. Contains embedded shell metacharacters (*?[]<>|(){}&=`!\\;$)
   9. Contains characters outside the POSIX Portable Filename Character Set (a-zA-Z0-9._-)
@@ -1048,9 +1048,9 @@ Available checks:
 The set of checks to be performed is controlled by the \fBSafeFilenames\fR option in the configuration file.  This option supports the following values:
 .sp
   \fBfalse\fR: No check is performed
-  \fBbasic\fR: Only basic checks (1-7 above) are performed (this is the default)
+  \fBbasic\fR: Only basic sanity checks (1-7 above) are performed (this is the default)
   \fBstrict\fR: Basic + disallow shell metacharacters (check 8)
-  \fBposix\fR: Basic + allow only characters in the POSIX Portable Filename Character Set (check 9)
+  \fBposix\fR: Basic + strict + allow only characters in the POSIX Portable Filename Character Set (check 9)
 .sp
 For more information about safe filenames consult \fIhttps://dwheeler.com/essays/fixing-unix-linux-filenames.html\fR.
 .TP
