@@ -6543,7 +6543,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& !(LE_U16(sig + 11) & 0x001F) && (sig[21] & 0xF0) == 0xF0) {
 		const uint16_t v = LE_U16(sig + 11);
 		if (v > 32 && v < 32769 && v + 4 < nread
-		&& (LE_U32(sig + v) & 0x00ffffF0) == 0x00ffffF0)
+		&& (LE_U32(sig + v) & 0x00FFFFF0) == 0x00FFFFF0)
 			return "application/x-ima";
 	}
 

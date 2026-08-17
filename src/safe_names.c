@@ -141,17 +141,15 @@ is_safe_filename(char *name)
 
 	struct flags_t printed = (struct flags_t){0};
 	int only_dots = 1;
-	const char *s = name;
+	const unsigned char *s = (const unsigned char *)name;
 
 	while (*s) {
-		/* Contains control characters (being not UTF-8 bytes) or the
-		 * DEL character (0x7f). */
-		if ((*s < ' ' && !IS_UTF8_CHAR(*s)) || *s == 0x7f)
+		/* Contains control characters or the DEL character (0x7f). */
+		if (*s < ' ' || *s == 0x7f)
 			print_val_err(name, UNSAFE_CONTROL, &safe, &printed.control);
 
 		/* Illegal bytes in well‑formed UTF‑8 sequences (RFC 3629) */
-		if ((unsigned char)*s == 0xc0 || (unsigned char)*s == 0xc1
-		|| (unsigned char)*s >= 0xf5)
+		if (*s == 0xc0 || *s == 0xc1 || *s >= 0xf5)
 			print_val_err(name, UNSAFE_ILLEGAL_UTF8, &safe, &printed.illegal_utf8);
 
 		/* Contains shell meta-characters (only in strict mode) */
@@ -170,11 +168,11 @@ is_safe_filename(char *name)
 		print_val_err(name, UNSAFE_FASTBACK, &safe, NULL);
 
 	/* Name too long */
-	if (s - name >= NAME_MAX)
+	if (namelen > NAME_MAX)
 		print_val_err(name, UNSAFE_TOO_LONG, &safe, NULL);
 
 	if (conf.safe_filenames == SAFENAMES_POSIX
-	&& is_portable_filename(name, (size_t)(s - name)) != FUNC_SUCCESS)
+	&& is_portable_filename(name, namelen) != FUNC_SUCCESS)
 		print_val_err(name, UNSAFE_NOT_PORTABLE, &safe, NULL);
 
 	return safe;
