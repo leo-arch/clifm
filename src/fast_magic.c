@@ -2227,6 +2227,43 @@ is_terminfo(const uint8_t *s, const size_t slen)
 	return (s[i] == '|');
 }
 
+static int
+is_hp_hpgl(const uint8_t *s, const size_t slen)
+{
+	if (slen < 4)
+		return 0;
+
+	/* Validate leading command names. */
+	if (!((s[0] == 'I' && s[1] == 'N' && s[2] == ';')
+	|| (s[0] == 'I' && s[1] == 'N' && s[2] == 'P' && s[3] == 'S')
+	|| (s[0] == 'D' && s[1] == 'F' && s[2] == ';')
+	|| (s[0] == 'S' && s[1] == 'P' && IS_DIGIT(s[2]))
+	|| (s[0] == 'C' && s[1] == 'O' && s[2] == ' ')
+	|| (s[0] == 'P' && s[1] == 'S' && (s[2] == ' ' || s[2] == '4' || s[2] == '9'))
+	|| (s[0] == 'I' && s[1] == 'P' && s[2] == '0')
+	|| (s[0] == 'P' && s[1] == 'A' && (s[2] == '-' || IS_DIGIT(s[2])))))
+		return 0;
+
+	/* Require at least two semicolons, each followed by two uppercase chars,
+	 * in the first 32 bytes. */
+	const size_t max = slen > 32 ? 32 : slen;
+	size_t sc = 0;
+	for (size_t i = 2; i + 1 < max; i++) {
+		if (s[i] != ';') continue;
+
+		size_t j = i + 1;
+
+		while (j < max && (s[j] == ' ' || s[j] == '\t'
+		|| s[j] == '\r' || s[j] == '\n'))
+			j++;
+
+		if (j + 1 < max && IS_ALPHA_UP(s[j]) &&	IS_ALPHA_UP(s[j + 1]))
+			if (++sc >= 2) return 1;
+	}
+
+	return 0;
+}
+
 static const char *
 check_modern_formats(const uint8_t *sig, const size_t nread,
 	const off_t file_size)
@@ -3263,6 +3300,14 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& memcmp(sig + 1, "SketchUp Model", 14) == 0)
 		return "application/vnd.sketchup.skp";
 
+	/* file(1): magic/Magdir/printer */
+	if (nread > 4 && sig[0] == 0x1b && sig[1] == '%' && sig[2] == '-'
+	&& sig[3] == '1' && sig[4] == 'B')
+		return "application/vnd.hp-HPGL";
+	if (nread >= 2 && IS_ALPHA_UP(sig[0]) && IS_ALPHA_UP(sig[1])
+	&& is_hp_hpgl(sig, nread) == 1)
+		return "application/vnd.hp-HPGL";
+
 	/* file(1): magic/Magdir/archive (SerpentOS - rebranded AerynOS) */
 	if (nread > 32 && !sig[0] && sig[1] == 'm' && sig[2] == 'o'
 	&& sig[3] == 's' && BE_U32(sig + 28) == 1)
@@ -3459,6 +3504,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 9 && sig[0] > 0 && sig[0] < 3 && sig[1] == 'A' && sig[2] == 'T'
 	&& memcmp(sig + 1, "ATARI7800", 9) == 0)
 		return "application/x-atari-7800-rom";
+
+	if (nread >= 4 && (BE_U32(sig) & 0xFFFFF00F) == 0x55AAF00F)
+		return "application/x-raspberry-eeprom";
+
+	if (nread >= 4 && BE_U16(sig) == 0x55AA && BE_U16(sig + 2) != 0xF00F)
+		return "application/x-ibm-rom";
 
 	return NULL;
 }
@@ -4517,17 +4568,18 @@ get_mimetype_from_companion_file(const char *filename)
 	return NULL;
 }
 
-/* Return 1 if there is at least one NUL byte in the first MAX bytes of the
+/* Return 1 if there is at least MIN bytes BYTE in the first MAX bytes of the
  * buffer S, or zero otherwise. */
 static int
-check_byte(const uint8_t *s, uint8_t byte, const size_t max)
+check_byte(const uint8_t *s, uint8_t byte, const size_t min, const size_t max)
 {
 	if (!s)
 		return 0;
 
+	size_t n = 0;
 	for (size_t i = 0; i < max; i++) {
-		if (s[i] == byte)
-			return 1;
+		if (s[i] == byte) n++;
+		if (n >= min) return 1;
 	}
 
 	return 0;
@@ -6815,7 +6867,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& !sig[3])
 		return "image/x-commodore-starpainter"; /* .zs */
 	if (nread >= 10 && sig[0] > 0 && sig[1] > 0
-	&& file_size == 2 + (sig[0] * (sig[1] << 3)) && check_byte(sig + 2, 0, 10))
+	&& file_size == 2 + (sig[0] * (sig[1] << 3)) && check_byte(sig + 2, 0, 1, 10))
 		return "image/x-commodore-starpainter"; /* .gr */
 
 	/* RECOIL: recoil.c (RECOIL_DecodeHim) */
@@ -7138,7 +7190,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* RECOIL: recoil.c:RECOIL_DecodeAtari8Spr */
 	if (file_size >= 3 && file_size <= 42
 	&& 2 + (size_t)sig[0] == (size_t)file_size
-	&& check_byte(sig + 1, 0, (size_t)file_size - 1))
+	&& check_byte(sig + 1, 0, 1, (size_t)file_size - 1))
 		return "image/x-atari-mad-studio-spr"; /* .spr */
 	/* RECOIL: recoil.c:RECOIL_DecodeMpl */
 	if (file_size >= 14 && file_size <= 174 && sig[0] > 0 && sig[0] <= 40
@@ -8227,8 +8279,7 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	&& strncasecmp(p, "echo off", 8) == 0)
 		return "text/x-msdos-batch";
 
-	if (is_rfc_message(s, len) == 1)
-		return "message/rfc822";
+	if (is_rfc_message(s, len) == 1) return "message/rfc822";
 
 #ifdef FMAGIC_NO_NULL
 	return "text/plain";
