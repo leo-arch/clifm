@@ -1275,6 +1275,8 @@ my_insert_text(char *text, char *s, const char _s)
 					q[l] = '\0';
 					l = 0;
 					rl_insert_text(q);
+					if (accept_first_word == 0 || redisplay == 1)
+						rl_redisplay();
 				}
 				continue;
 			}
