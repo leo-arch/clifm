@@ -1237,6 +1237,7 @@ my_insert_text(char *text, char *s, const char _s)
 					}
 				}
 				switch (t[i]) {
+				case '\\': /* fallthrough */
 				case '/': /* fallthrough */
 				case '"': /* fallthrough */
 				case '\'': /* fallthrough */
