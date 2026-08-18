@@ -4826,10 +4826,33 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[22] == 0x00 && sig[23] == 0x1A
 	&& memcmp(sig, "FOXSQZ COMPRESSED FILE", 22) == 0)
 		return "application/x-foxsqz";
+
 	/* http://fileformats.archiveteam.org/wiki/Apple_Disk_Image */
 	if (nread > 2 && sig[0] == '2' && sig[1] == 'I' && sig[2] == 'M'
 	&& sig[3] == 'G')
 		return "application/x-apple-diskimage";
+
+	/* file(1): magic/Magdir/apple */
+	if (nread > 12 && sig[0] == 0x01
+	&& ((sig[1] == 0x38 && memcmp(sig, "\x01\x38\xB0\x03\x4C", 5) == 0)
+	|| (sig[1] == 0x8A && memcmp(sig, "\x01\x8A\x48\xD8\x2C\x82\xC0\x8D\x0E\xC0\x8D\x0C", 12) == 0)
+	|| (sig[1] == 0xA8 && memcmp(sig, "\x01\xA8\x8A\x20\x7B\xF8\x29\x07\x09\xC0\x99\x30", 12) == 0)
+	|| (sig[1] == 0x4A && memcmp(sig, "\x01\x4A\xD0\x34\xE6\x3D\x8A\x20\x7B\xF8\x09\xC0", 12) == 0)
+	|| (sig[1] == 0xBD && memcmp(sig, "\x01\xBD\x88\xC0\x20\x2F\xFB\x20\x58\xFC\x20\x40", 12) == 0)
+	|| (sig[1] == 0x38 && memcmp(sig, "\x01\x38\xB0\x03\x4C\x1C\x09\x78\x86\x43\xC9\x03", 12) == 0)
+	|| (sig[1] == 0xA5 && memcmp(sig, "\x01\xA5\x27\xC9\x09\xD0", 6) == 0)
+	|| (sig[1] == 0xA6 && memcmp(sig, "\x01\xA6\x2B\xBD\x88\xC0\x8A\x4A\x4A", 9) == 0)
+	|| (sig[1] == 0xA8 && memcmp(sig, "\x01\xA8\xAD\x81\xC0\xEE\x09\x08\xAD", 9) == 0)))
+		return "application/x-apple-dsk";
+
+	if (nread > 8 && sig[0] == 'M' && sig[1] == 'O' && sig[2] == 'O'
+	&& sig[3] == 'F' && BE_U32(sig + 4) == 0xFF0A0D0A)
+		return "application/x-apple-moof";
+
+	if (nread > 8 && sig[0] == 'W' && sig[1] == 'O' && sig[2] == 'Z'
+	&& (sig[3] == 0x31 || sig[3] == 0x32) && BE_U32(sig + 4) == 0xFF0A0D0A)
+		return "application/x-apple-woz";
+
 	/* http://fileformats.archiveteam.org/wiki/ASD_Archiver */
 	if (nread > 4 && sig[0] == 'A' && sig[1] == 'S' && sig[2] == 'D'
 	&& sig[3] == '0' && (sig[4] == '1' || sig[4] == '2') && sig[5] == 0x1A)
@@ -6642,6 +6665,16 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	if (nread > 86 && sig[56] == 'U' && sig[59] == ' ' && sig[60] == 'L'
 	&& memcmp(sig + 56, "USE LYNX TO DISSOLVE THIS FILE", 30) == 0)
 		return "application/x-commodore-lnx";
+
+	/* http://unusedino.de/ec64/technical/formats/g64.html */
+	if (nread > 7 && sig[0] == 'G' && sig[1] == 'C' && sig[2] == 'R'
+	&& sig[3] == '-' && sig[4] == '1' && sig[5] == '5' && sig[6] == '4'
+	&& sig[7] == '1')
+		return "application/x-commodore-g64-disk";
+
+	/* https://ist.uwaterloo.ca/~schepers/formats/X64.TXT */
+	if (nread > 5 && BE_U32(sig) == 0x43154164 && sig[4] == 1 && sig[5] <= 2)
+		return "application/x-commodore-x64-disk";
 
 	if (nread > 6 && sig[0] == 0x01 && (sig[1] == 0x08 || sig[1] == 0x12)) {
 		if (nread >= 11 && sig[1] == 0x08 && sig[4] == 0xEF && sig[6] == 0x9E
