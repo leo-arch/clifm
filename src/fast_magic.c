@@ -2792,10 +2792,6 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 0xFB && sig[4] == 0x00) /* .qcow2 */
 		return "application/x-qemu-disk";
 
-	if (nread > 3 && sig[0] == 'E' && sig[1] == 'R' && sig[2] == 0x02
-	&& sig[3] == 0x00) /* .toast */
-		return "application/x-apple-diskimage";
-
 	if (nread > 3 && sig[0] == '7' && sig[1] == 'k' && sig[2] == 'S'
 	&& sig[3] == 't')
 		return "application/x-zpaq";
@@ -6539,6 +6535,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[7] == 0x1A)
 		return "application/x-spectrum-tzx";
 
+	if (nread > 8 && sig[0] == 'P' && sig[1] == 'Z' && sig[2] == 'X'
+	&& sig[3] == 'T' && sig[4] > 0 && BE_U16(sig + 6) == 0)
+		return "application/x-spectrum-pzx";
+
 	/* https://www.cpcwiki.eu/index.php/Format:DSK_disk_image_file_format */
 	if (nread > 34 && sig[17] == 'F' && sig[18] == 'i' && sig[19] == 'l'
 	&& sig[20] == 'e' && sig[21] == 0x0D && sig[22] == 0x0A
@@ -7179,7 +7179,8 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& (size_t)sig[0] + 2 == (size_t)file_size && is_msl_image(sig, nread) == 1)
 		return "image/x-atari-mad-studio-msl"; /* .msl */
 	/* RECOIL: recoil.c:RECOIL_DecodeAn2/4 */
-	if (nread > 1 && nread <= 967 && sig[0] < 40 && sig[1] < 24) {
+	if (nread > 1 && nread <= 967 && sig[0] && sig[1] && sig[0] < 40
+	&& sig[1] < 24) {
 		const uint8_t columns = sig[0] + 1;
 		const uint8_t rows = sig[1] + 1;
 		const size_t cr = (size_t)columns * (size_t)rows;
@@ -8346,12 +8347,20 @@ fast_magic(const char *file)
 		return mimetype;
 
 	/* CDROM images (size is divisible by 2048 - ISO-9660 sector size) */
-	if (st.st_size > 32774 && (st.st_size & 0x7FF) == 0 && sizeof(buf) > 7) {
-		const ssize_t read = read_file_at(file, 32768, buf, 7);
-		if (read >= 7 && buf[0] == 0x01 && buf[1] == 'C' && buf[2] == 'D'
-		&& buf[3] == '0' && buf[4] == '0' && buf[5] == '1' && buf[6] == 0x01)
+	if (st.st_size > 32774 && (st.st_size & 0x7FF) == 0) {
+		uint8_t tmp[7];
+		const ssize_t read = read_file_at(file, 32768, tmp, 7);
+		if (read >= 7 && tmp[0] == 0x01 && tmp[1] == 'C' && tmp[2] == 'D'
+		&& tmp[3] == '0' && tmp[4] == '0' && tmp[5] == '1' && tmp[6] == 0x01)
 			return "application/x-iso9660-image";
 	}
+
+	/* TOAST files are sometimes ISO-9660 files, in which case we want to
+	 * report them as such (this is why we place the ISO-9660 check first).
+	 * If not, we can safely check for the apple-diskimage specific format. */
+	if (nread > 3 && sig[0] == 'E' && sig[1] == 'R' && sig[2] == 0x02
+	&& sig[3] == 0x00) /* .toast */
+		return "application/x-apple-diskimage";
 
 	return text_or_binary(sig, nread);
 }
