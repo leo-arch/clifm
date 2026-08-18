@@ -3042,6 +3042,10 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 			return "application/x-lzma";
 	}
 
+	/* file(1): magic/Magdir/archive */
+	if (nread > 2 && sig[0] == 'D' && sig[1] == 'Z' && sig[2] < 4)
+		return "application/x-dzip";
+
 	/* https://tinyvg.tech/download/specification.pdf */
 	if (nread > 2 && sig[0] == 'r' && sig[1] == 'V' && sig[2] == 0x01)
 		return "image/x-tinyvg";
@@ -4826,6 +4830,32 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	&& sig[22] == 0x00 && sig[23] == 0x1A
 	&& memcmp(sig, "FOXSQZ COMPRESSED FILE", 22) == 0)
 		return "application/x-foxsqz";
+	/* file(1): magic/Magdir/archive */
+	if (nread > 3 && sig[0] == 'S' && sig[1] == 'Z' && sig[2] == 0x0A
+	&& sig[3] == 0x04)
+		return "application/x-szip";
+	if (nread > 3 && sig[0] == 'j' && sig[1] == 'm' && sig[2] == 0x02
+	&& sig[3] == 0x04)
+		return "application/x-xpack-xdi";
+	if (nread > 4 && sig[0] == 'x' && sig[1] == 'p' && sig[2] == 'a') {
+		if (sig[3] == 0x18) return "application/x-xpack-xpa";
+		if (sig[3] == 0x00 && sig[4] == 0x01) return "application/x-xpa32";
+	}
+	if (nread > 19 && sig[0] == 'C' && sig[1] == 'Q' && sig[2] == 0x14)
+		return "application/x-copyqm";
+	if (nread > 3 && sig[0] == 't' && sig[1] == 'd' && sig[2] == 0x00)
+		return "application/x-teledisk-compressed";
+	if (nread > 3 && sig[0] == 'T' && sig[1] == 'D' && sig[2] == 0x00)
+		return "application/x-teledisk";
+	if (nread > 24 && sig[0] == 'A' && sig[1] == 'C' && sig[2] == 'T'
+	&& memcmp(sig, "ACT Apricot disk image\x1a\x04", 24) == 0)
+		return "application/x-apridisk";
+
+	/* http://fileformats.archiveteam.org/wiki/Disk_Express */
+	if (nread >= 512 && sig[0] == 'A' && sig[1] == 'S'
+	&& (sig[2] == 1 || sig[2] == 2) && sig[3] <= 4 && sig[5] <= 7
+	&& sig[10] <= 2)
+		return "application/x-dxp";
 
 	/* http://fileformats.archiveteam.org/wiki/Apple_Disk_Image */
 	if (nread > 2 && sig[0] == '2' && sig[1] == 'I' && sig[2] == 'M'
@@ -6619,6 +6649,17 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		const uint16_t v = LE_U16(sig + 11);
 		if (v > 32 && v < 32769 && v + 4 < nread
 		&& (LE_U32(sig + v) & 0x00FFFFF0) == 0x00FFFFF0)
+			return "application/x-ima";
+	}
+	if (nread > 28 && (sig[19] == 0x40 || sig[19] == 0xA0 || sig[19] == 0xD0)
+	&& (sig[20] == 0x02 || sig[20] == 0x05 || sig[20] == 0x0B) && !sig[27]) {
+		if (memcmp(sig + 19, "\320\002\360\003\0\011\0\1\0", 9) == 0 /* MSDOS */
+		|| memcmp(sig + 19, "\240\005\371\003\0\011\0\2\0", 9) == 0
+		|| memcmp(sig + 19, "\100\013\360\011\0\022\0\2\0", 9) == 0
+		|| memcmp(sig + 19, "\240\005\371\005\0\011\0\2\0", 9) == 0
+		|| memcmp(sig + 19, "\100\013\371\005\0\011\0\2\0", 9) == 0
+		|| memcmp(sig + 19, "\320\002\370\005\0\011\0\1\0", 9) == 0 /* Atari */
+		|| memcmp(sig + 19, "\240\005\371\005\0\011\0\2\0", 9) == 0) /* Atari */
 			return "application/x-ima";
 	}
 
