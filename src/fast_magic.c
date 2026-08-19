@@ -4585,6 +4585,61 @@ check_byte(const uint8_t *s, uint8_t byte, const size_t min, const size_t max)
 	return 0;
 }
 
+static int
+is_floppy_image(const uint8_t *s, const size_t slen, const off_t file_size)
+{
+	if (slen < 512) return 0;
+
+	const uint16_t bytes_per_sector = LE_U16(s + 11); /* 512 */
+	const uint8_t sectors_per_cluster = s[13]; /* 1 2 4 */
+	const uint16_t reserved_sectors = LE_U16(s + 14); /* 1 */
+	const uint8_t fats_num = s[16]; /* 2 */
+	const uint16_t root_entries = LE_U16(s + 17); /* multiple of 16 */
+	const uint16_t total_sectors = LE_U16(s + 19);
+
+	/* Valid values: 0xf0, 0xf8, 0xf9, 0xfc, 0xfd, 0xfe, 0xff */
+	const uint8_t media_descriptor = s[21];
+
+	const uint16_t sectors_per_fat = LE_U16(s + 22); /* > 0 */
+	/* 8 9 10 15 18 (also 36, for 2.88 high-density disks, rare) */
+	const uint16_t sectors_per_track = LE_U16(s + 24);
+	const uint16_t heads = LE_U16(s + 26); /* 1, 2 */
+
+	/* The two FATs must fit in the actual file size */
+	const size_t fat1_start = (size_t)bytes_per_sector * reserved_sectors;
+	const size_t fats_bytes =
+		(size_t)sectors_per_fat * bytes_per_sector * fats_num;
+
+	/* Validation */
+	if ((size_t)file_size != (size_t)bytes_per_sector * total_sectors)
+		return 0;
+	if (sectors_per_cluster != 1 && sectors_per_cluster != 2
+	&& sectors_per_cluster != 4)
+		return 0;
+
+	if (reserved_sectors != 1 || fats_num != 2  || root_entries == 0
+	|| root_entries % 16 != 0 || sectors_per_fat == 0
+	|| (heads != 1 && heads != 2))
+		return 0;
+
+	if (sectors_per_track < 8 && sectors_per_track != 9
+	&& sectors_per_track != 10 && sectors_per_track != 15
+	&& sectors_per_track != 18 && sectors_per_track != 36)
+		return 0;
+
+	if (media_descriptor != 0xf0 && media_descriptor != 0xf8
+	&& media_descriptor != 0xf9 && media_descriptor != 0xfc
+	&& media_descriptor != 0xfd && media_descriptor != 0xfe
+	&& media_descriptor != 0xff)
+		return 0;
+
+	if (fat1_start > (size_t)file_size
+	|| fats_bytes > (size_t)file_size - fat1_start)
+		return 0;
+
+	return 1;
+}
+
 static const char *
 check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	const off_t file_size)
@@ -6643,25 +6698,10 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	 && sig[3] == 'M')
 		return "application/x-ms-mig";
 
-	/* file(1): magic/Magdir/filesystems */
-	if (nread > 128 && (LE_U32(sig) & 0x804000E9) == 0x000000E9
-	&& !(LE_U16(sig + 11) & 0x001F) && (sig[21] & 0xF0) == 0xF0) {
-		const uint16_t v = LE_U16(sig + 11);
-		if (v > 32 && v < 32769 && v + 4 < nread
-		&& (LE_U32(sig + v) & 0x00FFFFF0) == 0x00FFFFF0)
-			return "application/x-ima";
-	}
-	if (nread > 28 && (sig[19] == 0x40 || sig[19] == 0xA0 || sig[19] == 0xD0)
-	&& (sig[20] == 0x02 || sig[20] == 0x05 || sig[20] == 0x0B) && !sig[27]) {
-		if (memcmp(sig + 19, "\320\002\360\003\0\011\0\1\0", 9) == 0 /* MSDOS */
-		|| memcmp(sig + 19, "\240\005\371\003\0\011\0\2\0", 9) == 0
-		|| memcmp(sig + 19, "\100\013\360\011\0\022\0\2\0", 9) == 0
-		|| memcmp(sig + 19, "\240\005\371\005\0\011\0\2\0", 9) == 0
-		|| memcmp(sig + 19, "\100\013\371\005\0\011\0\2\0", 9) == 0
-		|| memcmp(sig + 19, "\320\002\370\005\0\011\0\1\0", 9) == 0 /* Atari */
-		|| memcmp(sig + 19, "\240\005\371\005\0\011\0\2\0", 9) == 0) /* Atari */
-			return "application/x-ima";
-	}
+	if (nread >= 512 && LE_U16(sig + 26) <= 2
+	&& (size_t)file_size == (size_t)LE_U16(sig + 11) * LE_U16(sig + 19)
+	&& is_floppy_image(sig, nread, file_size) == 1)
+		return "application/x-ima";
 
 	/* file(1): magic/Magdir/windows */
 	if (nread > 8 && sig[0] == 'T' && sig[1] == 'A' && sig[2] == 'P'

@@ -963,6 +963,7 @@ struct icons_t const icon_ext[] = {
 	{"aff", ICON_DISK, WHITE}, // Advanced Forensics Format disk image
 	{"dmg", ICON_DISK, WHITE}, // Apple Disk Image
 	{"image", ICON_DISK, WHITE}, // Apple Disk Image
+	{"ima", ICON_DISK, WHITE}, // Floppy Disk Image
 	{"img", ICON_DISK, WHITE}, // Disc Image Data File
 	{"qcow", ICON_DISK, WHITE}, // QEMU Copy On Write Disk Image
 	{"qcow2", ICON_DISK, WHITE}, // QEMU Copy On Write Version 2
@@ -971,7 +972,6 @@ struct icons_t const icon_ext[] = {
 	{"vhdx", ICON_DISK, WHITE}, // Windows 8 Virtual Hard Drive File
 	{"vmdk", ICON_DISK, WHITE}, // Virtual Machine Disk File
 /*	{"adf", ICON_DISK, WHITE}, // Amiga disk file (also adz, hdf, hdz)
-	{"ima", ICON_DISK, WHITE}, // Disk Image
 	{"wim", ICON_DISK, WHITE}, // Windows Imaging Format File */
 
 	/* Optical disk images */
