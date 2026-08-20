@@ -48,7 +48,7 @@ char *xstrcasechr(const char *s, const char c);
 size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);
 char * xstrncat(char *restrict dst, const size_t dst_len,
 	const char *restrict src, const size_t dst_size);
-int  xstrverscmp(const char *s1, const char *s2);
+int  xstrverscmp(const char *s1, const char *s2, const int ignore_case);
 
 __END_DECLS
 

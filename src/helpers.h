@@ -722,20 +722,23 @@ extern time_t curdir_mtime;
 /* Sort macros */
 #define SNONE      0
 #define SNAME      1
-#define STSIZE     2
-#define SATIME     3
-#define SBTIME     4
-#define SCTIME     5
-#define SMTIME     6
-#define SVER       7
-#define SEXT       8
-#define SINO       9
-#define SOWN       10
-#define SGRP       11
-#define SBLK       12
-#define SLNK       13
-#define STYPE      14
-#define SORT_TYPES 14
+#define SINAME     2
+#define STSIZE     3
+#define SATIME     4
+#define SBTIME     5
+#define SCTIME     6
+#define SMTIME     7
+#define SVER       8
+#define SIVER      9
+#define SEXT       10
+#define SIEXT      11
+#define SINO       12
+#define SOWN       13
+#define SGRP       14
+#define SBLK       15
+#define SLNK       16
+#define STYPE      17
+#define SORT_TYPES 17
 
 /* Macros for the colors_list function */
 #define NO_ELN        0

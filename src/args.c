@@ -793,9 +793,11 @@ set_sort_by_name(const char *name, const char *opt_str)
 	}
 
 	fprintf(stderr, _("%s: Invalid value '%s' for '%s'\n"
-		"Valid values: atime, btime, ctime, mtime, extension, group, "
-		"inode, name,\n              none, owner, size, version, "
-		"blocks, links, type\n"), PROGRAM_NAME, name, opt_str);
+		"Valid values: atime, btime, ctime, mtime, extension, iextension, "
+		"group, inode,\n              "
+		"name, iname, none, owner, size, version, iversion, blocks, type,\n"
+		"              links\n"),
+		PROGRAM_NAME, name, opt_str);
 	exit(EXIT_FAILURE);
 }
 

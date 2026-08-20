@@ -23,6 +23,11 @@
 #define F_GROUP_DIRS_FIRST(a, b) ((a) == (b) ? 0 : ((a) < (b) ? 1 : -1))
 #define F_GROUP_DIRS_LAST(a, b)  ((a) == (b) ? 0 : ((a) > (b) ? 1 : -1))
 
+#define ST_IGNORE_CASE() ((conf.sort == SINAME || conf.sort == SIEXT \
+	|| conf.sort == SIVER                                            \
+	|| (conf.sort != SNAME && conf.sort != SEXT && conf.sort != SVER \
+	&& conf.ignore_case == 1)))
+
 int
 skip_files(const struct dirent *ent)
 {
@@ -126,12 +131,14 @@ namecmp(const char *s1, const char *s2)
 		skip_name_prefixes(&s2);
 	}
 
+	const int ignore_case = ST_IGNORE_CASE();
+
 	if (!IS_UTF8_LEAD_BYTE(*s1) && !IS_UTF8_LEAD_BYTE(*s2)) {
 	/* None of the strings begins with a unicode char: compare the first
 	 * byte of both strings. */
 		char ac = *s1, bc = *s2;
 
-		if (conf.ignore_case == 1) {
+		if (ignore_case == 1) {
 			ac = (char)TOLOWER(*s1);
 			bc = (char)TOLOWER(*s2);
 		}
@@ -143,7 +150,7 @@ namecmp(const char *s1, const char *s2)
 			return 1;
 	}
 
-	if (conf.ignore_case == 1)
+	if (ignore_case == 1)
 		return strcoll(s1, s2);
 
 	return strcmp(s1, s2);
@@ -164,8 +171,8 @@ sort_by_extension(const struct fileinfo *pa, const struct fileinfo *pb)
 		if (!e2)
 			return 1;
 
-		return conf.ignore_case == 0
-			? strcmp(e1, e2) : strcasecmp(e1, e2);
+		return ST_IGNORE_CASE() == 1
+			? strcasecmp(e1, e2) : strcmp(e1, e2);
 	}
 
 	return 0;
@@ -223,7 +230,7 @@ sort_by_version(const char *s1, const char *s2, const int have_utf8)
 		skip_name_prefixes(&s2);
 	}
 
-	return xstrverscmp(s1, s2);
+	return xstrverscmp(s1, s2, ST_IGNORE_CASE());
 }
 
 int
@@ -251,11 +258,13 @@ entrycmp(const void *a, const void *b)
 		return ret;
 
 	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(st))
-		st = SNAME;
+		st = SINAME;
 
 	const int have_utf8 = (pa->utf8 == 1 || pb->utf8 == 1);
 
 	switch (st) {
+	case SNAME: /* fallthrough */
+	case SINAME: break;
 	case STSIZE:
 		/* Let's have the logic of sorting dirs without access (unknown
 		 * recursive size) before everything else. */
@@ -273,8 +282,12 @@ entrycmp(const void *a, const void *b)
 	case SBTIME: /* fallthrough */
 	case SCTIME: /* fallthrough */
 	case SMTIME: ret = F_SORT(pa->time, pb->time); break;
-	case SVER: ret = sort_by_version(pa->name, pb->name, have_utf8); break;
-	case SEXT: ret = sort_by_extension(pa, pb); break;
+	case SVER: /* fallthrough */
+	case SIVER:
+		ret = sort_by_version(pa->name, pb->name, have_utf8); break;
+	case SEXT: /* fallthrough */
+	case SIEXT:
+		ret = sort_by_extension(pa, pb); break;
 	case SINO: ret = F_SORT(pa->inode, pb->inode); break;
 	case SOWN: ret = sort_by_owner(pa, pb); break;
 	case SGRP: ret = sort_by_group(pa, pb); break;
@@ -331,13 +344,16 @@ num_to_sort_name(const int n, const int abbrev)
 	switch (n) {
 	case SNONE:	 return "none";
 	case SNAME:  return "name";
+	case SINAME: return "iname";
 	case STSIZE: return "size";
 	case SATIME: return "atime";
 	case SBTIME: return "btime";
 	case SCTIME: return "ctime";
 	case SMTIME: return "mtime";
 	case SVER:   return abbrev ? "ver" : "version";
+	case SIVER:  return abbrev ? "iver" : "iversion";
 	case SEXT:   return abbrev ? "ext" : "extension";
+	case SIEXT:  return abbrev ? "iext" : "iextension";
 	case SINO:   return abbrev ? "ino" : "inode";
 	case SOWN:   return abbrev ? "own" : "owner";
 	case SGRP:   return abbrev ? "grp" : "group";

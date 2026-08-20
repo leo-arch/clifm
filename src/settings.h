@@ -606,9 +606,9 @@ ws2=31:ws3=38;5;228:ws4=32:ws5=36:ws6=38;5;214:ws7=35:ws8=2;37:xf=1;31:xs=32:"
 #define DEF_SKIP_NON_ALNUM_PREFIX 1
 #define DEF_SI 0 /* If 1, compute sizes in powers of 1000 instead of 1024 */
 /* Supported sort options:
- * SNONE, SNAME, STSIZE, SATIME, SBTIME, SCTIME, SMTIME
- * SVER, SEXT, SINO, SOWN, and SGRP */
-#define DEF_SORT SVER
+ * SNONE, SNAME, SINAME, STSIZE, SATIME, SBTIME, SCTIME, SMTIME
+ * SVER, SIVER, SEXT, SIEXT, SINO, SOWN, and SGRP */
+#define DEF_SORT SIVER
 #define DEF_SORT_REVERSE 0
 #define DEF_SPLASH_SCREEN 0
 #ifdef __OpenBSD__

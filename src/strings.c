@@ -316,7 +316,7 @@ xstrncat(char *restrict dst, const size_t dst_len, const char *restrict src,
  * equal to or greater than S2 (for more info, see the texinfo doc).
  * This function is not UTF8 aware. */
 int
-xstrverscmp(const char *s1, const char *s2)
+xstrverscmp(const char *s1, const char *s2, const int ignore_case)
 {
 	const unsigned char *p1 = (const unsigned char *)s1;
 	const unsigned char *p2 = (const unsigned char *)s2;
@@ -345,7 +345,7 @@ xstrverscmp(const char *s1, const char *s2)
 	if (p1 == p2)
 		return 0;
 
-	if (conf.ignore_case == 1) {
+	if (ignore_case == 1) {
 		c1 = (unsigned char)TOLOWER(*p1);
 		p1++;
 		c2 = (unsigned char)TOLOWER(*p2);
@@ -363,7 +363,7 @@ xstrverscmp(const char *s1, const char *s2)
 			return diff;
 
 		state = next_state[state];
-		if (conf.ignore_case == 1) {
+		if (ignore_case == 1) {
 			c1 = (unsigned char)TOLOWER(*p1);
 			p1++;
 			c2 = (unsigned char)TOLOWER(*p2);

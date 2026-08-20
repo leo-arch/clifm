@@ -2024,9 +2024,10 @@ create_main_config_file(char *file)
 # run Clifm on it (via the 'x' or 'X' commands).\n\
 ;TerminalCmd='%s'\n\n"
 
-	    "# File sort mode: none, name, size, atime, btime, ctime, mtime,\n\
-# version, extension, inode, owner, group, blocks, links, type.\n\
-;Sort=version\n\
+	    "# File sort mode: none, name, iname, size, atime, btime, ctime,\n\
+# mtime, version, iversion, extension, iextension, inode, owner, group,\n\
+# blocks, links, type.\n\
+;Sort=iversion\n\
 # Sort in reverse order\n\
 ;SortReverse=%s\n\
 # Files starting with PrioritySortChar are listed at top of the file list.\n\
@@ -3578,6 +3579,14 @@ print_case_sens_deprecation_warning(const char *op)
 		"Use 'IgnoreCase=[true|false]' instead.\n"), PROGRAM_NAME, op);
 }
 
+static void
+print_case_sens_list_deprecation_warning(const char *op)
+{
+	err('n', PRINT_PROMPT, _("%s: '%s' is deprecated. "
+		"Use 'Sort=[name|iname|version|iversion|extension|iextension]' "
+		"instead.\n"), PROGRAM_NAME, op);
+}
+
 /* The buffer to store read lines is PATH_MAX + 16. But for some reason
  * cppcheck does not expand PATH_MAX, so that it only sees 16 bytes, and
  * thereby a lot of out-of-bounds read. */
@@ -3655,17 +3664,14 @@ read_config(void)
 		&& strncmp(line, "CaseSensitiveDirJump=", 21) == 0) {
 			print_case_sens_deprecation_warning("CaseSensitiveDirJump");
 		}
-
 		else if (*line == 'C'
 		&& strncmp(line, "CaseSensitiveSearch=", 20) == 0) {
 			print_case_sens_deprecation_warning("CaseSensitiveSearch");
 		}
-
 		else if (*line == 'C'
 		&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
-			print_case_sens_deprecation_warning("CaseSensitiveList");
+			print_case_sens_list_deprecation_warning("CaseSensitiveList");
 		}
-
 		else if (*line == 'C'
 		&& strncmp(line, "CaseSensitivePathComp=", 22) == 0) {
 			print_case_sens_deprecation_warning("CaseSensitivePathComp");
