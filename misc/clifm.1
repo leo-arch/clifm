@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Aug 15, 2026" "clifm 1.28.15" "Clifm Manual"
+.TH "CLIFM" "1" "Aug 21, 2026" "clifm 1.28.16" "Clifm Manual"
 .SH NAME
 clifm - The Command-Line File Manager
 .SH SYNOPSIS
@@ -70,7 +70,7 @@ A convenient way to obtain comprehensive information about \fBclifm\fR commands 
 For a quick introduction, please refer to the \fBEXAMPLES\fR section at the end of this document.
 
 .SH 2. DESCRIPTION
-\fBClifm\fR is a Command-Line-Interface File Manager.  Its main feature and strength lie in the fact that all input and interacion are conducted through commands typed directly into a prompt.  In other words, \fBclifm\fR operates as a Read-Eval-Print Loop (REPL), following this basic structure: \fBR\fRead (user input via the command line), \fBE\fRvaluate/\fBE\fRxecute the command, \fBP\fRrint the results, \fBL\fRoop (repeat the process).
+\fBClifm\fR is a Command-Line-Interface File Manager.  Its main feature and strength lies in the fact that all input and interacion are conducted through commands typed directly into a prompt.  In other words, \fBclifm\fR operates as a Read-Eval-Print Loop (REPL), following this basic structure: \fBR\fRead (user input via the command line), \fBE\fRvaluate/\fBE\fRxecute the command, \fBP\fRrint the results, \fBL\fRoop (repeat the process).
 .sp
 Unlike most terminal file managers out there, indeed, \fBclifm\fR replaces the traditional Text User Interface (TUI), often referred to as curses or text-menu based interface, with a straightforward command-line interface (REPL).  This design allows it to function not only as a file manager, but also as a \fBshell extension\fR.  You can search for files, copy, rename, remove them, while also performing system tasks such as updating or upgrading your system, adding cron jobs, stopping services, and launching text editors like nano, vi, or emacs.
 .sp
@@ -131,7 +131,7 @@ Print this help and exit.
 List files horizontally (instead of vertically).
 .TP
 \fB-i\fR, \fB--ignore-case\fR
-Ignore case distinctions in filenames and paths (default).
+Ignore case distinctions in filenames and paths (default).  In the case of the file list specifically, you can override this directive using \fB--sort\fR (or \fBSort\fR in the config file).  See below.
 .TP
 \fB-I\fR, \fB--no-ignore-case\fR
 Do not ignore case distinctions.
@@ -185,7 +185,7 @@ Disallow the use of external (shell) commands.
 Enable the light mode to speed up \fBclifm\fR (see the \fBNOTE ON SPEED\fR section below).
 .TP
 \fB-z\fR, \fB--sort\fR=\fI\,METHOD\/\fR
-Sort files by \fIMETHOD\fR, where \fIMETHOD\fR is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 =  extension, 9 = inode, 10 = owner, 11 = group, 12 = blocks, 13 = links, or 14 = type.  Both numbers and names are supported.  For example, you can use \fB--sort=9\fR or \fB--sort=inode\fR.
+Sort files by \fIMETHOD\fR, where \fIMETHOD\fR is one of: \fBnone\fR, \fBname\fR, \fBiname\fR, \fBatime\fR, \fBbtime\fR, \fBctime\fR, \fBmtime\fR, \fBversion\fR, \fBiversion\fR, \fBextension\fR, \fBiextension\fR, \fBinode\fR, \fBowner\fR, \fBgroup\fR, \fBblocks\fR, \fBlinks\fR, or \fBtype\fR.  The 'i' prefix stands for case-insensitive.  E.g., \fBiname\fR is the case-insensitive version of \fBname\fR. If either \fBname\fR, \fBiname\fR, \fBversion\fR, \fBiversion\fR, \fBextension\fR, or \fBiextension\fR is used, names in the file list are sorted in this specific mode, overriding the program-wide option \fB--[no-]ignore-case\fR.  The default value is \fBiversion\fR.
 .TP
 \fB--bell\fR=\fI\,TYPE\/\fR
 Set the terminal bell type, where \fITYPE\fR is one of: 0 = none, 1 = audible, 2 = visible (requires readline >= 8.1), and 3 = flash. Defaults to \fB2\fR (\fBvisible\fR), and, if not available, \fB0\fR (\fBnone\fR).  Only numbers are allowed.
@@ -438,39 +438,39 @@ Help for all commands listed here can be accessed via the \fB-h,--help\fR option
 If the \fBautocd\fR and/or \fBauto-open\fR functions are enabled (default), open \fIFILE\fR or change directory to \fIDIR\fR.  In other words, `\fBFILE\fR` amounts to `\fBopen FILE\fR` (or `\fBo FILE\fR`), and `\fBDIR\fR` to `\fBcd DIR\fR`. ELNs, of course, are allowed.  For example: `\fB12\fR`.
 .TP
 .B /\fIPATTERN\fR [\fI-FILETYPE\fR] [-r] [\fIDIR\fR]
-This is the \fBquick search\fR function.  Type `\fB/\fR` followed by a glob or (extended) regular expression, and \fBclifm\fR will list all matches in the current directory.  For example, both `\fB/*.pdf\fR` and `\fB/.pdf$\fR` expressions will list all PDF files in the current directory, the former using wildcards, and the second a regular expression.
+This is the \fBquick search\fR function.  Type `\fB/\fR` followed by a pattern string, to list all filenames matching PATTERN in the current directory.  For example, `\fB/*.pdf\fR` lists all PDF files in the current directory.
 .sp
 You can list previously used search patterns using the TAB key: `\fB/*<TAB>\fR`.
 .sp
-\fBNote 1\fR: By default, the search function attempts to resolve a pattern first as glob, and then, if no matches are found, as a regular expression.  This behavior can be customizad in the configuration file, using the \fBSearchStrategy\fR option.
+\fBNote 1\fR: To force the use of a specific pattern matching method for the current search, use the 'gl:' (for glob) or 're:' (for regex) prefixes.  For example, `\fB/re:.*\.pdf$\fR` forces the use of regex for the current search.  If no method is specified (for example, `\fB/*.pdf\fR`), the pattern is resolved using the value of the \fBSearchStrategy\fR option in the configuration file (by default, glob).
 .sp
 \fBNote 2\fR: If no further parameter is provided, but only a glob pattern (wildcards), you can expand the pattern into the corresponding matches by hitting the TAB key.  For example, to list all C files in the current directory: `\fB/*.c<TAB>\fR`.
 .sp
-\fBNote 3\fR: Expressions containing no pattern metacharacter are automatically transformed into a glob/regular expression (depending on the value of the \fBSearchStrategy\fR option).  For example, `\fB/test\fR` becomes `\fB*test*\fR` or `\fB/.*test.*\fR`.
+\fBNote 3\fR: Expressions containing no pattern metacharacter are automatically transformed into a glob/regular expression (depending on the pattern matching method currently used).  For example, `\fB/test\fR` becomes `\fB*test*\fR` (if using glob), or `\fB/.*test.*\fR` (if using regex).
 .sp
-\fB1. Destination directory\fR
+\fB1. Starting directory\fR
 .sp
-To search for files in any directory other than the current directory, specify the directory name as a further parameter (\fIDIR\fR).  For example, enter `\fB/^A 7\fR` to search for all files starting with \'A\' in the directory corresponding to the ELN 7.
+To search for files in any directory other than the current directory, specify the directory name as a further parameter (\fIDIR\fR).  For example, enter `\fB/A* /media\fR` to search for all files starting with \'A\' in the directory \fI/media\fR.
 .sp
 \fB2. File type filter\fR
 .sp
-The result of the search can be further filtered by specifying a filter type: \fB-b\fR, \fB-c\fR, \fB-d\fR, \fB-f\fR, \fB-l\fR, \fB-p\fR, \fB-s\fR, \fB-O\fR, and \fB-P\fR (block device, character device, directory, regular file, symbolic link, FIFO/pipe, socket, door (Solaris), and port (Solaris) respectively.  For example, `\fB/[.-].*d$ -d Documents/\fR` will list all directories containing a dot or a dash and ending with \'d\' in the directory named \fIDocuments\fR.
+The result of the search can be further filtered by specifying a filter type: \fB-b\fR, \fB-c\fR, \fB-d\fR, \fB-f\fR, \fB-l\fR, \fB-p\fR, \fB-s\fR, \fB-O\fR, and \fB-P\fR (block device, character device, directory, regular file, symbolic link, FIFO/pipe, socket, door (Solaris), and port (Solaris) respectively.  For example, `\fB/re:[.-].*d$ -d Documents/\fR` will list all directories containing a dot or a dash and ending with \'d\' in the directory named \fIDocuments\fR.
 .sp
 \fB3. Invert matching\fR
 .sp
-Prepend the exclamation mark (!) to invert the meaning of a given search pattern.  For example: `\fB!.*s$ -d /etc\fR` will match all directories in \fI/etc\fR \fBnot\fR ending with \'s\', just as `\fB!D*\fR` will match all files in the current directory \fBnot\fR starting with \'D\'.
+Prepend the pattern with an exclamation mark (!) to invert its meaning.  For example, `\fB/!*s -d /etc\fR` will match all directories in \fI/etc\fR \fBnot\fR ending with \'s\', just as `\fB/!D*\fR` will match all files in the current directory \fBnot\fR starting with \'D\'.
 .sp
 \fB4. Recursive search\fR
 .sp
-To perform a recursive search use the \fB-r\fR parameter, and, optionally, a search path (\fIDIR\fR) (file type filter is not allowed).  The search will be performed using \fBfind\fR(1) as follows: \fBfind \fIDIR MODE PATTERN\fR.  If no search path is provided, the search is executed starting in the current directory.  Otherwise, the search starts in \fIDIR\fR.  \fIMODE\fR is one of:
+To perform a recursive search use the \fB-r\fR parameter, and, optionally, a starting path (\fIDIR\fR) (file type filters are not allowed).  The search will be performed using \fBfind\fR(1) as follows: \fBfind \fIDIR MODE PATTERN\fR.  If no starting path is provided, the search is executed starting in the current directory.  Otherwise, it starts in \fIDIR\fR.  \fIMODE\fR is one of:
 .sp
- -name: if \fBSearchStrategy\fR is not \fBregex-only\fR and \fBIgnoreCase\fR is set to \fBfalse\fR
-.sp
- -iname: if \fBSearchStrategy\fR is not \fBregex-only\fR and \fBIgnoreCase\fR is set to \fBtrue\fR
-.sp
- -regex: if \fBSearchStrategy\fR is \fBregex-only\fR and \fBIgnoreCase\fR is set to \fBfalse\fR
-.sp
- -iregex: if \fBSearchStrategy\fR is \fBregex-only\fR and \fBIgnoreCase\fR is set to \fBtrue\fR
+ -name: if using glob and \fBIgnoreCase\fR is set to \fBfalse\fR
+.sp 0
+ -iname: if using glob and \fBIgnoreCase\fR is set to \fBtrue\fR
+.sp 0
+ -regex: if using regex and \fBIgnoreCase\fR is set to \fBfalse\fR
+.sp 0
+ -iregex: if using regex and \fBIgnoreCase\fR is set to \fBtrue\fR
 .TP
 .B ;\fR[\fICMD\fR], \fB:\fR[\fICMD\fR]
 If \fICMD\fR is not specified, run the system shell in the current directory.  If \fICMD\fR is specified, skip all \fBclifm\fR expansions (see the \fBBUILT-IN EXPANSIONS\fR section below) and run the input string (\fICMD\fR) as is via the default system shell (consult the \fBMISCELLANEOUS NOTES\fR section for information on how shell commands are executed).
