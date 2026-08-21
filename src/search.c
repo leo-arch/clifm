@@ -1080,10 +1080,10 @@ set_search_params(const char *query, char **pattern, int *invert, int *strat)
 	}
 
 	const char *pat = query + 1; /* Skip leading slash */
-	if (query[1] == 'g' && query[2] == 'l' && query[3] == ':' && query[4]) {
+	if (pat[0] == 'g' && pat[1] == 'l' && pat[2] == ':' && pat[3]) {
 		pat += 3;
 		*strat = GLOB_MATCH;
-	} else if (query[1] == 'r' && query[2] == 'e' && query[3] == ':' && query[4]) {
+	} else if (pat[0] == 'r' && pat[1] == 'e' && pat[2] == ':' && pat[3]) {
 		pat += 3;
 		*strat = REGEX_MATCH;
 	}

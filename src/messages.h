@@ -1045,14 +1045,21 @@ the editor (quit without saving to cancel the operation).\n\n\
 
 #define SEARCH_USAGE "Search for files using either glob or regular expressions\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  /PATTERN [-filetype] [-r] [DIR]\n\n\
+  /[gl:|re:]PATTERN [-filetype] [-r] [DIR]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - List all PDF files in the current directory\n\
-    /*.pdf (or, as a regular expression, '/.*\\.pdf$')\n\
-- List all files starting with 'A' in the directory whose ELN is 7\n\
-    /A* 7\n\
+    /*.pdf\n\
+- List all files starting with 'A' in the directory 'dir'\n\
+    /A* dir/\n\
 - List all .conf files in the directory '/etc'\n\
     /*.conf /etc\n\n\
+By default, the pattern matching method used is the one specified by the\n\
+SearchStrategy option in the configuration file (defaults to 'glob'). Use\n\
+the 'gl:' or 're:' prefixes to force the use a specific method. For\n\
+example, to list files starting with 'd' using regex:\n\
+    /re:^d.*\n\
+or using glob:\n\
+    /gl:d*\n\n\
 You can further filter the search using a file type filter:\n\
   -b	block device\n\
   -c	character device\n\
@@ -1063,9 +1070,9 @@ You can further filter the search using a file type filter:\n\
   -s	socket\n\
 - For example, to list all directories containing a dot or a dash and ending\n\
 with 'd' in the directory named 'Documents':\n\
-    /[.-].*d$ -d Documents/\n\n\
-To perform a recursive search, use the -r modifier (file types not allowed)\n\
-    /str -r /boot\n\n\
+    /re:[.-].*d$ -d Documents/\n\n\
+To perform a recursive search, use the -r modifier (file types are not allowed)\n\
+    /PATTERN -r /boot\n\n\
 To search for files by content instead of names, use the rgfind plugin, bound\n\
 by default to the \"//\" action name. For example:\n\
     // content I\\'m looking for\n\n\
