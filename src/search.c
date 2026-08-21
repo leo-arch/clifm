@@ -1074,7 +1074,7 @@ set_search_params(const char *query, char **pattern, int *invert, int *strat)
 		return;
 
 	if (query[1] == '!') {
-		*pattern = query[2] ? strdup(query + 2) : NULL;
+		*pattern = strdup(query[2] ? query + 2 : query + 1);
 		if (invert) *invert = 1;
 		return;
 	}
@@ -1088,12 +1088,12 @@ set_search_params(const char *query, char **pattern, int *invert, int *strat)
 		*strat = REGEX_MATCH;
 	}
 
-	if (*pat == '!') {
+	if (*pat == '!' && pat[1]) {
 		if (invert) *invert = 1;
 		pat++;
 	}
 
-	*pattern = strdup(pat ? pat : query);
+	*pattern = strdup(pat);
 }
 
 /* Search for files in ARGS[1] (current directory if NULL) using ARGS[0]
