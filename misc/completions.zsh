@@ -156,7 +156,7 @@ case "$state" in
 	;;
 
 	methods)
-		_values -s , 'methods' none name size atime btime mtime version extension inode owner group blocks links type
+		_values -s , 'methods' none name iname size atime btime mtime version iversion extension iextension inode owner group blocks links type
 	;;
 
 	styles)

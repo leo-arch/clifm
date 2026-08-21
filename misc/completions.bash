@@ -188,7 +188,7 @@ _clifm ()
 		COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "-z" || $prev == "--sort" ]]; then
-		local args=$(echo -e "none\nname\nsize\natime\nbtime\nctime\nmtime\nversion\nextension\ninode\nowner\ngroup\nblocks\nlinks\ntype")
+		local args=$(echo -e "none\nname\niname\nsize\natime\nbtime\nctime\nmtime\nversion\niversion\nextension\niextension\ninode\nowner\ngroup\nblocks\nlinks\ntype")
         COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "-f" || $prev == "--group-dirs" ]]; then
