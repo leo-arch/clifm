@@ -63,7 +63,7 @@ load_dothidden(void)
 			len--;
 		}
 
-		if (check_glob_char(line, GLOB_ONLY) == 0) {
+		if (check_glob_char(line, GLOB_MATCH) == 0) {
 			h[counter].name = savestring(line, len);
 			h[counter++].len = len;
 			continue;

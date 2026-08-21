@@ -2491,7 +2491,7 @@ glob_expand(char **cmd)
 	&& (strcmp(cmd[0], "ds") == 0 || strcmp(cmd[0], "desel") == 0)) {
 		if (*cmd[1] == '*' && !cmd[1][1])
 			return 0;
-		return (check_glob_char(cmd[1], GLOB_REGEX));
+		return (check_glob_char(cmd[1], REGEX_MATCH));
 	}
 
 	/* Do not expand if command is sel or untrash, just to allow the use

@@ -1982,8 +1982,7 @@ create_main_config_file(char *file)
 	"# How to quote expanded ELN's (regular files only): backslash, single, double.\n\
 ;QuotingStyle=%s\n\n"
 
-	"# We have three search strategies: 0 = glob-only, 1 = regex-only,\n\
-# and 2 = glob-regex.\n\
+"# Specify how to perform searches: 0 = glob, and 1 = regex.\n\
 ;SearchStrategy=%d\n\n",
 
 		DEF_AUTOCD == 1 ? "true" : "false",
@@ -2923,13 +2922,12 @@ END:
 static void
 set_search_strategy(const char *line)
 {
-	if (!line || *line < '0' || *line > '2')
+	if (!line || *line < '0' || *line > '1')
 		return;
 
 	switch (*line) {
-	case '0': conf.search_strategy = GLOB_ONLY; break;
-	case '1': conf.search_strategy = REGEX_ONLY; break;
-	case '2': conf.search_strategy = GLOB_REGEX; break;
+	case '0': conf.search_strategy = GLOB_MATCH; break;
+	case '1': conf.search_strategy = REGEX_MATCH; break;
 	default: break;
 	}
 }

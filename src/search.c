@@ -30,7 +30,7 @@
 #include "sort.h"
 #include "spawn.h"
 
-#define ERR_SKIP_REGEX 2
+#define SEARCH_ERROR 2
 
 #if (defined(__OpenBSD__) || defined(__sun)) && !defined(_BE_POSIX)
 /* OpenBSD/Solaris find(1) has neither -regex nor -iregex. We'll try to use
@@ -76,7 +76,7 @@ define_find_name(void)
 #endif /* FIND_HAS_NO_REGEX */
 
 static int
-run_find(char *search_path, char *arg)
+run_find(char *search_path, const char *arg, const int regex)
 {
 	char *_path = (search_path && *search_path) ? search_path : ".";
 	char *name = "find";
@@ -85,7 +85,7 @@ run_find(char *search_path, char *arg)
 	/* POSIX find(1) only supports -name */
 	char *method = "-name";
 #else
-	char *method = conf.search_strategy == REGEX_ONLY
+	char *method = regex == 1
 		? (conf.ignore_case == 0 ? "-regex" : "-iregex")
 		: (conf.ignore_case == 0 ? "-name" : "-iname");
 # if defined(FIND_HAS_NO_REGEX)
@@ -95,28 +95,28 @@ run_find(char *search_path, char *arg)
 # endif /* FIND_HAS_NO_REGEX */
 #endif /* _BE_POSIX */
 
-	const int glob_char = check_glob_char(arg + 1, GLOB_REGEX);
-	if (glob_char == 1)
-		return exec_find(name, _path, method, arg + 1);
+	const int glob_char = check_glob_char(arg, REGEX_MATCH);
+	if (glob_char == 1) /* Matches both glob and regex metacharacters */
+		return exec_find(name, _path, method, arg);
 
-	const size_t pattern_len = strlen(arg + 1) + 5;
+	const size_t pattern_len = strlen(arg) + 5;
 	char *pattern = xnmalloc(pattern_len, sizeof(char));
 
 #if !defined(_BE_POSIX)
-	if (conf.search_strategy == REGEX_ONLY) {
+	if (conf.search_strategy == REGEX_MATCH) {
 # if !defined(FIND_HAS_NO_REGEX)
-		snprintf(pattern, pattern_len, ".*%s.*", arg + 1);
+		snprintf(pattern, pattern_len, ".*%s.*", arg);
 # else
 		if (*name == 'g') /* We have GNU find (gfind) */
-			snprintf(pattern, pattern_len, ".*%s.*", arg + 1);
+			snprintf(pattern, pattern_len, ".*%s.*", arg);
 		else
-			snprintf(pattern, pattern_len, "*%s*", arg + 1);
+			snprintf(pattern, pattern_len, "*%s*", arg);
 # endif /* FIND_HAS_NO_REGEX */
 	} else {
-		snprintf(pattern, pattern_len, "*%s*", arg + 1);
+		snprintf(pattern, pattern_len, "*%s*", arg);
 	}
 #else
-	snprintf(pattern, pattern_len, "*%s*", arg + 1);
+	snprintf(pattern, pattern_len, "*%s*", arg);
 #endif /* !_BE_POSIX */
 
 	const int ret = exec_find(name, _path, method, pattern);
@@ -127,7 +127,7 @@ run_find(char *search_path, char *arg)
 
 static int
 set_file_type_and_search_path(char **args, mode_t *file_type,
-	char **search_path, const int invert)
+	char **search_path, const char *query, const int invert, const int regex)
 {
 	/* If there are two arguments, the one starting with '-' is the
 	 * file type and the other is the path. */
@@ -169,7 +169,7 @@ set_file_type_and_search_path(char **args, mode_t *file_type,
 	case 'p': *file_type = invert == 1 ? DT_FIFO : S_IFIFO; break;
 	case 's': *file_type = invert == 1 ? DT_SOCK : S_IFSOCK; break;
 	case 'r': /* Fallthrough */
-	case 'x': run_find(*search_path, args[0]); return FUNC_SUCCESS;
+	case 'x': run_find(*search_path, query, regex); return FUNC_SUCCESS;
 	default:
 		fprintf(stderr, _("search: '%c': Unrecognized file "
 			"type\n"), (char)*file_type);
@@ -197,7 +197,7 @@ chdir_search_path(char **search_path, const char *arg)
 	if (path_len > 1 && (*search_path)[path_len - 1] == '/')
 		(*search_path)[path_len - 1] = '\0';
 
-	/* If search path is the current directory. */
+	// If search path is the current directory.
 	if ((*(*search_path) == '.' && !(*search_path)[1]) ||
 	    ((*search_path)[1] == workspaces[cur_ws].path[1]
 	    && strcmp(*search_path, workspaces[cur_ws].path) == 0)) {
@@ -212,8 +212,112 @@ chdir_search_path(char **search_path, const char *arg)
 	return FUNC_SUCCESS;
 }
 
+#include <fnmatch.h>
+
+typedef struct {
+	char **gl_pathv;     // or full paths
+	size_t gl_pathc;
+	size_t cap;
+} xglob_t;
+
+static void
+gl_skip_name_prefixes(const char **name)
+{
+	const char *s = *name;
+
+	while (*s) {
+		if (IS_ALNUM(*s) || IS_UTF8_LEAD_BYTE(*s))
+			break;
+		s++;
+	}
+
+	if (!*s) s = *name;
+	*name = s;
+}
+
+static int
+gl_namecmp(const void *a, const void *b)
+{
+	const char *s1 = *(const char * const *)a;
+	const char *s2 = *(const char * const *)b;
+
+	if (conf.skip_non_alnum_prefix == 1) {
+		gl_skip_name_prefixes(&s1);
+		gl_skip_name_prefixes(&s2);
+	}
+
+	if (!IS_UTF8_LEAD_BYTE(*s1) && !IS_UTF8_LEAD_BYTE(*s2)) {
+	/* None of the strings begins with a unicode char: compare the first
+	 * byte of both strings. */
+		char ac = *s1;
+		char bc = *s2;
+
+		if (conf.ignore_case == 1) {
+			ac = (char)TOLOWER(*s1);
+			bc = (char)TOLOWER(*s2);
+		}
+
+		if (bc > ac) return -1;
+		if (bc < ac) return 1;
+	}
+
+	if (conf.ignore_case == 1)
+		return strcoll(s1, s2);
+
+	return strcmp(s1, s2);
+}
+
+static int
+xglob(const char *dirpath, const char *pattern, xglob_t *out, const int gl_flags)
+{
+	DIR *dp = dirpath ? opendir(dirpath) : NULL;
+	if (!dp)
+		return (-1);
+
+	struct dirent *ent;
+	errno = 0;
+
+	while ((ent = readdir(dp)) != NULL) {
+		const char *name = ent->d_name;
+		if (SELFORPARENT(name))
+			continue;
+
+		if (fnmatch(pattern, name, gl_flags) != 0)
+			continue;
+
+		if (out->gl_pathc == out->cap) {
+			const size_t newcap = out->cap ? out->cap * 2 : 32;
+			out->gl_pathv = xnrealloc(out->gl_pathv, newcap + 1, sizeof(char *));
+			out->cap = newcap;
+		}
+
+		out->gl_pathv[out->gl_pathc++] = strdup(name);
+		out->gl_pathv[out->gl_pathc] = NULL;
+	}
+
+	closedir(dp);
+	if (out->gl_pathc == 0)
+		return (-1);
+
+	qsort(out->gl_pathv, out->gl_pathc, sizeof(out->gl_pathv[0]), gl_namecmp);
+
+	return errno != 0 ? (-1) : 0;
+}
+
+static void
+xglobfree(xglob_t *gl)
+{
+	if (!gl)
+		return;
+
+	for (size_t i = 0; i < gl->gl_pathc; i++)
+		free(gl->gl_pathv[i]);
+	free(gl->gl_pathv);
+	gl = NULL;
+}
+
 static char **
-glob_sort_dirs(glob_t *globbed_files, size_t *g)
+glob_sort_dirs(xglob_t *globbed_files, size_t *g)
 {
 	int *dirs = xnmalloc(globbed_files->gl_pathc + 1, sizeof(int));
 	char **gfiles = xnmalloc(globbed_files->gl_pathc + 1, sizeof(char *));
@@ -434,34 +538,27 @@ get_glob_longest(struct search_t *matches, int *longest_eln,
 	*longest_match += (size_t)(*eln_pad - DIGINUM(*longest_eln));
 }
 
-/* Original string is either "/QUERY" or "/!QUERY". Let's extract QUERY.
- * If the query string contains no metacharacters, change it to "*QUERY*" */
+/* If the pattern string contains no metacharacters, change it to "*PATTERN*". */
 static char *
-construct_glob_query(char **arg, const int invert)
+construct_glob_query(char **pattern)
 {
 	search_flags &= ~NO_GLOB_CHAR;
-	char *query = *arg + (invert == 1 ? 2 : 1);
+	char *query = *pattern;
 
 	/* If the query string already contains metacharacters, return it as is. */
-	if (check_glob_char(query, GLOB_REGEX) == 1)
+	if (check_glob_char(query, REGEX_MATCH) == 1)
 		return query;
 
 	search_flags |= NO_GLOB_CHAR;
-	if (conf.search_strategy != GLOB_ONLY) {
-		/* Let's return here to perform a regex search. */
-		return NULL;
-	}
 
 	/* Search strategy is glob-only */
-	const size_t len = strlen(*arg);
-
-	char *q = savestring(query, len - (invert == 1 ? 2 : 1));
-	*arg = xnrealloc(*arg, (len + 3), sizeof(char));
-
-	snprintf((*arg) + 1, len + 2, "*%s*", q);
+	const size_t len = strlen(query);
+	char *q = strdup(query);
+	query = xnrealloc(query, len + 3, sizeof(char));
+	snprintf(query, len + 3, "*%s*", q);
 	free(q);
 
-	return (*arg) + 1;
+	return query;
 }
 
 static size_t
@@ -537,26 +634,25 @@ print_glob_matches(struct search_t *matches, const char *search_path)
 	tab_offset = tab_offset_bk;
 
 	print_reload_msg(SET_SUCCESS_PTR, xs_cb, _("Matches found: %d%s\n"), found,
-		conf.search_strategy != GLOB_ONLY ? " (glob)" : "");
+		conf.search_strategy != GLOB_MATCH ? " (glob)" : "");
 
 	return found;
 }
 
 /* List matching filenames in the specified directory. */
 static int
-search_glob(char **args)
+search_glob(char **args, char **pattern, const int invert)
 {
 	if (!args || !args[0])
 		return FUNC_FAILURE;
 
-	const int invert = (args[0][1] == '!');
-
-	char *search_query = NULL, *search_path = NULL;
+	char *search_query = NULL;
+	char *search_path = NULL;
 	mode_t file_type = 0;
 
 	if (set_file_type_and_search_path(args, &file_type,
-	&search_path, invert) == FUNC_FAILURE) {
-		return ERR_SKIP_REGEX;
+	&search_path, *pattern, invert, 0) == FUNC_FAILURE) {
+		return SEARCH_ERROR;
 	}
 
 	if (file_type == 'x' || file_type == 'r') /* Recursive search via find(1) */
@@ -566,17 +662,23 @@ search_glob(char **args)
 	 * works on CWD. */
 	if (search_path && *search_path
 	&& chdir_search_path(&search_path, args[1]) == FUNC_FAILURE)
-		return ERR_SKIP_REGEX;
+		return SEARCH_ERROR;
 
-	search_query = construct_glob_query(&args[0], invert);
-	if (!search_query && conf.search_strategy != GLOB_ONLY)
+	search_query = construct_glob_query(pattern);
+	if (!search_query && conf.search_strategy != GLOB_MATCH)
 		return FUNC_FAILURE;
 
 	/* Get matches, if any. */
-	glob_t globbed_files;
-	const int ret = glob(search_query, GLOB_BRACE, NULL, &globbed_files);
+	xglob_t globbed_files = {0};
+#ifdef FNM_CASEFOLD
+	const int gl_flags = conf.ignore_case == 1 ? FNM_CASEFOLD : 0;
+#else
+	const int gl_flags = 0;
+#endif
+	const int ret = xglob(search_path ? search_path : ".",
+		search_query, &globbed_files, gl_flags);
 	if (ret != 0) {
-		globfree(&globbed_files);
+		xglobfree(&globbed_files);
 
 		/* Go back to the directory we came from */
 		if (search_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
@@ -604,7 +706,7 @@ search_glob(char **args)
 	else
 		list = get_glob_matches_invert(gfiles, search_path, file_type);
 
-	globfree(&globbed_files);
+	xglobfree(&globbed_files);
 
 	const int matches = print_glob_matches(list, search_path);
 
@@ -630,23 +732,19 @@ search_glob(char **args)
 /* Original string is either "/QUERY" or "/!QUERY". Let's extract QUERY.
  * If the query string contains no metacharacters, change it to ".*QUERY.*" */
 static char *
-construct_regex_query(char **arg, const int invert, int *regex_found)
+construct_regex_query(char **query, int *regex_found)
 {
-	char *query = *arg + (invert == 1 ? 2 : 1);
-
-	*regex_found = check_regex(query);
+	*regex_found = check_regex(*query);
 	if (*regex_found == FUNC_SUCCESS)
-		return query;
+		return *query;
 
-	const size_t len = strlen(*arg);
-
-	char *q = savestring(query, len - (invert == 1 ? 2 : 1));
-	*arg = xnrealloc(*arg, (len + 5), sizeof(char));
-
-	snprintf(*arg + 1, len + 4, ".*%s.*", q);
+	const size_t len = strlen(*query);
+	char *q = strdup(*query);
+	*query = xnrealloc(*query, len + 5, sizeof(char));
+	snprintf(*query, len + 5, ".*%s.*", q);
 	free(q);
 
-	return *arg + 1;
+	return *query;
 }
 
 static void
@@ -858,20 +956,20 @@ END:
 /* List matching (or non-matching if INVERT is set to 1) filenames
  * in the specified directory. */
 static int
-search_regex(char **args)
+search_regex(char **args, char **pattern, const int invert)
 {
 	if (!args || !args[0])
 		return FUNC_FAILURE;
 
-	int invert = (args[0][1] == '!');
-	char *search_query = NULL, *search_path = NULL;
+	char *search_query = NULL;
+	char *search_path = NULL;
 	mode_t file_type = 0;
 
 	if (set_file_type_and_search_path(args, &file_type,
-	&search_path, 1) == FUNC_FAILURE)
+	&search_path, *pattern, invert, 1) == FUNC_FAILURE)
 		return FUNC_FAILURE;
 
-	if (file_type == 'x') /* Recursive search via find(1) */
+	if (file_type == 'x' || file_type == 'r') /* Recursive search via find(1) */
 		return FUNC_SUCCESS;
 
 	struct dirent **reg_dirlist = NULL;
@@ -894,7 +992,7 @@ search_regex(char **args)
 	}
 
 	int regex_found = 0;
-	search_query = construct_regex_query(&args[0], invert, &regex_found);
+	search_query = construct_regex_query(pattern, &regex_found);
 
 	/* Get matches */
 	regex_t regex_files;
@@ -968,10 +1066,39 @@ err_glob_no_match(const char *arg)
 	return FUNC_FAILURE;
 }
 
-/* We provide three search strategies:
- * 1 - Only glob
- * 2 - Only regex
- * 3 - Glob-regex */
+static void
+set_search_params(const char *query, char **pattern, int *invert, int *strat)
+{
+	*strat = conf.search_strategy;
+
+	if (!query || !*query || !query[1])
+		return;
+
+	if (query[1] == '!') {
+		*pattern = query[2] ? strdup(query + 2) : NULL;
+		if (invert) *invert = 1;
+		return;
+	}
+
+	const char *pat = query;
+	if (query[1] == 'g' && query[2] == 'l' && query[3] == ':' && query[4]) {
+		pat = query += 4;
+		*strat = GLOB_MATCH;
+	} else if (query[1] == 'r' && query[2] == 'e' && query[3] == ':' && query[4]) {
+		pat = query += 4;
+		*strat = REGEX_MATCH;
+	}
+
+	if (*pat == '!') {
+		if (invert) *invert = 1;
+		pat++;
+	}
+
+	*pattern = strdup(pat ? pat : query);
+}
+
+/* Search for files in ARGS[1] (current directory if NULL) using ARGS[0]
+ * as pattern */
 int
 search_function(char **args)
 {
@@ -980,18 +1107,31 @@ search_function(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	if (conf.search_strategy == REGEX_ONLY)
-		return search_regex(args);
+	char *pattern = NULL;
+	int invert = 0;
+	int search_strategy = 0;
+	set_search_params(args[0], &pattern, &invert, &search_strategy);
+	if (!pattern)
+		return FUNC_FAILURE;
 
-	const int ret = search_glob(args);
+	if (search_strategy == REGEX_MATCH) {
+		const int ret = search_regex(args, &pattern, invert);
+		free(pattern);
+		return ret;
+	}
+
+	const int ret = search_glob(args, &pattern, invert);
+	free(pattern);
 	if (ret != FUNC_FAILURE)
-		return (ret == ERR_SKIP_REGEX ? 1 : ret);
+		return (ret == SEARCH_ERROR ? 1 : ret);
 
-	if (conf.search_strategy == GLOB_ONLY)
+	if (search_strategy == GLOB_MATCH)
 		return err_glob_no_match(args[1]);
 
-	if (!(search_flags & NO_GLOB_CHAR))
-		fputs(_("Glob: No matches found. Trying regex...\n"), stderr);
+	if (!(search_flags & NO_GLOB_CHAR)) {
+		fputs(_("search: No matches found\n"), stderr);
+		return FUNC_FAILURE;
+	}
 
-	return search_regex(args);
+	return FUNC_SUCCESS;
 }

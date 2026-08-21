@@ -595,9 +595,8 @@ extern time_t curdir_mtime;
 #define DESKTOP_NOTIF_KITTY  2
 
 /* Search strategy */
-#define GLOB_ONLY  0
-#define REGEX_ONLY 1
-#define GLOB_REGEX 2
+#define GLOB_MATCH  0
+#define REGEX_MATCH 1
 
 #define GLOB_CHARS "*?[{"
 #define GLOB_REGEX_CHARS "*?[{|^+$."
