@@ -103,7 +103,7 @@ run_find(char *search_path, const char *arg, const int regex)
 	char *pattern = xnmalloc(pattern_len, sizeof(char));
 
 #if !defined(_BE_POSIX)
-	if (conf.search_strategy == REGEX_MATCH) {
+	if (regex == 1) {
 # if !defined(FIND_HAS_NO_REGEX)
 		snprintf(pattern, pattern_len, ".*%s.*", arg);
 # else
