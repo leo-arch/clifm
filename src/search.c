@@ -540,25 +540,24 @@ get_glob_longest(struct search_t *matches, int *longest_eln,
 
 /* If the pattern string contains no metacharacters, change it to "*PATTERN*". */
 static char *
-construct_glob_query(char **pattern)
+build_glob_query(char **pattern)
 {
 	search_flags &= ~NO_GLOB_CHAR;
-	char *query = *pattern;
 
 	/* If the query string already contains metacharacters, return it as is. */
-	if (check_glob_char(query, REGEX_MATCH) == 1)
-		return query;
+	if (check_glob_char(*pattern, REGEX_MATCH) == 1)
+		return *pattern;
 
 	search_flags |= NO_GLOB_CHAR;
 
 	/* Search strategy is glob-only */
-	const size_t len = strlen(query);
-	char *q = strdup(query);
-	query = xnrealloc(query, len + 3, sizeof(char));
-	snprintf(query, len + 3, "*%s*", q);
-	free(q);
+	const size_t len = strlen(*pattern);
+	char *tmp = strdup(*pattern);
+	*pattern = xnrealloc(*pattern, len + 3, sizeof(char));
+	snprintf(*pattern, len + 3, "*%s*", tmp);
+	free(tmp);
 
-	return query;
+	return *pattern;
 }
 
 static size_t
@@ -664,7 +663,7 @@ search_glob(char **args, char **pattern, const int invert)
 	&& chdir_search_path(&search_path, args[1]) == FUNC_FAILURE)
 		return SEARCH_ERROR;
 
-	search_query = construct_glob_query(pattern);
+	search_query = build_glob_query(pattern);
 	if (!search_query && conf.search_strategy != GLOB_MATCH)
 		return FUNC_FAILURE;
 
@@ -732,17 +731,17 @@ search_glob(char **args, char **pattern, const int invert)
 /* Original string is either "/QUERY" or "/!QUERY". Let's extract QUERY.
  * If the query string contains no metacharacters, change it to ".*QUERY.*" */
 static char *
-construct_regex_query(char **query, int *regex_found)
+build_regex_query(char **query, int *regex_found)
 {
 	*regex_found = check_regex(*query);
 	if (*regex_found == FUNC_SUCCESS)
 		return *query;
 
 	const size_t len = strlen(*query);
-	char *q = strdup(*query);
+	char *tmp = strdup(*query);
 	*query = xnrealloc(*query, len + 5, sizeof(char));
-	snprintf(*query, len + 5, ".*%s.*", q);
-	free(q);
+	snprintf(*query, len + 5, ".*%s.*", tmp);
+	free(tmp);
 
 	return *query;
 }
@@ -992,7 +991,7 @@ search_regex(char **args, char **pattern, const int invert)
 	}
 
 	int regex_found = 0;
-	search_query = construct_regex_query(pattern, &regex_found);
+	search_query = build_regex_query(pattern, &regex_found);
 
 	/* Get matches */
 	regex_t regex_files;
@@ -1080,12 +1079,12 @@ set_search_params(const char *query, char **pattern, int *invert, int *strat)
 		return;
 	}
 
-	const char *pat = query;
+	const char *pat = query + 1; /* Skip leading slash */
 	if (query[1] == 'g' && query[2] == 'l' && query[3] == ':' && query[4]) {
-		pat = query += 4;
+		pat += 3;
 		*strat = GLOB_MATCH;
 	} else if (query[1] == 'r' && query[2] == 'e' && query[3] == ':' && query[4]) {
-		pat = query += 4;
+		pat += 3;
 		*strat = REGEX_MATCH;
 	}
 
