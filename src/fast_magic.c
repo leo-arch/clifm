@@ -6666,19 +6666,19 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	/* file(1): magic/Magdir/windows */
 	if (nread > 6 && sig[0] == 'R' && sig[1] == 'E' && sig[2] == 'G'
 	&& sig[3] == 'E' && sig[4] == 'D' && sig[5] == 'I' && sig[6] == 'T')
-		return "application/x-ms-regedit";
+		return "text/x-ms-regedit";
 	if (nread > 3 && sig[0] == 'r' && sig[1] == 'e' && sig[2] == 'g'
 	 && sig[3] == 'f')
-		return "application/x-ms-regedit";
+		return "text/x-ms-regedit";
 	if (nread > 3 && sig[0] == 'C' && sig[1] == 'R' && sig[2] == 'E'
 	 && sig[3] == 'G')
-		return "application/x-ms-regedit";
+		return "text/x-ms-regedit";
 	if (nread > 4 && sig[0] == 'S' && sig[1] == 'H' && sig[2] == 'C'
 	 && sig[3] == 'C' && sig[4] == '3')
-		return "application/x-ms-regedit";
+		return "text/x-ms-regedit";
 	if (nread >= 36 && sig[0] == 'W' && sig[32] == '5'
 	&& memcmp(sig, "Windows Registry Editor Version 5.00", 36) == 0)
-		return "application/x-ms-regedit";
+		return "text/x-ms-regedit";
 
 	/* file(1): magic/Magdir/windows */
 	if (nread > 4 && BE_U32(sig) == 0xDC058340 && !sig[4])
