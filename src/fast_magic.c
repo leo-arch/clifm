@@ -4622,7 +4622,7 @@ is_floppy_image(const uint8_t *s, const size_t slen, const off_t file_size)
 	|| (heads != 1 && heads != 2))
 		return 0;
 
-	if (sectors_per_track < 8 && sectors_per_track != 9
+	if (sectors_per_track != 8 && sectors_per_track != 9
 	&& sectors_per_track != 10 && sectors_per_track != 15
 	&& sectors_per_track != 18 && sectors_per_track != 36)
 		return 0;
