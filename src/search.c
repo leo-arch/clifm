@@ -790,26 +790,11 @@ check_regex_file_type(struct dirent **reg_dirlist, const int index,
 {
 	if (reg_dirlist) { /* A search path has been provided. */
 #if !defined(_DIRENT_HAVE_D_TYPE)
-		mode_t type;
-		struct stat attr;
-		if (lstat(reg_dirlist[index]->d_name, &attr) == -1)
+		struct stat a;
+		if (lstat(reg_dirlist[index]->d_name, &a) == -1)
 			return FUNC_FAILURE;
 
-		switch (attr.st_mode & S_IFMT) {
-		case S_IFBLK: type = DT_BLK; break;
-		case S_IFCHR: type = DT_CHR; break;
-		case S_IFDIR: type = DT_DIR; break;
-# ifdef SOLARIS_DOORS
-		case S_IFDOOR: type = DT_DOOR; break;
-		case S_IFPORT: type = DT_PORT; break;
-# endif /* SOLARIS_DOORS */
-		case S_IFIFO: type = DT_FIFO; break;
-		case S_IFLNK: type = DT_LNK; break;
-		case S_IFREG: type = DT_REG; break;
-		case S_IFSOCK: type = DT_SOCK; break;
-		default: type = DT_UNKNOWN; break;
-		}
-
+		const mode_t type = get_dt(a.st_mode);
 		if (type != file_type)
 #else
 		if (reg_dirlist[index]->d_type != file_type)
@@ -901,7 +886,7 @@ print_regex_matches(const mode_t file_type, struct dirent **reg_dirlist,
 	size_t matches = 0; /* Number of filtered matches */
 
 	for (size_t i = total; i-- > 0;) {
-		int index = regex_index[i];
+		const int index = regex_index[i];
 
 		if (file_type != 0 && check_regex_file_type(reg_dirlist,
 		index, file_type) == FUNC_FAILURE)
@@ -1036,8 +1021,9 @@ search_regex(char **args, char **pattern, const int invert)
 	}
 
 	/* We have matches: print them. */
+	const mode_t ftype = invert == 1 ? file_type : get_dt(file_type);
 	const size_t matches =
-		print_regex_matches(file_type, reg_dirlist, regex_index);
+		print_regex_matches(ftype, reg_dirlist, regex_index);
 
 	free(regex_index);
 	free_regex_dirlist(&reg_dirlist, tmp_files);
