@@ -460,11 +460,11 @@
 # This option is ignored in secure mode (umask is forcefully set to 077).
 ;Umask=077
 
-# Choose the search strategy for the quick search function. Supported values:
-# 0 = glob-only
-# 1 = regex-only
-# 2 = glob-regex (default)
-;SearchStrategy=2
+# Default pattern matching method used when searching for files. Supported
+# values: 'glob' and 'regex'.
+# Note: run '/ --help' for information on how to force a specific method
+# for the current search.
+;SearchStrategy=glob
 
 # Minimum rank for directories in the jump database. Directories with a rank
 # below this value are removed. If set to 0, directories are retained
@@ -524,14 +524,15 @@
 #=====================================#
 
 # Ignore case distinctions in filenames and paths.
+# Note: for the file list, use Sort instead.
 ;IgnoreCase=true
 
 # Use the faster built-in magic check; fall back to libmagic if no result
 # is found.
 ;FastMagic=true
 
-# When sorting files by 'version' or 'name', skip non-alphanumeric characters.
-# For example, '__file' is sorted as 'file'.
+# When sorting files by '(i)version' or '(i)name', skip non-alphanumeric
+# characters. For example, '__file' is sorted as 'file'.
 # This also affects hidden files: if set to false, '.hidden' will appear
 # before 'afile'; if set to true, it will appear after 'gfile' (unless
 # ShowHiddenFiles is set to 'first' or 'last').

@@ -262,7 +262,7 @@ gen_max_namelen_value_str(const int cfg)
 	}
 }
 
-static char *
+static const char *
 gen_desktop_notif_str(const int value)
 {
 	switch (value) {
@@ -273,7 +273,7 @@ gen_desktop_notif_str(const int value)
 	}
 }
 
-static char *
+static const char *
 gen_safenames_str(const int value)
 {
 	switch (value) {
@@ -285,7 +285,13 @@ gen_safenames_str(const int value)
 	}
 }
 
-static char *
+static const char *
+gen_search_strat_str(const int value)
+{
+	return value == GLOB_MATCH ? "glob" : "regex";
+}
+
+static const char *
 gen_term_title_str(const int value)
 {
 	switch (value) {
@@ -563,9 +569,9 @@ dump_config(void)
 	print_config_value("SafeFilenames", gen_safenames_str(conf.safe_filenames),
 		gen_safenames_str(DEF_SAFE_FILENAMES), DUMP_CONFIG_STR_NO_QUOTE);
 
-	n = DEF_SEARCH_STRATEGY;
-	print_config_value("SearchStrategy", &conf.search_strategy, &n,
-		DUMP_CONFIG_INT);
+	print_config_value("SearchStrategy",
+		gen_search_strat_str(conf.search_strategy),
+		gen_search_strat_str(DEF_SEARCH_STRATEGY), DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_SHARE_SELBOX;
 	print_config_value("ShareSelbox", &conf.share_selbox, &n, DUMP_CONFIG_BOOL);
@@ -1982,8 +1988,8 @@ create_main_config_file(char *file)
 	"# How to quote expanded ELN's (regular files only): backslash, single, double.\n\
 ;QuotingStyle=%s\n\n"
 
-"# Specify how to perform searches: 0 = glob, and 1 = regex.\n\
-;SearchStrategy=%d\n\n",
+"# Specify how to perform searches: 'glob' or 'regex'.\n\
+;SearchStrategy=%s\n\n",
 
 		DEF_AUTOCD == 1 ? "true" : "false",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
@@ -1997,7 +2003,7 @@ create_main_config_file(char *file)
 		DEF_QUOTING_STYLE == QUOTING_STYLE_BACKSLASH ? "backslash"
 			: (DEF_QUOTING_STYLE == QUOTING_STYLE_DOUBLE_QUOTES ? "double"
 			: "single"),
-		DEF_SEARCH_STRATEGY
+		DEF_SEARCH_STRATEGY == GLOB_MATCH ? "glob" : "regex"
 		);
 
 	fprintf(config_fp,
@@ -2922,13 +2928,22 @@ END:
 static void
 set_search_strategy(const char *line)
 {
-	if (!line || *line < '0' || *line > '1')
+	if (!line || !*line || *line == '\n')
 		return;
 
-	switch (*line) {
-	case '0': conf.search_strategy = GLOB_MATCH; break;
-	case '1': conf.search_strategy = REGEX_MATCH; break;
-	default: break;
+	if (IS_DIGIT(*line)) { // Deprecated
+		switch (*line) {
+		case '0': conf.search_strategy = GLOB_MATCH; break;
+		case '1': conf.search_strategy = REGEX_MATCH; break;
+		default: break;
+		}
+	} else {
+		if (*line == 'g' && strcmp(line, "glob\n") == 0) {
+			conf.search_strategy = GLOB_MATCH;
+		} else {
+			if (*line == 'r' && strcmp(line, "regex\n") == 0)
+				conf.search_strategy = REGEX_MATCH;
+		}
 	}
 }
 
