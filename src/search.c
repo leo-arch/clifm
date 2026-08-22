@@ -10,6 +10,7 @@
 #include "helpers.h"
 
 #include <errno.h>
+#include <fnmatch.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -30,7 +31,8 @@
 #include "sort.h"
 #include "spawn.h"
 
-#define SEARCH_ERROR 2
+#define IS_METHOD_PREFIX(s, l) ((s) && (l) > 3                       \
+&& ((strncmp((s), "/gl:", 4) == 0) || (strncmp((s), "/re:", 4) == 0)))
 
 #if (defined(__OpenBSD__) || defined(__sun)) && !defined(_BE_POSIX)
 /* OpenBSD/Solaris find(1) has neither -regex nor -iregex. We'll try to use
@@ -173,7 +175,7 @@ set_file_type_and_search_path(char **args, mode_t *file_type,
 	default:
 		fprintf(stderr, _("search: '%c': Unrecognized file "
 			"type\n"), (char)*file_type);
-		break;
+		return FUNC_FAILURE;
 	}
 
 	return FUNC_SUCCESS;
@@ -197,7 +199,7 @@ chdir_search_path(char **search_path, const char *arg)
 	if (path_len > 1 && (*search_path)[path_len - 1] == '/')
 		(*search_path)[path_len - 1] = '\0';
 
-	// If search path is the current directory.
+	/* If search path is the current directory. */
 	if ((*(*search_path) == '.' && !(*search_path)[1]) ||
 	    ((*search_path)[1] == workspaces[cur_ws].path[1]
 	    && strcmp(*search_path, workspaces[cur_ws].path) == 0)) {
@@ -205,17 +207,15 @@ chdir_search_path(char **search_path, const char *arg)
 	} else {
 		if (xchdir(*search_path, NO_TITLE) == -1) {
 			xerror("search: '%s': %s\n", *search_path, strerror(errno));
-			return FUNC_FAILURE;
+			return errno;
 		}
 	}
 
 	return FUNC_SUCCESS;
 }
 
-#include <fnmatch.h>
-
 typedef struct {
-	char **gl_pathv;     // or full paths
+	char **gl_pathv;
 	size_t gl_pathc;
 	size_t cap;
 } xglob_t;
@@ -550,7 +550,6 @@ build_glob_query(char **pattern)
 
 	search_flags |= NO_GLOB_CHAR;
 
-	/* Search strategy is glob-only */
 	const size_t len = strlen(*pattern);
 	char *tmp = strdup(*pattern);
 	*pattern = xnrealloc(*pattern, len + 3, sizeof(char));
@@ -638,6 +637,27 @@ print_glob_matches(struct search_t *matches, const char *search_path)
 	return found;
 }
 
+static int
+err_glob_no_match(const char *arg)
+{
+	char *input = (conf.autocd == 1 && !arg
+		&& (search_flags & NO_GLOB_CHAR) && rl_line_buffer
+		&& !IS_METHOD_PREFIX(rl_line_buffer, rl_end))
+			? strrchr(rl_line_buffer, '/') : NULL;
+
+	if (input && input != rl_line_buffer) {
+		/* Input string contains two slashes: it looks like a path, so let's
+		 * err like it was. */
+		char *p = unescape_str(rl_line_buffer);
+		xerror("cd: '%s': %s\n", p ? p : rl_line_buffer, strerror(ENOENT));
+		free(p);
+		return FUNC_FAILURE;
+	}
+
+	fputs(_("search: No matches found\n"), stderr);
+	return FUNC_FAILURE;
+}
+
 /* List matching filenames in the specified directory. */
 static int
 search_glob(char **args, char **pattern, const int invert)
@@ -648,10 +668,11 @@ search_glob(char **args, char **pattern, const int invert)
 	char *search_query = NULL;
 	char *search_path = NULL;
 	mode_t file_type = 0;
+	int ret = FUNC_FAILURE;
 
 	if (set_file_type_and_search_path(args, &file_type,
 	&search_path, *pattern, invert, 0) == FUNC_FAILURE) {
-		return SEARCH_ERROR;
+		return FUNC_FAILURE;
 	}
 
 	if (file_type == 'x' || file_type == 'r') /* Recursive search via find(1) */
@@ -660,8 +681,8 @@ search_glob(char **args, char **pattern, const int invert)
 	/* If we have a path ("/str /path"), chdir into it, since glob(3)
 	 * works on CWD. */
 	if (search_path && *search_path
-	&& chdir_search_path(&search_path, args[1]) == FUNC_FAILURE)
-		return SEARCH_ERROR;
+	&& (ret = chdir_search_path(&search_path, args[1])) != FUNC_SUCCESS)
+		return ret;
 
 	search_query = build_glob_query(pattern);
 	if (!search_query && conf.search_strategy != GLOB_MATCH)
@@ -674,7 +695,7 @@ search_glob(char **args, char **pattern, const int invert)
 #else
 	const int gl_flags = 0;
 #endif
-	const int ret = xglob(search_path ? search_path : ".",
+	ret = xglob(search_path ? search_path : ".",
 		search_query, &globbed_files, gl_flags);
 	if (ret != 0) {
 		xglobfree(&globbed_files);
@@ -683,7 +704,7 @@ search_glob(char **args, char **pattern, const int invert)
 		if (search_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
 			xerror("search: '%s': %s\n", workspaces[cur_ws].path, strerror(errno));
 
-		return FUNC_FAILURE;
+		return err_glob_no_match(args[1]);
 	}
 
 	/* We have matches */
@@ -725,7 +746,7 @@ search_glob(char **args, char **pattern, const int invert)
 		return FUNC_FAILURE;
 	}
 
-	return (matches == 0 ? FUNC_FAILURE : FUNC_SUCCESS);
+	return matches == 0 ? err_glob_no_match(args[1]) : FUNC_SUCCESS;
 }
 
 /* Original string is either "/QUERY" or "/!QUERY". Let's extract QUERY.
@@ -750,7 +771,8 @@ static void
 err_regex_no_match(const int regex_found, const char *arg)
 {
 	char *input = (conf.autocd == 1 && !arg && (regex_found == FUNC_FAILURE
-			|| (search_flags & NO_GLOB_CHAR)) && rl_line_buffer)
+			|| (search_flags & NO_GLOB_CHAR)) && rl_line_buffer
+			&& !IS_METHOD_PREFIX(rl_line_buffer, rl_end))
 			? strrchr(rl_line_buffer, '/') : NULL;
 
 	if (input && input != rl_line_buffer) {
@@ -759,10 +781,8 @@ err_regex_no_match(const int regex_found, const char *arg)
 		char *p = unescape_str(rl_line_buffer);
 		xerror("cd: '%s': %s\n", p ? p : rl_line_buffer, strerror(ENOENT));
 		free(p);
-	} else if (search_flags & NO_GLOB_CHAR) {
-		fputs(_("search: No matches found\n"), stderr);
 	} else {
-		fputs(_("No matches found\n"), stderr);
+		fputs(_("search: No matches found\n"), stderr);
 	}
 
 	search_flags &= ~NO_GLOB_CHAR;
@@ -948,9 +968,10 @@ search_regex(char **args, char **pattern, const int invert)
 	char *search_query = NULL;
 	char *search_path = NULL;
 	mode_t file_type = 0;
+	int ret = FUNC_FAILURE;
 
 	if (set_file_type_and_search_path(args, &file_type,
-	&search_path, *pattern, invert, 1) == FUNC_FAILURE)
+	&search_path, *pattern, invert, 1) != FUNC_SUCCESS)
 		return FUNC_FAILURE;
 
 	if (file_type == 'x' || file_type == 'r') /* Recursive search via find(1) */
@@ -960,8 +981,8 @@ search_regex(char **args, char **pattern, const int invert)
 	int tmp_files = -1;
 
 	if (search_path && *search_path) {
-		if (chdir_search_path(&search_path, args[1]) == FUNC_FAILURE)
-			return FUNC_FAILURE;
+		if ((ret = chdir_search_path(&search_path, args[1])) != FUNC_SUCCESS)
+			return ret;
 
 		tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
 		if (tmp_files == -1) {
@@ -982,7 +1003,7 @@ search_regex(char **args, char **pattern, const int invert)
 	regex_t regex_files;
 	int reg_flags = conf.ignore_case == 0 ? (REG_NOSUB | REG_EXTENDED)
 		: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
-	int ret = regcomp(&regex_files, search_query, reg_flags);
+	ret = regcomp(&regex_files, search_query, reg_flags);
 
 	if (ret != FUNC_SUCCESS) {
 		xerror(_("'%s': Invalid regular expression\n"), search_query);
@@ -1031,26 +1052,6 @@ search_regex(char **args, char **pattern, const int invert)
 	return matches == 0 ? FUNC_FAILURE : FUNC_SUCCESS;
 }
 
-static int
-err_glob_no_match(const char *arg)
-{
-	char *input = (conf.autocd == 1 && !arg
-		&& (search_flags & NO_GLOB_CHAR)
-		&& rl_line_buffer) ? strrchr(rl_line_buffer, '/') : NULL;
-
-	if (input && input != rl_line_buffer) {
-		/* Input string contains two slashes: it looks like a path, so let's
-		 * err like it was. */
-		char *p = unescape_str(rl_line_buffer);
-		xerror("cd: '%s': %s\n", p ? p : rl_line_buffer, strerror(ENOENT));
-		free(p);
-		return FUNC_FAILURE;
-	}
-
-	fputs(_("search: No matches found\n"), stderr);
-	return FUNC_FAILURE;
-}
-
 static void
 set_search_params(const char *query, char **pattern, int *invert, int *strat)
 {
@@ -1095,28 +1096,18 @@ search_function(char **args)
 	char *pattern = NULL;
 	int invert = 0;
 	int search_strategy = 0;
+	int ret = 0;
+
 	set_search_params(args[0], &pattern, &invert, &search_strategy);
 	if (!pattern)
 		return FUNC_FAILURE;
 
-	if (search_strategy == REGEX_MATCH) {
-		const int ret = search_regex(args, &pattern, invert);
-		free(pattern);
-		return ret;
-	}
+	if (search_strategy == REGEX_MATCH)
+		ret = search_regex(args, &pattern, invert);
+	else /* search_stratergy == GLOB_MATCH */
+		ret = search_glob(args, &pattern, invert);
 
-	const int ret = search_glob(args, &pattern, invert);
 	free(pattern);
-	if (ret != FUNC_FAILURE)
-		return (ret == SEARCH_ERROR ? 1 : ret);
 
-	if (search_strategy == GLOB_MATCH)
-		return err_glob_no_match(args[1]);
-
-	if (!(search_flags & NO_GLOB_CHAR)) {
-		fputs(_("search: No matches found\n"), stderr);
-		return FUNC_FAILURE;
-	}
-
-	return FUNC_SUCCESS;
+	return ret;
 }
