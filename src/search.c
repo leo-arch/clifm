@@ -153,6 +153,10 @@ set_file_type_and_search_path(char **args, mode_t *file_type,
 		}
 	}
 
+	/* Starting path is the same as the current dir. Ignore it. */
+	if (*search_path && strcmp(*search_path, workspaces[cur_ws].path) == 0)
+		*search_path = NULL;
+
 	if (*file_type == 0)
 		return FUNC_SUCCESS;
 
@@ -199,16 +203,9 @@ chdir_search_path(char **search_path, const char *arg)
 	if (path_len > 1 && (*search_path)[path_len - 1] == '/')
 		(*search_path)[path_len - 1] = '\0';
 
-	/* If search path is the current directory. */
-	if ((*(*search_path) == '.' && !(*search_path)[1]) ||
-	    ((*search_path)[1] == workspaces[cur_ws].path[1]
-	    && strcmp(*search_path, workspaces[cur_ws].path) == 0)) {
-			*search_path = NULL;
-	} else {
-		if (xchdir(*search_path, NO_TITLE) == -1) {
-			xerror("search: '%s': %s\n", *search_path, strerror(errno));
-			return errno;
-		}
+	if (xchdir(*search_path, NO_TITLE) == -1) {
+		xerror("search: '%s': %s\n", *search_path, strerror(errno));
+		return errno;
 	}
 
 	return FUNC_SUCCESS;
@@ -271,8 +268,11 @@ static int
 xglob(const char *dirpath, const char *pattern, xglob_t *out, const int gl_flags)
 {
 	DIR *dp = dirpath ? opendir(dirpath) : NULL;
-	if (!dp)
+	if (!dp) {
+		if (dirpath)
+			xerror("%s: '%s': %s\n", PROGRAM_NAME, dirpath, strerror(errno));
 		return (-1);
+	}
 
 	struct dirent *ent;
 	errno = 0;
@@ -404,6 +404,7 @@ get_glob_matches(char **gfiles, const char *search_path,
 			matches[n].eln = (int)(j + 1);
 			matches[n].len = wc_xstrlen(file_info[j].name)
 				+ (size_t)file_info[j].eln_n + 1;
+			break;
 		}
 
 		if (f == 0) {
@@ -671,7 +672,7 @@ search_glob(char **args, char **pattern, const int invert)
 	int ret = FUNC_FAILURE;
 
 	if (set_file_type_and_search_path(args, &file_type,
-	&search_path, *pattern, invert, 0) == FUNC_FAILURE) {
+	&search_path, *pattern, invert, 0) != FUNC_SUCCESS) {
 		return FUNC_FAILURE;
 	}
 
@@ -695,8 +696,7 @@ search_glob(char **args, char **pattern, const int invert)
 #else
 	const int gl_flags = 0;
 #endif
-	ret = xglob(search_path ? search_path : ".",
-		search_query, &globbed_files, gl_flags);
+	ret = xglob(".", search_query, &globbed_files, gl_flags);
 	if (ret != 0) {
 		xglobfree(&globbed_files);
 
@@ -992,7 +992,7 @@ search_regex(char **args, char **pattern, const int invert)
 				xerror("search: '%s': %s\n", workspaces[cur_ws].path,
 					strerror(errno));
 
-			return FUNC_FAILURE;
+			return errno;
 		}
 	}
 
@@ -1022,7 +1022,7 @@ search_regex(char **args, char **pattern, const int invert)
 		char *name = (search_path && *search_path) ? reg_dirlist[i]->d_name
 		: file_info[i].name;
 
-		if (regexec(&regex_files, name, 0, NULL, 0) == FUNC_SUCCESS) {
+		if (regexec(&regex_files, name, 0, NULL, 0) == 0) {
 			if (invert == 0)
 				regex_index[found++] = (int)i;
 		} else {
