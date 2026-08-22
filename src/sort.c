@@ -258,7 +258,7 @@ entrycmp(const void *a, const void *b)
 		return ret;
 
 	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(st))
-		st = SINAME;
+		st = DEF_SORT_LIGHT_MODE;
 
 	const int have_utf8 = (pa->utf8 == 1 || pb->utf8 == 1);
 
@@ -372,10 +372,12 @@ print_sort_method(void)
 	printf("%s%s%s%s", BOLD, name, NC,
 		(conf.sort_reverse == 1) ? " (reverse)" : "");
 
-	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(conf.sort))
-		printf(_(" (not available in light mode: using %sname%s)\n"), BOLD, NC);
-	else
+	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(conf.sort)) {
+		printf(_(" (not available in light mode: using %s%s%s)\n"),
+			BOLD, num_to_sort_name(DEF_SORT_LIGHT_MODE, 0), NC);
+	} else {
 		putchar('\n');
+	}
 }
 
 static inline int
@@ -405,7 +407,7 @@ set_sort_by_name(char **arg)
 		&& strcmp(*arg, sort_methods[i].name) == 0) {
 			if (conf.light_mode == 1
 			&& !ST_IN_LIGHT_MODE(sort_methods[i].num)) {
-				fprintf(stderr, _("st: '%s': Not available in light mode\n"),
+				fprintf(stderr, _("sort: '%s': Not available in light mode\n"),
 					sort_methods[i].name);
 				return FUNC_FAILURE;
 			}
@@ -416,7 +418,7 @@ set_sort_by_name(char **arg)
 		}
 	}
 
-	fprintf(stdout, _("st: %s: No such sort order\n"), *arg);
+	fprintf(stdout, _("sort: %s: No such sort order\n"), *arg);
 	return FUNC_FAILURE;
 }
 
@@ -425,7 +427,7 @@ sort_function(char **arg)
 {
 	/* No argument: Just print the current sort order. */
 	if (!arg[1]) {
-		fputs(_("Sorted by "), stdout);
+		fputs(_("sort: sorted by "), stdout);
 		print_sort_method();
 		return FUNC_SUCCESS;
 	}
@@ -445,14 +447,14 @@ sort_function(char **arg)
 	const int n = xatoi(arg[1]);
 
 	if (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(n)) {
-		fprintf(stderr, _("st: %d (%s): Not available in light mode\n"),
+		fprintf(stderr, _("sort: %d (%s): Not available in light mode\n"),
 			n, num_to_sort_name(n, 0));
 		return FUNC_FAILURE;
 	}
 
 #ifndef ST_BTIME
 	if (n == SBTIME) {
-		fputs(_("st: Birth time is not available on this platform"), stderr);
+		fputs(_("sort: Birth time is not available on this platform"), stderr);
 		return FUNC_FAILURE;
 	}
 #endif /* !ST_BTIME */

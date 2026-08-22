@@ -1995,15 +1995,9 @@ sort_num_generator(const char *text, int state)
 	|| (conf.light_mode == 1 && !ST_IN_LIGHT_MODE(num_text)))
 		return NULL;
 
-	static const char *const sorts[] = {
-	    "none", "name", "size", "atime", "btime", "ctime", "mtime",
-	    "version", "extension", "inode", "owner", "group", "blocks",
-	    "links", "type", NULL
-	};
-
-	while (i <= SORT_TYPES && (name = sorts[i++]) != NULL) {
-		if (*name == *sorts[num_text]
-		&& strcmp(name, sorts[num_text]) == 0)
+	while (i <= SORT_TYPES && (name = sort_methods[i++].name) != NULL) {
+		if (*name == *sort_methods[num_text].name
+		&& strcmp(name, sort_methods[num_text].name) == 0)
 			return strdup(name);
 	}
 

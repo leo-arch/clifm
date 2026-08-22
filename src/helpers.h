@@ -1004,8 +1004,11 @@ extern time_t curdir_mtime;
 	: (s).st_blocks * S_BLKSIZE)
 
 /* Do we have the sort method S in light mode? */
-#define ST_IN_LIGHT_MODE(s) ((s) == SNAME || (s) == SVER || (s) == SINO \
-	|| (s) == SEXT || (s) == SNONE || (s) == STYPE)
+#define ST_IN_LIGHT_MODE(s) ((s) == SNAME || (s) == SINAME || (s) == SVER \
+	|| (s) == SIVER || (s) == SINO || (s) == SEXT || (s) == SIEXT         \
+	|| (s) == SNONE || (s) == STYPE)
+
+#define DEF_SORT_LIGHT_MODE SINAME
 
 #define UNUSED(x) (void)(x) /* Just silence the compiler's warning */
 

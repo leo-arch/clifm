@@ -518,7 +518,7 @@ files in the current directory:\n\n\
 
 #define GD_USAGE "Specify how to group directories\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  gd, group-dirs [first | last | asfiles]\n\
+  gd, group-dirs [first | last | false]\n\
 \x1b[1mEXAMPLE\x1b[22m\n\
 - Group directories last (after files)\n\
     gd last\n\
