@@ -513,6 +513,9 @@ is_internal_cmd(char *cmd, const int flag, const int check_hist,
 	if ((check_search == 1 && (*cmd == '/' && access(cmd, F_OK) != 0))
 	|| (check_hist == 1 && (*cmd == '!' && (IS_DIGIT(cmd[1])
 	|| (cmd[1] == '-' && IS_DIGIT(cmd[2])) || cmd[1] == '!')))) {
+		/* If STATE_COMPLETING is set, we come from int_cmd_no_filename(),
+		 * in readline.c, in which case we know there's an space after the
+		 * search command, meaning that we should display path completions. */
 		if (!(flags & STATE_COMPLETING))
 			return 1;
 	}

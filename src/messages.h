@@ -1483,7 +1483,7 @@ c: Quit paging (printing remaining files)\n"
 \n  -G, --no-pager\t\t Disable the pager (default)\
 \n  -h, --help\t\t\t Show this help and exit\
 \n  -H, --horizontal-list\t\t List files horizontally\
-\n  -i, --ignore-case\t\t Ignore case distinctions in filenames and paths (default)\
+\n  -i, --ignore-case\t\t Ignore case distinctions in names (default). For the file list, use --sort instead.\
 \n  -I, --no-ignore-case\t\t Do not ignore case distinctions\
 \n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
 \n  -l, --long-view\t\t Display extended file metadata\

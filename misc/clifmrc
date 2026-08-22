@@ -89,9 +89,12 @@
 # File listing layout: 0 = vertical (like ls), 1 = horizontal.
 ;ListingMode=0
 
-# Sort methods: none, name, version, extension, type, blocks, size
-# links, atime, btime, ctime, mtime, inode, owner, and group.
-;Sort=version
+# Sort methods: none, name, iname, version, iversion, extension, iextension,
+# type, blocks, size, links, atime, btime, ctime, mtime, inode, owner, and
+# group.
+# The 'i' prefix stands for case-insensitive (e.g., 'iname' is the case
+# insensitive version of 'name').
+;Sort=iversion
 
 # Invert sort order. You can also use the --sort-reverse option
 # or the 'st rev' command.
