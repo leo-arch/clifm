@@ -379,14 +379,13 @@ get_glob_matches(char **gfiles, const char *search_path,
 				continue;
 		}
 
-		matches[n].name = savestring(gfiles[i], strlen(gfiles[i]));
-
 		/* Get the longest filename in the list. */
 		/* If not in CWD, we only need to know the file's length (no ELN) */
 		if (search_path) {
 			/* This will be passed to colors_list(): -1 means no ELN */
 			matches[n].eln = -1;
-			matches[n].len = wc_xstrlen(matches[n].name);
+			matches[n].name = strdup(gfiles[i]);
+			matches[n].len = wc_xstrlen(gfiles[i]);
 			n++;
 			continue;
 		}
@@ -394,25 +393,18 @@ get_glob_matches(char **gfiles, const char *search_path,
 		/* No search_path */
 		/* If searching in CWD, take into account the file's ELN
 		 * when calculating its length. */
-		size_t f = 0;
 		for (size_t j = 0; file_info[j].name; j++) {
-			if (!matches[n].name || *matches[n].name != *file_info[j].name
-			|| strcmp(matches[n].name, file_info[j].name) != 0)
+			if (*gfiles[i] != *file_info[j].name
+			|| strcmp(gfiles[i], file_info[j].name) != 0)
 				continue;
 
-			f = 1;
+			matches[n].name = strdup(gfiles[i]);
 			matches[n].eln = (int)(j + 1);
-			matches[n].len = wc_xstrlen(file_info[j].name)
+			matches[n].len = wc_xstrlen(gfiles[i])
 				+ (size_t)file_info[j].eln_n + 1;
+			n++;
 			break;
 		}
-
-		if (f == 0) {
-			matches[n].eln = -1;
-			matches[n].len = 0;
-		}
-
-		n++;
 	}
 
 	matches[n].name = NULL;
@@ -716,7 +708,7 @@ search_glob(char **args, char **pattern, const int invert)
 	if (conf.group_dirs > 0)
 		gfiles = glob_sort_dirs(&globbed_files, &g);
 
-	/* We need to store pointers to matching filenames in array of pointers,
+	/* We need to store pointers to matching filenames in an array of pointers,
 	 * just as the filename length (to construct the columned output), and,
 	 * if searching in CWD, its index (ELN) in the dirlist array as well. */
 	struct search_t *list = NULL;
