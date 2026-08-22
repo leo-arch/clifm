@@ -425,16 +425,16 @@ get_non_matches_from_search_path(const char *search_path, char **gfiles,
 		sizeof(struct search_t));
 
 	for (i = 0; i < dir_entries; i++) {
-		int f = 0;
+		int found = 0;
 		for (j = 0; gfiles[j]; j++) {
 			if (*ent[i]->d_name == *gfiles[j]
 			&& strcmp(ent[i]->d_name, gfiles[j]) == 0) {
-				f = 1;
+				found = 1;
 				break;
 			}
 		}
 
-		if (f == 1)
+		if (found == 1)
 			continue;
 
 #if !defined(_DIRENT_HAVE_D_TYPE)
@@ -475,17 +475,17 @@ get_glob_matches_invert(char **gfiles, const char *search_path,
 		xnmalloc((size_t)g_files_num + 1, sizeof(struct search_t));
 
 	for (filesn_t i = 0; file_info[i].name; i++) {
-		int f = 0;
+		int found = 0;
 
 		for (filesn_t j = 0; gfiles[j]; j++) {
 			if (*gfiles[j] == *file_info[i].name
 			&& strcmp(gfiles[j], file_info[i].name) == 0) {
-				f = 1;
+				found = 1;
 				break;
 			}
 		}
 
-		if (f == 1 || (file_type && file_info[i].type != file_type))
+		if (found == 1 || (file_type && file_info[i].type != file_type))
 			continue;
 
 		matches[n].eln = (int)(i + 1);

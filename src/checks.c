@@ -512,8 +512,10 @@ is_internal_cmd(char *cmd, const int flag, const int check_hist,
 
 	if ((check_search == 1 && (*cmd == '/' && access(cmd, F_OK) != 0))
 	|| (check_hist == 1 && (*cmd == '!' && (IS_DIGIT(cmd[1])
-	|| (cmd[1] == '-' && IS_DIGIT(cmd[2])) || cmd[1] == '!'))))
-		return 1;
+	|| (cmd[1] == '-' && IS_DIGIT(cmd[2])) || cmd[1] == '!')))) {
+		if (!(flags & STATE_COMPLETING))
+			return 1;
+	}
 
 	return 0;
 }
