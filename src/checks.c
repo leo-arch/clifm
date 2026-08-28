@@ -45,7 +45,7 @@ is_force_param(const char *s)
 }
 
 int
-check_glob_char(const char *str, const int gflag)
+check_metachar(const char *str, const int gflag)
 {
 	if (!str || !*str)
 		return 0;

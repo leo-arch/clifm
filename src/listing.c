@@ -77,8 +77,6 @@
 
 /* Macros for the return value of the pager_run function */
 #define PAGER_RET_OK   0
-#define PAGER_RET_BACK 1
-#define PAGER_RET_HELP 2
 #define PAGER_RET_QUIT 3
 
 /* Macros for run_dir_cmd function */
@@ -89,9 +87,8 @@
 
 #define ENTRY_N 64
 
-#ifdef TIGHT_COLUMNS
-# define COLUMNS_GAP 2
-#endif
+/* Space between file columns */
+#define COLUMNS_GAP 2
 
 #define ICONS_ELN       0
 #define ICONS_NO_ELN    1
@@ -137,7 +134,6 @@ struct wtrunc_t {
 static struct fileinfo default_file_info;
 
 static int g_pager_bk = 0;
-static int g_pager_quit = 0;
 static int g_pager_help = 0;
 static int g_dir_out = 0;
 static int g_long_view_bk = UNSET;
@@ -501,6 +497,16 @@ get_file_icon(const char *name, const struct stat *a, const char **color)
 DEFAULT_ICON:
 	if (color) *color = DEF_FILE_ICON_COLOR;
 	return DEF_FILE_ICON;
+}
+
+const char *
+get_file_icon_and_color(const char *name, const struct stat *a,
+	const char *file_color, const char **icon_color)
+{
+	const char *icon = get_file_icon(name, a, icon_color);
+	if (xargs.icons_use_file_color == 1)
+		*icon_color = file_color ? file_color : DEF_FILE_ICON_COLOR;
+	return icon;
 }
 
 void
@@ -884,8 +890,7 @@ post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 
 	const size_t s_files = (size_t)g_files_num;
 
-	if (g_pager_quit == 0 && conf.max_files != UNSET
-	&& g_files_num > (filesn_t)conf.max_files)
+	if (conf.max_files != UNSET && g_files_num > (filesn_t)conf.max_files)
 		printf("... (%d/%zu)\n", conf.max_files, s_files);
 
 	print_div_line();
@@ -939,83 +944,64 @@ post_listing(DIR *dir, const int reset_pager, const int autocmd_ret)
 	return FUNC_SUCCESS;
 }
 
+static void
+pager_help_screen(void)
+{
+	fputs("\x1b[?1049h", stdout); /* Alternate screen buffer */
+	CLEAR; HIDE_CURSOR;
+	fflush(stdout);
+
+	fputs(_(PAGER_HELP), stdout);
+
+	xgetchar();
+	UNHIDE_CURSOR;
+	fputs("\x1b[?1049l", stdout);
+	fflush(stdout);
+}
+
 /* A basic pager for directories containing large number of files.
  * What's missing? It only goes downwards. To go backwards, use the
  * terminal scrollback function */
 static int
-run_pager(const int columns_n, int *reset_pager, filesn_t *i, size_t *counter)
+run_pager(int *reset_pager, size_t *counter, const size_t remaining)
 {
 	fputs(PAGER_LABEL, stdout);
 
-	switch (xgetchar()) {
-	/* Advance one line at a time */
-	case 66: /* fallthrough */ /* Down arrow */
-	case 10: /* fallthrough */ /* Enter (LF) */
-	case 13: /* fallthrough */ /* Enter (CR) */
-	case ' ':
-		break;
+	while (1) {
+		switch (xgetchar()) {
+		/* Advance one line at a time */
+		case 66: /* fallthrough */ /* Down arrow */
+		case 10: /* fallthrough */ /* Enter (LF) */
+		case 13: /* fallthrough */ /* Enter (CR) */
+		case ' ':
+			putchar('\r'); ERASE_TO_RIGHT; return PAGER_RET_OK;
 
-	/* Advance one page at a time */
-	case 126: /* Page Down */
-		*counter = 0;
-		break;
+		/* Advance one page at a time */
+		case 126: /* Page Down */
+			*counter = 0;
+			putchar('\r'); ERASE_TO_RIGHT; return PAGER_RET_OK;
 
-	/* h: Print pager help */
-	case '?': /* fallthrough */
-	case 'h': {
-		CLEAR;
+		/* h: Print pager help */
+		case '?': /* fallthrough */
+		case 'h':
+			pager_help_screen(); break;
 
-		fputs(_(PAGER_HELP), stdout);
-		int l = (int)term_lines - 6;
-		MOVE_CURSOR_DOWN(l);
-		fputs(PAGER_LABEL, stdout);
+		/* Stop paging (and set a flag to reenable the pager later) */
+		case 'c': /* fallthrough */
+		case 'p': /* fallthrough */
+		case 'Q':
+			g_pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
+			putchar('\r'); ERASE_TO_RIGHT; return PAGER_RET_OK;
 
-		xgetchar();
-		CLEAR;
+		case 'q':
+			g_pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
+			putchar('\r'); ERASE_TO_RIGHT;
+			printf(_("... and %zd more %s\n"), remaining, FILE_STR(remaining));
+			return PAGER_RET_QUIT;
 
-		g_pager_help = conf.long_view == 0;
-
-		if (columns_n == -1) { /* Long view */
-			*i = 0;
-		} else { /* Normal view */
-			if (conf.listing_mode == HORLIST)
-				*i = 0;
-			else
-				return PAGER_RET_HELP;
+		default: break;
 		}
-
-		*counter = 0;
-		if (*i < 0)
-			*i = 0;
-	} break;
-
-	/* Stop paging (and set a flag to reenable the pager later) */
-	case 'c': /* fallthrough */
-	case 'p': /* fallthrough */
-	case 'Q':
-		g_pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
-		break;
-
-	case 'q':
-		g_pager_bk = conf.pager; conf.pager = 0; *reset_pager = 1;
-		putchar('\r');
-		ERASE_TO_RIGHT;
-		if (conf.long_view == 0 && conf.columned == 1
-		&& conf.max_name_len != UNSET)
-			MOVE_CURSOR_UP(1);
-		return PAGER_RET_QUIT;
-
-	/* If another key is pressed, go back one position.
-	 * Otherwise, some filenames won't be listed.*/
-	default:
-		putchar('\r');
-		ERASE_TO_RIGHT;
-		return PAGER_RET_BACK;
 	}
-
-	putchar('\r');
-	ERASE_TO_RIGHT;
-	return PAGER_RET_OK;
 }
 
 static int
@@ -1343,37 +1329,27 @@ print_long_mode(int *reset_pager, const int eln_len)
 		space_left = (int)longest.name_len;
 
 	maxes.name = space_left + (conf.icons == 1 ? ICON_LEN : 0);
-	g_pager_quit = g_pager_help = 0;
+	g_pager_help = 0;
 
 	/* Cache conf struct values for faster access. */
 	const filesn_t conf_max_files = conf.max_files;
 	const int conf_no_eln = conf.no_eln;
 
-	filesn_t i;
 	const filesn_t f = g_files_num; /* Cache global variable. */
 	const size_t s_term_lines = term_lines > 2 ? (size_t)(term_lines - 2) : 0;
 	size_t pager_counter = 0;
 
-	for (i = 0; i < f; i++) {
+	for (filesn_t i = 0; i < f; i++) {
 		if (conf_max_files != UNSET && i == conf_max_files)
 			break;
 
 		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
 		&& g_files_num >= (filesn_t)conf.pager)) {
 			if (pager_counter > s_term_lines) {
-				const int ret = run_pager(-1, reset_pager, &i, &pager_counter);
-
-				if (ret == PAGER_RET_QUIT) {
-					g_pager_quit = 1;
+				const size_t rem = (size_t)(f - i);
+				const int ret = run_pager(reset_pager, &pager_counter, rem);
+				if (ret == PAGER_RET_QUIT)
 					break;
-				}
-
-				if (ret == PAGER_RET_BACK || ret == PAGER_RET_HELP) {
-					i--;
-					if (ret == PAGER_RET_HELP)
-						pager_counter = 0;
-					continue;
-				}
 			}
 			pager_counter++;
 		}
@@ -1391,9 +1367,6 @@ print_long_mode(int *reset_pager, const int eln_len)
 		/* Print the remaining part of the entry. */
 		print_entry_props(&file_info[i], &maxes, have_xattr);
 	}
-
-	if (g_pager_quit == 1)
-		printf("... (%zd/%zd)\n", i, g_files_num);
 }
 
 /* Return the minimal number of columns we can use for the current list
@@ -1402,13 +1375,7 @@ print_long_mode(int *reset_pager, const int eln_len)
 static size_t
 get_columns(void)
 {
-	/* LONGEST.NAME_LEN is size_t: it will never be less than zero. */
-#ifdef TIGHT_COLUMNS
 	size_t n = (size_t)term_cols / (longest.name_len + COLUMNS_GAP);
-#else
-	size_t n = (size_t)term_cols / (longest.name_len + 1);
-#endif
-	/* +1 for the space between filenames. */
 
 	/* If LONGEST.NAME_LEN is larger than the number of terminal columns,
 	 * N will zero. To avoid this: */
@@ -1906,7 +1873,6 @@ print_entry_nocolor_light(int *ind_char, const filesn_t i,
 		free(wtrunc.wname);
 }
 
-#ifdef TIGHT_COLUMNS
 static size_t
 calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
 {
@@ -1942,306 +1908,61 @@ calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
 	return (size_t)item_len;
 }
 
-static size_t *
-get_longest_per_col(size_t *columns_n, filesn_t *rows, const filesn_t files_n)
+/* Test a column count and optionally return the width of each column.
+ * The layout is either column-major, like ls, or row-major (horizontal). */
+static int
+layout_fits(const size_t count, size_t columns, size_t spacing,
+	size_t screen_width, size_t widths[])
 {
-	if (conf.columned == 0) {
-		*columns_n = 1;
-		*rows = g_files_num;
-		size_t *longest_per_col = xnmalloc(2, sizeof(size_t));
-		longest_per_col[0] = term_cols;
-		return longest_per_col;
-	}
+	size_t rows = (count + columns - 1) / columns;
+	size_t total_width = 0;
+	const int hl = (conf.listing_mode == HORLIST);
 
-	size_t used_cols = 0;
-	size_t longest_index = 0;
+	const int eln_len = conf.no_eln == 1 ? 0 : DIGINUM(count);
+	const int icon_len = conf.icons == 1 ? ICON_LEN : 0;
 
-	if (*columns_n == 0)
-		*columns_n = 1;
-	if (*rows <= 0)
-		*rows = 1;
+	for (size_t col = 0; col < columns; col++) {
+		size_t _longest = 0;
 
-	/* Make enough room to hold columns information. We'll never get more
-	 * columns for the current file list than the number of terminal columns. */
-	size_t *longest_per_col = xnmalloc((size_t)term_cols + 1, sizeof(size_t));
-
-	/* Hold info about the previous columns state */
-	size_t *prev_longest_per_col = NULL;
-	filesn_t prev_rows = *rows;
-
-	const int longest_eln = conf.no_eln != 1 ? DIGINUM(files_n + 1) : 1;
-	const int icon_len = (conf.icons == 1 ? ICON_LEN : 0);
-
-#define LONGEST_PLUS_GAP (longest_per_col[longest_index] + COLUMNS_GAP)
-
-	while (1) {
-		/* Calculate the number of rows that will be in each column except
-		 * possibly for a short column on the right. */
-		*rows = files_n / (filesn_t)*columns_n
-			+ (files_n % (filesn_t)*columns_n != 0);
-
-		/* Get longest filename per column */
-		filesn_t i;
-		filesn_t counter = 1;
-		size_t longest_name_len = 0;
-
-		/* Cache the value referenced by the pointer once here instead of
-		 * dereferencing it hundreds of times in the below for-loop. */
-		const filesn_t cached_rows = *rows;
-
-		for (i = 0; i < files_n; i++) {
-			size_t len = 0;
-			if (file_info[i].total_entry_len > 0) {
-				len = file_info[i].total_entry_len;
-			} else {
-				len = file_info[i].total_entry_len =
-					calc_item_length(longest_eln, icon_len, i);
-			}
-
-			if (len > longest_name_len)
-				longest_name_len = len;
-
-			if (counter == cached_rows) {
-				counter = 1;
-				longest_per_col[longest_index] = longest_name_len;
-				used_cols += LONGEST_PLUS_GAP;
-				longest_index++;
-				longest_name_len = 0;
-			} else {
-				counter++;
-			}
-		}
-
-		/* Count last column as well: If the number of files in the last
-		 * column is less than the number of rows (in which case
-		 * LONGEST_NAME_LEN is bigger than zero), the longest name in this
-		 * column isn't taken into account: let's do it here. */
-		if (longest_name_len > 0) {
-			longest_per_col[longest_index] = longest_name_len;
-			used_cols += LONGEST_PLUS_GAP;
-		} else {
-			if (longest_index > 0)
-				longest_index--;
-			else
-				break;
-		}
-
-		const int rest = (int)term_cols - (int)used_cols;
-
-		if ((*rows == 1 && (filesn_t)*columns_n + 1 >= files_n)
-		|| rest < (int)LONGEST_PLUS_GAP) {
-			if (rest < 0 && *columns_n > 1) {
-				if (!prev_longest_per_col)
-					return longest_per_col;
-
-				(*columns_n)--;
-				*rows = prev_rows;
-				free(longest_per_col);
-				return prev_longest_per_col;
-			} else {
-				break;
-			}
-		}
-
-		/* Keep a copy of the current state, in case the next iteration
-		 * returns too many columns, in which case the current state is
-		 * what we want. */
-		prev_rows = *rows;
-		free(prev_longest_per_col);
-		prev_longest_per_col = xnmalloc(*columns_n + 1, sizeof(size_t));
-		memcpy(prev_longest_per_col, longest_per_col,
-			(*columns_n + 1) * sizeof(size_t));
-
-		/* There is space left for one more column: increase columns_n. */
-		(*columns_n)++;
-		longest_index = 0;
-		used_cols = 0;
-	}
-
-#undef LONGEST_PLUS_GAP
-
-	free(prev_longest_per_col);
-	return longest_per_col;
-}
-
-static void
-pad_filename_new(const filesn_t i, const int termcap_move_right,
-	const size_t longest_in_col)
-{
-	const int diff = ((int)longest_in_col + COLUMNS_GAP)
-		- ((int)file_info[i].total_entry_len + (conf.no_eln == 1));
-
-	if (termcap_move_right == 1) {
-		MOVE_CURSOR_RIGHT(diff);
-	} else {
-		int j = diff;
-		while (--j >= 0)
-			putchar(' ');
-	}
-}
-#endif /* TIGHT_COLUMNS */
-
-/* Right pad the current filename (adding spaces) to equate the longest
- * filename length. */
-static void
-pad_filename(const int ind_char, const filesn_t i, const int eln_len,
-	const int termcap_move_right)
-{
-	int cur_len =  eln_len + 1 + (conf.icons == 1 ? ICON_LEN : 0)
-		+ (int)file_info[i].len + (ind_char ? 1 : 0);
-
-	if (file_info[i].dir == 1 && conf.classify == 1) {
-		cur_len++;
-		if (file_info[i].filesn > 0 && conf.file_counter == 1
-		&& file_info[i].user_access == 1)
-			cur_len += DIGINUM((int)file_info[i].filesn);
-	}
-
-	const int diff = (int)longest.name_len - cur_len;
-	if (termcap_move_right == 1) {
-		MOVE_CURSOR_RIGHT(diff + 1);
-	} else {
-		int j = diff + 1;
-		while (--j >= 0)
-			putchar(' ');
-	}
-}
-
-/* List files horizontally:
- * 1 AAA	2 AAB	3 AAC
- * 4 AAD	5 AAE	6 AAF */
-static void
-list_files_horizontal(int *reset_pager, const int eln_len, size_t columns_n)
-{
-	const filesn_t nn = (conf.max_files != UNSET
-		&& (filesn_t)conf.max_files < g_files_num)
-		? (filesn_t)conf.max_files : g_files_num;
-
-/*	size_t *longest_per_col = get_longest_per_col(&columns_n, nn);
-	size_t cur_col = 0; */
-
-	void (*print_entry_function)(int *, const filesn_t, const int, const int);
-	if (conf.colorize == 1)
-		print_entry_function = conf.light_mode == 1
-			? print_entry_color_light : print_entry_color;
-	else
-		print_entry_function = conf.light_mode == 1
-			? print_entry_nocolor_light : print_entry_nocolor;
-
-	const int termcap_move_right = (xargs.list_and_quit == 1
-		|| term_caps.suggestions == 0) ? 0 : 1;
-
-	const int int_longest_fc_len = (int)longest.fc_len;
-	size_t cur_cols = 0;
-	filesn_t i;
-	int last_column = 0;
-	int backup_last_column = last_column;
-
-	g_pager_quit = g_pager_help = 0;
-	size_t pager_counter = 0;
-
-	for (i = 0; i < nn; i++) {
-		/* If current entry is in the last column, we need to print a
-		 * new line char. */
-		size_t bcur_cols = cur_cols;
-		if (++cur_cols != columns_n) {
-			last_column = 0;
-		} else {
-			cur_cols = 0;
-			last_column = 1;
-		}
-
-		int ind_char = (conf.classify != 0);
-
-				/* ##########################
-				 * #  MAS: A SIMPLE PAGER   #
-				 * ########################## */
-
-		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
-		&& g_files_num >= (filesn_t)conf.pager)) {
-			/* Run the pager only once all columns and rows fitting in
-			 * the screen are filled with the corresponding filenames */
-			int ret = 0;
-			filesn_t backup_i = i;
-			if (backup_last_column
-			&& pager_counter > columns_n * ((size_t)term_lines - 2))
-				ret = run_pager((int)columns_n, reset_pager, &i, &pager_counter);
-
-			if (ret == PAGER_RET_QUIT) {
-				g_pager_quit = 1;
-				goto END;
-			}
-
-			if (ret == PAGER_RET_BACK) {
-				i = backup_i ? backup_i - 1 : backup_i;
-				cur_cols = bcur_cols;
-				last_column = backup_last_column;
+		for (size_t row = 0; row < rows; row++) {
+			const size_t index = hl ? (row * columns + col) : (col * rows + row);
+			if (index >= count)
 				continue;
-			}
-			pager_counter++;
+
+			const size_t len =
+				calc_item_length(eln_len, icon_len, (filesn_t)index);
+			if (len > _longest)
+				_longest = len;
 		}
 
-		backup_last_column = last_column;
+		widths[col] = _longest;
 
-			/* #################################
-			 * #    PRINT THE CURRENT ENTRY    #
-			 * ################################# */
-
-		const int fc = file_info[i].dir != 1 ? int_longest_fc_len : 0;
-		/* Displayed filename will be truncated to MAX_NAME_LEN. */
-		const int max_namelen = conf.max_name_len + fc;
-
-		file_info[i].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(i + 1);
-
-		print_entry_function(&ind_char, i, eln_len, max_namelen);
-
-		if (last_column == 0) {
-/*			pad_filename_new(i, termcap_move_right, longest_per_col[cur_col]);
-			cur_col++; */
-			pad_filename(ind_char, i, eln_len, termcap_move_right);
-		} else {
-			putchar('\n');
-//			cur_col = 0;
-		}
+		/* Add spacing after every column except the last one. */
+		if (col + 1 < columns)
+			total_width += _longest + spacing;
+		else
+			total_width += _longest;
 	}
 
-END:
-//	free(longest_per_col);
-	if (last_column == 0)
-		putchar('\n');
-	if (g_pager_quit == 1)
-		printf("... (%zd/%zd)\n", i, g_files_num);
+	return total_width <= screen_width;
 }
 
-/* List files vertically, like ls(1) would
- * 1 AAA	3 AAC	5 AAE
- * 2 AAB	4 AAD	6 AAF */
+/* List files in the current directory. */
 static void
-list_files_vertical(int *reset_pager, const int eln_len, size_t num_columns)
+list_files(int *reset_pager)
 {
 	/* Total number of files to be listed. */
-	const filesn_t total_files = (conf.max_files != UNSET
+	const filesn_t total = (conf.max_files != UNSET
 		&& (filesn_t)conf.max_files < g_files_num)
 		? (filesn_t)conf.max_files : g_files_num;
 
-#ifdef TIGHT_COLUMNS
-	filesn_t num_rows = 0;
-	size_t *longest_per_col =
-		get_longest_per_col(&num_columns, &num_rows, total_files);
-	size_t cur_col = 0;
-#else
-	/* How many lines (rows) do we need to print TOTAL_FILES files? */
-	/* Division/modulo is slow, true. But the compiler will make a much
-	 * better job than us at optimizing this code. */
-	/* NUM_COLUMNS is guarranteed to be >0 by get_columns() */
-	filesn_t num_rows = total_files / (filesn_t)num_columns;
-	if (total_files % (filesn_t)num_columns > 0)
-		num_rows++;
-#endif
+	if (total <= 0)
+		return;
 
-	int last_column = 0;
-	/* The previous value of LAST_COLUMN. We need this value to run the pager. */
-	int backup_last_column = last_column;
+	const size_t count = (size_t)total;
+	const int eln_len = conf.no_eln == 1 ? 0 : DIGINUM(count);
+	const int icon_len = conf.icons == 1 ? ICON_LEN : 0;
+	const int hl = (conf.listing_mode == HORLIST);
 
 	void (*print_entry_function)(int *, const filesn_t, const int, const int);
 	if (conf.colorize == 1)
@@ -2251,141 +1972,73 @@ list_files_vertical(int *reset_pager, const int eln_len, size_t num_columns)
 		print_entry_function = conf.light_mode == 1
 			? print_entry_nocolor_light : print_entry_nocolor;
 
-	const int termcap_move_right = (xargs.list_and_quit == 1
-		|| term_caps.suggestions == 0) ? 0 : 1;
-
 	const int int_longest_fc_len = (int)longest.fc_len;
-	size_t column_count = num_columns; // Current column number
-	filesn_t file_index = 0; // Index of the file to be actually printed
-	filesn_t row_index = 0; // Current line number
-	filesn_t i = 0; // Index of the current entry being analyzed
-
 	const int conf_max_name_len = conf.max_name_len;
 	const int conf_no_eln = conf.no_eln;
 	const int conf_classify = conf.classify;
 
-	g_pager_quit = g_pager_help = 0;
-	size_t pager_counter = 0;
+	const size_t screen_width = term_cols;
+	const size_t spacing = COLUMNS_GAP;
+	size_t *widths = xnmalloc(count, sizeof(*widths));
+	size_t columns = 0;
 
-	for ( ; ; i++) {
-		/* Copy current values to restore them if necessary. */
-		filesn_t backup_row_index = row_index;
-		filesn_t backup_file_index = file_index;
-		size_t backup_column_count = column_count;
-
-		if (column_count != num_columns) {
-			file_index += num_rows;
-			column_count++;
-		} else {
-			file_index = row_index;
-			row_index++;
-			column_count = 1;
-		}
-
-		if (row_index > num_rows)
+	/* Find the greatest number of columns that fits. */
+	while (columns < count) {
+		columns++;
+		if (layout_fits(count, columns, spacing, screen_width, widths) == 0) {
+			if (columns > 1)
+				layout_fits(count, --columns, spacing, screen_width, widths);
 			break;
-
-		/* If current entry is in the last column, print a new line char */
-		last_column = (column_count == num_columns);
-
-		int ind_char = (conf_classify != 0);
-
-		if (file_index >= total_files || !file_info[file_index].name) {
-			if (last_column == 1) {
-				/* Last column is empty. E.g.:
-				 * 1 file  3 file3  5 file5
-				 * 2 file2 4 file4  HERE
-				 * ... */
-				putchar('\n');
-#ifdef TIGHT_COLUMNS
-				cur_col = 0;
-#endif
-			}
-			continue;
 		}
+	}
 
-				/* ##########################
-				 * #  MAS: A SIMPLE PAGER   #
-				 * ########################## */
+	const size_t rows = (count + columns - 1) / columns;
+
+	size_t pager_counter = 0;
+	for (size_t row = 0; row < rows; row++) {
 
 		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
 		&& g_files_num >= (filesn_t)conf.pager)) {
-			int ret = 0;
-			filesn_t backup_i = i;
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding filenames. */
-			if (backup_last_column
-			&& pager_counter > num_columns * ((size_t)term_lines - 2))
-				ret = run_pager((int)num_columns,
-					reset_pager, &file_index, &pager_counter);
-
-			if (ret == PAGER_RET_QUIT) {
-				g_pager_quit = 1;
-				goto END;
-			}
-
-			if (ret == PAGER_RET_BACK) {
-				/* Restore previous values */
-				i = backup_i ? backup_i - 1: backup_i;
-				file_index = backup_file_index;
-				row_index = backup_row_index;
-				column_count = backup_column_count;
-				continue;
-			} else {
-				if (ret == PAGER_RET_HELP) {
-					i = file_index = row_index = 0;
-					last_column = backup_last_column = 0;
-					pager_counter = 0;
-					column_count = num_columns;
-					continue;
-				}
+			if (pager_counter + 2 > (size_t)term_lines) {
+				const size_t rem = count - (columns * row);
+				const int ret = run_pager(reset_pager, &pager_counter, rem);
+				if (ret == PAGER_RET_QUIT)
+					break;
 			}
 			pager_counter++;
 		}
 
-		backup_last_column = last_column;
+		for (size_t col = 0; col < columns; col++) {
+			const size_t index = hl ? (row * columns + col) : (col * rows + row);
+			if (index >= count)
+				continue;
 
-			/* #################################
-			 * #    PRINT THE CURRENT ENTRY    #
-			 * ################################# */
+			size_t len = calc_item_length(eln_len, icon_len, (filesn_t)index);
+			const int fc = file_info[index].dir != 1 ? int_longest_fc_len : 0;
 
-		const int fc = file_info[file_index].dir != 1 ? int_longest_fc_len : 0;
-		/* Displayed filename will be truncated to MAX_NAMELEN. */
-		const int max_namelen = conf_max_name_len + fc;
+			/* Displayed filename will be truncated at MAX_NAMELEN. */
+			const int max_namelen = conf_max_name_len + fc;
+			int ind_char = (conf_classify != 0);
 
-		file_info[file_index].eln_n = conf_no_eln == 1
-			? -1 : DIGINUM(file_index + 1);
+			file_info[index].eln_n = conf_no_eln == 1
+				? -1 : DIGINUM(index + 1);
 
-		print_entry_function(&ind_char, file_index, eln_len, max_namelen);
+			print_entry_function(&ind_char, (filesn_t)index,
+				eln_len, max_namelen);
 
-		if (last_column == 0) {
-#ifdef TIGHT_COLUMNS
-			pad_filename_new(file_index, termcap_move_right,
-				longest_per_col[cur_col]);
-			cur_col++;
-#else
-			pad_filename(ind_char, file_index, eln_len, termcap_move_right);
-#endif
-		} else {
-			/* Last column is populated. Example:
-			 * 1 file  3 file3  5 file5HERE
-			 * 2 file2 4 file4  6 file6HERE
-			 * ... */
-			putchar('\n');
-#ifdef TIGHT_COLUMNS
-			cur_col = 0;
-#endif
+			if (col + 1 < columns) {
+				size_t padding = widths[col] - len + spacing;
+				while (padding--)
+					putchar(' ');
+			}
 		}
+
+		putchar('\n');
 	}
 
-END:
-#ifdef TIGHT_COLUMNS
-	free(longest_per_col);
-#endif
-	if (last_column == 0)
-		putchar('\n');
-	if (g_pager_quit == 1)
-		printf("... (%zd/%zd)\n", i, g_files_num);
+	free(widths);
 }
 
 /* Execute commands in either AUTOCMD_DIR_IN_FILE or AUTOCMD_DIR_OUT_FILE files.
@@ -3002,10 +2655,8 @@ list_dir_light(const int autocmd_ret)
 				 * #   NORMAL VIEW MODE   #
 				 * ######################## */
 
-	else if (conf.listing_mode == VERTLIST) { /* ls(1)-like listing */
-		list_files_vertical(&reset_pager, eln_len, columns_n);
-	} else {
-		list_files_horizontal(&reset_pager, eln_len, columns_n);
+	else {
+		list_files(&reset_pager);
 	}
 
 				/* #########################
@@ -3866,10 +3517,8 @@ list_dir(void)
 				 * #   NORMAL VIEW MODE   #
 				 * ######################## */
 
-	else if (conf.listing_mode == VERTLIST) { /* ls(1) like listing */
-		list_files_vertical(&reset_pager, eln_len, columns_n);
-	} else {
-		list_files_horizontal(&reset_pager, eln_len, columns_n);
+	else {
+		list_files(&reset_pager);
 	}
 
 				/* #########################

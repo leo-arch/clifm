@@ -1988,10 +1988,9 @@ properties_function(char **args, const int follow_link, const int full_dirsize)
 	if (!args)
 		return FUNC_FAILURE;
 
-	size_t i;
 	int exit_status = FUNC_SUCCESS;
 
-	for (i = 0; args[i]; i++) {
+	for (size_t i = 0; args[i]; i++) {
 		if (strchr(args[i], '\\')) {
 			char *deq_file = unescape_str(args[i]);
 			if (!deq_file) {

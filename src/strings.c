@@ -49,6 +49,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #include "readline.h"
 #include "sort.h"
 #include "tags.h"
+#include "xmatch.h" /* xglob */
 
 /* Macros for xstrverscmp() */
 /* states: S_N: normal, S_I: comparing integral part, S_F: comparing
@@ -77,6 +78,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 || (x) == 's' || (x) == 't' || (x) == 'u' || (x) == 'x')
 #endif /* SOLARIS_DOORS */
 
+// Remove brace and add IS_REGEX()
 #define IS_GLOB(x, y) (((x) == '*' || (x) == '?' || (x) == '{' ) && (y) != ' ')
 
 #define IS_WORD(x, y) (((x) == '$' && ((y) == '(' || (y) == '{')) \
@@ -1964,54 +1966,80 @@ expand_bookmarks(char ***substr)
 }
 
 static int
+do_glob(char *pattern, xglob_t *globbuf)
+{
+	if (!pattern || !globbuf)
+		return (-1);
+
+	char *p = strrchr(pattern, '/');
+	if (p && p[1]) {
+		*p = '\0';
+		char *buf = (*pattern == '~') ? tilde_expand(pattern) : strdup(pattern);
+		*p = '/';
+		int ret = xglob(buf, p + 1, globbuf, -1, 0, 0, 0);
+		free(buf);
+		return ret;
+	}
+
+	return xglob(".", pattern, globbuf, -1, 0, 0, 0);
+}
+
+static int
 expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 {
 	size_t old_pathc = 0;
 	size_t i = 0;
 
 	for (size_t g = 0; g < (size_t)glob_n; g++) {
-		glob_t globbuf;
+		xglob_t globbuf = {0};
 
 		if (is_quoted_word((size_t)glob_array[g] + old_pathc))
 			continue;
 
-		if (glob((*substr)[glob_array[g] + (int)old_pathc],
-			GLOB_BRACE | GLOB_TILDE, NULL, &globbuf) != FUNC_SUCCESS) {
-			globfree(&globbuf);
+		char *s = (*substr)[glob_array[g] + (int)old_pathc];
+		const int is_glob_prefix = IS_GLOB_PREFIX(s);
+		if (!is_glob_prefix && conf.search_strategy != GLOB_MATCH)
+			continue;
+
+		if (is_glob_prefix)
+			s += 3;
+
+		if (do_glob(s, &globbuf) != 0) {
+			xglobfree(&globbuf);
 			continue;
 		}
 
-		if (globbuf.gl_pathc == 0)
+		if (globbuf.gl_matches == 0)
 			goto CONT;
 
 		size_t j = 0;
 		char **glob_cmd = NULL;
-		glob_cmd = xcalloc(args_n + globbuf.gl_pathc + 1, sizeof(char *));
+		glob_cmd = xcalloc(args_n + globbuf.gl_matches + 1, sizeof(char *));
 
 		for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++)
 			glob_cmd[j++] = savestring((*substr)[i], strlen((*substr)[i]));
 
-		for (i = 0; i < globbuf.gl_pathc; i++) {
-			if (SELFORPARENT(globbuf.gl_pathv[i]))
+		for (i = 0; i < globbuf.gl_matches; i++) {
+			if (SELFORPARENT(globbuf.gl_finfo[i].name))
 				continue;
 
 			char *esc_str = NULL;
 			/* Escape the globbed filename and copy it */
-			if (virtual_dir == 1 && is_file_in_cwd(globbuf.gl_pathv[i])) {
+			if (virtual_dir == 1 && is_file_in_cwd(globbuf.gl_finfo[i].name)) {
 				char buf[PATH_MAX + 1]; *buf = '\0';
-				if (xreadlink(XAT_FDCWD, globbuf.gl_pathv[i], buf,
+				if (xreadlink(XAT_FDCWD, globbuf.gl_finfo[i].name, buf,
 				sizeof(buf)) == -1 || !*buf)
 					continue;
 				esc_str = escape_str(buf);
 			} else {
-				esc_str = escape_str(globbuf.gl_pathv[i]);
+				esc_str = escape_str(globbuf.gl_finfo[i].name);
 			}
 
 			if (esc_str) {
 				glob_cmd[j++] = esc_str;
 			} else {
 				xerror(_("%s: '%s': Error escaping filename\n"),
-					PROGRAM_NAME, globbuf.gl_pathv[i]);
+					PROGRAM_NAME, globbuf.gl_finfo[i].name);
 				continue;
 			}
 		}
@@ -2030,8 +2058,8 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 		args_n = j - 1;
 
 CONT:
-		old_pathc += (globbuf.gl_pathc - 1);
-		globfree(&globbuf);
+		old_pathc += (globbuf.gl_matches - 1);
+		xglobfree(&globbuf);
 	}
 
 	return 0;
@@ -2065,7 +2093,7 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 			 * by the sel function, mostly regex expansion. */
 			const char *p =
 				strchr((*substr)[word_array[w] + (int)old_pathc], '$');
-			if (p && *(p + 1) != '(' && (*(p + 1) < 'A' || *(p + 1) > 'Z'))
+			if (p && p[1] != '(' && (p[1] < 'A' || p[1] > 'Z'))
 				continue;
 		}
 
@@ -2290,123 +2318,148 @@ expand_ranges(char ***substr)
 	free(range_array);
 }
 
-static void
-expand_regex(char ***substr)
+/* Add leading '^' and trailing '$' to pattern to prevent accidental file
+ * expansions. For example, a file named "file.txt" must not be expanded
+ * given the pattern "ile.t". In other words, we force the use of
+ * ".*PATTERN.*" instead of just "PATTERN". */
+static char *
+harden_regex_pattern(char *pattern)
 {
-	/* Let's store all strings currently in substr plus REGEX expanded
-	 * files, if any, in a temporary array. */
-	char **tmp = xnmalloc((size_t)g_files_num + args_n + 2, sizeof(char *));
-	filesn_t i, j;
-	size_t n = 0;
-	regex_t regex;
+	char *s = strrchr(pattern, '/');
+	if (!s || !s[1]) { /* Not a path */
+		const size_t len = strlen(pattern) + 3;
+		const int is_invert = (*pattern == '!');
+		char *tmp = xnmalloc(len, sizeof(char));
+		snprintf(tmp, len, "%s^%s$", is_invert ? "!" : "",
+			is_invert ? pattern + 1 : pattern);
 
-/*	int reg_flags = conf.ignore_case == 0 ? (REG_NOSUB | REG_EXTENDED)
-			: (REG_NOSUB | REG_EXTENDED | REG_ICASE); */
-
-	const int reg_flags = (REG_NOSUB | REG_EXTENDED);
-
-	for (i = 0; (*substr)[i]; i++) {
-		if (n > ((size_t)g_files_num + args_n))
-			break;
-
-		/* Ignore the first string of the search function: it will be
-		 * expanded by the search function itself.
-		 * Also, ignore quoted words and existent filenames. */
-		struct stat a;
-		if (*(*substr)[0] == '/' || is_quoted_word((size_t)i)
-		|| lstat((*substr)[i], &a) != -1) {
-			tmp[n++] = (*substr)[i];
-			continue;
-		}
-
-		/* At this point, all filenames are escaped. But check_regex()
-		 * needs unescaped filenames. So, let's deescape it. */
-		const char *p = strchr((*substr)[i], '\\');
-		char *dstr = NULL;
-		if (p)
-			dstr = unescape_str((*substr)[i]);
-
-		const char *t = dstr ? dstr : (*substr)[i];
-
-		/* Add leading '^' and trailing '$' to prevent accidental file
-		 * expansions. For example, a file named file.txt must not be expanded
-		 * given the pattern "ile.t". In other words, we force the use of
-		 * ".*PATTERN.*" instead of just "PATTERN". */
-		const size_t l = strlen(t) + 3;
-		char *rstr = xnmalloc(l, sizeof(char));
-		snprintf(rstr, l, "^%s$", t);
-
-		const int ret = check_regex(dstr);
-		free(dstr);
-
-		if (ret != FUNC_SUCCESS
-		|| regcomp(&regex, rstr, reg_flags) != FUNC_SUCCESS) {
-			if (ret == FUNC_SUCCESS)
-				regfree(&regex);
-			free(rstr);
-			tmp[n++] = (*substr)[i];
-			continue;
-		}
-
-		free(rstr);
-		int reg_found = 0;
-
-		for (j = 0; j < g_files_num; j++) {
-			if (regexec(&regex, file_info[j].name, 0, NULL, 0) != FUNC_SUCCESS)
-				continue;
-
-			/* Make sure the matching filename is not already in the tmp array */
-			size_t m = n, found = 0;
-			for (; m-- > 0;) {
-				if (*file_info[j].name == *tmp[m]
-				&& strcmp(file_info[j].name, tmp[m]) == 0)
-					found = 1;
-			}
-
-			if (found == 1)
-				continue;
-
-			tmp[n++] = file_info[j].name;
-			reg_found = 1;
-		}
-
-		if (reg_found == 0)
-			tmp[n++] = (*substr)[i];
-
-		regfree(&regex);
+		return tmp;
 	}
 
-	if (n > 0) {
-		tmp[n] = NULL;
+	*s = '\0';
+	const size_t len = strlen(pattern) + strlen(s + 1) + 4;
+	const int is_invert = (s[1] == '!');
+	char *tmp = xnmalloc(len, sizeof(char));
+	snprintf(tmp, len, "%s/%s^%s$", pattern, is_invert ? "!" : "",
+		is_invert ? s + 2 : s + 1);
+	*s = '/';
 
-		char **tmp_files = xnmalloc(n + 2, sizeof(char *));
+	return tmp;
+}
+
+static int
+do_regex(char *pattern, xregex_t *regbuf, const int re_prefix)
+{
+	if (!pattern || !regbuf)
+		return (-1);
+
+	char *pat = pattern;
+	if (re_prefix == 0)
+		/* Not running with 're:' prefix. Let's take some
+		 * precautions to avoid undesired expansions. */
+		pat = harden_regex_pattern(pattern);
+
+	int ret = 0;
+	char *p = strrchr(pat, '/');
+	if (p && p[1]) { /* We have a path */
+		*p = '\0';
+		char *dir = (*pat == '~') ? tilde_expand(pat) : strdup(pat);
+		*p = '/';
+		ret = xregex(dir, p + 1, regbuf, -1, 0, 0, 0);
+		free(dir);
+	} else {
+		ret = xregex(".", pat, regbuf, -1, 0, 0, 0);
+	}
+
+	if (pat != pattern)
+		free(pat);
+
+	return ret;
+}
+
+static int
+expand_regex(char ***substr)
+{
+	size_t old_index = 0;
+	size_t regex_array[INT_ARRAY_MAX];
+	size_t regex_n = 0;
+
+	for (size_t i = 0; (*substr)[i]; i++) {
+		char *name = (*substr)[i];
+		if (strchr(name, '\\'))
+			name = unescape_str((*substr)[i]);
+		if (regex_n < sizeof(regex_array) && check_regex(name) == FUNC_SUCCESS)
+			regex_array[regex_n++] = i;
+		if (name != (*substr)[i])
+			free(name);
+	}
+
+	if (regex_n == 0)
+		return 0;
+
+	for (size_t i = 0; i < (size_t)regex_n; i++) {
+		if (is_quoted_word((size_t)regex_array[i] + old_index))
+			continue;
+
+		char *s = (*substr)[regex_array[i] + old_index];
+		const int is_regex_prefix = IS_REGEX_PREFIX(s);
+		if (!is_regex_prefix && conf.search_strategy != REGEX_MATCH)
+			continue;
+
+		if (is_regex_prefix)
+			s += 3;
+
+		xregex_t r = {0};
+		if (do_regex(s, &r, is_regex_prefix) != 0 || r.re_matches == 0) {
+			xregfree(&r);
+			continue;
+		}
 
 		size_t k = 0;
-		for (j = 0; tmp[j]; j++) {
-			struct stat a;
-			if (virtual_dir == 1 && lstat(tmp[j], &a) == 0
-			&& S_ISLNK(a.st_mode) && is_file_in_cwd(tmp[j])) {
-				char buf[PATH_MAX]; *buf = '\0';
-				const ssize_t buf_len =
-					xreadlink(XAT_FDCWD, tmp[j], buf, sizeof(buf));
-				if (buf_len == -1 || !*buf)
+		char **reg_cmd = xcalloc(args_n + r.re_matches + 1, sizeof(char *));
+
+		for (size_t j = 0; j < ((size_t)regex_array[i] + old_index); j++)
+			reg_cmd[k++] = strdup((*substr)[j]);
+
+		for (size_t j = 0; j < r.re_matches; j++) {
+			char *esc_str = NULL;
+			/* Escape the globbed filename and copy it */
+			if (virtual_dir == 1 && is_file_in_cwd(r.re_finfo[j].name)) {
+				char buf[PATH_MAX + 1]; *buf = '\0';
+				if (xreadlink(XAT_FDCWD, r.re_finfo[j].name, buf,
+				sizeof(buf)) == -1 || !*buf)
 					continue;
-				tmp_files[k++] = savestring(buf, (size_t)buf_len);
+				esc_str = escape_str(buf);
 			} else {
-				tmp_files[k++] = savestring(tmp[j], strlen(tmp[j]));
+				esc_str = escape_str(r.re_finfo[j].name);
+			}
+
+			if (esc_str) {
+				reg_cmd[k++] = esc_str;
+			} else {
+				xerror(_("%s: '%s': Error escaping filename\n"),
+					PROGRAM_NAME, r.re_finfo[j].name);
+				continue;
 			}
 		}
-		tmp_files[k] = NULL;
 
-		for (j = 0; (*substr)[j]; j++)
+		for (size_t j = (size_t)regex_array[i] + old_index + 1; j <= args_n; j++)
+			reg_cmd[k++] = strdup((*substr)[j]);
+
+		reg_cmd[k] = NULL;
+
+		for (size_t j = 0; j <= args_n; j++)
 			free((*substr)[j]);
 		free((*substr));
 
-		(*substr) = tmp_files;
-		args_n = (k > 0 ? k - 1 : k);
+		(*substr) = reg_cmd;
+		args_n = k - 1;
+
+		old_index += (r.re_matches - 1);
+		xregfree(&r);
 	}
 
-	free(tmp);
+	return 0;
 }
 
 static int
@@ -2491,7 +2544,7 @@ glob_expand(char **cmd)
 	&& (strcmp(cmd[0], "ds") == 0 || strcmp(cmd[0], "desel") == 0)) {
 		if (*cmd[1] == '*' && !cmd[1][1])
 			return 0;
-		return (check_glob_char(cmd[1], REGEX_MATCH));
+		return (check_metachar(cmd[1], REGEX_MATCH));
 	}
 
 	/* Do not expand if command is sel or untrash, just to allow the use
@@ -2513,15 +2566,21 @@ glob_expand(char **cmd)
 
 /* Return 1 if CMD should be regex expanded, or 0 otherwise. */
 static int
-regex_expand(const char *cmd)
+regex_expand(const char *cmd, const char *arg1)
 {
 	if (!cmd || !*cmd)
 		return 0;
 
-	if (strcmp(cmd, "ds") == 0 || strcmp(cmd, "desel") == 0
-	|| strcmp(cmd, "u") == 0 || strcmp(cmd, "undel") == 0
-	|| strcmp(cmd, "untrash") == 0
-	|| strcmp(cmd, "s") == 0 || strcmp(cmd, "sel") == 0)
+	const int is_single_asterisk =
+		(arg1 && *arg1 && arg1[1] == '*' && !arg1[2]);
+
+	if ((strcmp(cmd, "ds") == 0 || strcmp(cmd, "desel") == 0)
+	&& is_single_asterisk)
+		return 0; /* "ds *" is handled by the 'ds' command itself. */
+	if (strcmp(cmd, "u") == 0 || strcmp(cmd, "undel") == 0
+	|| strcmp(cmd, "untrash") == 0)
+		return 0;
+	if (strcmp(cmd, "s") == 0 || strcmp(cmd, "sel") == 0)
 		return 0;
 
 	return 1;
@@ -2711,7 +2770,14 @@ make_sel_recursive(char ***substr)
 		check_find = 1;
 	}
 
-	const int use_regex = (s[2][0] && s[2][1] == 'R');
+	const int is_regex_prefix = IS_REGEX_PREFIX(pattern);
+	if (is_regex_prefix == 1 || IS_GLOB_PREFIX(pattern)) {
+		char *tmp = strdup(pattern + 3);
+		free(s[1]);
+		s[1] = tmp;
+		pattern = s[1];
+	}
+	const int use_regex = ((s[2][0] && s[2][1] == 'R') || is_regex_prefix);
 	char *method = NULL;
 	if (conf.ignore_case == 0)
 		method = use_regex ? "-regex" : "-name";
@@ -3136,14 +3202,27 @@ parse_input_str(char *str)
 		if (lstat(substr[i], &a) != -1)
 			continue;
 
+		/* Regex expression: skip wordexp and glob for this one. */
+		if (!g_sel_is_recursive && IS_REGEX_PREFIX(substr[i]))
+			continue;
+
+		/* Glob expression: skip wordexp and regex for this one. */
+		if (!g_sel_is_recursive && IS_GLOB_PREFIX(substr[i])) {
+			if (glob_n < INT_ARRAY_MAX)
+				glob_array[glob_n++] = (int)i;
+			continue;
+		}
+
 #ifdef HAVE_WORDEXP
 		/* Let's make wordexp(3) ignore escaped words. */
-		const int is_escaped = strchr(substr[i], '\\') ? 1 : 0;
+		const int is_escaped = (!g_sel_is_recursive && strchr(substr[i], '\\'));
 #endif /* HAVE_WORDEXP */
 
 		for (size_t j = 0; substr[i][j]; j++) {
+			char s0 = substr[i][j];
+			char s1 = substr[i][j + 1];
 			/* Brace and wildcard expansion is made by glob(3). */
-			if (IS_GLOB(substr[i][j], substr[i][j + 1])) {
+			if (!g_sel_is_recursive && IS_GLOB(s0, s1)) {
 				/* Strings containing these characters are taken as wildacard
 				 * patterns and are expanded by the glob function. See glob(7). */
 				if (glob_n < INT_ARRAY_MAX)
@@ -3153,7 +3232,7 @@ parse_input_str(char *str)
 #ifdef HAVE_WORDEXP
 			/* Command substitution, tilde, and environment variables
 			 * expansion is made by wordexp(3). */
-			if (is_escaped == 0 && IS_WORD(substr[i][j], substr[i][j + 1])) {
+			if (is_escaped == 0 && IS_WORD(s0, s1)) {
 				/* Unlike glob() and tilde_expand(), wordexp() can expand tilde
 				 * and env vars even in the middle of a string. E.g.:
 				 * '$HOME/Downloads'. */
@@ -3188,8 +3267,7 @@ parse_input_str(char *str)
 			 * #       3.3) REGEX EXPANSION          #
 			 * ####################################### */
 
-	if (regex_expand(substr[0]) == 1)
-		/* Escaped file names are unescaped here. */
+	if (regex_expand(substr[0], substr[1]) == 1)
 		expand_regex(&substr);
 
 	/* #### NULL TERMINATE THE INPUT STRING ARRAY (again) #### */

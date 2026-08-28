@@ -18,6 +18,8 @@ void reload_dirlist(void);
 void refresh_screen(void);
 
 #ifndef _NO_ICONS
+const char *get_file_icon_and_color(const char *name, const struct stat *a,
+	const char *file_color, const char **icon_color);
 void *print_file_icon(const char *name, const struct stat *a,
 	const char *file_color);
 void init_icons_hashes(void);

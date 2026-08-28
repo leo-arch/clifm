@@ -143,10 +143,6 @@
 # undef _DIRENT_HAVE_D_TYPE
 #endif /* _BE_POSIX && _DIRENT_HAVE_D_TYPE */
 
-#if !defined(TIGHT_COLUMNS) && !defined(NO_TIGHT_COLUMNS)
-# define TIGHT_COLUMNS
-#endif /* !TIGHT_COLUMNS && !NO_TIGHT_COLUMNS */
-
 #ifdef CLIFM_LEGACY
 /* Replace functions not available before POSIX-1.2008. More precisely,
  * let's try to be POSIX-1.2001 compliant. This is still experimental:
@@ -1373,7 +1369,7 @@ struct human_size_t {
 	int    pad0;
 };
 
-/* Struct to store files information */
+/* Struct to store file information */
 struct fileinfo {
 	struct human_size_t human_size;
 	struct groups_t uid_i;
@@ -1385,12 +1381,10 @@ struct fileinfo {
 	char *icon_color;
 	char *name;
 	filesn_t filesn;
+	filesn_t eln;
 	blkcnt_t blocks;
 	size_t len;    /* Filename len (columns needed to display filename) */
 	size_t bytes;  /* Bytes consumed by filename */
-#ifdef TIGHT_COLUMNS
-	size_t total_entry_len;
-#endif
 	time_t ltime;  /* For long view mode */
 	time_t time;
 	ino_t inode;

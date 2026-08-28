@@ -1045,7 +1045,7 @@ the editor (quit without saving to cancel the operation).\n\n\
 
 #define SEARCH_USAGE "Search for files using either glob or regular expressions\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  /[gl:|re:]PATTERN [-filetype] [-r] [DIR]\n\n\
+  /[gl:|re:][!]PATTERN [-filetype] [-r] [DIR]\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
 - List all PDF files in the current directory\n\
     /*.pdf\n\
@@ -1060,6 +1060,9 @@ example, to list files starting with 'd' using regex:\n\
     /re:^d.*\n\
 or using glob:\n\
     /gl:d*\n\n\
+Use the '!' prefix to negate a pattern. For example, to list all files in the\n\
+current directory not starting with 'd':\n\
+    /re:!^d.*\n\n\
 You can further filter the search using a file type filter:\n\
   -b	block device\n\
   -c	character device\n\
@@ -1096,7 +1099,7 @@ injection. To enable this mode, use the --secure-cmds command line switch."
 
 #define SEL_USAGE "Select one or multiple files\n\n\
 \x1b[1mUSAGE\x1b[22m\n\
-  s, sel [-i,--invert] [FILE...] [(!)PATTERN] [-(d|f|l|s|p|b|c|r|R)] [:PATH]\n\n\
+  s, sel [-i,--invert] [FILE...] [gl:|re:][!][PATTERN] [-(d|f|l|s|p|b|c|r)] [:PATH]\n\n\
 Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 (s)ocket, fifo/(p)ipe, (b)lock device, (c)haracter device\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\
@@ -1104,20 +1107,26 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
     s 12 (or 's <TAB>' to select from a list - multi-selection is allowed)\n\
 - Select all files ending with .odt:\n\
     s *.odt\n\
+- Select all files not ending with .odt:\n\
+    s !*.odt\n\
+- Select JPG files in the directory 'Downloads' using regex:\n\
+    s re:.*\\.jpg$ :Downloads\n\
+  Note: For details about the 're:' and 'gl:' prefixes, run '/ --help'.\n\
 - Select multiple files at once\n\
-    s 12 15-21 *.pdf\n\
+    s 12 15-21 ~/Downloads/*.pdf\n\
 - Select all regular files in the directory '/etc' starting with 'd'\n\
-    s ^d.* -f :/etc\n\
+    s d* -f :/etc\n\
 - Select all files in the current directory (including hidden files)\n\
-    s * .* (or Alt+a)\n\
-- Interactively select files in '/media' (requires fzf, fnf, or smenu\n\
-  tab completion modes)\n\
+    s * (or Alt+a)\n\
+- Interactively select files in the directory 'media' (requires fzf, fnf,\n\
+  or smenu tab completion modes)\n\
     s /media/*<TAB>\n\
-- Recursively select *.PNG files starting from the current directory\n\
+- Recursively select PNG files starting from the current directory\n\
     s *.png -r\n\
-- Recursively select *.PNG files starting from the directory 'dir'\n\
+- Recursively select PNG files starting from the directory 'dir'\n\
     s *.png -r dir/\n\
-  Note: To use a regular expression instead of a glob pattern, use -R\n\
+  Note: To use a regular expression instead of a glob pattern, use the\n\
+    're:' prefix. E.g., 's re:.*\\.png$ -r dir/'\n\
   Note: Only a single pattern is allowed when recursively selecting files\n\
 - List currently selected files\n\
     sb\n\
@@ -1125,8 +1134,8 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
     s -i (also 's --invert' or Shift+Tab)\n\
 - Copy selected files to the current directory:\n\
     c sel\n\
-- Move selected files to the directory whose ELN is 24\n\
-    m sel 24\n\
+- Move selected files to the directory 'dir'\n\
+    m sel dir/\n\
 - Deselect all files\n\
     ds * (or Alt+d)\n\
 - Deselect files selectively\n\

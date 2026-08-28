@@ -1848,7 +1848,7 @@ rl_select_all(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	exec_prompt_cmds = 1;
-	return run_kb_cmd("s ^", 0);
+	return run_kb_cmd("s gl:*", 0);
 }
 
 static int
