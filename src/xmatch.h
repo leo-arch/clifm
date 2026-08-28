@@ -10,7 +10,7 @@
 #ifndef CLIFM_XMATCH_H
 #define CLIFM_XMATCH_H
 
-#include "helpers.h" // struct fileinfo
+#include "helpers.h" /* struct fileinfo */
 
 #include <regex.h>
 

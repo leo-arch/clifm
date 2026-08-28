@@ -1618,7 +1618,7 @@ hist_generator(const char *text, int state)
 			if (!*name || !name[1])
 				continue;
 			const char *ret = strpbrk(name + 1,
-				conf.search_strategy == GLOB_MATCH
+				conf.matching_style == GLOB_MATCH
 				? " /*?[{" : " /*?[{|^+$.");
 			if (!ret || *ret == ' ' || *ret == '/')
 				continue;

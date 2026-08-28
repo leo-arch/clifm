@@ -256,9 +256,9 @@ err_regex_no_match(const int regex_found, const char *arg)
 }
 
 static void
-set_search_params(const char *query, char **pattern, int *strat)
+set_search_params(const char *query, char **pattern, int *style)
 {
-	*strat = conf.search_strategy;
+	*style = conf.matching_style;
 
 	if (!query || !*query || !query[1])
 		return;
@@ -271,10 +271,10 @@ set_search_params(const char *query, char **pattern, int *strat)
 	const char *pat = query + 1; /* Skip leading slash */
 	if (IS_GLOB_PREFIX(pat)) {
 		pat += 3;
-		*strat = GLOB_MATCH;
+		*style = GLOB_MATCH;
 	} else if (IS_REGEX_PREFIX(pat)) {
 		pat += 3;
-		*strat = REGEX_MATCH;
+		*style = REGEX_MATCH;
 	}
 
 	*pattern = strdup(pat);
@@ -557,16 +557,16 @@ search_function(char **args)
 	}
 
 	char *pattern = NULL;
-	int search_strategy = 0;
+	int matching_style = 0;
 	int ret = 0;
 
-	set_search_params(args[0], &pattern, &search_strategy);
+	set_search_params(args[0], &pattern, &matching_style);
 	if (!pattern)
 		return FUNC_FAILURE;
 
-	if (search_strategy == REGEX_MATCH)
+	if (matching_style == REGEX_MATCH)
 		ret = search_regex(args, &pattern);
-	else /* search_stratergy == GLOB_MATCH */
+	else /* matching_style == GLOB_MATCH */
 		ret = search_glob(args, &pattern);
 
 	free(pattern);

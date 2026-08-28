@@ -553,15 +553,15 @@ select_filename(char *arg, const char *dir, int *errors, const int unescape)
 
 static int
 select_pattern(char *arg, const char *dir, const mode_t filetype,
-	int *err, const int pattern_type)
+	int *err, const int matching_style)
 {
 	int ret = 0;
-	if (pattern_type == GLOB_MATCH) {
+	if (matching_style == GLOB_MATCH) {
 		ret = sel_glob(arg, dir, filetype);
-	} else if (pattern_type == REGEX_MATCH) {
+	} else if (matching_style == REGEX_MATCH) {
 		ret = sel_regex(arg, dir, filetype);
 	} else {
-		if (conf.search_strategy == GLOB_MATCH)
+		if (conf.matching_style == GLOB_MATCH)
 			ret = sel_glob(arg, dir, filetype);
 		else
 			ret = sel_regex(arg, dir, filetype);
@@ -715,15 +715,15 @@ sel_function(char **args)
 		f++;
 
 		pattern = NULL;
-		int pattern_style = UNSET;
+		int matching_style = UNSET;
 		if (check_regex(args[i]) == FUNC_SUCCESS)
-			pattern = set_pattern_style(args[i], &pattern_style);
+			pattern = set_pattern_style(args[i], &matching_style);
 
 		if (!pattern) {
 			new_sel += select_filename(args[i], dir, &error, 1);
 		} else {
 			new_sel +=
-				select_pattern(pattern, dir, filetype, &error, pattern_style);
+				select_pattern(pattern, dir, filetype, &error, matching_style);
 		}
 	}
 

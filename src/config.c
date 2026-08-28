@@ -286,7 +286,7 @@ gen_safenames_str(const int value)
 }
 
 static const char *
-gen_search_strat_str(const int value)
+gen_matching_style_str(const int value)
 {
 	return value == GLOB_MATCH ? "glob" : "regex";
 }
@@ -468,6 +468,10 @@ dump_config(void)
 	n = DEF_LONG_VIEW;
 	print_config_value("LongViewMode", &conf.long_view, &n, DUMP_CONFIG_BOOL);
 
+	print_config_value("MatchingStyle",
+		gen_matching_style_str(conf.matching_style),
+		gen_matching_style_str(DEF_MATCHING_STYLE), DUMP_CONFIG_STR_NO_QUOTE);
+
 	print_config_value("MaxConfirmFiles",
 		get_max_confirm_files_str(conf.max_confirm_files),
 		get_max_confirm_files_str(DEF_MAX_CONFIRM_FILES),
@@ -568,10 +572,6 @@ dump_config(void)
 
 	print_config_value("SafeFilenames", gen_safenames_str(conf.safe_filenames),
 		gen_safenames_str(DEF_SAFE_FILENAMES), DUMP_CONFIG_STR_NO_QUOTE);
-
-	print_config_value("SearchStrategy",
-		gen_search_strat_str(conf.search_strategy),
-		gen_search_strat_str(DEF_SEARCH_STRATEGY), DUMP_CONFIG_STR_NO_QUOTE);
 
 	n = DEF_SHARE_SELBOX;
 	print_config_value("ShareSelbox", &conf.share_selbox, &n, DUMP_CONFIG_BOOL);
@@ -1988,8 +1988,8 @@ create_main_config_file(char *file)
 	"# How to quote expanded ELN's (regular files only): backslash, single, double.\n\
 ;QuotingStyle=%s\n\n"
 
-"# Specify how to perform searches: 'glob' or 'regex'.\n\
-;SearchStrategy=%s\n\n",
+"# Set the pattern-matching style: 'glob' or 'regex'.\n\
+;MatchingStyle=%s\n\n",
 
 		DEF_AUTOCD == 1 ? "true" : "false",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
@@ -2003,7 +2003,7 @@ create_main_config_file(char *file)
 		DEF_QUOTING_STYLE == QUOTING_STYLE_BACKSLASH ? "backslash"
 			: (DEF_QUOTING_STYLE == QUOTING_STYLE_DOUBLE_QUOTES ? "double"
 			: "single"),
-		DEF_SEARCH_STRATEGY == GLOB_MATCH ? "glob" : "regex"
+		DEF_MATCHING_STYLE == GLOB_MATCH ? "glob" : "regex"
 		);
 
 	fprintf(config_fp,
@@ -2926,23 +2926,27 @@ END:
 }
 
 static void
-set_search_strategy(const char *line)
+set_matching_style(const char *line, const int deprecation_warning)
 {
 	if (!line || !*line || *line == '\n')
 		return;
 
+	if (deprecation_warning == 1)
+		err('n', PRINT_PROMPT, "%s: 'SearchStrategy' is deprecated. Use "
+			"'MatchingStyle' instead.\n", PROGRAM_NAME);
+
 	if (IS_DIGIT(*line)) { // Deprecated
 		switch (*line) {
-		case '0': conf.search_strategy = GLOB_MATCH; break;
-		case '1': conf.search_strategy = REGEX_MATCH; break;
+		case '0': conf.matching_style = GLOB_MATCH; break;
+		case '1': conf.matching_style = REGEX_MATCH; break;
 		default: break;
 		}
 	} else {
 		if (*line == 'g' && strcmp(line, "glob\n") == 0) {
-			conf.search_strategy = GLOB_MATCH;
+			conf.matching_style = GLOB_MATCH;
 		} else {
 			if (*line == 'r' && strcmp(line, "regex\n") == 0)
-				conf.search_strategy = REGEX_MATCH;
+				conf.matching_style = REGEX_MATCH;
 		}
 	}
 }
@@ -4004,7 +4008,11 @@ read_config(void)
 		}
 
 		else if (*line == 'S' && strncmp(line, "SearchStrategy=", 15) == 0) {
-			set_search_strategy(line + 15);
+			set_matching_style(line + 15, 1);
+		}
+
+		else if (*line == 'M' && strncmp(line, "MatchingStyle=", 14) == 0) {
+			set_matching_style(line + 14, 0);
 		}
 
 		else if (xargs.share_selbox == UNSET && *line == 'S'

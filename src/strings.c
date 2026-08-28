@@ -1998,7 +1998,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 
 		char *s = (*substr)[glob_array[g] + (int)old_pathc];
 		const int is_glob_prefix = IS_GLOB_PREFIX(s);
-		if (!is_glob_prefix && conf.search_strategy != GLOB_MATCH)
+		if (!is_glob_prefix && conf.matching_style != GLOB_MATCH)
 			continue;
 
 		if (is_glob_prefix)
@@ -2403,7 +2403,7 @@ expand_regex(char ***substr)
 
 		char *s = (*substr)[regex_array[i] + old_index];
 		const int is_regex_prefix = IS_REGEX_PREFIX(s);
-		if (!is_regex_prefix && conf.search_strategy != REGEX_MATCH)
+		if (!is_regex_prefix && conf.matching_style != REGEX_MATCH)
 			continue;
 
 		if (is_regex_prefix)

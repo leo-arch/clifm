@@ -198,6 +198,7 @@ init_conf_struct(void)
 	conf.log_cmds = DEF_LOG_CMDS;
 	conf.log_msgs = DEF_LOG_MSGS;
 	conf.long_view = UNSET;
+	conf.matching_style = DEF_MATCHING_STYLE;
 	conf.max_confirm_files = DEF_MAX_CONFIRM_FILES;
 	conf.max_dirhist = UNSET;
 	conf.max_files = DEF_MAX_FILES;
@@ -239,7 +240,6 @@ init_conf_struct(void)
 	conf.restore_last_path = UNSET;
 	conf.rm_force = DEF_RM_FORCE;
 	conf.safe_filenames = DEF_SAFE_FILENAMES;
-	conf.search_strategy = DEF_SEARCH_STRATEGY;
 	conf.share_selbox = UNSET;
 	conf.show_hidden = UNSET;
 	conf.show_mounts = UNSET;

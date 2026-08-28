@@ -1183,6 +1183,7 @@ struct config_t {
 	int log_cmds;
 	int log_msgs;
 	int long_view;
+	int matching_style;
 	int max_confirm_files;
 	int max_dirhist;
 	int max_hist;
@@ -1223,7 +1224,6 @@ struct config_t {
 	int restore_last_path;
 	int rm_force;
 	int safe_filenames;
-	int search_strategy;
 	int share_selbox;
 	int show_hidden;
 	int show_mounts;
