@@ -7267,7 +7267,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "image/x-ibm-cap";
 
 	/* RECOIL: recoil.c:REOCIL_DecodeWin */
-	if ((size_t)file_size < BYTES_TO_READ) {
+	if ((size_t)file_size < nread) {
 		const size_t W = (size_t)LE_U16(sig + file_size - 4);
 		const size_t H = (size_t)sig[file_size - 2];
 		if (W > 0 && W <= 640 && H > 0 && H <= 200
