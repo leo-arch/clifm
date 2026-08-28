@@ -460,11 +460,11 @@
 # This option is ignored in secure mode (umask is forcefully set to 077).
 ;Umask=077
 
-# Default pattern matching method used when searching for files. Supported
-# values: 'glob' and 'regex'.
-# Note: run '/ --help' for information on how to force a specific method
-# for the current search.
-;SearchStrategy=glob
+# Default pattern-matching style. Supported values: 'glob' and 'regex'.
+# This option affects file selection, search, and the use of patterns in
+# the command line.
+# Note: run '/ --help' for information on how to force a specific method.
+;MatchingStyle=glob
 
 # Minimum rank for directories in the jump database. Directories with a rank
 # below this value are removed. If set to 0, directories are retained
