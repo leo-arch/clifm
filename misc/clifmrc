@@ -260,6 +260,12 @@
 #         2. COMMAND LINE             #
 #=====================================#
 
+# Default pattern-matching style. Supported values: 'glob' and 'regex'.
+# This option affects file selection, search, and the use of patterns in
+# the command line.
+# Note: run '/ --help' for information on how to force a specific style.
+;MatchingStyle=glob
+
 # Quoting style used to expand ELNs (regular files only).
 # Supported values: 'backslash' (default), 'single', or 'double' quotes.
 # This option is particularly useful for shells that do not support
@@ -273,7 +279,7 @@
 # 1 = faster, but not Unicode aware
 # 2 = slower, but Unicode aware (note that this algorithm will nonetheless
 # fall back to the first one whenever the query string does not contain
-# Unicode characters, minimizing thus the performance impact).
+# Unicode characters, minimizing thus the performance penalty).
 ;FuzzyAlgorithm=2
 
 # Set the tab completion mode. Supported values: standard, fzf, fnf, smenu.
@@ -459,12 +465,6 @@
 # the shell (though 077 is recommended).
 # This option is ignored in secure mode (umask is forcefully set to 077).
 ;Umask=077
-
-# Default pattern-matching style. Supported values: 'glob' and 'regex'.
-# This option affects file selection, search, and the use of patterns in
-# the command line.
-# Note: run '/ --help' for information on how to force a specific method.
-;MatchingStyle=glob
 
 # Minimum rank for directories in the jump database. Directories with a rank
 # below this value are removed. If set to 0, directories are retained
