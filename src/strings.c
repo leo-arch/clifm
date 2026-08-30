@@ -2017,7 +2017,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 		glob_cmd = xcalloc(args_n + globbuf.gl_matches + 1, sizeof(char *));
 
 		for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++)
-			glob_cmd[j++] = savestring((*substr)[i], strlen((*substr)[i]));
+			glob_cmd[j++] = strdup((*substr)[i]);
 
 		for (i = 0; i < globbuf.gl_matches; i++) {
 			if (SELFORPARENT(globbuf.gl_finfo[i].name))
@@ -2045,7 +2045,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 		}
 
 		for (i = (size_t)glob_array[g] + old_pathc + 1; i <= args_n; i++)
-			glob_cmd[j++] = savestring((*substr)[i], strlen((*substr)[i]));
+			glob_cmd[j++] = strdup((*substr)[i]);
 
 		glob_cmd[j] = NULL;
 
@@ -2110,7 +2110,7 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 				sizeof(char *));
 
 			for (i = 0; i < ((size_t)word_array[w] + old_pathc); i++)
-				word_cmd[j++] = savestring((*substr)[i], strlen((*substr)[i]));
+				word_cmd[j++] = strdup((*substr)[i]);
 
 			for (i = 0; i < wordbuf.we_wordc; i++) {
 				/* Escape the globbed filename and copy it */
@@ -2135,7 +2135,7 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 			}
 
 			for (i = (size_t)word_array[w] + old_pathc + 1; i <= args_n; i++)
-				word_cmd[j++] = savestring((*substr)[i], strlen((*substr)[i]));
+				word_cmd[j++] = strdup((*substr)[i]);
 
 			word_cmd[j] = NULL;
 
@@ -2284,7 +2284,7 @@ expand_ranges(char ***substr)
 			for (i = 0; i < (size_t)range_array[r] + old_ranges_n; i++) {
 				if (!(*substr)[i])
 					continue;
-				ranges_cmd[j++] = savestring((*substr)[i], strlen((*substr)[i]));
+				ranges_cmd[j++] = strdup((*substr)[i]);
 			}
 
 			for (i = 0; i < ranges_n; i++) {
@@ -2298,7 +2298,7 @@ expand_ranges(char ***substr)
 			i <= args_n; i++) {
 				if (!(*substr)[i])
 					continue;
-				ranges_cmd[j++] = savestring((*substr)[i], strlen((*substr)[i]));
+				ranges_cmd[j++] = strdup((*substr)[i]);
 			}
 
 			ranges_cmd[j] = NULL;
@@ -2808,21 +2808,18 @@ make_sel_recursive(char ***substr)
 #endif /* HAVE_WORDEXP */
 
 /*
- * This function is one of the keys of clifm. It will perform a series of
- * actions:
+ * This function is one of the keys of clifm. It performs a series of actions:
  * 1) Take the string stored by readline and get its substrings without
  * leading and trailing spaces (dequoting/unescaping if necessary).
- * 2) In case of user defined variables (var=value), it will pass the
- * whole string to exec_cmd(), which will take care of storing the
- * variable;
+ * 2) In case of user defined variables (var=value), it passes the whole string
+ * to exec_cmd(), which takes care of storing the variable;
  * 3) If the input string begins with ';' or ':' the whole string is
- * sent to exec_cmd(), where it will be directly executed by the system
- * shell.
+ * sent to exec_cmd(), where it is directly executed by the system shell.
  * 4) The following expansions (especific to clifm) are performed here:
  * ELN's, "sel" keyword, ranges of numbers (ELN's), tags, pinned dir,
  * bookmark names, environment variables, file types (=x), mime types (@...),
- * path normalization, fastback, and, for internal commands only, tilde,
- * braces, wildcards, command and paramenter substitution, and regex.
+ * path normalization, fastback, tilde, wildcards, command and paramenter
+ * substitution, and regex.
  */
 char **
 parse_input_str(char *str)
@@ -2891,7 +2888,7 @@ parse_input_str(char *str)
 
 	/* If chained commands, check each of them. If at least one of them
 	 * is internal, take care of the job (the system shell does not know
-	 * our internal commands and therefore cannot execute them); else,
+	 * about our internal commands and cannot execute them); else,
 	 * if no internal command is found, leave it to the system shell. */
 	if ((chaining == 1 || cond_cmd == 1) && check_chained_cmds(str) == 1) {
 		if (fusedcmd_ok == 1)
@@ -2946,7 +2943,7 @@ parse_input_str(char *str)
 
 #ifdef HAVE_WORDEXP
 	g_sel_is_recursive = 0;
-	/* Handle 'sel pattern -[rR]' (recursive selection via find(1)) */
+	/* Handle 'sel PATTERN -r' (recursive selection via find(1)) */
 	if (((substr[0][0] == 's' && !substr[0][1])
 	|| strcmp(substr[0], "sel") == 0) && substr[1] && *substr[1] && substr[2]
 	&& substr[2][0] == '-' && (substr[2][1] == 'r' || substr[2][1] == 'R')
@@ -3150,25 +3147,17 @@ parse_input_str(char *str)
 	substr = xnrealloc(substr, args_n + 2, sizeof(char *));
 	substr[args_n + 1] = NULL;
 
-	const int is_action = is_action_name(substr[0]);
-	if (is_int_cmd == 0 && is_action == 0
-	&& check_expansion_patterns(substr[0]) == 0)
+	if (check_expansion_patterns(substr[0]) == 0 && !substr[1])
 		return substr;
+
+	const int is_action = is_action_name(substr[0]);
 
 		/* ####################################################
 		 * #            3) SHELL-LIKE EXPANSIONS              #
-		 * #      Only for internal commands and plugins      #
 		 * #################################################### */
 
-	/* Most clifm functions are purely internal, that is, they are not
-	 * wrappers of a shell command and do not call the system shell at all.
-	 * For this reason, some expansions normally made by the system shell
-	 * (wildcards, regular expressions, and command substitution) must be
-	 * made here (in the lobby [got it?]) in order to be able to understand
-	 * these expansions at all. */
-
-	/* Let's first mark substrings containing special expansions made by either
-	 * glob(3) and wordexp(3). */
+	/* Let's first mark substrings containing special expansions made by
+	 * xglob() and wordexp(3). */
 
 	int *glob_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t glob_n = 0;
@@ -3243,9 +3232,9 @@ parse_input_str(char *str)
 		}
 	}
 
-			/* ##########################################
-			 * #   3.1) WILDCARDS AND BRACE EXPANSION   #
-			 * ########################################## */
+			/* ######################################
+			 * #     3.1) WILDCARDS EXPANSION       #
+			 * ###################################### */
 
 	if (glob_n > 0 && glob_expand(substr) == 1)
 		expand_glob(&substr, glob_array, glob_n);
