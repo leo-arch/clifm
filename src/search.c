@@ -350,12 +350,13 @@ calc_item_len(const struct fileinfo *f)
 
 /* Test a column count and optionally return the width of each column. */
 static int
-layout_fits(struct fileinfo *finfo, const size_t count, size_t columns,
-	size_t spacing, size_t screen_width, size_t widths[])
+layout_fits(struct fileinfo *finfo, const size_t count, const size_t columns,
+	const size_t spacing, size_t widths[])
 {
 	const int hl = (conf.listing_mode == HORLIST);
 	size_t rows = (count + columns - 1) / columns;
 	size_t total_width = 0;
+	size_t screen_width = (size_t)term_cols;
 
 	for (size_t col = 0; col < columns; col++) {
 		size_t longest = 0;
@@ -377,6 +378,9 @@ layout_fits(struct fileinfo *finfo, const size_t count, size_t columns,
 			total_width += longest + spacing;
 		else
 			total_width += longest;
+
+		if (total_width > screen_width)
+			return 0;
 	}
 
 	return total_width <= screen_width;
@@ -388,18 +392,17 @@ print_matches(struct fileinfo *finfo, const size_t count, const char *dir)
 	if (count == 0)
 		return;
 
-	const size_t screen_width = (size_t)term_cols;
 	const size_t spacing = 2; // COLUMNS_GAP
 	const int hl = (conf.listing_mode == HORLIST);
+	const int conf_icons = conf.icons;
 	size_t *widths = xnmalloc(count, sizeof(*widths));
-	size_t columns = 0;
+	size_t columns = 1;
 
 	/* Find the greatest number of columns that fits. */
 	while (columns < count) {
 		columns++;
-		if (layout_fits(finfo, count, columns, spacing, screen_width, widths) == 0) {
-			if (columns > 1)
-				layout_fits(finfo, count, --columns, spacing, screen_width, widths);
+		if (layout_fits(finfo, count, columns, spacing, widths) == 0) {
+			layout_fits(finfo, count, --columns, spacing, widths);
 			break;
 		}
 	}
@@ -412,7 +415,7 @@ print_matches(struct fileinfo *finfo, const size_t count, const char *dir)
 			if (index >= count)
 				continue;
 
-			size_t len = calc_item_len(&finfo[index]);
+			const size_t len = calc_item_len(&finfo[index]);
 			size_t padding = 0;
 			if (col + 1 < columns)
 				padding = widths[col] - len + spacing;
@@ -424,9 +427,9 @@ print_matches(struct fileinfo *finfo, const size_t count, const char *dir)
 
 			/* Print the remaining line */
 			printf("%s%s%s%s%s%s%s%s%s%s%s%*s",
-				conf.icons ? finfo[index].icon_color : "",
-				conf.icons ? finfo[index].icon : "", df_c,
-				conf.icons ? " " : "",
+				conf_icons ? finfo[index].icon_color : "",
+				conf_icons ? finfo[index].icon : "", df_c,
+				conf_icons ? " " : "",
 
 				finfo[index].color, finfo[index].name, df_c,
 				finfo[index].dir ? fc_c : "",

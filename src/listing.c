@@ -1911,8 +1911,8 @@ calc_item_length(const int eln_len, const int icon_len, const filesn_t i)
 /* Test a column count and optionally return the width of each column.
  * The layout is either column-major, like ls, or row-major (horizontal). */
 static int
-layout_fits(const size_t count, size_t columns, size_t spacing,
-	size_t screen_width, size_t widths[])
+layout_fits(const size_t count, const size_t columns, const size_t spacing,
+	size_t widths[])
 {
 	size_t rows = (count + columns - 1) / columns;
 	size_t total_width = 0;
@@ -1920,6 +1920,7 @@ layout_fits(const size_t count, size_t columns, size_t spacing,
 
 	const int eln_len = conf.no_eln == 1 ? 0 : DIGINUM(count);
 	const int icon_len = conf.icons == 1 ? ICON_LEN : 0;
+	const size_t screen_width = (size_t)term_cols;
 
 	for (size_t col = 0; col < columns; col++) {
 		size_t _longest = 0;
@@ -1942,6 +1943,9 @@ layout_fits(const size_t count, size_t columns, size_t spacing,
 			total_width += _longest + spacing;
 		else
 			total_width += _longest;
+
+		if (total_width > screen_width)
+			return 0;
 	}
 
 	return total_width <= screen_width;
@@ -1977,21 +1981,21 @@ list_files(int *reset_pager)
 	const int conf_no_eln = conf.no_eln;
 	const int conf_classify = conf.classify;
 
-	const size_t screen_width = term_cols;
 	const size_t spacing = COLUMNS_GAP;
 	size_t *widths = xnmalloc(count, sizeof(*widths));
-	size_t columns = 0;
+	size_t columns = 1;
 
 	/* Find the greatest number of columns that fits. */
 	while (columns < count) {
-		columns++;
-		if (layout_fits(count, columns, spacing, screen_width, widths) == 0) {
-			if (columns > 1)
-				layout_fits(count, --columns, spacing, screen_width, widths);
+		columns++; /* We begin by testing 2 columns. */
+		if (layout_fits(count, columns, spacing, widths) == 0) {
+			layout_fits(count, --columns, spacing, widths);
 			break;
 		}
 	}
 
+	/* widths is uninitialized when count is 1 (because the while-loop body is
+	 * never accessed), but widths is not accessed in this case, so it's safe. */
 	const size_t rows = (count + columns - 1) / columns;
 
 	size_t pager_counter = 0;
