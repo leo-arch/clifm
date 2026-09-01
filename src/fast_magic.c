@@ -3205,6 +3205,9 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'D')
 		return "model/x3d+vrml";
 
+	/* https://www.fabbers.com/tech/STL_Format */
+	if (nread >= 134 && (size_t)file_size == LE_U32(sig + 80) * 50 + 84)
+		return "model/stl"; /* Binary STL */
 	if (nread > 3 && sig[0] == 'S' && sig[1] == 'T' && sig[2] == 'L'
 	&& sig[3] == ' ')
 		return "model/stl";
