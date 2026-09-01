@@ -1053,17 +1053,17 @@ the editor (quit without saving to cancel the operation).\n\n\
     /A* dir/\n\
 - List all .conf files in the directory '/etc'\n\
     /*.conf /etc\n\n\
-By default, the pattern matching method used is the one specified by the\n\
-SearchStrategy option in the configuration file (defaults to 'glob'). Use\n\
-the 'gl:' or 're:' prefixes to force the use a specific method. For\n\
-example, to list files starting with 'd' using regex:\n\
+By default, the pattern matching style used is the one specified by the\n\
+MatchingStyle option in the configuration file (defaults to 'glob'). Use\n\
+the 'gl:' or 're:' prefixes to force the use a specific style. For example,\n\
+to list files starting with 'd' using regex:\n\
     /re:^d.*\n\
 or using glob:\n\
     /gl:d*\n\n\
 Use the '!' prefix to negate a pattern. For example, to list all files in the\n\
 current directory not starting with 'd':\n\
     /re:!^d.*\n\n\
-You can further filter the search using a file type filter:\n\
+You can further filter the search using a filetype filter:\n\
   -b	block device\n\
   -c	character device\n\
   -d	directory\n\
@@ -1117,7 +1117,7 @@ Recognized file types: (d)irectory, regular (f)ile, symbolic (l)ink,\n\
 - Select all regular files in the directory '/etc' starting with 'd'\n\
     s d* -f :/etc\n\
 - Select all files in the current directory (including hidden files)\n\
-    s * (or Alt+a)\n\
+    s re:^ (or Alt+a)\n\
 - Interactively select files in the directory 'media' (requires fzf, fnf,\n\
   or smenu tab completion modes)\n\
     s /media/*<TAB>\n\

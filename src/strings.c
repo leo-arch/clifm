@@ -49,6 +49,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #include "readline.h"
 #include "sort.h"
 #include "tags.h"
+#include "xbrace.h" /* brace_expand */
 #include "xmatch.h" /* xglob */
 
 /* Macros for xstrverscmp() */
@@ -1524,7 +1525,8 @@ get_bm_paths(void)
 /* Reconstruct the array DST inserting all fields in the array SRC at
  * index I in DST. NUM is updated to the number of inserted fields. */
 static char **
-insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
+insert_fields(char ***dst, char ***src, const size_t i, size_t *num,
+	const int escape)
 {
 	if (!*dst || !*src)
 		return NULL;
@@ -1559,7 +1561,7 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 		d[c] = strdup((*dst)[c]);
 
 	for (n = 0; s[n]; n++) {
-		char *p = escape_str(s[n]);
+		char *p = escape == 1 ? escape_str(s[n]) : NULL;
 		d[c++] = strdup(p ? p : s[n]);
 		free(p);
 	}
@@ -1836,7 +1838,7 @@ expand_file_type(char ***substr)
 
 		size_t c = 0;
 		if (p) {
-			char **ret = insert_fields(substr, &p, (size_t)index, &c);
+			char **ret = insert_fields(substr, &p, (size_t)index, &c, 1);
 
 			for (size_t n = 0; p[n]; n++)
 				free(p[n]);
@@ -1890,7 +1892,7 @@ expand_mime_type(char ***substr)
 
 		size_t c = 0;
 		if (p) {
-			char **ret = insert_fields(substr, &p, (size_t)index, &c);
+			char **ret = insert_fields(substr, &p, (size_t)index, &c, 1);
 
 			size_t n;
 			for (n = 0; p[n]; n++)
@@ -1945,7 +1947,7 @@ expand_bookmarks(char ***substr)
 		size_t c = 0;
 
 		if (p) {
-			char **ret = insert_fields(substr, &p, (size_t)index, &c);
+			char **ret = insert_fields(substr, &p, (size_t)index, &c, 1);
 			free(p);
 
 			if (ret) {
@@ -2807,6 +2809,56 @@ make_sel_recursive(char ***substr)
 }
 #endif /* HAVE_WORDEXP */
 
+static void
+expand_braces(char ***substr)
+{
+	if (!substr)
+		return;
+
+	char **s = *substr;
+	size_t old_index = 0;
+	struct stat a;
+
+	for (size_t i = 0; s[i + old_index]; i++) {
+		if (is_quoted_word(i + old_index))
+			continue;
+
+		char *start = s[i + old_index];
+		if (!strchr(start, '{'))
+			continue;
+
+		/* Skip existent files */
+		char *deq = strchr(start, '\\') ? unescape_str(start) : NULL;
+		const int stat_ret = lstat(deq ? deq : start, &a);
+		free(deq);
+		if (stat_ret == 0)
+			continue;
+
+		char **out = brace_expand(start, NULL);
+		if (!out)
+			continue;
+
+		size_t c = 0;
+		char **ret = insert_fields(substr, &out, (size_t)i + old_index, &c, 0);
+
+		for (size_t n = 0; out[n]; n++)
+			free(out[n]);
+		free(out);
+
+		if (ret) {
+			for (size_t n = 0; n <= args_n; n++)
+				free((*substr)[n]);
+			free((*substr));
+
+			(*substr) = ret;
+			s = (*substr);
+			args_n += (c > 0 ? c - 1 : 0);
+		}
+
+		old_index += (c > 0 ? c - 1 : 0);
+	}
+}
+
 /*
  * This function is one of the keys of clifm. It performs a series of actions:
  * 1) Take the string stored by readline and get its substrings without
@@ -2912,10 +2964,6 @@ parse_input_str(char *str)
 
 	if (!substr)
 		return NULL;
-
-	/* Do not perform expansions for the 'n/new' command. */
-	if (*substr[0] == 'n' && (!substr[0][1] || strcmp(substr[0], "new") == 0))
-		return substr;
 
 	/* Handle background/foreground process. */
 	bg_proc = 0;
@@ -3147,16 +3195,17 @@ parse_input_str(char *str)
 	substr = xnrealloc(substr, args_n + 2, sizeof(char *));
 	substr[args_n + 1] = NULL;
 
+	const int is_action = is_action_name(substr[0]);
 	if (check_expansion_patterns(substr[0]) == 0 && !substr[1])
 		return substr;
-
-	const int is_action = is_action_name(substr[0]);
 
 		/* ####################################################
 		 * #            3) SHELL-LIKE EXPANSIONS              #
 		 * #################################################### */
 
-	/* Let's first mark substrings containing special expansions made by
+	expand_braces(&substr);
+
+	/* Let's mark substrings containing special expansions made by
 	 * xglob() and wordexp(3). */
 
 	int *glob_array = xnmalloc(INT_ARRAY_MAX, sizeof(int));

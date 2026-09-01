@@ -154,7 +154,7 @@ select_file(char *file)
 
 	if (exists == 0) {
 		sel_elements = xnrealloc(sel_elements, sel_n + 2, sizeof(struct sel_t));
-		sel_elements[sel_n].name = savestring(tfile, strlen(tfile));
+		sel_elements[sel_n].name = strdup(tfile);
 		sel_elements[sel_n++].size = (off_t)UNSET;
 
 		sel_elements[sel_n].name = NULL;

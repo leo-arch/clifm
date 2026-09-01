@@ -129,15 +129,9 @@ fill_st_info(const char *fpath, const char *basename, const struct stat *a)
 }
 
 static int
-xglob_cwd(const char *pattern, xglob_t *out, int gl_flags,
+xglob_cwd(const char *pattern, xglob_t *out, const int gl_flags,
 	const mode_t file_type)
 {
-	if (gl_flags == -1) {
-		gl_flags = FNM_PATHNAME|FNM_EXTMATCH;
-		if (conf.ignore_case == 1)
-			gl_flags |= FNM_CASEFOLD;
-	}
-
 	int invert = 0;
 	if (*pattern == '!') {
 		invert = 1;
@@ -176,11 +170,25 @@ xglob_cwd(const char *pattern, xglob_t *out, int gl_flags,
 	return 0;
 }
 
+static void
+build_gl_flags(int *gl_flags)
+{
+	if (*gl_flags == -1) {
+		*gl_flags = FNM_PATHNAME|FNM_EXTMATCH;
+		if (conf.show_hidden == 0)
+			*gl_flags |= FNM_PERIOD;
+		if (conf.ignore_case == 1)
+			*gl_flags |= FNM_CASEFOLD;
+	}
+}
+
 int
 xglob(const char *dirpath, const char *pattern, xglob_t *out,
 	int gl_flags, const mode_t file_type, const int do_stat,
 	const int store_basename)
 {
+	build_gl_flags(&gl_flags);
+
 	if ((!dirpath || (*dirpath == '.' && !dirpath[1])) && conf.autols == 1)
 		return xglob_cwd(pattern, out, gl_flags, file_type);
 
@@ -188,12 +196,6 @@ xglob(const char *dirpath, const char *pattern, xglob_t *out,
 	if (!dp) {
 		xerror("%s: '%s': %s\n", PROGRAM_NAME, dirpath, strerror(errno));
 		return (-1);
-	}
-
-	if (gl_flags == -1) {
-		gl_flags = FNM_PATHNAME|FNM_EXTMATCH;
-		if (conf.ignore_case == 1)
-			gl_flags |= FNM_CASEFOLD;
 	}
 
 	int invert = 0;
@@ -290,14 +292,9 @@ xglobfree(xglob_t *g)
 }
 
 static int
-xregex_cwd(const char *pattern, xregex_t *out, int re_flags,
+xregex_cwd(const char *pattern, xregex_t *out, const int re_flags,
 	const mode_t file_type)
 {
-	if (re_flags == -1) {
-		re_flags = conf.ignore_case == 0 ? (REG_NOSUB | REG_EXTENDED)
-			: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
-	}
-
 	int invert = 0;
 	if (*pattern == '!') {
 		invert = 1;
@@ -344,11 +341,22 @@ xregex_cwd(const char *pattern, xregex_t *out, int re_flags,
 	return 0;
 }
 
+static void
+build_re_flags(int *re_flags)
+{
+	if (*re_flags == -1) {
+		*re_flags = conf.ignore_case == 0 ? (REG_NOSUB | REG_EXTENDED)
+			: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
+	}
+}
+
 int
 xregex(const char *dirpath, const char *pattern, xregex_t *out,
 	int re_flags, const mode_t file_type, const int do_stat,
 	const int store_basename)
 {
+	build_re_flags(&re_flags);
+
 	if ((!dirpath || (*dirpath == '.' && !dirpath[1])) && conf.autols == 1)
 		return xregex_cwd(pattern, out, re_flags, file_type);
 
@@ -356,11 +364,6 @@ xregex(const char *dirpath, const char *pattern, xregex_t *out,
 	if (!dp) {
 		xerror("%s: '%s': %s\n", PROGRAM_NAME, dirpath, strerror(errno));
 		return (-1);
-	}
-
-	if (re_flags == -1) {
-		re_flags = conf.ignore_case == 0 ? (REG_NOSUB | REG_EXTENDED)
-			: (REG_NOSUB | REG_EXTENDED | REG_ICASE);
 	}
 
 	int invert = 0;
