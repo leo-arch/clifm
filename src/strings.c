@@ -2761,6 +2761,7 @@ make_sel_recursive(char ***substr)
 
 #ifdef _BE_POSIX
 	char *method = "-name";
+	const char *regex_op = "";
 #else
 	static int check_find = 0;
 	if (check_find == 0) {
@@ -2782,12 +2783,15 @@ make_sel_recursive(char ***substr)
 		method = use_regex ? "-regex" : "-name";
 	else
 		method = use_regex ? "-iregex" : "-iname";
+
+	const char *regex_op = use_regex ? "-regextype posix-extended" : "";
 #endif /* _BE_POSIX */
 
-	const size_t len = strlen(cmd) + strlen(search_path) + strlen(method)
-		+ strlen(pattern) + 8 + 1;
+	const size_t len = strlen(cmd) + strlen(search_path)
+		+ strlen(regex_op) + strlen(method) + strlen(pattern) + 9 + 1;
 	char *buf = xnmalloc(len, sizeof(char));
-	snprintf(buf, len, "$(%s %s %s '%s')", cmd, search_path, method, pattern);
+	snprintf(buf, len, "$(%s %s %s %s '%s')",
+		cmd, search_path, regex_op, method, pattern);
 
 	free(s[1]);
 	s[1] = buf;
