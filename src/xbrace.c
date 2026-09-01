@@ -1,3 +1,12 @@
+/*
+ * This file is part of Clifm
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ * SPDX-FileCopyrightText: 2016-2026 L. Abramovich <leo.clifm@outlook.com>
+*/
+
+/* xbrace.c */
+
 #include "helpers.h"
 
 #include <stdio.h>
@@ -11,19 +20,20 @@ typedef struct {
 	char **items;
 	size_t count;
 	size_t capacity;
-} brace_list_t;
+} brace_t;
 
 static void
-list_add(brace_list_t *list, const char *text)
+list_add(brace_t *list, const char *text)
 {
 	if (list->count == list->capacity) {
 		size_t new_capacity = list->capacity ? list->capacity * 2 : 8;
 		list->items =
-			xnrealloc(list->items, new_capacity, sizeof(*list->items));
+			xnrealloc(list->items, new_capacity + 1, sizeof(*list->items));
 		list->capacity = new_capacity;
 	}
 
 	list->items[list->count++] = strdup(text);
+	list->items[list->count] = NULL;
 }
 
 /* Return a malloc'd string containing the three strings, A, B, and C
@@ -31,6 +41,9 @@ list_add(brace_list_t *list, const char *text)
 static char *
 join3(const char *a, const char *b, const char *c)
 {
+	if (!a || !b || !c)
+		return NULL;
+
 	const size_t alen = strlen(a);
 	const size_t blen = strlen(b);
 	const size_t clen = strlen(c);
@@ -73,41 +86,32 @@ find_braces(const char *s, const char **open, const char **close)
 	return 0;
 }
 
-static char *
-join3_range(const int value, const char *prefix,
-	const char *suffix, const int is_num)
+static const char *
+build_range_value(const int value, const int is_num, int *val_len)
 {
-	const size_t prefix_len = prefix ? strlen(prefix) : 0;
-	const size_t suffix_len = suffix ? strlen(suffix) : 0;
-	char str[MAX_INT_STR + 1];
+	static char str[MAX_INT_STR + 1];
 	const char *val = NULL;
-	int val_len = 0;
 
 	if (!is_num) {
 		str[0] = (char)value;
 		str[1] = '\0';
 		val = (const char *)str;
-		val_len = 1;
+		if (val_len) *val_len = 1;
 	} else if (value >= 0) {
 		val = xitoa(value);
-		val_len = !val[0] ? 0 : (!val[1] ? 1 : (int)strlen(val));
+		if (val_len)
+			*val_len = !val[0] ? 0 : (!val[1] ? 1 : (int)strlen(val));
 	} else {
-		val_len = snprintf(str, sizeof(str), "%d", value);
+		int bytes = snprintf(str, sizeof(str), "%d", value);
+		if (val_len && bytes >= 0) *val_len = bytes;
 		val = (const char *)str;
 	}
 
-	const size_t len = prefix_len + (size_t)val_len + suffix_len + 1;
-	char *buf = xnmalloc(len, sizeof(char));
-
-	memcpy(buf, prefix, prefix_len + 1);
-	memcpy(buf + prefix_len, val, (size_t)val_len + 1);
-	memcpy(buf + prefix_len + (size_t)val_len, suffix, suffix_len + 1);
-
-	return buf;
+	return val;
 }
 
 /* Expand numeric/alphabetic ranges in the string RANGE.
- * Each expanded string prefixed with PREFIX and suffixed with SUFFIX.
+ * Each expanded string is prefixed with PREFIX and suffixed with SUFFIX.
  * The list of expanded strings is returned, or NULL if no expansion is made. */
 static char **
 expand_brace_ranges(const char *prefix, const char *range, const char *suffix)
@@ -140,7 +144,7 @@ expand_brace_ranges(const char *prefix, const char *range, const char *suffix)
 	const int is_num_start = (IS_DIGIT(*st) && is_number(st));
 	const int is_num_end = (IS_DIGIT(*et) && is_number(et));
 
-	/* Both fields in the range must be either numberic or alphabetic. */
+	/* Both fields in the range must be either numeric or alphabetic. */
 	if (is_num_start != is_num_end) {
 		free(buf);
 		return NULL;
@@ -173,21 +177,22 @@ expand_brace_ranges(const char *prefix, const char *range, const char *suffix)
 	if (first > second) {
 		ranges = xnmalloc((size_t)(first - second + 2), sizeof(char *));
 		for (int i = first; i >= second; i -= step) {
-			ranges[n++] = join3_range(i, prefix, suffix, is_num_start);
-			ranges[n] = NULL;
+			const char *val = build_range_value(i, is_num_start, NULL);
+			ranges[n++] = join3(prefix, val, suffix);
 		}
 	} else if (first < second) {
 		ranges = xnmalloc((size_t)(second - first + 2), sizeof(char *));
 		for (int i = first; i <= second; i += step) {
-			ranges[n++] = join3_range(i, prefix, suffix, is_num_start);
-			ranges[n] = NULL;
+			const char *val = build_range_value(i, is_num_start, NULL);
+			ranges[n++] = join3(prefix, val, suffix);
 		}
 	} else {
 		ranges = xnmalloc(2, sizeof(char *));
-		ranges[n++] = join3_range(first, prefix, suffix, is_num_start);
-		ranges[n] = NULL;
+		const char *val = build_range_value(first, is_num_start, NULL);
+		ranges[n++] = join3(prefix, val, suffix);
 	}
 
+	ranges[n] = NULL;
 	free(buf);
 	return ranges;
 }
@@ -195,18 +200,19 @@ expand_brace_ranges(const char *prefix, const char *range, const char *suffix)
 /* Recusively expand the brace expression EXPRESSION and store the expanded
  * strings into RESULT. */
 static void
-expand_recursive(const char *expression, brace_list_t *result)
+expand_recursive(const char *expression, brace_t *result)
 {
 	const char *open = NULL;
 	const char *close = NULL;
 
+	/* Write into RESULT once there are no more expandable braces. */
 	if (!find_braces(expression, &open, &close)) {
 		list_add(result, expression);
 		return;
 	}
 
-	size_t prefix_length = (size_t)(open - expression);
-	size_t inside_length = (size_t)(close - open - 1);
+	const size_t prefix_length = (size_t)(open - expression);
+	const size_t inside_length = (size_t)(close - open - 1);
 	const char *suffix = close + 1;
 
 	char *prefix = xnmalloc(prefix_length + 1, sizeof(char));
@@ -232,15 +238,15 @@ expand_recursive(const char *expression, brace_list_t *result)
 			depth--;
 
 		if ((c == ',' && depth == 0) || c == '\0') {
-			size_t part_length = i - part_start;
-			char *part = xnmalloc(part_length + 1, sizeof(char));
+			const size_t part_len = i - part_start;
+			char *part = xnmalloc(part_len + 1, sizeof(char));
 
-			memcpy(part, inside + part_start, part_length);
-			part[part_length] = '\0';
+			memcpy(part, inside + part_start, part_len);
+			part[part_len] = '\0';
 
 			/* Expand the selected alternative first, then append the
 			 * original suffix. This also handles braces in the suffix. */
-			brace_list_t alternative = {0};
+			brace_t alternative = {0};
 			expand_recursive(part, &alternative);
 			free(part);
 
@@ -281,15 +287,9 @@ expand_recursive(const char *expression, brace_list_t *result)
 char **
 brace_expand(const char *expression, size_t *count)
 {
-	brace_list_t result = {0};
+	brace_t result = {0};
 	expand_recursive(expression, &result);
 
-	/* Add a NULL terminator so the result can also be traversed like
-	 * a conventional argv-style array. */
-	result.items = xnrealloc(result.items,
-		(result.count + 1), sizeof(*result.items));
-
-	result.items[result.count] = NULL;
 	if (count) *count = result.count;
 
 	return result.items;
