@@ -79,15 +79,12 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 || (x) == 's' || (x) == 't' || (x) == 'u' || (x) == 'x')
 #endif /* SOLARIS_DOORS */
 
-// Remove brace and add IS_REGEX()
-#define IS_GLOB(x, y) (((x) == '*' || (x) == '?' || (x) == '{' ) && (y) != ' ')
+#define IS_GLOB(x, y) (((x) == '*' || (x) == '?') && (y) != ' ')
 
 #define IS_WORD(x, y) (((x) == '$' && ((y) == '(' || (y) == '{')) \
 || ((x) == '`' && (y) != ' ') || (x) == '~' || (x) == '$')
 
-#ifdef HAVE_WORDEXP
 static int g_sel_is_recursive = 0;
-#endif
 
 /* QUOTED_WORDS stores indices of words quoted in the command line so that we
  * can keep track of them and prevent expanding them when spliting the
@@ -2079,10 +2076,10 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 
 	char *old_ifs = NULL;
 	if (g_sel_is_recursive == 1) {
-		/* Why? wordexp(2) splits the output of find(1) using $IFS, and
+		/* Why? wordexp(3) splits the output of find(1) using $IFS, and
 		 * if unset, its falls back to ' ', '\t', '\n' as field separators.
-		 * This makes wordexp(2) split filenames containing spaces. To avoid
-		 * this, let's set IFS to newline only. Hacky, but works. */
+		 * This makes it split filenames containing spaces. To avoid
+		 * this, we set IFS to newline only. Hacky, but works. */
 		old_ifs = xgetenv("IFS", 1);
 		setenv("IFS", "\n", 1);
 	}
