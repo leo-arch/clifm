@@ -209,6 +209,34 @@ select_matches(const struct fileinfo *finfo, const int matches)
 	return new_sel;
 }
 
+/* Err removing the reference to find(1), used for recusrive selection. */
+static void
+xglob_err(const char *pattern)
+{
+	const char *p = pattern;
+	const int is_find = (*p == '$' && p[1] == '('
+	&& (strncmp(p + 2, "find ", 5) == 0 || strncmp(p + 2, "gfind ", 6) == 0));
+
+	if (is_find == 0) {
+		xerror(_("sel: '%s': No matches found\n"), pattern);
+		return;
+	}
+
+	const char *lead_quote = strchr(p, '\'');
+	const char *end_quote = lead_quote ? strrchr(lead_quote + 1, '\'') : NULL;
+	if (!lead_quote || !end_quote) {
+		xerror(_("sel: '%s': No matches found\n"), pattern);
+		return;
+	}
+
+	const size_t pat_len = (size_t)(end_quote - lead_quote) + 1;
+	char *buf = xnmalloc(pat_len + 1, sizeof(char));
+	memcpy(buf, lead_quote, pat_len);
+	buf[pat_len] = '\0';
+	xerror(_("sel: %s: No matches found\n"), buf);
+	free(buf);
+}
+
 static int
 sel_glob(char *str, const char *sel_path, const mode_t filetype)
 {
@@ -234,7 +262,7 @@ sel_glob(char *str, const char *sel_path, const mode_t filetype)
 
 	int ret = xglob(spath ? spath : ".", pattern, &g, -1, filetype, 0, 0);
 	if (ret != 0) {
-		xerror(_("sel: '%s': No matches found\n"), pattern);
+		xglob_err(pattern);
 		xglobfree(&g);
 		free(gl_path);
 		return (-1);
