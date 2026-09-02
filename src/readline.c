@@ -50,6 +50,7 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 #endif /* !_NO_SUGGESTIONS */
 #include "tabcomp.h"
 #include "tags.h"
+#include "xmatch.h" /* xglob */
 
 #define DEL_EMPTY_LINE     1
 #define DEL_NON_EMPTY_LINE 2
@@ -60,12 +61,12 @@ typedef void rl_macro_print_func_t (const char *, const char *, int, const char 
 
 #define RL_VI_MODE 0
 
-#define SUGGEST_ONLY             0
-#define RL_INSERT_CHAR           1
+#define SUGGEST_ONLY           0
+#define RL_INSERT_CHAR         1
 #ifndef _NO_SUGGESTIONS
-# define SKIP_CHAR               2
+# define SKIP_CHAR             2
 #endif /* !_NO_SUGGESTIONS */
-#define SKIP_CHAR_NO_REDISPLAY   3
+#define SKIP_CHAR_NO_REDISPLAY 3
 
 #define MAX_EXT_OPTS NAME_MAX
 #define MAX_EXT_OPTS_LEN NAME_MAX
@@ -289,14 +290,14 @@ leftmost_bell(void)
 }
 #endif /* !_NO_SUGGESTIONS */
 
-/* Construct a wide-char (UTF8) byte by byte.
+/* Build a wide-char (UTF8) byte by byte.
  * This function is called multiple times until we get a full wide-char.
  * Each byte (C), in each subsequent call, is appended to a string (WC_STR),
  * until we have a complete multi-byte char (WC_BYTES were copied into WC_STR),
  * in which case we insert the character into the readline buffer (my_rl_getc
  * will then trigger the suggestions system using the updated input buffer). */
 static int
-construct_utf8_char(unsigned char c)
+build_utf8_char(unsigned char c)
 {
 	static char wc_str[UTF8_MAX_LEN] = "";
 	static size_t wc_len = 0;
@@ -416,7 +417,7 @@ rl_exclude_input(const unsigned char c, const unsigned char prev)
 		return RL_INSERT_CHAR;
 
 	if (IS_UTF8_CHAR(c))
-		return construct_utf8_char(c);
+		return build_utf8_char(c);
 
 	if (c != KEY_ESC)
 		cmdhist_flag = 0;
@@ -1360,6 +1361,7 @@ int_cmds_generator(const char *text, int state)
 		"fs      (toggle follow-symlinks)",
 		"ft      (set a file filter)",
 		"fz      (toggle recursive-directory-size: long view only)",
+		"gd      (set group-directories mode)",
 		"hh      (toggle hidden files)",
 		"history (manage the commands history)",
 		"icons   (toggle icons)",
@@ -1437,7 +1439,7 @@ int_z_cmds_generator(const char *text, int state)
 
 	static const char *const cmd_desc[] = {
 		"zc (toggle file-counter)",
-		"zd (cycle through sort-dir modes)",
+		"zd (cycle through group-directories modes)",
 		"zf (toggle follow-symlinks)",
 		"zh (toggle hidden-files)",
 		"zi (toggle icons)",
@@ -2367,7 +2369,7 @@ rl_mime_files(const char *text)
 
 		if (!p) continue;
 
-		t[n++] = savestring(name, strlen(name));
+		t[n++] = strdup(name);
 	}
 
 	t[n] = NULL;
@@ -2382,85 +2384,72 @@ rl_mime_files(const char *text)
 	return t;
 }
 
+static char *
+get_glob_dir(const char *str, const size_t str_len)
+{
+	char *tmp = xnmalloc(str_len + 1, sizeof(char));
+	memcpy(tmp, str, str_len);
+	tmp[str_len] = '\0';
+
+	char *dir = strchr(tmp, '\\') ? unescape_str(tmp) : NULL;
+	if (!dir)
+		return tmp;
+
+	free(tmp);
+	return dir;
+}
+
 /* Return the list of matches for the glob expression TEXT or NULL if
  * there are no matches. */
 static char **
 rl_glob(const char *text)
 {
-	char *tmp = expand_tilde_glob(text);
-	glob_t globbuf;
+	char *tilde_expanded = expand_tilde_glob(text);
+	const char *gpath = tilde_expanded ? (const char *)tilde_expanded : text;
+	xglob_t g = {0};
 
-	if (glob(tmp ? tmp : text, 0, NULL, &globbuf) != FUNC_SUCCESS) {
-		globfree(&globbuf);
-		free(tmp);
+	char *dir = NULL;
+	const char *pattern = gpath;
+	const char *slash = strrchr(gpath, '/');
+	if (slash && slash[1]) {
+		const size_t dir_len = (size_t)(slash - gpath) + 1;
+		dir = get_glob_dir(gpath, dir_len);
+		pattern = slash + 1;
+	}
+
+	const int ret = xglob(dir, pattern, &g, -1, 0, 0, 0);
+	free(tilde_expanded);
+
+	if (ret != FUNC_SUCCESS) {
+		xglobfree(&g);
+		free(dir);
 		return NULL;
 	}
 
-	free(tmp);
-
-	if (globbuf.gl_pathc == 1) {
-		char **matches = xnmalloc(globbuf.gl_pathc + 2, sizeof(char *));
-		char *basename = strrchr(globbuf.gl_pathv[0], '/');
-		if (basename && *(++basename)) {
-			const char c = *basename;
-			*basename = '\0';
-			matches[0] =
-				savestring(globbuf.gl_pathv[0], strlen(globbuf.gl_pathv[0]));
-			*basename = c;
-			matches[1] = savestring(basename, strlen(basename));
+	if (g.gl_matches == 1) {
+		char **matches = xnmalloc(g.gl_matches + 2, sizeof(char *));
+		if (dir) {
+			matches[0] = dir;
+			matches[1] = strdup(g.gl_finfo[0].name);
 			matches[2] = NULL;
 		} else {
-			matches[0] =
-				savestring(globbuf.gl_pathv[0], strlen(globbuf.gl_pathv[0]));
+			matches[0] = strdup(g.gl_finfo[0].name);
 			matches[1] = NULL;
 		}
-		globfree(&globbuf);
+		xglobfree(&g);
 		return matches;
 	}
 
-	char **matches = xnmalloc(globbuf.gl_pathc + 3, sizeof(char *));
+	char **matches = xnmalloc(g.gl_matches + 3, sizeof(char *));
 
-	/* If /path/to/dir/GLOB<TAB>, /path/to/dir goes to slot 0 */
-	char *last_word = get_last_chr(rl_line_buffer, ' ', rl_point);
-	if (last_word)
-		last_word++;
-	else
-		last_word = rl_line_buffer;
-
-	char *str = (last_word && *last_word)
-		? unescape_str(last_word) : NULL;
-	char *word = str ? str : NULL;
-
-	int char_copy = -1;
-	char *basename = NULL;
-	if (word && word[1]) {
-		basename = strrchr(word, '/');
-		if (basename && *(++basename)) {
-			char_copy = (int)*basename;
-			*basename = '\0';
-		}
-	}
-
-	if (char_copy != -1) {
-		matches[0] = savestring(word, strlen(word));
-		*basename = (char)char_copy;
-	} else {
-		matches[0] = xnmalloc(1, sizeof(char));
-		*matches[0] = '\0';
-	}
-
-	free(str);
+	matches[0] = dir ? dir : strdup("");
 
 	size_t j = 1;
-	for (size_t i = 0; i < globbuf.gl_pathc; i++) {
-		if (SELFORPARENT(globbuf.gl_pathv[i]))
-			continue;
-		matches[j++] =
-			savestring(globbuf.gl_pathv[i], strlen(globbuf.gl_pathv[i]));
-	}
+	for (size_t i = 0; i < g.gl_matches; i++)
+		matches[j++] = strdup(g.gl_finfo[i].name);
 	matches[j] = NULL;
 
-	globfree(&globbuf);
+	xglobfree(&g);
 	return matches;
 }
 
@@ -2495,7 +2484,7 @@ rl_trashed_files(const char *text)
 
 	char **tfiles = xnmalloc((size_t)n + 2, sizeof(char *));
 	if (f) {
-		tfiles[0] = savestring(f, strlen(f));
+		tfiles[0] = strdup(f);
 	} else {
 		tfiles[0] = xnmalloc(1, sizeof(char));
 		*tfiles[0] = '\0';
@@ -2509,7 +2498,7 @@ rl_trashed_files(const char *text)
 			free(t[i]);
 			continue;
 		}
-		tfiles[nn++] = savestring(name, strlen(name));
+		tfiles[nn++] = strdup(name);
 		free(t[i]);
 	}
 	free(t);
@@ -2665,7 +2654,7 @@ get_cur_tag(void)
 	while (*q) {
 		if (*q == ' ' && (q != p || *(q - 1) != '\\')) {
 			*q = '\0';
-			char *tag = savestring(p, strlen(p));
+			char *tag = strdup(p);
 			*q = ' ';
 			if (is_tag(tag))
 				return tag;
@@ -3191,7 +3180,7 @@ rl_fastback(const char *s)
 	}
 
 	char **matches = xnmalloc(2, sizeof(char *));
-	matches[0] = savestring(p, strlen(p));
+	matches[0] = strdup(p);
 	matches[1] = NULL;
 
 	free(p);
@@ -3219,10 +3208,10 @@ cmd_takes_edit(const char *str)
 		NULL
 	};
 
-	size_t i;
-	for (i = 0; cmds[i]; i++)
+	for (size_t i = 0; cmds[i]; i++) {
 		if (*str == *cmds[i] && strcmp(str + 1, cmds[i] + 1) == 0)
 			return 1;
+	}
 
 	return 0;
 }
@@ -3552,7 +3541,7 @@ complete_tags(const char *text)
 		return complete_tag_names_t(text);
 
 	free(cur_tag);
-	cur_tag = savestring(text + 2, strlen(text + 2));
+	cur_tag = strdup(text + 2);
 	char **matches = check_tagged_files(cur_tag);
 
 	if (!matches) {
@@ -4021,7 +4010,7 @@ complete_bookmarks_prompt(const char *text)
 
 		matches = xnmalloc(2, sizeof(char *));
 		const char *name = bookmarks[n - 1].name;
-		matches[0] = savestring(name, strlen(name));
+		matches[0] = strdup(name);
 		matches[1] = NULL;
 		cur_comp_type = TCMP_NET; /* Same behavior as 'net'. */
 
@@ -4418,11 +4407,6 @@ FIRST_WORD_COMP:
 	/* Arguments for shell commands. */
 	if (*text == '-' && (matches = complete_shell_cmd_opts(text)))
 		return matches;
-
-	/* ELN ranges */
-/*	if (*text >= '0' && *text <= '9'
-	&& (matches = complete_ranges(text)))
-		return matches; */
 
 	/* Finally, try to complete with filenames in CWD. */
 	if ((matches = rl_completion_matches(text, &filenames_gen_text))) {
