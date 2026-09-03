@@ -127,10 +127,12 @@ count_chars(const char *restrict s, const char c)
 	return n;
 }
 
+/* Return 1 if the character at index I in the string S is bracketed, or
+ * 0 if not. */
 static int
 is_bracketed(const char *s, const size_t i, const size_t start)
 {
-	if (!s || (s[i] != '|' && s[i] != ';' && s[i] != '&'))
+	if (!s || !*s)
 		return 0;
 
 	const char *cur = s + i;
@@ -145,10 +147,11 @@ is_bracketed(const char *s, const size_t i, const size_t start)
 			open_bracket = s + n;
 			bracket = s[n];
 		}
+		/* The closing bracket for '(' is '(' + 1, while for '{' and '['
+		 * is the character plus 2. */
 		if (bracket != 0 && ((bracket == '(' && s[n] == bracket + 1)
-		|| s[n] == bracket + 2)) {
+		|| s[n] == bracket + 2))
 			closing_bracket = s + n;
-		}
 	}
 
 	if (open_bracket && cur > open_bracket
