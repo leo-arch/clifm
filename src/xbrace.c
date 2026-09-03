@@ -71,14 +71,13 @@ find_braces(const char *s, const char **open, const char **close)
 			if (depth == 0)
 				*open = p;
 			depth++;
-		} else if (*p == '}') {
-			if (depth > 0) {
-				depth--;
+		} else {
+			if (*p != '}' || depth == 0)
+				continue;
 
-				if (depth == 0) {
-					*close = p;
-					return 1;
-				}
+			if (--depth == 0) {
+				*close = p;
+				return 1;
 			}
 		}
 	}
@@ -232,10 +231,12 @@ expand_recursive(const char *expression, brace_t *result)
 	for (size_t i = 0; i <= inside_length; i++) {
 		char c = inside[i];
 
-		if (c == '{')
+		if (c == '{') {
 			depth++;
-		else if (c == '}')
-			depth--;
+		} else {
+			if (c == '}')
+				depth--;
+		}
 
 		if ((c == ',' && depth == 0) || c == '\0') {
 			const size_t part_len = i - part_start;

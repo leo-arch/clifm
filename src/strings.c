@@ -128,7 +128,8 @@ count_chars(const char *restrict s, const char c)
 }
 
 /* Return 1 if the character at index I in the string S is bracketed, or
- * 0 if not. */
+ * 0 if not. The check is made starting at index START in S up to the end of
+ * the string. */
 static int
 is_bracketed(const char *s, const size_t i, const size_t start)
 {
