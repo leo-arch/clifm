@@ -1968,6 +1968,29 @@ check_dirhist(const char *word, const size_t len)
 	return PARTIAL_MATCH;
 }
 
+/* There's no suggestion available for the current prompt, but still we
+ * want to prevent the warning prompt from being triggered in some specific
+ * cases.
+ * Returns 1 if the warning prompt must be triggered or 0 if not. */
+static inline int
+triggers_warning_prompt(const char *word, size_t word_len,
+	const unsigned char cur)
+{
+	/* Last character in the command line */
+    unsigned char lastc = word_len > 0
+		? (unsigned char)word[word_len - 1] : 0;
+	/* CUR is the character being currently processed, not inserted yet
+	 * in the command line. */
+
+    return (lastc != '|' /* Process separators */
+		&& lastc != ';'
+		&& lastc != '&'
+		&& cur > ' ' /* Space, backspace, and control characters */
+		&& cur != 0x7F /* Del */
+		&& !RL_ISSTATE(RL_STATE_MOREINPUT)
+		&& (*word != '/' || strchr(word + 1, '/') != NULL));
+}
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion(). */
@@ -2020,6 +2043,8 @@ rl_suggestions(const unsigned char c)
 		const char *q = rl_line_buffer + start_word;
 		first_word = savestring(q, strlen(q));
 		rl_line_buffer[full_word] = ' ';
+	} else {
+		first_word = strdup(rl_line_buffer + start_word);
 	}
 
 	/* A pointer to the beginning of the last word (command name) */
@@ -2573,7 +2598,7 @@ CHECK_FIRST_WORD:
 	/* There's no suggestion nor any command name matching the first entered
 	 * word. So, we assume we have an invalid command name. Switch to the
 	 * warning prompt to warn the user. */
-		if (*word != '/' || strchr(word + 1, '/'))
+		if (triggers_warning_prompt(word, wlen, c) == 1)
 			print_warning_prompt(*word, c);
 	}
 

@@ -590,7 +590,7 @@ extern time_t curdir_mtime;
 #define DESKTOP_NOTIF_SYSTEM 1
 #define DESKTOP_NOTIF_KITTY  2
 
-/* Search strategy */
+/* Matching style */
 #define GLOB_MATCH  0
 #define REGEX_MATCH 1
 

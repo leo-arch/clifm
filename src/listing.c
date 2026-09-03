@@ -1987,7 +1987,7 @@ list_files(int *reset_pager)
 
 	/* Find the greatest number of columns that fits. */
 	while (columns < count) {
-		columns++; /* We begin by testing 2 columns. */
+		columns++; /* We start testing 2 columns. */
 		if (layout_fits(count, columns, spacing, widths) == 0) {
 			layout_fits(count, --columns, spacing, widths);
 			break;

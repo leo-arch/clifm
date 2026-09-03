@@ -18,7 +18,7 @@
 #include <string.h> /* strcmp, strlen */
 
 #include "aux.h"       /* xnmalloc, open_fread */
-#include "checks.h"    /* check_glob_char */
+#include "checks.h"    /* check_metachar */
 #include "dothidden.h" /* dothidden_t, DOTHIDDEN_FILE */
 #include "strings.h"   /* savestring */
 
@@ -58,10 +58,8 @@ load_dothidden(void)
 			continue;
 
 		size_t len = strlen(line);
-		if (len > 0 && line[len - 1] == '\n') {
-			line[len - 1] = '\0';
-			len--;
-		}
+		if (len > 0 && line[len - 1] == '\n')
+			line[--len] = '\0';
 
 		if (check_metachar(line, GLOB_MATCH) == 0) {
 			h[counter].name = savestring(line, len);

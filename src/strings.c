@@ -127,6 +127,37 @@ count_chars(const char *restrict s, const char c)
 	return n;
 }
 
+static int
+is_bracketed(const char *s, const size_t i, const size_t start)
+{
+	if (!s || (s[i] != '|' && s[i] != ';' && s[i] != '&'))
+		return 0;
+
+	const char *cur = s + i;
+	const char *open_bracket = NULL;
+	const char *closing_bracket = NULL;
+	char bracket = 0;
+
+	for (size_t n = start; s[n]; s++) {
+		if (s[n] == ' ' && (n == 0 || s[n - 1] != '\\'))
+			break;
+		if (s[n] == '(' || s[n] == '{' || s[n] == '[') {
+			open_bracket = s + n;
+			bracket = s[n];
+		}
+		if (bracket != 0 && ((bracket == '(' && s[n] == bracket + 1)
+		|| s[n] == bracket + 2)) {
+			closing_bracket = s + n;
+		}
+	}
+
+	if (open_bracket && cur > open_bracket
+	&& (!closing_bracket || cur < closing_bracket))
+		return 1;
+
+	return 0;
+}
+
 /* Return the number of words found in the current readline buffer. */
 size_t
 count_words(size_t *start_word, size_t *full_word)
@@ -157,8 +188,10 @@ count_words(size_t *start_word, size_t *full_word)
 		/* If a process separator char is found, reset variables so that we
 		 * can start counting again for the new command. */
 		if (quote == 0 && cur_color != hq_c && i > 0 && b[i - 1] != '\\'
-		&& ((b[i] == '&' && b[i - 1] == '&') || b[i] == '|' || b[i] == ';'))
-			words = first_non_space = *full_word = 0;
+		&& ((b[i] == '&' && b[i - 1] == '&') || b[i] == '|' || b[i] == ';')) {
+			if (!is_bracketed(b, i, *full_word + 1))
+				words = first_non_space = *full_word = 0;
+		}
 	}
 
 	return words;
