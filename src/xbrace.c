@@ -115,7 +115,7 @@ build_range_value(const int value, const int is_num, int *val_len)
 static char **
 expand_brace_ranges(const char *prefix, const char *range, const char *suffix)
 {
-	char *buf = strdup(range);
+	char *buf = range ? strdup(range) : NULL;
 
 	char *first_sep = buf ? strstr(buf, "..") : NULL;
 	if (!first_sep) {
@@ -164,8 +164,8 @@ expand_brace_ranges(const char *prefix, const char *range, const char *suffix)
 
 	const int max = 10000;
 
-	if (first == INT_MIN || second == INT_MIN || step == INT_MIN
-	|| first > max || second > max || step == INT_MIN) {
+	if (first == INT_MIN || second == INT_MIN
+	|| first > max || second > max) {
 		free(buf);
 		return NULL;
 	}
