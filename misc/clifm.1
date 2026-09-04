@@ -2787,34 +2787,37 @@ tl
 T}	tag list	List available tags
 T{
 -
-T}	tag list-full	List available tags and all tagged files
+T}	tag list-full	List available tags and tagged files
 T{
 tl work
-T}	tag list work	List all files tagged as \fIwork\fR
+T}	tag list work	List files tagged as \fBwork\fR
+T{
+tl work old
+T}	tag list work old	List files tagged as both \fBwork\fR and \fBold\fR
 T{
 tl file.txt
 T}	tag list file.txt	List tags applied to the file \fIfile.txt\fR
 T{
 tn dogs cats
-T}	tag new dogs cats	Create two empty tags: \fIdogs\fR and \fIcats\fR
+T}	tag new dogs cats	Create two empty tags: \fBdogs\fR and \fBcats\fR
 T{
 ta *.png :images :png
-T}	tag add *.png :images :png	Tag PNG files as both \fIimages\fR and \fIpng\fR \fB(1) (2)\fR
+T}	tag add *.png :images :png	Tag PNG files as both \fBimages\fR and \fBpng\fR \fB(1)(2)\fR
 T{
 ta sel :special
-T}	tag add sel :special	Tag all selected files as \fIspecial\fR
+T}	tag add sel :special	Tag selected files as \fBspecial\fR
 T{
 tr documents docs
-T}	tag rename documents docs	Rename the tag \fIdocuments\fR as \fIdocs\fR
+T}	tag rename documents docs	Rename the tag \fBdocuments\fR to \fBdocs\fR
 T{
 ty png images
-T}	tag merge png images	Merge the tag \fIpng\fR into \fIimages\fR \fB(3)\fR
+T}	tag merge png images	Merge the tag \fBpng\fR into \fBimages\fR \fB(3)\fR
 T{
 td images
-T}	tag del images	Remove the tag \fIimages\fR \fB(4)\fR
+T}	tag del images	Remove the tag \fBimages\fR \fB(4)\fR
 T{
 tu :work file1 dir2
-T}	tag untag :work file1 dir2	Untag a few files from \fIwork\fR \fB(5)\fR
+T}	tag untag :work file1 dir2	Untag a few files from \fBwork\fR \fB(5)\fR
 .TE
 
 .sp
