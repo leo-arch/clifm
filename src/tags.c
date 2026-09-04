@@ -270,20 +270,108 @@ list_tags_full(void)
 	return exit_status;
 }
 
+struct tnames_t {
+	char *name;
+	struct stat st;
+	size_t in_tags;
+};
+
+struct tags_t {
+	struct tnames_t *files;
+	size_t count;
+	size_t cap;
+};
+
+static void
+mark_tagged(const char *file, const struct stat *a, const struct tags_t *t)
+{
+	if (!file || !a || !t)
+		return;
+
+	const ino_t ino = a->st_ino;
+	const dev_t dev = a->st_dev;
+
+	for (size_t i = 0; i < t->count; i++) {
+		if (t->files[i].name[0] && ino == t->files[i].st.st_ino
+		&& dev == t->files[i].st.st_dev
+		&& strcmp(file, t->files[i].name) == 0) {
+			t->files[i].in_tags++;
+			return;
+		}
+	}
+}
+
+static void
+append_to_tag_list(const char *file, const struct stat *st, struct tags_t *t)
+{
+	if (!file || !st || !t)
+		return;
+
+	if (t->count == t->cap) {
+		const size_t newcap = t->cap == 0 ? 32 : t->cap * 2;
+		t->files = xnrealloc(t->files, newcap, sizeof(struct tnames_t));
+		t->cap = newcap;
+	}
+
+	t->files[t->count].name = strdup(file);
+	t->files[t->count].in_tags = 1;
+	t->files[t->count++].st = *st;
+}
+
+static void
+append_files_in_tag(const char *tag, struct tags_t *tag_list, const int first)
+{
+	if (!tag || !tag_list || !tags_dir)
+		return;
+
+	char tmp[PATH_MAX + 1];
+	snprintf(tmp, sizeof(tmp), "%s/%s", tags_dir, tag);
+
+	DIR *dir = opendir(tmp);
+	if (!dir)
+		return;
+
+	char full_name[PATH_MAX + NAME_MAX + 2];
+	char resolved[PATH_MAX + 1];
+	struct stat a;
+	const struct dirent *ent;
+
+	while ((ent = readdir(dir))) {
+		if (SELFORPARENT(ent->d_name))
+			continue;
+
+		snprintf(full_name, sizeof(full_name), "%s/%s", tmp, ent->d_name);
+
+		*resolved = '\0';
+		(void)xrealpath(full_name, resolved);
+		if (!*resolved)
+			continue;
+
+		if (lstat(resolved, &a) == -1)
+			continue;
+
+		if (first == 1)
+			(void)append_to_tag_list(resolved, &a, tag_list);
+		else
+			(void)mark_tagged(resolved, &a, tag_list);
+	}
+
+	closedir(dir);
+}
+
 static int
 list_tags(char **args)
 {
 	if (tags_n == 0)
 		return print_no_tags();
 
-	size_t i;
 	int exit_status = FUNC_SUCCESS;
 
 	if (!args || !args[0] || !args[1] || !args[2]) {
 		/* 'tag list': list all tags */
 		const int pad = (int)get_longest_tag();
 
-		for (i = 0; tags[i]; i++) {
+		for (size_t i = 0; tags[i]; i++) {
 			char p[PATH_MAX + 1];
 			snprintf(p, sizeof(p), "%s/%s", tags_dir, tags[i]);
 			const filesn_t n = count_dir(p, NO_CPOP);
@@ -297,7 +385,10 @@ list_tags(char **args)
 		return FUNC_SUCCESS;
 	}
 
-	for (i = 2; args[i]; i++) {
+	struct tags_t tag_list = {0};
+	size_t valid_tags = 0;
+
+	for (size_t i = 2; args[i]; i++) {
 		if (!is_tag(args[i])) {
 			/* 'tag list FILENAME' */
 			char *p = unescape_str(args[i]);
@@ -305,7 +396,7 @@ list_tags(char **args)
 			struct stat a;
 			if (lstat(p ? p : args[i], &a) == -1) {
 				exit_status = errno;
-				xerror("%s: %s\n", p ? p : args[i], strerror(errno));
+				xerror("tag: '%s': %s\n", p ? p : args[i], strerror(errno));
 				free(p);
 				continue;
 			}
@@ -315,17 +406,23 @@ list_tags(char **args)
 			free(p);
 			list_tags_having_file(a.st_dev, a.st_ino);
 
+			if (args[i + 1])
+				putchar('\n');
 		} else {
 			/* 'tag list TAG' */
-			printf(_("Files tagged as %s%s%s%s:\n"), conf.colorize == 1 ? BOLD : "'",
-				args[i], conf.colorize == 1 ? BOLD : "'",
-				conf.colorize == 1 ? NC : "'");
-			if (list_files_in_tag(args[i]) == FUNC_FAILURE)
-				exit_status = FUNC_FAILURE;
+			valid_tags++;
+			const int first_run = (i == 2);
+			(void)append_files_in_tag(args[i], &tag_list, first_run);
 		}
+	}
 
-		if (args[i + 1])
-			putchar('\n');
+	if (tag_list.count > 0) { /* 'tag list TAG' */
+		for (size_t i = 0; i < tag_list.count; i++) {
+			if (tag_list.files[i].in_tags == valid_tags)
+				printf("%s\n", tag_list.files[i].name);
+			free(tag_list.files[i].name);
+		}
+		free(tag_list.files);
 	}
 
 	return exit_status;
@@ -758,7 +855,7 @@ reconstruct_input(char **args)
 	}
 
 	for (n = 1; args[n]; n++)
-		a[c++] = savestring(args[n], strlen(args[n]));
+		a[c++] = strdup(args[n]);
 	a[c] = NULL;
 
 	return a;

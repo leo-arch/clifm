@@ -1177,20 +1177,22 @@ following shortcuts as well:\n\n\
 - List available tags and each tagged file\n\
     tag list-full\n\
 - List files tagged as 'pdf'\n\
-    tag list pdf (or 't:pdf<TAB>')'\n\
+    tag list pdf (or 't:pdf<TAB>')\n\
+- List files tagged as both 'pdf' and 'old'\n\
+    tag list pdf old\n\
 - List tags applied to the file 'file.txt'\n\
     tag list file.txt\n\
-- Tag all .PNG files in the current directory as both 'images' and 'png'\n\
+- Tag PNG files in the current directory as both 'images' and 'png'\n\
     tag add *.png :images :png\n\
-  Note: Tags are created if they do not exist.\n\
+  Note 1: Tags are created if they do not exist.\n\
   Note 2: Since 'add' is the default action, it can be omitted.\n\
-- Tag all selected files as 'special'\n\
+- Tag selected files as 'special'\n\
     tag add sel :special\n\
 - Rename tag 'documents' to 'docs'\n\
     tag rename documents docs\n\
 - Merge tag 'png' into 'images'\n\
     tag merge png images\n\
-  Note: All files tagged as 'png' will be now tagged as 'images',\n\
+  Note: Files tagged as 'png' will be now tagged as 'images',\n\
   and the 'png' tag will be removed.\n\
 - Remove the tag 'images' (untag all files tagged as 'images')\n\
     tag del images\n\
@@ -1201,9 +1203,9 @@ following shortcuts as well:\n\n\
 Operating on tagged files (t:TAG)\n\
 - Print the file properties of all files tagged as 'docs'\n\
     p t:docs (or 'p t:<TAB>' to select from a list)\n\
-- Remove all files tagged as 'images'\n\
+- Remove files tagged as 'images'\n\
     r t:images\n\
-- Run stat(1) over all files tagged as 'work' and all files tagged as\n\
+- Run stat(1) over files tagged as 'work' and files tagged as\n\
   'docs'\n\
     stat t:work t:docs\n\n\
 To operate only on some tagged files use TAB as follows:\n\
