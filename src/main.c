@@ -837,6 +837,8 @@ const struct nameslist_t param_str[] = {
 };
 
 const struct nameslist_t kb_cmds[] = {
+	{"accept-suggestion", 17},
+	{"accept-suggested-word", 6},
 	{"archive-sel", 11},
 	{"bookmarks", 9},
 	{"cmd-hist", 8},
