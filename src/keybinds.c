@@ -3278,6 +3278,7 @@ set_hardcoded_keybinds(void)
 	rl_bind_key('\t', rl_tab_comp);
 }
 
+/*
 static int
 rl_accept_line(int count, int key)
 {
@@ -3286,7 +3287,7 @@ rl_accept_line(int count, int key)
 	rl_erase_empty_line = 1;
 	putchar('\n'); fflush(stdout);
 	return FUNC_SUCCESS;
-}
+} */
 
 /* Disable readline keybindings conflicting with clifm's.
  * This function is called before reading the readline config file (by
@@ -3295,15 +3296,16 @@ rl_accept_line(int count, int key)
 static void
 disable_rl_conflicting_kbinds(void)
 {
-	for (int i = 0; i < 0x20; i++) /* Disable Ctrl codes. */
+/*	for (int i = 0; i < 32; i++)
 		rl_bind_key(i, do_nothing);
 
-	rl_bind_key(0x0a, rl_accept_line); /* LF (Ctrl+j) */
-	rl_bind_key(0x0d, rl_accept_line); /* CR (Enter, Ctrl+m) */
-	rl_bind_key(0x1b, rl_insert); /* ESC (self-insert) */
+	rl_bind_key(0x0a, rl_accept_line); // LF (Ctrl+j)
+	rl_bind_key(0x0d, rl_accept_line); // CR (Ctrl+m)
+	rl_bind_key(0x1b, rl_insert); // ESC (self-insert) */
 
 	const char *const keys[] = {"\\x1b\\xd", "\\C-x(", "\\C-x\\C-u",
 		"\\C-x\\C-x", "\\C-x\\C-g", "\\C-x\\C-?","\\C-x\\C-r", "\\C-xe",
+		"\\C-x", "\\C-q", "\\C-d", "\\C-]",
 		"\\e\\C-]", "\\e\\C-i",
 		"\\e\\", "\\e\\e", "\\eb", "\\e.", "\\et", "\\ey", "\\e-",
 		"\\eu", "\\M-5", "\\M-6", "\\M-7", "\\M-8", "\\M-9", NULL};
