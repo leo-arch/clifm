@@ -659,6 +659,7 @@ my_rl_getc(FILE *stream)
 				rl_redisplay();
 			continue;
 		}
+
 		/* If zero characters are returned, then the file that we are
 		reading from is empty! Return EOF in that case. */
 		if (result == 0)
@@ -4525,7 +4526,6 @@ initialize_readline(void)
 	rl_catch_signals = 0;
 
 	/* Initialize the keyboard bindings function. */
-	disable_rl_conflicting_kbinds();
 	readline_kbinds();
 	set_rl_init_file();
 

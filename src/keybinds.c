@@ -3130,9 +3130,13 @@ set_keybinds_from_file(void)
 #ifndef _NO_PROFILES
 		{"next-profile", rl_profile_next},
 		{"previous-profile", rl_profile_previous},
-#endif // _NO_PROFILES
+#endif /* _NO_PROFILES */
 		{"quit", rl_quit}, {"lock", rl_lock}, {"refresh-screen", rl_refresh},
 		{"clear-line", rl_clear_line},
+
+		{"accept-suggestion", rl_accept_suggestion},
+		{"accept-suggested-word", rl_accept_first_word},
+
 		{"toggle-case-sensitive-sort", rl_toggle_ignore_case}, /* Deprecated */
 		{"toggle-disk-usage", rl_toggle_disk_usage},
 		{"toggle-hidden", rl_toggle_hidden_files},
@@ -3274,16 +3278,33 @@ set_hardcoded_keybinds(void)
 	rl_bind_key('\t', rl_tab_comp);
 }
 
+static int
+rl_accept_line(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	rl_done = 1;
+	rl_erase_empty_line = 1;
+	putchar('\n'); fflush(stdout);
+	return FUNC_SUCCESS;
+}
+
 /* Disable readline keybindings conflicting with clifm's.
  * This function is called before reading the readline config file (by
  * default ~/.inputrc), so that the user can rebind them using any of config
  * files (either readline.clifm or keybindings.clifm). */
-void
+static void
 disable_rl_conflicting_kbinds(void)
 {
+	for (int i = 0; i < 0x20; i++) /* Disable Ctrl codes. */
+		rl_bind_key(i, do_nothing);
+
+	rl_bind_key(0x0a, rl_accept_line); /* LF (Ctrl+j) */
+	rl_bind_key(0x0d, rl_accept_line); /* CR (Enter, Ctrl+m) */
+	rl_bind_key(0x1b, rl_insert); /* ESC (self-insert) */
+
 	const char *const keys[] = {"\\x1b\\xd", "\\C-x(", "\\C-x\\C-u",
 		"\\C-x\\C-x", "\\C-x\\C-g", "\\C-x\\C-?","\\C-x\\C-r", "\\C-xe",
-		"\\C-x", "\\C-q", "\\C-d", "\\C-]", "\\e\\C-]", "\\e\\C-i",
+		"\\e\\C-]", "\\e\\C-i",
 		"\\e\\", "\\e\\e", "\\eb", "\\e.", "\\et", "\\ey", "\\e-",
 		"\\eu", "\\M-5", "\\M-6", "\\M-7", "\\M-8", "\\M-9", NULL};
 
@@ -3294,10 +3315,11 @@ disable_rl_conflicting_kbinds(void)
 void
 readline_kbinds(void)
 {
+	disable_rl_conflicting_kbinds();
+	set_hardcoded_keybinds();
+
 	if (kbinds_file)
 		set_keybinds_from_file();
 	else
 		set_default_keybinds();
-
-	set_hardcoded_keybinds();
 }
