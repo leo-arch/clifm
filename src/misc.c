@@ -506,13 +506,6 @@ filter_function(char *arg)
 	free(filter.str);
 	regfree(&regex_exp);
 
-	if (*arg == '!') {
-		filter.rev = 1;
-		arg++;
-	} else {
-		filter.rev = 0;
-	}
-
 	char *p = arg;
 	if (*arg == '\'' || *arg == '"') {
 		p = remove_quotes(arg);
@@ -520,6 +513,13 @@ filter_function(char *arg)
 			xerror("%s\n", _("ft: Error removing quotes: Filter unset"));
 			return FUNC_FAILURE;
 		}
+	}
+
+	if (*p == '!') {
+		filter.rev = 1;
+		p++;
+	} else {
+		filter.rev = 0;
 	}
 
 	set_filter_type(*p);
