@@ -1169,7 +1169,7 @@ following shortcuts as well:\n\n\
   tl: List tags/tagged files (same as 'tag list')\n\
   tm: Rename tag             (same as 'tag rename')\n\
   tn: Create new tag(s)      (same as 'tag new')\n\
-  tp: Purge invalid entries  (same as 'tag purge')\n\
+  tp: Remove invalid entries (same as 'tag purge')\n\
   tu: Untag file(s)          (same as 'tag untag')\n\
   ty: Merge two tags         (same as 'tag merge')\n\n\
 \x1b[1mEXAMPLES\x1b[22m\n\

@@ -828,7 +828,7 @@ get_color_age(const time_t t, char *str, const size_t len)
 		if      (age <             0LL) n = 0;
 		else if (age <=        60LL*60) n = 1; /* One hour or less */
 		else if (age <=     24LL*60*60) n = 2; /* One day or less */
-		else if (age <=   7LL*24*60*60) n = 3; /* One weak or less */
+		else if (age <=   7LL*24*60*60) n = 3; /* One week or less */
 		else if (age <= 4LL*7*24*60*60) n = 4; /* One month or less */
 		else                            n = 5; /* Older */
 	}
