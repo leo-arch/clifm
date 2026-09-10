@@ -3037,6 +3037,9 @@ parse_input_str(char *str)
 		make_sel_recursive(&substr);
 #endif /* HAVE_WORDEXP */
 
+	if (strcmp(substr[0], "ft") == 0 || strcmp(substr[0], "filter") == 0)
+		return substr;
+
 				/* ##############################
 				 * #   2) BUILTIN EXPANSIONS    #
 				 * ##############################
