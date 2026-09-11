@@ -2590,7 +2590,7 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 
 	if (nread > 4 && sig[0] == 'B' && sig[1] == 'Z' && sig[2] == '3'
 	&& sig[3] == 'v' && sig[4] == '1')
-		return "application/x-bzip3";
+		return "application/vnd.bzip3";
 
 	if (nread > 3 && sig[0] == 0x04 && sig[1] == '"' && sig[2] == 'M'
 	&& sig[3] == 0x18)
