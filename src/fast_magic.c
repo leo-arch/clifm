@@ -2334,6 +2334,8 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		return "audio/flac";
 
 	if (nread >= 10 && sig[0] == '%' && memcmp(sig, "%!PS-Adobe", 10) == 0) {
+		if (nread > 17 && sig[10] == 'F' && memcmp(sig + 10, "Font-1.", 7) == 0)
+			return "font/x-postscript-pfb";
 		if (nread > 17 && sig[15] == 'E' && sig[16] == 'P' && sig[17] == 'S')
 			return "image/x-eps";
 		return "application/postscript";
@@ -2444,7 +2446,7 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	if (nread > 3 && ((sig[0] == 'S' && sig[1] == 'D' && sig[2] == 'P'
 	&& sig[3] == 'X') || (sig[0] == 'X' && sig[1] == 'P' && sig[2] == 'D'
 	&& sig[3] == 'S')))
-		return "image/x-dpx";
+		return "image/dpx";
 
 	if (nread > 3 && sig[0] == 0x76 && sig[1] == 0x2F && sig[2] == 0x31
 	&& sig[3] == 0x01)
@@ -2768,6 +2770,10 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[64] == 'M' && sig[65] == 'O' && sig[66] == 'B' && sig[67] == 'I')))
 		return "application/x-mobipocket-ebook";
 
+	if (nread > 8 && sig[0] == 'L' && !sig[1] && sig[2] == 'R' && !sig[3]
+	&& sig[4] == 'F' && !sig[5] && !sig[6] && !sig[7])
+		return "application/x-sony-bbeb";
+
 	if (nread > 3 && sig[0] == 'w' && sig[1] == 'v' && sig[2] == 'p'
 	&& sig[3] == 'k')
 		return "audio/x-wavpack";
@@ -2935,6 +2941,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		if (sig[5] == '4') return "video/vnd.mpegurl";
 	}
 
+	/* https://github.com/exiftool/exiftool/blob/master/lib/Image/ExifTool/Red.pm */
+	if (nread > 7 && sig[4] == 'R' && sig[5] == 'E' && sig[6] == 'D'
+	&& (sig[7] == '1' || sig[7] == '2')
+	&& (uint64_t)file_size >= (uint64_t)BE_U32(sig))
+		return "video/x-red-r3d";
+
 	/* http://fileformats.archiveteam.org/wiki/Codec2 */
 	if (nread > 4 && sig[0] == 0xC0 && sig[1] == 0xDE && sig[2] == 0xC2
 	&& sig[3] <= 0x10 && sig[4] <= 0x10	/* Bytes 3-4: version (curren 1.2 (0x01 0x02)) */
@@ -3091,6 +3103,11 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		return "application/postscript";
 	}
 
+	/* https://pub.ks-and-ks.ne.jp/cycling/edge500_fit.shtml */
+	if (nread > 11 && sig[8] == '.' && sig[9] == 'F' && sig[10] == 'I'
+	&& sig[11] == 'T')
+		return "application/x-garmin-fit";
+
 	if (nread > 32 && is_sixel_image(sig, nread) == 1)
 		return "image/x-sixel";
 
@@ -3104,6 +3121,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'A' && sig[4] == 0xA3 && sig[5] == 0xA3
 	&& sig[6] == 0x0D && sig[7] == 0x0A)
 		return "image/vnd.xara";
+
+	/* See https://github.com/nrpatel/lfptools
+	 * and file(1): magic/Magdir/images */
+	if (nread > 8 && sig[0] == 0x89 && sig[7] == 0x0A
+	&& memcmp(sig, "\x89LFP\x0d\x0a\x1a\x0a", 8) == 0)
+		return "image/x-lytro-lfp";
 
 	if (nread > 4 && sig[0] == 0x00 && sig[1] == 0x00 && sig[2] == 0x00
 	&& sig[3] == 0x01 && (sig[4] & 0x80) == 0 && (sig[4] & 0x1F) == 7)
@@ -3286,6 +3309,12 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	/* file(1): magic/Magdir/magic */
 	if (nread > 4 && (BE_U32(sig) == 0xF11E041C || LE_U32(sig) == 0xF11E041C))
 		return "application/x-file"; /* file(1) magic file (binary) */
+
+	/* https://pixinsight.com/doc/docs/XISF-1.0-spec/XISF-1.0-spec.html#distributed_xisf_unit */
+	if (nread > 7 && sig[0] == 'X' && sig[1] == 'I' && sig[2] == 'S'
+	&& sig[3] == 'F' && sig[4] == '0' && sig[5] == '1' && sig[6] == '0'
+	&& sig[7] == '0')
+		return "application/x-xisf+xml";
 
 	/* file(1): magic/Magdir/terminfo */
 	if (nread > 64 && sig[14] > 32 && ((sig[0] == 0x1A && sig[1] == 0x01)
@@ -5230,7 +5259,7 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 		return "video/x-flv";
 
 	if ((BE_U32(sig) & 0xffffff00) == 0x1f070000)
-		return "video/x-dv";
+		return "video/dv";
 
 	if (nread > 3 && sig[0] == 'D' && sig[1] == 'K' && sig[2] == 'I'
 	&& sig[3] == 'F')
@@ -8297,6 +8326,12 @@ text_or_binary(const uint8_t *s, const size_t slen)
 	&& TOUPPER(s[3]) == 'M' && TOUPPER(s[4]) == 'L' && (s[5] == ' '
 	|| s[5] == 0x09 || s[5] == 0x0A || s[5] == 0x0D))
 		return "text/xml";
+
+	/* https://en.wikipedia.org/wiki/Extensible_Metadata_Platform */
+	/* https://www.iana.org/assignments/media-types/application/rdf+xml */
+	if (len > 16 && s[0] == '<' && s[1] == '?' && s[2] == 'x' && s[3] == 'p'
+	&& memcmp(s, "<?xpacket begin=", 16) == 0)
+		return "application/rdf+xml";
 
 	/* Skip blanks */
 	while (len > 1 && (*s == ' ' || *s == 0x0A || *s == 0x0D || *s == 0x09)) {
