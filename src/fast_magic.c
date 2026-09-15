@@ -159,6 +159,9 @@ FALLBACK:
 static const char *
 check_zip_magic(const uint8_t *str, const size_t str_len)
 {
+	if (str_len <= 4) /* Only "PK\x03\x04" */
+		goto END;
+
 	/* A ZIP header is exacly 30 bytes. If there is a 'mimetype' tag,
 	 * it must be found at offset 30. */
 	if (str_len >= 39 && str[30] == 'm' && str[31] == 'i' && str[32] == 'm'
@@ -190,7 +193,7 @@ check_zip_magic(const uint8_t *str, const size_t str_len)
 		&& memcmp(s + i, "ppt/presentation.xml", 20) == 0)
 			return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
 
-		if (rem >= 5 && s[i] == 'v' && s[i + 1] == 'i' && s[i + 2] == 's'
+		if (rem > 5 && s[i] == 'v' && s[i + 1] == 'i' && s[i + 2] == 's'
 		&& s[i + 3] == 'i' && s[i + 4] == 'o' && s[i + 5] == '/')
 			return "application/vnd.ms-visio.drawing.main+xml";
 
@@ -216,6 +219,7 @@ check_zip_magic(const uint8_t *str, const size_t str_len)
 			return "model/3mf";
 	}
 
+END:
 #ifdef FMAGIC_NO_NULL
 	return "application/zip";
 #else
@@ -2520,10 +2524,6 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'G' && sig[4] == '\r' && sig[5] == '\n' && sig[6] == 0x1A
 	&& sig[7] == '\n')
 		return "video/x-mng";
-
-	if (nread > 7 && sig[4] == 'R' && sig[5] == 'E' && sig[6] == 'D'
-	&& sig[7] == '1')
-		return "video/x-r3d";
 
 	/* BINK video */
 	if (nread > 4 && sig[0] == 'B' && sig[1] == 'I' && sig[2] == 'K') {
