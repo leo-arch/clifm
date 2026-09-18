@@ -91,8 +91,8 @@ print_tagged_file(char *name, const char *tag)
 	*tmp = '\0';
 
 	snprintf(dir, sizeof(dir), "%s/%s/%s", tags_dir, tag, name);
-	(void)xrealpath(dir, tmp);
-	if (!*tmp) {
+	char *p = xrealpath(dir, tmp);
+	if (!p || !*tmp) {
 		xerror(_("tag: '%s': Error resolving link target\n"), name);
 		return;
 	}
@@ -341,8 +341,8 @@ append_files_in_tag(const char *tag, struct tags_t *tag_list, const int first)
 		snprintf(full_name, sizeof(full_name), "%s/%s", tmp, ent->d_name);
 
 		*resolved = '\0';
-		(void)xrealpath(full_name, resolved);
-		if (!*resolved) {
+		char *p = xrealpath(full_name, resolved);
+		if (!p || !*resolved) {
 			xerror(_("tag: Cannot resolve symbolic link '%s'\n"), full_name);
 			tag_list->errors++;
 			continue;
