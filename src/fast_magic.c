@@ -704,14 +704,18 @@ check_ftyp_magic(const uint8_t *s, const size_t l)
 	|| (s[0] == 'e' && s[1] == 'm' && s[2] == 's' && s[3] == 'g')))
 		return "video/vnd.dvb.file";
 
+#ifdef FMAGIC_NO_NULL
+	return "application/octet-stream";
+#else
 	return NULL;
+#endif
 }
 
 static const char *
 check_ogg_magic(const uint8_t *s, const size_t slen)
 {
-	if (slen < 28)
-		return NULL;
+	if (slen <= 28)
+		goto END;
 
 	const uint8_t *name = s + 28;
 	const size_t l = slen - 28;
@@ -732,6 +736,7 @@ check_ogg_magic(const uint8_t *s, const size_t slen)
 	if (l >= 9 && *name == 0200 && memcmp(name, "\200kate\0\0\0\0", 9) == 0)
 		return "application/ogg";
 
+END:
 #ifdef FMAGIC_NO_NULL
 	return "application/ogg";
 #else
