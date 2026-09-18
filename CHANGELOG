@@ -1,3 +1,85 @@
+1.29 (Stan Stanman) - Sep 18, 2026
+
+BUG FIXES:
+* Symbolic links not properly sorted when sorting by size.
+* Long-view: link to dir without access shows size '0B', while dir wihtout access shows '?'.
+* Long-view/full-dir-size: dirs without access (size '?') are sorted as if their size were 0.
+* The 'zp' command, unlike 'view', does not allow specifying file names in the command line.
+* No overwrite prompt when duplicate names are in the source list and not in the destination directory.
+* Relative symlinks not properly resolved by 'p'/'pp'/'--stat'.
+* Bulk-link ('bl' command) does not honor the 'LinkCreationMode' option.
+* No information for files with timestamps dated before the Unix Epoch.
+* Almost unusable/unresponsible when selecting thousands of files.
+* When compiled in POSIX-mode, '--stat' always fails to retrieve the file's MIME type.
+* If $NO_COLOR (system-wide) is set, there's no way to override this specifically for Clifm. You can now force colorization using either '--color=always', or setting $CLIFM_FORCE_COLOR to either '8', '16', '256', '24bit', or 'truecolor'.
+* Files deselected after running 't sel', even if the operation was cancelled (the user entered 'no' in the confirmation prompt).
+* '--stat' does not honor '--unicode'.
+* The prompt displays negative error codes on Haiku.
+* Some keybindings do not work after being set with the 'kb bind' command.
+* Commands using fused parameters with ranges starting with 10, 20, 30, etc do not work. E.g., 's10-12'.
+* When selections are modified from a second instance, the prompt indicator is updated, but not the file list. A second screen reload is required.
+* Unable to select a file whose name contains an embedded newline char (yes, these names are an abomination, but they're legal and a file manager should be able to handle them).
+* Filenames containing invalid UTF-8 chars break suggestions.
+* Filenames containing invalid UTF-8 chars break the interactive rename prompt ('m' command).
+* Wrong behavior when previewing files whose name starts with a dash (-).
+* Wrong colorization when accepting the first suggested word (Alt+f).
+* File type filters not working with regex searches (e.g., '/.*\.d$ -d /etc').
+* Completions/suggestions not working for starting path in the search function ('/QUERY dir/').
+* ft: quoted filter ignores negation.
+
+NEW FEATURES/IMPROVEMENTS:
+* Fast-magic: add file type detection for text files (mostly source-code files: almost 40 languages detected!).
+* Allow ELN ranges for single files (e.g., '1-1' or '1-' where there is only one file).
+* Allow overriding z-commands with custom command names (aliases or actions). Completions/suggestions for overridden commands are disabled.
+* Add 'skip' and 'skipall' options to the overwrite prompt (c/m commands) (replacing the previous functions of 'no' and 'none', which now copy files, but renaming them). Consult the manpage or run 'c --help' for more information.
+* Document z-commands. Press z<TAB> for the list of commands or consult the manpage for more information.
+* Add opening apps (f3d, prusa-slicer, openscad) for 3D-Graphic files (stl,step,3mf,iges,scad). Update your mimelist.clifm file.
+* Use the '-r' switch to recursively select files. E.g., 's *.png -r', or 's *.png -r dir/' to start from the directory 'dir'. To evaluate the selection pattern as a regular expression (instead of as a wildcard), use '-R'.
+* Recursive search is now made with '-r' (the old '-x' is still supported for backward compatibility).
+* Allow using all available answers for the overwrite prompt as default answer.
+* The new default answer for the overwrite prompt is 'o' (none).
+* Add short form for 's --invert': 's -i'.
+* New command-line option: '--mime-type FILE...'. Print MIME type of files and exit.
+* Allow specifying a destination directory (via a dedicated user prompt) when creating symlinks in bulk ('bl' command).
+* Mount ISO files with archivemount(1) to avoid using sudo (required by mount(1)).
+* Mount archives in '$TMPDIR/clifm-$USER/mnt' instead of '~/.config/clifm/profiles/PROFILE/mounts'.
+* Automatically unmount archives at exit.
+* The keyword 'mnt:' expands to the directory used to mount archives. For example, to quickly jumpt to the mountpoints directory, run 'cd mnt:'.* Add specific icon for empty directories.
+* Add icon for Fennel, Puppet, Razor/CSHTML source files.
+* Allow grouping directories after files. Set via a dedicated command: 'gd/group-dirs [first|last|false]'; via the config file: 'GroupDirs=[first|last|false]'; or via a command-line option: -f,--group-dirs=[first|last|false]. Note that the command 'ff'/'dirs-first' was removed, while --[no]-dirs-first, just as the 'ListDirsFirst' config option, is deprecated.
+* Display major/minor ID for character and block devices in long view (size field), like ls(1) would.
+* New config option (MaxConfirmFiles) to specify how many filenames are displayed in confirmation prompts (trash and removal). Supported values: 'auto' (half terminal lines), 'none', 'all', or a positive integer. Defaults to 'auto'.
+* Colorize the list of files displayed in confirmation prompts (trash and removal).
+* Better handle pluralization in output messages (e.g., "file" or "files" instead of "file(s)").
+* Add support for mounted device name and filesystem type ('--disk-usage') on Haiku.
+* New feature: use '--mounts' to prepend indicator ('+') to directories that are mountpoints. The 'p/pp' command identifies mounted device for these directories in the form 'DIR/ -> DEVNAME [FSTYPE]'. The color code used for this indicator is 'dm'. N.B.: Linux bind mounts are not supported.
+* New option: '--names-last': print filenames after metadata instead of before (long view).
+* The 'glob-regex' value for 'SearchStrategy' was removed due to inconsistent results. Now only 'glob' (default) and 'regex' are available.
+* Allow specifiying a pattern matching method for the current search disregarding the value of 'SearchStrategy'. For example, '/re:PATTERN' forces the use of regex, while '/gl:PATTERN' forces the use of globbing.
+* The 'SearchStrategy' option now allows the use of alphabetic values: 'glob' and 'regex'. Also, the option 'glob-regex' was removed. It defaults to 'glob'.
+* 'SearchStrategy' is deprecated. Use 'MatchingStyle' instead. Note that this new option is not restricted to the search function, but affects all functions and commands using patterns (this includes search, but also file selection).
+* Use the 'gl:' and 're:' prefixes to force the use of a specific pattern-matching style deviating from the default (glob). For example, run 's re:.*\.pdf$' to select PDF files, or '/gl:d*' to search for files starting with 'd', now using wildcards (note that, since the default style is glob, '/d*' (without prefix) is equivalent).
+* Improved algorithm to display files in columns, resulting in a better use of the terminal width. This includes an improved file pager.
+* Improved output for the search command: sorting follows the file list, and files are better organized in columns.
+* Improve how the warning prompt is triggered in the presence of process separators characters (|;&).
+* List files belonging in multiple tags: 'tag list tag1 tag2...'.
+* tag: Use the 'purge' subcommand to purge tags from invalid entries. E.g., 'tag purge TAG1 TAG2' to purge TAG1 and TAG2 from invalid entries. If no tag name is provided, all tags are scanned for invalid entries. The user is prompted for confirmation.
+* Add 'accept-suggestion' bindable action to make the action configurable. E.g., 'kb bind accept-suggestion'. The same goes for 'accept-suggested-word' (only the first suggested word is inserted).
+
+MISC:
+* '--no-columns' is deprecated, Use '-1/--oneline' instead.
+* New option: '--color[=always|auto|never]'. '--no-color' is now deprecated (use '--color=never' instead).
+* For consistency with other tools, '--full-dir-size' was renamed to '--total-size', and the config option 'FullDirsize' to 'TotalSize'. Old names still work, but it is recommended to adopt the new ones.
+* '--case-sens-dirjump', and '--case-sens-path-comp' options are now obsolete.
+*'--[no-]case-sensitive' is deprecated. Use '-i,--ignore-case' or '-I,--no-ignore-case' instead.
+Also, the config options 'CaseSensitiveDirjump', 'CaseSensitiveSearch', and 'CaseSensitivePathComp' (all deprecated) were merged into 'IgnoreCase=[true|false]'. 'CaseSensitiveList' was replaced by 'Sort=[name,iname,version,iversion,extension,iextension]'. Note: The new 'i' prefix in sort option names stands for case-insensitive.
+* The '--ls' options behaves now a bit more like ls(1). It implies: '--list-and-quit', '--no-clear-screen', '--no-eln', '--no-classify', '--sort=name', '--group-dirs=false', '--no-dereference', '--show-hidden=false', and '--names-last'.
+
+BREAKING CHANGES:
+* For consistency with other tools, '-L' stands now for '--dereference', in place of the old '--no-follow-symlinks' (use '--no-dereference' instead).
+* The '-f' option now requires an argument: 'first', 'last', 'false'.
+* '-F' is not a valid option anymore (use -f,--sort-dirs=false instead).
+
 1.28 (Rubber Chicken) - May 27, 2026
 
 BUG FIXES
