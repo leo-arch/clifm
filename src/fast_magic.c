@@ -2660,6 +2660,13 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 	&& sig[3] == 'g')
 		return "application/pgp-encrypted";
 
+	/* file(1): magic/MagDir/gnu */
+	if (nread > 5 && sig[0] == 0x8C && sig[1] == 0x0D && sig[4] == 0x03
+	&& sig[5] == 0x02 && sig[2] == 0x04 && (sig[3] == 2 || sig[3] == 3
+	|| sig[3] == 4 || sig[3] == 7 || sig[3] == 8 || sig[3] == 9
+	|| sig[3] == 0x0A || sig[3] == 0x0B || sig[3] == 0x0c || sig[3] == 0x0D))
+		return "application/pgp-encrypted"; /* GPG symetrically encrypted data */
+
 	if (nread > 11 && BE_U32(sig) == 32 && sig[4] == 0x01 && sig[8] == 'K'
 	&& sig[9] == 'B' && sig[10] == 'X' && sig[11] == 'f')
 		return "application/x-gpg-keybox";
@@ -2838,6 +2845,10 @@ check_modern_formats(const uint8_t *sig, const size_t nread,
 		if (sig[2] == 0xBA && sig[3] == 0xBE) return check_cafebabe(sig, nread);
 		if (sig[2] == 0xD0 && sig[3] == 0x0D) return "application/x-java-pack200";
 	}
+
+	if (nread > 4 && ((LE_U32(sig) & 0xfffffffe) == 0xfeedface
+	|| (BE_U32(sig) & 0xfffffffe) == 0xfeedface))
+		return "application/x-mach-binary";
 
 	/* file(1): magic/Magdir/kde */
 	if (nread >= 19 && sig[0] == '[' && sig[1] == 'K'
@@ -7622,6 +7633,18 @@ check_legacy_formats(const char *file, const uint8_t *sig, const size_t nread,
 	|| (sig[0] == 0x72 && sig[1] == 0xB5 && sig[2] == 0x4A
 	&& sig[3] == 0x86)))
 		return "font/x-psf";
+
+	if (nread > 7 && sig[0] == 'A' && sig[1] == 'I' && sig[2] == 'L'
+	&& sig[3] == '3' && sig[7] == 0x1A) {
+		if (sig[4] == 'M' && sig[5] == 'D' && sig[6] == 'I')
+			return "application/vnd.mss-mdi";
+		if (sig[4] == 'D' && sig[5] == 'I' && sig[6] == 'G')
+			return "application/vnd.mss-dig";
+	}
+
+	if (nread > 7 && sig[0] == 'I' && sig[1] == 'D' && sig[2] == 'P'
+	&& sig[3] == '2' && BE_U32(sig + 4) == 0x08000000)
+		return "model/vnd.quake2-md2";
 
 	const char *mimetype = get_mimetype_from_companion_file(file);
 	if (mimetype)
