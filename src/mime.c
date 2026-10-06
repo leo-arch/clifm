@@ -973,7 +973,9 @@ expand_app_fields(char ***cmd, size_t *n, const char *fpath, int *exec_flags)
 			copy_field(&a[i], fpath);
 			f = 1;
 			set_exec_flags("EO", exec_flags);
+#ifndef __CYGWIN__
 			*exec_flags |= E_SETSID;
+#endif
 			bg_proc = 1;
 			i++;
 			break;
@@ -1451,7 +1453,9 @@ build_command(char **app_fields, char **files, int *exec_flags)
 			append_filenames(cmd, files, &n);
 			f_flag = 1;
 			set_exec_flags("EO", exec_flags);
+#ifndef __CYGWIN__
 			*exec_flags |= E_SETSID;
+#endif
 			bg_proc = 1;
 			break;
 		}
