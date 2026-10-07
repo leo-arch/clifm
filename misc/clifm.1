@@ -1003,7 +1003,7 @@ MIME types are retrieved from 4 different sources, in this order of precedence:
 .sp
 The first source returning a valid MIME type is used.
 .sp
-1. The \fImime.types\fR file follows the same strcuture used by the \fI/etc/mime.types\fR file.  You can even use this specific file by pointing to it with the \fBCLIFM_MIMETYPES_FILE\fR environment variable.  If none of these files is found, this step is skipped.  Also, these files are never consulted when running with \fB--mime-type\fR.
+1. The \fImime.types\fR file follows the same structure used by the \fI/etc/mime.types\fR file.  You can even use this specific file by pointing to it with the \fBCLIFM_MIMETYPES_FILE\fR environment variable.  If none of these files is found, this step is skipped.  Also, these files are never consulted when running with \fB--mime-type\fR.
 .sp
 2. Moira (or simply fast-magic) is \fBClifm\fR's built-in file-type identification tool.  It is enabled by default, but you can disable it by setting \fBFastMagic\fR to \fBfalse\fR in the main configuration file.
 .sp
