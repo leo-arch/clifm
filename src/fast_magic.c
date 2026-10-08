@@ -1187,7 +1187,7 @@ get_ms_exec_type(const uint8_t *s, const size_t slen)
 	/* Read little-endian dword (double word - 32bit) at 0x3C (e_lfanew pointer) */
 	const uint32_t n = LE_U32(s + 0x3C);
 
-	if (n + 4 > slen)
+	if ((uint64_t)n + 4 > (uint64_t)slen)
 		return "application/x-dosexec";
 
 	if (s[n] == 'P' && s[n + 1] == 'E' && s[n + 2] == 0x00 && s[n + 3] == 0x00)
