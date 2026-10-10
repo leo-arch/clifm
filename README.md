@@ -156,7 +156,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 ### From a package manager
 
 <details>
-<summary>Packaging status <a href="https://repology.org/project/clifm/versions"><img src="https://repology.amdmi3.ru/badge/tiny-repos/clifm.svg" alt="Packaging status"></a></summary>
+<summary>Packaging status <a href="https://repology.org/project/clifm/versions"><img src="https://repology.org/badge/tiny-repos/clifm.svg" alt="Packaging status"></a></summary>
 <a href="https://repology.org/project/clifm/versions">
     <img src="https://repology.org/badge/vertical-allrepos/clifm.svg?columns=3" alt="Packaging status">
 </a>
