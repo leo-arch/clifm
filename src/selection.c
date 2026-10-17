@@ -744,15 +744,21 @@ sel_function(char **args)
 
 		pattern = NULL;
 		int matching_style = UNSET;
-		if (check_regex(args[i]) == FUNC_SUCCESS)
+
+		char *deq = strchr(args[i], '\\') ? unescape_str(args[i]) : NULL;
+		char *name = deq ? deq : args[i];
+
+		if (check_regex(name) == FUNC_SUCCESS)
 			pattern = set_pattern_style(args[i], &matching_style);
 
 		if (!pattern) {
-			new_sel += select_filename(args[i], dir, &error, 1);
+			new_sel += select_filename(name, dir, &error, 0);
 		} else {
 			new_sel +=
 				select_pattern(pattern, dir, filetype, &error, matching_style);
 		}
+
+		free(deq);
 	}
 
 	if (f == 0)
