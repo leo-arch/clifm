@@ -784,7 +784,7 @@ check_ebml_magic(const uint8_t *s, const size_t nread)
 	if (*p == 'w' && memcmp(p, "webm", 4) == 0)
 		return "video/webm";
 	if (*p == 'm' && memcmp(p, "matroska", 8) == 0)
-		return "video/x-matroska";
+		return "video/matroska";
 
 	return NULL;
 }
