@@ -3835,7 +3835,7 @@ read_config(void)
 
 		else if (*line == 'L' && strncmp(line, "ListDirsFirst=", 14) == 0) {
 			err('n', PRINT_PROMPT, _("%s: ListDirsFirst: This option is "
-				"deprecated. Use SortDirs=[first|last|asfiles] instead.\n"),
+				"deprecated. Use GroupDirs=[first|last|false] instead.\n"),
 				PROGRAM_NAME);
 		}
 
