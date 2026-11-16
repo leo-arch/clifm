@@ -102,12 +102,13 @@ rename_file(char *oldpath, char *newpath)
 }
 
 /* Write filenames in ARGS into the temporary file TMPFILE, whose file
- * descriptor is FD. Update WRITTEN to the number of actually written
- * filenames, and make ATTR hold the stat attributes of the temporary
- * file after writing into it all filenames. */
+ * descriptor is FD. Store the actually written filenames in WRITTEN_NAMES
+ * (NULL terminated) and their number in WRITTEN, and make ATTR hold the
+ * stat attributes of the temporary file after writing into it all
+ * filenames. */
 static int
 write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
-	struct stat *attr, size_t *written)
+	struct stat *attr, char **written_names, size_t *written)
 {
 	FILE *fp = fdopen(fd, "w");
 	if (!fp)
@@ -154,8 +155,11 @@ write_files_to_tmp(char ***args, const char *tmpfile, const int fd,
 		}
 
 		fprintf(fp, "%s\n", (*args)[i]);
+		written_names[*written] = (*args)[i];
 		(*written)++;
 	}
+
+	written_names[*written] = NULL;
 
 	if (*written == 0 || fstat(fd, attr) == -1) {
 		if (unlinkat(XAT_FDCWD, tmpfile, 0) == -1)
@@ -401,19 +405,32 @@ bulk_rename(char **args, size_t *renamed, const size_t reload_list)
 		return FUNC_FAILURE;
 	}
 
-	/* Write files to be renamed into a tmp file and store stat info in attra. */
+	/* Write files to be renamed into a tmp file and store stat info in attra.
+	 * Files that cannot be listed are skipped, so OLD_NAMES, not ARGS, holds
+	 * the names matching the lines of the tmp file. */
 	size_t written = 0;
-	int ret = write_files_to_tmp(&args, tmpfile, fd, &attra, &written);
-	if (ret != FUNC_SUCCESS)
+	size_t files_n = 0;
+	while (args[files_n + 1])
+		files_n++;
+	char **old_names = xnmalloc(files_n + 1, sizeof(char *));
+	int ret = write_files_to_tmp(&args, tmpfile, fd, &attra, old_names,
+		&written);
+	if (ret != FUNC_SUCCESS) {
+		free(old_names);
 		return ret;
+	}
 
 	/* Open the tmp file with the associated text editor. */
-	if ((ret = open_tmpfile(args[args_n], tmpfile)) != FUNC_SUCCESS)
+	if ((ret = open_tmpfile(args[args_n], tmpfile)) != FUNC_SUCCESS) {
+		free(old_names);
 		return ret;
+	}
 
 	FILE *fp;
-	if (!(fp = open_fread(tmpfile, &fd)))
+	if (!(fp = open_fread(tmpfile, &fd))) {
+		free(old_names);
 		return err_open_tmp_file(tmpfile, fd);
+	}
 
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified. */
@@ -432,10 +449,11 @@ bulk_rename(char **args, size_t *renamed, const size_t reload_list)
 
 	unlink_and_close_tmpfile(fp, tmpfile, &exit_status);
 
-	if (!new_names)
+	if (!new_names) {
+		free(old_names);
 		return exit_status;
+	}
 
-	char **old_names = args + 1;
 	const size_t modified = print_and_count_modified_names(old_names, new_names);
 	if (modified == 0)
 		goto FREE_AND_EXIT;
@@ -466,10 +484,12 @@ FREE_AND_EXIT:
 	for (size_t i = 0; new_names[i]; i++)
 		free(new_names[i]);
 	free(new_names);
+	free(old_names);
 
 	return exit_status;
 
 CLOSE_AND_EXIT:
 	unlink_and_close_tmpfile(fp, tmpfile, &exit_status);
+	free(old_names);
 	return exit_status;
 }
