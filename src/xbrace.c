@@ -138,6 +138,12 @@ expand_brace_ranges(const char *prefix, const char *range, const char *suffix)
 		}
 	}
 
+	/* Both endpoints are required (e.g., "{a..}" is not a range). */
+	if (!*start_text || !*end_text) {
+		free(buf);
+		return NULL;
+	}
+
 	char *st = start_text + (*start_text == '-');
 	char *et = end_text + (*end_text == '-');
 	const int is_num_start = (IS_DIGIT(*st) && is_number(st));
